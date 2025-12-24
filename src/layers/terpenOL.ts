@@ -17,7 +17,7 @@ export function createTerpenLayerOL() {
     source: new TileWMS({
       url: 'https://geoportaal.fryslan.nl/arcgis/services/ProvinciaalGeoRegister/PGR2/MapServer/WMSServer',
       params: {
-        'LAYERS': '66',  // Terpen layer
+        'LAYERS': 'Terpen',
         'STYLES': '',
         'TILED': true,
         'FORMAT': 'image/png'
