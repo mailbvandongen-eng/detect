@@ -45,6 +45,8 @@ const ALL_OVERLAYS = [
   'Hunebedden',
   'EUROEVOL Sites',
   'FAMKE Steentijd',
+  'Grafheuvels',
+  'Terpen',
   // Archaeological layers
   'AMK Monumenten',
   'Romeinse wegen',

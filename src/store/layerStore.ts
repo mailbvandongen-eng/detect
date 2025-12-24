@@ -42,6 +42,8 @@ export const useLayerStore = create<LayerState>()(
       'Hunebedden': false,
       'EUROEVOL Sites': false,
       'FAMKE Steentijd': false,
+      'Grafheuvels': false,
+      'Terpen': false,
       // Archeologische lagen
       'AMK Monumenten': false,
       'Romeinse wegen': false,
@@ -91,7 +93,8 @@ export const useLayerStore = create<LayerState>()(
       'AHN4 Hillshade NL': 0.7,
       'AHN4 Multi-Hillshade NL': 0.7,
       'AHN4 Helling NL': 0.6,
-      'World Hillshade': 0.7
+      'World Hillshade': 0.7,
+      'Terpen': 0.7
     },
 
     // Loading state for lazy-loaded layers

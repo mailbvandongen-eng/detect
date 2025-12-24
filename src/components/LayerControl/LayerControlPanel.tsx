@@ -37,10 +37,12 @@ export function LayerControlPanel() {
               </LayerGroup>
 
               {/* Steentijd (Stone Age) */}
-              <LayerGroup title="Steentijd" defaultExpanded={false}>
+              <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false}>
                 <LayerItem name="Hunebedden" type="overlay" />
                 <LayerItem name="EUROEVOL Sites" type="overlay" />
                 <LayerItem name="FAMKE Steentijd" type="overlay" />
+                <LayerItem name="Grafheuvels" type="overlay" />
+                <LayerItem name="Terpen" type="overlay" />
               </LayerGroup>
 
               {/* Archaeological Layers */}

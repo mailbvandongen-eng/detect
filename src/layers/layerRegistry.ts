@@ -92,6 +92,16 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: true
   },
 
+  // Friesland WMS layers
+  'Terpen': {
+    name: 'Terpen',
+    factory: async () => {
+      const { createTerpenLayerOL } = await import('./terpenOL')
+      return createTerpenLayerOL()
+    },
+    immediateLoad: true
+  },
+
   // Hillshade layers - NL only
   'AHN4 Hillshade NL': {
     name: 'AHN4 Hillshade NL',
@@ -299,6 +309,16 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     factory: async () => {
       const { createBunkersLayerOL } = await import('./bunkersOL')
       return createBunkersLayerOL()
+    },
+    immediateLoad: false
+  },
+
+  // Grafheuvels (burial mounds) - from OpenStreetMap
+  'Grafheuvels': {
+    name: 'Grafheuvels',
+    factory: async () => {
+      const { createGrafheuvelsLayerOL } = await import('./grafheuvelsOL')
+      return createGrafheuvelsLayerOL()
     },
     immediateLoad: false
   },

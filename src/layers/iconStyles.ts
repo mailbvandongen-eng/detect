@@ -29,6 +29,10 @@ export const LUCIDE_ICONS = {
   // Military
   bunker: 'M3 21h18M5 21V7l7-4 7 4v14M9 21V11h6v10M9 11h6M5 7h14',
 
+  // Burial / Mounds
+  tumulus: 'M2 20h20M4 20c0-6 3.5-12 8-12s8 6 8 12',  // Simple burial mound shape
+  terp: 'M2 20h20M4 20c0-5 3-10 8-10s8 5 8 10M10 10v-3h4v3',  // Mound with house
+
   // Default
   circle: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z',
   dot: 'M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0',
@@ -227,6 +231,20 @@ export const LAYER_STYLES = {
     icon: 'bunker',
     color: 'white',
     bgColor: '#57534e',  // stone-600 (concrete grey for WWII bunkers)
+    baseSize: 26
+  }),
+
+  grafheuvel: () => createIconStyle({
+    icon: 'tumulus',
+    color: 'white',
+    bgColor: '#854d0e',  // yellow-800 (bronze age brown)
+    baseSize: 26
+  }),
+
+  terp: () => createIconStyle({
+    icon: 'terp',
+    color: 'white',
+    bgColor: '#0d9488',  // teal-600 (Frisian green-blue)
     baseSize: 26
   }),
 }
