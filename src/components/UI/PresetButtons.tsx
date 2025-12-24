@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLayerStore, useGPSStore } from '../../store'
 
@@ -31,6 +31,14 @@ const HILLSHADE_LAYERS = [
   'AHN4 Multi-Hillshade NL'
 ]
 
+const ANALYSE_LAYERS = [
+  'IKAW',
+  'Geomorfologie',
+  'Bodemkaart',
+  'AHN4 Multi-Hillshade NL',
+  'AMK Monumenten'
+]
+
 // All overlay layers - NL only
 const ALL_OVERLAYS = [
   // Steentijd layers
@@ -46,6 +54,11 @@ const ALL_OVERLAYS = [
   'Kastelen',
   'IKAW',
   'Archeo Landschappen',
+  'Archeo Onderzoeken',
+  // Erfgoed & Monumenten
+  'Rijksmonumenten',
+  'Werelderfgoed',
+  'WWII Bunkers',
   // UIKAV layers
   'UIKAV Punten',
   'UIKAV Vlakken',
@@ -169,6 +182,13 @@ export function PresetButtons() {
             >
               <Mountain size={14} className="text-stone-600" />
               <span className="text-xs text-gray-700">Hillshade</span>
+            </button>
+            <button
+              onClick={() => applyPreset(ANALYSE_LAYERS)}
+              className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-amber-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
+            >
+              <Search size={14} className="text-amber-600" />
+              <span className="text-xs text-gray-700">Analyse</span>
             </button>
           </motion.div>
         )}

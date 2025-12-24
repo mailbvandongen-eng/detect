@@ -66,6 +66,32 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: true
   },
 
+  // RCE WMS layers - Erfgoed & Monumenten
+  'Rijksmonumenten': {
+    name: 'Rijksmonumenten',
+    factory: async () => {
+      const { createRijksmonumentenLayerOL } = await import('./pdokWMSLayers')
+      return createRijksmonumentenLayerOL()
+    },
+    immediateLoad: true
+  },
+  'Archeo Onderzoeken': {
+    name: 'Archeo Onderzoeken',
+    factory: async () => {
+      const { createArcheoOnderzoekenLayerOL } = await import('./pdokWMSLayers')
+      return createArcheoOnderzoekenLayerOL()
+    },
+    immediateLoad: true
+  },
+  'Werelderfgoed': {
+    name: 'Werelderfgoed',
+    factory: async () => {
+      const { createWerelderfgoedLayerOL } = await import('./pdokWMSLayers')
+      return createWerelderfgoedLayerOL()
+    },
+    immediateLoad: true
+  },
+
   // Hillshade layers - NL only
   'AHN4 Hillshade NL': {
     name: 'AHN4 Hillshade NL',
@@ -263,6 +289,16 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     factory: async () => {
       const { createFossielenLayerOL } = await import('./fossielenOL')
       return createFossielenLayerOL()
+    },
+    immediateLoad: false
+  },
+
+  // WWII Bunkers - from OpenStreetMap
+  'WWII Bunkers': {
+    name: 'WWII Bunkers',
+    factory: async () => {
+      const { createBunkersLayerOL } = await import('./bunkersOL')
+      return createBunkersLayerOL()
     },
     immediateLoad: false
   },

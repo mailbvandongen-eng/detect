@@ -166,3 +166,71 @@ export function createVlaanderenBeschArchLayerOL() {
 
   return layer
 }
+
+// ============================================
+// RCE - Rijksdienst voor het Cultureel Erfgoed
+// ============================================
+
+// Rijksmonumenten - 62.000+ beschermde monumenten
+export function createRijksmonumentenLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Rijksmonumenten', type: 'wms' },
+    visible: false,
+    opacity: 0.8,
+    source: new TileWMS({
+      url: 'https://data.geo.cultureelerfgoed.nl/openbaar/wms',
+      params: {
+        'LAYERS': 'rijksmonumentpunten',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// Archeologische Onderzoeksmeldingen - waar onderzoek is gedaan
+export function createArcheoOnderzoekenLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Archeo Onderzoeken', type: 'wms' },
+    visible: false,
+    opacity: 0.7,
+    source: new TileWMS({
+      url: 'https://data.geo.cultureelerfgoed.nl/openbaar/wms',
+      params: {
+        'LAYERS': 'archeologische_onderzoeksmeldingen_openbaar_rd',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// UNESCO Werelderfgoed - incl. Hollandse Waterlinies, Stelling van Amsterdam
+export function createWerelderfgoedLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Werelderfgoed', type: 'wms' },
+    visible: false,
+    opacity: 0.7,
+    source: new TileWMS({
+      url: 'https://service.pdok.nl/rce/ps-ch/wms/v1_0',
+      params: {
+        'LAYERS': 'PS.ProtectedSite',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
