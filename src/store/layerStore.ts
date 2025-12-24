@@ -33,9 +33,9 @@ export const useLayerStore = create<LayerState>()(
     // Initial visibility state - NL only
     visible: {
       // Base layers
-      'CartoDB Positron': true,
+      'CartoDB (licht)': true,
       'OpenStreetMap': false,
-      'Satellite': false,
+      'Google Hybride': false,
       'TMK 1850': false,
       'Bonnebladen 1900': false,
       // Steentijd
@@ -51,12 +51,12 @@ export const useLayerStore = create<LayerState>()(
       'Kastelen': false,
       'IKAW': false,
       'Archeo Landschappen': false,
-      // Uiterwaarden
-      'Archeo Punten': false,
-      'Vlakken': false,
-      'Bufferlaag': false,
-      'Expert': false,
-      'Indeling': false,
+      // Uiterwaarden (UIKAV)
+      'UIKAV Punten': false,
+      'UIKAV Vlakken': false,
+      'UIKAV Buffer': false,
+      'UIKAV Expert': false,
+      'UIKAV Indeling': false,
       // Hillshade NL
       'AHN4 Hillshade NL': false,
       'AHN4 Multi-Hillshade NL': false,

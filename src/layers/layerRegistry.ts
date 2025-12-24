@@ -182,40 +182,40 @@ export const layerRegistry: Record<string, LayerDefinition> = {
   },
 
   // UIKAV layers
-  'Archeo Punten': {
-    name: 'Archeo Punten',
+  'UIKAV Punten': {
+    name: 'UIKAV Punten',
     factory: async () => {
       const { createUIKAVArcheoPuntenLayerOL } = await import('./uikavArcheoPuntenOL')
       return createUIKAVArcheoPuntenLayerOL()
     },
     immediateLoad: false
   },
-  'Vlakken': {
-    name: 'Vlakken',
+  'UIKAV Vlakken': {
+    name: 'UIKAV Vlakken',
     factory: async () => {
       const { createUIKAVVlakkenLayerOL } = await import('./uikavVlakkenOL')
       return createUIKAVVlakkenLayerOL()
     },
     immediateLoad: false
   },
-  'Bufferlaag': {
-    name: 'Bufferlaag',
+  'UIKAV Buffer': {
+    name: 'UIKAV Buffer',
     factory: async () => {
       const { createUIKAVBufferlaagLayerOL } = await import('./uikavBufferlaagOL')
       return createUIKAVBufferlaagLayerOL()
     },
     immediateLoad: false
   },
-  'Expert': {
-    name: 'Expert',
+  'UIKAV Expert': {
+    name: 'UIKAV Expert',
     factory: async () => {
       const { createUIKAVExpertLayerOL } = await import('./uikavExpertOL')
       return createUIKAVExpertLayerOL()
     },
     immediateLoad: false
   },
-  'Indeling': {
-    name: 'Indeling',
+  'UIKAV Indeling': {
+    name: 'UIKAV Indeling',
     factory: async () => {
       const { createUIKAVUiterwaardenLayerOL } = await import('./uikavUiterwaardenOL')
       return createUIKAVUiterwaardenLayerOL()

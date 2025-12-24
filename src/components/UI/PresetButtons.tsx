@@ -1,15 +1,14 @@
 import { useState } from 'react'
-import { RotateCcw, Compass, TreePalm, ShoppingBag, Layers, ChevronUp, Mountain } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLayerStore, useGPSStore } from '../../store'
 
-// Layer presets
+// Layer presets - NL only
 const DETECTIE_LAYERS = [
   'AMK Monumenten',
   'Romeinse wegen',
   'Castella (punten)',
-  'Castella (lijnen)',
-  'Toestemmingen'
+  'Castella (lijnen)'
 ]
 
 const RECREATIE_LAYERS = [
@@ -18,9 +17,12 @@ const RECREATIE_LAYERS = [
   'Strandjes'
 ]
 
-const UITJES_LAYERS = [
-  'Musea',
-  'Kringloopwinkels'
+const UITERWAARDEN_LAYERS = [
+  'UIKAV Punten',
+  'UIKAV Vlakken',
+  'UIKAV Expert',
+  'UIKAV Buffer',
+  'UIKAV Indeling'
 ]
 
 const HILLSHADE_LAYERS = [
@@ -29,47 +31,27 @@ const HILLSHADE_LAYERS = [
   'AHN4 Multi-Hillshade NL'
 ]
 
-// All overlay layers (complete list)
+// All overlay layers - NL only
 const ALL_OVERLAYS = [
   // Steentijd layers
   'Hunebedden',
   'EUROEVOL Sites',
   'FAMKE Steentijd',
-  'Archeo Landschappen',
-  'IKAW',
   // Archaeological layers
   'AMK Monumenten',
-  'Archis-punten',
-  'CAI Vlaanderen',
   'Romeinse wegen',
   'Castella (punten)',
   'Castella (lijnen)',
   'Oppida',
   'Kastelen',
-  'Toestemmingen',
-  'Archeo Zones Vlaanderen',
-  'Beschermde Sites Vlaanderen',
-  'Monumenten BE',
-  'Archeo Zones BE',
-  'Arch Sites BE',
-  'Erfgoed Landschap BE',
-  'CAI Elementen',
-  'Hist. Gebouwen FR',
-  'INRAP Sites FR',
-  'Archeo Sites Bretagne',
-  'Operaties Bretagne',
-  'Archeo Parijs',
-  'Sites Patrimoine Occitanie',
-  'Sites Patrimoine PACA',
-  'Maginotlinie',
-  'Sites Patrimoine Normandie',
-  'Vici.org Romeins',
+  'IKAW',
+  'Archeo Landschappen',
   // UIKAV layers
-  'Archeo Punten',
-  'Vlakken',
-  'Expert',
-  'Bufferlaag',
-  'Indeling',
+  'UIKAV Punten',
+  'UIKAV Vlakken',
+  'UIKAV Expert',
+  'UIKAV Buffer',
+  'UIKAV Indeling',
   // Terrain layers
   'Veengebieden',
   'AHN 0.5m',
@@ -80,40 +62,22 @@ const ALL_OVERLAYS = [
   'AHN4 Multi-Hillshade NL',
   'AHN4 Helling NL',
   'World Hillshade',
-  // Hillshade layers BE
-  'Hillshade Vlaanderen 25cm',
-  'Skyview Vlaanderen 25cm',
-  'DTM Vlaanderen 1m',
-  'Hillshade Wallonië',
-  // Hillshade layers DE
-  'Hillshade NRW 25cm',
-  'Hillshade NRW Kleur',
-  // Hillshade layers FR
-  'Hillshade Frankrijk',
-  'LiDAR HD Frankrijk',
-  'RGE Alti Frankrijk 1m',
-  'Hoogtelijn Frankrijk',
   // Fossil layers
   'Fossielen Nederland',
-  'Fossielen België',
-  'Fossielen Duitsland',
-  'Fossielen Frankrijk',
   // Recreation layers
   'Parken',
   'Speeltuinen',
   'Musea',
-  'Strandjes',
-  'Kringloopwinkels'
+  'Strandjes'
 ]
 
 // Base layers
 const BASE_LAYERS = [
-  'CartoDB Positron',
+  'CartoDB (licht)',
   'OpenStreetMap',
-  'Satellite',
+  'Google Hybride',
   'TMK 1850',
-  'Bonnebladen 1900',
-  'Carte Cassini'
+  'Bonnebladen 1900'
 ]
 
 export function PresetButtons() {
@@ -125,15 +89,15 @@ export function PresetButtons() {
     // Turn off all overlay layers
     ALL_OVERLAYS.forEach(layer => setLayerVisibility(layer, false))
 
-    // Set CartoDB Positron as active base layer
+    // Set CartoDB as active base layer
     BASE_LAYERS.forEach(layer => {
-      setLayerVisibility(layer, layer === 'CartoDB Positron')
+      setLayerVisibility(layer, layer === 'CartoDB (licht)')
     })
 
     // Stop GPS tracking
     stopTracking()
 
-    console.log('🔄 Reset: CartoDB Positron, alle lagen uit, GPS uit')
+    console.log('🔄 Reset: CartoDB (licht), alle lagen uit, GPS uit')
   }
 
   const applyPreset = (layers: string[]) => {
@@ -186,18 +150,18 @@ export function PresetButtons() {
               <span className="text-xs text-gray-700">Detectie</span>
             </button>
             <button
+              onClick={() => applyPreset(UITERWAARDEN_LAYERS)}
+              className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-cyan-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
+            >
+              <Waves size={14} className="text-cyan-600" />
+              <span className="text-xs text-gray-700">Uiterwaarden</span>
+            </button>
+            <button
               onClick={() => applyPreset(RECREATIE_LAYERS)}
               className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-green-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
             >
               <TreePalm size={14} className="text-green-600" />
               <span className="text-xs text-gray-700">Recreatie</span>
-            </button>
-            <button
-              onClick={() => applyPreset(UITJES_LAYERS)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-amber-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
-            >
-              <ShoppingBag size={14} className="text-amber-600" />
-              <span className="text-xs text-gray-700">Uitjes</span>
             </button>
             <button
               onClick={() => applyPreset(HILLSHADE_LAYERS)}

@@ -3,27 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { SlidersHorizontal, ChevronDown, ChevronUp } from 'lucide-react'
 import { useLayerStore } from '../../store/layerStore'
 
-// All layers that should have opacity sliders
+// All layers that should have opacity sliders - NL only
 const OPACITY_LAYERS = [
-  // Dutch layers
+  // Hillshade NL
   { name: 'AHN4 Hillshade NL', color: 'blue', default: 0.7 },
   { name: 'AHN4 Multi-Hillshade NL', color: 'blue', default: 0.7 },
   { name: 'AHN4 Helling NL', color: 'blue', default: 0.6 },
   { name: 'AHN 0.5m', color: 'blue', default: 0.7 },
   { name: 'World Hillshade', color: 'blue', default: 0.7 },
-  // Belgian layers
-  { name: 'Hillshade Vlaanderen 25cm', color: 'amber', default: 0.7 },
-  { name: 'Skyview Vlaanderen 25cm', color: 'amber', default: 0.7 },
-  { name: 'DTM Vlaanderen 1m', color: 'amber', default: 0.6 },
-  { name: 'Hillshade Wallonië', color: 'amber', default: 0.7 },
-  // German layers
-  { name: 'Hillshade NRW 25cm', color: 'red', default: 0.7 },
-  { name: 'Hillshade NRW Kleur', color: 'red', default: 0.7 },
-  // French layers
-  { name: 'Hillshade Frankrijk', color: 'indigo', default: 0.7 },
-  { name: 'LiDAR HD Frankrijk', color: 'indigo', default: 0.7 },
-  { name: 'RGE Alti Frankrijk 1m', color: 'indigo', default: 0.6 },
-  { name: 'Hoogtelijn Frankrijk', color: 'indigo', default: 0.8 },
   // Terrain layers
   { name: 'Geomorfologie', color: 'green', default: 0.5 },
   { name: 'Bodemkaart', color: 'amber', default: 0.6 },
@@ -31,10 +18,6 @@ const OPACITY_LAYERS = [
   { name: 'Archeo Landschappen', color: 'green', default: 0.5 },
   // Archaeological layers
   { name: 'AMK Monumenten', color: 'purple', default: 0.8 },
-  { name: 'Monumenten BE', color: 'purple', default: 0.8 },
-  { name: 'Archeo Zones BE', color: 'purple', default: 0.6 },
-  { name: 'Arch Sites BE', color: 'purple', default: 0.7 },
-  { name: 'Erfgoed Landschap BE', color: 'purple', default: 0.5 },
 ]
 
 const COLOR_CLASSES: Record<string, string> = {
@@ -65,7 +48,7 @@ export function OpacitySliders() {
   const hasMore = activeSliders.length > 3
 
   return (
-    <div className="fixed bottom-[195px] md:bottom-[220px] right-2.5 z-[900]">
+    <div className="fixed bottom-[140px] md:bottom-[150px] right-2.5 z-[900]">
       {/* Toggle button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}

@@ -24,7 +24,7 @@ export function LayerItem({ name, type }: Props) {
       toggleLayer(name)
     } else {
       // For base layers, turn off all other base layers
-      const baseLayerNames = ['CartoDB Positron', 'OpenStreetMap', 'Satellite', 'TMK 1850', 'Bonnebladen 1900', 'Carte Cassini']
+      const baseLayerNames = ['CartoDB (licht)', 'OpenStreetMap', 'Google Hybride', 'TMK 1850', 'Bonnebladen 1900']
       baseLayerNames.forEach(layerName => {
         setLayerVisibility(layerName, layerName === name)
       })

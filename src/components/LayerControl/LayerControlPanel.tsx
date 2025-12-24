@@ -27,11 +27,11 @@ export function LayerControlPanel() {
             </button>
           </div>
           <div className="p-2 overflow-y-auto flex-1">
-              {/* Base Layers */}
-              <LayerGroup title="Achtergrond" defaultExpanded={true}>
-                <LayerItem name="CartoDB Positron" type="base" />
+              {/* Base Layers - collapsed by default */}
+              <LayerGroup title="Achtergrond" defaultExpanded={false}>
+                <LayerItem name="CartoDB (licht)" type="base" />
                 <LayerItem name="OpenStreetMap" type="base" />
-                <LayerItem name="Satellite" type="base" />
+                <LayerItem name="Google Hybride" type="base" />
                 <LayerItem name="TMK 1850" type="base" />
                 <LayerItem name="Bonnebladen 1900" type="base" />
               </LayerGroup>
@@ -55,13 +55,13 @@ export function LayerControlPanel() {
                 <LayerItem name="Archeo Landschappen" type="overlay" />
               </LayerGroup>
 
-              {/* Uiterwaarden Layers */}
-              <LayerGroup title="Uiterwaarden" defaultExpanded={false}>
-                <LayerItem name="Archeo Punten" type="overlay" />
-                <LayerItem name="Vlakken" type="overlay" />
-                <LayerItem name="Expert" type="overlay" />
-                <LayerItem name="Bufferlaag" type="overlay" />
-                <LayerItem name="Indeling" type="overlay" />
+              {/* Uiterwaarden Layers - renamed */}
+              <LayerGroup title="Uiterwaarden (UIKAV)" defaultExpanded={false}>
+                <LayerItem name="UIKAV Punten" type="overlay" />
+                <LayerItem name="UIKAV Vlakken" type="overlay" />
+                <LayerItem name="UIKAV Expert" type="overlay" />
+                <LayerItem name="UIKAV Buffer" type="overlay" />
+                <LayerItem name="UIKAV Indeling" type="overlay" />
               </LayerGroup>
 
               {/* Hillshade & LiDAR Layers - NL only */}

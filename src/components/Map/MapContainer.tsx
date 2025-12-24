@@ -1,10 +1,7 @@
 import { useEffect, useRef } from 'react'
 import 'ol/ol.css'
 import { Tile as TileLayer } from 'ol/layer'
-import { OSM, XYZ, WMTS } from 'ol/source'
-import WMTSTileGrid from 'ol/tilegrid/WMTS'
-import { get as getProjection } from 'ol/proj'
-import { getTopLeft, getWidth } from 'ol/extent'
+import { OSM, XYZ } from 'ol/source'
 import { useMap } from '../../hooks/useMap'
 import { useLayerStore, useMapStore } from '../../store'
 import { useNavigationStore } from '../../store/navigationStore'
@@ -33,7 +30,7 @@ export function MapContainer() {
     })
 
     const cartoDBLayer = new TileLayer({
-      properties: { title: 'CartoDB Positron', type: 'base' },
+      properties: { title: 'CartoDB (licht)', type: 'base' },
       visible: true,
       source: new XYZ({
         url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
@@ -42,7 +39,7 @@ export function MapContainer() {
     })
 
     const satelliteLayer = new TileLayer({
-      properties: { title: 'Satellite', type: 'base' },
+      properties: { title: 'Google Hybride', type: 'base' },
       visible: false,
       source: new XYZ({
         url: 'https://mt{0-3}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
@@ -74,47 +71,12 @@ export function MapContainer() {
       })
     })
 
-    // Carte de Cassini (France ~1750) - WMTS from IGN
-    // Create WMTS tile grid for Web Mercator (PM_6_14 = zoom levels 6-14)
-    const projection = getProjection('EPSG:3857')!
-    const projectionExtent = projection.getExtent()!
-    const size = getWidth(projectionExtent) / 256
-    // Only zoom levels 6-14 are available
-    const resolutions: number[] = []
-    const matrixIds: string[] = []
-    for (let z = 6; z <= 14; ++z) {
-      resolutions.push(size / Math.pow(2, z))
-      matrixIds.push(z.toString())
-    }
-
-    const cassiniLayer = new TileLayer({
-      properties: { title: 'Carte Cassini', type: 'base' },
-      visible: false,
-      minZoom: 6,
-      maxZoom: 14,
-      source: new WMTS({
-        url: 'https://data.geopf.fr/wmts',
-        layer: 'BNF-IGNF_GEOGRAPHICALGRIDSYSTEMS.CASSINI',
-        matrixSet: 'PM_6_14',
-        format: 'image/png',
-        style: 'normal',
-        tileGrid: new WMTSTileGrid({
-          origin: getTopLeft(projectionExtent),
-          resolutions: resolutions,
-          matrixIds: matrixIds
-        }),
-        attributions: '© IGN France / BnF - Carte de Cassini',
-        crossOrigin: 'anonymous'
-      })
-    })
-
     // Add base layers to map
     map.addLayer(osmLayer)
     map.addLayer(cartoDBLayer)
     map.addLayer(satelliteLayer)
     map.addLayer(tmk1850Layer)
     map.addLayer(bonne1900Layer)
-    map.addLayer(cassiniLayer)
     console.log('✅ Base layers added:', {
       osm: osmLayer.getVisible(),
       cartodb: cartoDBLayer.getVisible(),
@@ -123,11 +85,10 @@ export function MapContainer() {
 
     // Register base layers in store
     registerLayer('OpenStreetMap', osmLayer)
-    registerLayer('CartoDB Positron', cartoDBLayer)
-    registerLayer('Satellite', satelliteLayer)
+    registerLayer('CartoDB (licht)', cartoDBLayer)
+    registerLayer('Google Hybride', satelliteLayer)
     registerLayer('TMK 1850', tmk1850Layer)
     registerLayer('Bonnebladen 1900', bonne1900Layer)
-    registerLayer('Carte Cassini', cassiniLayer)
 
     // Force map to render
     map.updateSize()
