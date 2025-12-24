@@ -1,2 +1,0 @@
-import{G as o}from"./GeoJSON-BNI7ZAi1.js";import{L as t}from"./iconStyles-Dekz-tIq.js";import{M as a,G as s}from"./index-BKsCfZqb.js";async function d(){const e=await(await fetch("/detectorapp-nl/data/oppida.geojson")).json(),r=new a({features:new o().readFeatures(e,{featureProjection:"EPSG:3857"})});return new s({source:r,properties:{title:"Oppida (IJzertijd)"},visible:!1,style:t.landmark("#f97316")})}export{d as createOppidaLayerOL};
-//# sourceMappingURL=oppidaOL-BFL9eUEj.js.map

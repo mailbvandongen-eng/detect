@@ -148,6 +148,66 @@ export function Popup() {
           continue
         }
 
+        // Archeo Onderzoeken (RCE) - archaeological research locations
+        if (title === 'Archeo Onderzoeken') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 100
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://data.geo.cultureelerfgoed.nl/openbaar/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=archeologische_onderzoeksmeldingen_openbaar_rd&QUERY_LAYERS=archeologische_onderzoeksmeldingen_openbaar_rd&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-blue-800">Archeologisch Onderzoek</strong>`
+
+              if (props.type_onderzoek) {
+                html += `<br/><span class="text-sm font-semibold">${props.type_onderzoek}</span>`
+              }
+              if (props.onderzoeksmeldingnummer) {
+                html += `<br/><span class="text-xs text-gray-500">Melding: ${props.onderzoeksmeldingnummer}</span>`
+              }
+              if (props.uitvoerder) {
+                html += `<br/><span class="text-sm text-gray-700">Uitvoerder: ${props.uitvoerder}</span>`
+              }
+              if (props.startdatum || props.einddatum) {
+                const periode = [props.startdatum, props.einddatum].filter(Boolean).join(' - ')
+                html += `<br/><span class="text-xs text-gray-600">Periode: ${periode}</span>`
+              }
+              if (props.gemeente) {
+                html += `<br/><span class="text-xs text-gray-500">${props.gemeente}</span>`
+              }
+
+              // Convert type_uri to clickable hyperlink
+              if (props.type_uri) {
+                const linkUrl = props.type_uri.replace('type_uri:', '').trim()
+                if (linkUrl.startsWith('http')) {
+                  html += `<br/><a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">Meer informatie →</a>`
+                }
+              }
+
+              // Also check for other URI fields
+              for (const [key, value] of Object.entries(props)) {
+                if (key.toLowerCase().includes('uri') && typeof value === 'string' && key !== 'type_uri') {
+                  const linkUrl = value.replace(/^[a-z_]+:/i, '').trim()
+                  if (linkUrl.startsWith('http')) {
+                    html += `<br/><a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">${key.replace('_uri', '')} →</a>`
+                  }
+                }
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Archeo Onderzoeken WMS query failed:', error)
+          }
+          continue
+        }
+
         // Special handling for IKAW (needs STYLES parameter and larger bbox for coarse raster)
         if (title === 'IKAW') {
           try {
