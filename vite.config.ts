@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   base: '/detectorapp-nl/',
   build: {
-    outDir: 'dist',
+    outDir: 'docs',
     assetsDir: 'assets',
     sourcemap: true
   },
