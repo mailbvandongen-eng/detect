@@ -2,14 +2,19 @@
   "type": "FeatureCollection",
   "name": "EUROEVOL Neolithische Sites NL/BE",
   "source": "EUROEVOL Project (UCL)",
-  "description": "Neolithic archaeological sites from the EUROEVOL database",
+  "license": "CC0 Public Domain",
+  "url": "https://discovery.ucl.ac.uk/id/eprint/1469811/",
+  "description": "Neolithic archaeological sites with culture and period information",
   "features": [
     {
       "type": "Feature",
       "properties": {
         "name": "Aardhorst-Vessem",
         "id": "S1004",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -24,7 +29,10 @@
       "properties": {
         "name": "Abri des Autours",
         "id": "S1014",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Midden Neolithicum, Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -39,7 +47,10 @@
       "properties": {
         "name": "l'Abri sous roche du Chaveau",
         "id": "S1016",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Seine Oise Marne",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -54,7 +65,10 @@
       "properties": {
         "name": "Abri du Pape",
         "id": "S1017",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -69,7 +83,10 @@
       "properties": {
         "name": "Abri Lechat",
         "id": "S1018",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -84,7 +101,10 @@
       "properties": {
         "name": "Al Zèpe",
         "id": "S1051",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -97,9 +117,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Almere-Hout \\",
+        "name": "Almere-Hout \\Zwaanpad\\",
         "id": "S1069",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -112,9 +135,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Almere-Zenit ",
+        "name": "Almere-Zenit",
         "id": "S1070",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -129,7 +155,10 @@
       "properties": {
         "name": "Amersfoort",
         "id": "S1078",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -144,7 +173,10 @@
       "properties": {
         "name": "Angelslo",
         "id": "S1084",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "EBA, Corded Ware, Trichterbecher",
+        "period": "EBA, Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -159,7 +191,10 @@
       "properties": {
         "name": "Anloo",
         "id": "S1086",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker, EBA, Corded Ware, Trichterbecher",
+        "period": "Laat Neolithicum, EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -174,7 +209,10 @@
       "properties": {
         "name": "Annertol",
         "id": "S1088",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -189,7 +227,10 @@
       "properties": {
         "name": "Aven Ackers",
         "id": "S1168",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -204,7 +245,10 @@
       "properties": {
         "name": "Bantega",
         "id": "S1212",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -219,7 +263,10 @@
       "properties": {
         "name": "Be-45",
         "id": "S1245",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -234,7 +281,10 @@
       "properties": {
         "name": "Be-52",
         "id": "S1246",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -249,7 +299,10 @@
       "properties": {
         "name": "Beerzer Belten II",
         "id": "S1258",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -264,7 +317,10 @@
       "properties": {
         "name": "Beerzer Belten I",
         "id": "S1259",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -279,7 +335,10 @@
       "properties": {
         "name": "Bennekom",
         "id": "S1271",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -294,7 +353,10 @@
       "properties": {
         "name": "Bergstoep",
         "id": "S1275",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -309,7 +371,10 @@
       "properties": {
         "name": "Bergumermeer S-64A",
         "id": "S1276",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -324,7 +389,10 @@
       "properties": {
         "name": "Bergumermeer S64-B",
         "id": "S1277",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -339,7 +407,10 @@
       "properties": {
         "name": "Best",
         "id": "S1287",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -354,7 +425,10 @@
       "properties": {
         "name": "Boomkwekerij",
         "id": "S1336",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -369,7 +443,10 @@
       "properties": {
         "name": "Borger",
         "id": "S1337",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -384,7 +461,10 @@
       "properties": {
         "name": "Borkel-Achterste Brug",
         "id": "S1339",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -399,7 +479,10 @@
       "properties": {
         "name": "Bornwerd",
         "id": "S1341",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -414,7 +497,10 @@
       "properties": {
         "name": "Bosse de la Tombe",
         "id": "S1342",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Rossen",
+        "period": "Midden Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -429,7 +515,10 @@
       "properties": {
         "name": "Bosstraat",
         "id": "S1343",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -444,7 +533,10 @@
       "properties": {
         "name": "Brandwijk",
         "id": "S1357",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Hazendonk",
+        "period": "Laat Mesolithicum / Vroeg Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -459,7 +551,10 @@
       "properties": {
         "name": "Bronneger",
         "id": "S1373",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Swifterbant",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -474,7 +569,10 @@
       "properties": {
         "name": "Buinen",
         "id": "S1392",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -489,7 +587,10 @@
       "properties": {
         "name": "Bunschoten",
         "id": "S1397",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -504,7 +605,10 @@
       "properties": {
         "name": "Buurser Veen",
         "id": "S1405",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -519,7 +623,10 @@
       "properties": {
         "name": "Canal nr Bronneger",
         "id": "S1445",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Swifterbant",
+        "period": "Laat Mesolithicum / Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -534,7 +641,10 @@
       "properties": {
         "name": "Couture de la Chaussée",
         "id": "S1613",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -549,7 +659,10 @@
       "properties": {
         "name": "Dalfsen-Welsum",
         "id": "S1665",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -564,7 +677,10 @@
       "properties": {
         "name": "De Eese",
         "id": "S1674",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -579,7 +695,10 @@
       "properties": {
         "name": "De Hel",
         "id": "S1675",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Midden Neolithicum",
+        "type": "Omheining"
       },
       "geometry": {
         "type": "Point",
@@ -594,7 +713,10 @@
       "properties": {
         "name": "De Leijen",
         "id": "S1676",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -609,7 +731,10 @@
       "properties": {
         "name": "De Waag",
         "id": "S1677",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -624,7 +749,10 @@
       "properties": {
         "name": "Denekamp, Klokkenberg",
         "id": "S1690",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -639,7 +767,10 @@
       "properties": {
         "name": "Dertienhuizen A",
         "id": "S1697",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -654,7 +785,10 @@
       "properties": {
         "name": "Dertienhuizen B",
         "id": "S1698",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -669,7 +803,10 @@
       "properties": {
         "name": "Deventer-Rielerenk",
         "id": "S1701",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -684,7 +821,10 @@
       "properties": {
         "name": "Diever",
         "id": "S1707",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -699,7 +839,10 @@
       "properties": {
         "name": "Dok",
         "id": "S1723",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -714,7 +857,10 @@
       "properties": {
         "name": "Dokkum-Jantjeszeepolder",
         "id": "S1724",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -729,7 +875,10 @@
       "properties": {
         "name": "Donderen",
         "id": "S1731",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -744,7 +893,10 @@
       "properties": {
         "name": "Donk",
         "id": "S1733",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -759,7 +911,10 @@
       "properties": {
         "name": "Donkerbroek",
         "id": "S1734",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -774,7 +929,10 @@
       "properties": {
         "name": "Drachtsercompagnie",
         "id": "S1744",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -789,7 +947,10 @@
       "properties": {
         "name": "Drouwenerzand",
         "id": "S1752",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -804,7 +965,10 @@
       "properties": {
         "name": "Duurswoude-Oud Leger",
         "id": "S1767",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -819,7 +983,10 @@
       "properties": {
         "name": "Duurswoude",
         "id": "S1768",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -834,7 +1001,10 @@
       "properties": {
         "name": "Ede-Maanderbuurt",
         "id": "S1777",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -849,7 +1019,10 @@
       "properties": {
         "name": "Ede, Hotel Bosbeek",
         "id": "S1778",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -864,7 +1037,10 @@
       "properties": {
         "name": "Een",
         "id": "S1779",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -879,7 +1055,10 @@
       "properties": {
         "name": "Eersel-Panberg",
         "id": "S1780",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -894,7 +1073,10 @@
       "properties": {
         "name": "Eeserveld",
         "id": "S1781",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -909,7 +1091,10 @@
       "properties": {
         "name": "Eext-Hooidijk",
         "id": "S1782",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -924,7 +1109,10 @@
       "properties": {
         "name": "Eext, Bergakkers",
         "id": "S1783",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -939,7 +1127,10 @@
       "properties": {
         "name": "Eext, Galgwandenveen",
         "id": "S1784",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -954,7 +1145,10 @@
       "properties": {
         "name": "Eext, Kerkweg",
         "id": "S1785",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker, Trichterbecher",
+        "period": "Laat Neolithicum, EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -969,7 +1163,10 @@
       "properties": {
         "name": "Eext, Ketenberg",
         "id": "S1786",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -984,7 +1181,10 @@
       "properties": {
         "name": "Eext, Schaapdijksweg",
         "id": "S1787",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -999,7 +1199,10 @@
       "properties": {
         "name": "Eext",
         "id": "S1788",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware, Trichterbecher",
+        "period": "Laat Neolithicum, EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1014,7 +1217,10 @@
       "properties": {
         "name": "Eindegoorheide",
         "id": "S1802",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1029,7 +1235,10 @@
       "properties": {
         "name": "Elderslo",
         "id": "S1817",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Trichterbecher",
+        "period": "EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1044,7 +1253,10 @@
       "properties": {
         "name": "Elsloo-Tronde",
         "id": "S1823",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1059,7 +1271,10 @@
       "properties": {
         "name": "Elsloo",
         "id": "S1824",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1074,7 +1289,10 @@
       "properties": {
         "name": "Emmen-Angelslo",
         "id": "S1827",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1089,7 +1307,10 @@
       "properties": {
         "name": "Emmererfscheidenveen",
         "id": "S1828",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1104,7 +1325,10 @@
       "properties": {
         "name": "Engis",
         "id": "S1833",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1119,7 +1343,10 @@
       "properties": {
         "name": "Ermelo Romeins Marskamp",
         "id": "S1844",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1134,7 +1361,10 @@
       "properties": {
         "name": "Ermelose Heide",
         "id": "S1846",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1149,7 +1379,10 @@
       "properties": {
         "name": "Europoort",
         "id": "S1862",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "MM, Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1164,7 +1397,10 @@
       "properties": {
         "name": "Exloerveen",
         "id": "S1868",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1179,7 +1415,10 @@
       "properties": {
         "name": "Ferme de l' Hosté",
         "id": "S1893",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1194,7 +1433,10 @@
       "properties": {
         "name": "Flabaert",
         "id": "S1910",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1209,7 +1451,10 @@
       "properties": {
         "name": "Fond Chenai",
         "id": "S1926",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1224,7 +1469,10 @@
       "properties": {
         "name": "Gasselte, Boerveen",
         "id": "S1982",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1239,7 +1487,10 @@
       "properties": {
         "name": "Geldrop 3-1",
         "id": "S1994",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1254,7 +1505,10 @@
       "properties": {
         "name": "Geldrop 3-2 East",
         "id": "S1995",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1269,7 +1523,10 @@
       "properties": {
         "name": "Geldrop-Aalsterhut",
         "id": "S1996",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1284,7 +1541,10 @@
       "properties": {
         "name": "Geldrop",
         "id": "S1997",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1299,7 +1559,10 @@
       "properties": {
         "name": "Gennep",
         "id": "S2001",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1314,7 +1577,10 @@
       "properties": {
         "name": "Gieten",
         "id": "S2012",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1329,7 +1595,10 @@
       "properties": {
         "name": "Ginkelse Heide",
         "id": "S2016",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1342,9 +1611,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Glimmer   ",
+        "name": "Glimmer",
         "id": "S2028",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1359,7 +1631,10 @@
       "properties": {
         "name": "Glimmer Es",
         "id": "S2029",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Trichterbecher",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1374,7 +1649,10 @@
       "properties": {
         "name": "Gramsbergen I",
         "id": "S2057",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1389,7 +1667,10 @@
       "properties": {
         "name": "Grognon",
         "id": "S2080",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1404,7 +1685,10 @@
       "properties": {
         "name": "Groningen",
         "id": "S2082",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1419,7 +1703,10 @@
       "properties": {
         "name": "Grootegast-Niekerk",
         "id": "S2084",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1434,7 +1721,10 @@
       "properties": {
         "name": "Grotte de la Martina",
         "id": "S2133",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1449,7 +1739,10 @@
       "properties": {
         "name": "Grotte des Sarrazins",
         "id": "S2136",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Bell Beaker",
+        "period": "Onbekend Mesolithicum, EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1464,7 +1757,10 @@
       "properties": {
         "name": "Grotte du Coléoptère",
         "id": "S2137",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1479,7 +1775,10 @@
       "properties": {
         "name": "Haagakkers",
         "id": "S2159",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1494,7 +1793,10 @@
       "properties": {
         "name": "Haaksbergen-Hassinkbrink II",
         "id": "S2160",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1509,7 +1811,10 @@
       "properties": {
         "name": "Haamstede-Brabers",
         "id": "S2161",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Vlaardingen",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1524,7 +1829,10 @@
       "properties": {
         "name": "Haarlem, Schoterweg",
         "id": "S2162",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -1539,7 +1847,10 @@
       "properties": {
         "name": "Harderwijk, Beekhuizer Zand",
         "id": "S2186",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Trichterbecher",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1552,9 +1863,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Harich ",
+        "name": "Harich",
         "id": "S2187",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1569,7 +1883,10 @@
       "properties": {
         "name": "Hasselt-Gasthuisstraat",
         "id": "S2193",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1584,7 +1901,10 @@
       "properties": {
         "name": "Haule",
         "id": "S2196",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1599,7 +1919,10 @@
       "properties": {
         "name": "Havelte-DE-Doeze 1",
         "id": "S2198",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1614,7 +1937,10 @@
       "properties": {
         "name": "Havelte-DE-Doeze 2",
         "id": "S2199",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1629,7 +1955,10 @@
       "properties": {
         "name": "Havelte-De-Doeze 3",
         "id": "S2200",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1644,7 +1973,10 @@
       "properties": {
         "name": "Havelte-De-Douze",
         "id": "S2201",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1659,7 +1991,10 @@
       "properties": {
         "name": "Havelte-Holtingerzand",
         "id": "S2202",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1674,7 +2009,10 @@
       "properties": {
         "name": "Havelte",
         "id": "S2203",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1689,7 +2027,10 @@
       "properties": {
         "name": "Hazeputten",
         "id": "S2209",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1704,7 +2045,10 @@
       "properties": {
         "name": "Heerjansdam",
         "id": "S2217",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1719,7 +2063,10 @@
       "properties": {
         "name": "Hekelingen 1",
         "id": "S2221",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Vlaardingen",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -1734,7 +2081,10 @@
       "properties": {
         "name": "Hempens-Waldwei",
         "id": "S2226",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1749,7 +2099,10 @@
       "properties": {
         "name": "Hijken, De Utrecht",
         "id": "S2235",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1764,7 +2117,10 @@
       "properties": {
         "name": "Hijkerveld",
         "id": "S2236",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1779,7 +2135,10 @@
       "properties": {
         "name": "Hof-ten-Damme",
         "id": "S2245",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Late Meso, Michelsberg",
+        "period": "LM, Midden Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1794,7 +2153,10 @@
       "properties": {
         "name": "Hoogeinds Voorhoofd",
         "id": "S2253",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1809,7 +2171,10 @@
       "properties": {
         "name": "Hoogkerk-Ruskenveen",
         "id": "S2254",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1824,7 +2189,10 @@
       "properties": {
         "name": "HS-16",
         "id": "S2270",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1839,7 +2207,10 @@
       "properties": {
         "name": "HS-17",
         "id": "S2271",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1854,7 +2225,10 @@
       "properties": {
         "name": "HS-22",
         "id": "S2272",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1869,7 +2243,10 @@
       "properties": {
         "name": "HS-30",
         "id": "S2273",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1884,7 +2261,10 @@
       "properties": {
         "name": "Huizerhof",
         "id": "S2276",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1899,7 +2279,10 @@
       "properties": {
         "name": "Hulshorst",
         "id": "S2277",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1914,7 +2297,10 @@
       "properties": {
         "name": "Jardinga",
         "id": "S2324",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1929,7 +2315,10 @@
       "properties": {
         "name": "Jipsingboertange",
         "id": "S2333",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1944,7 +2333,10 @@
       "properties": {
         "name": "Kampen Rijksweg 50",
         "id": "S2353",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1959,7 +2351,10 @@
       "properties": {
         "name": "Kapelberg",
         "id": "S2354",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1974,7 +2369,10 @@
       "properties": {
         "name": "Kemmelberg",
         "id": "S2371",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -1989,7 +2387,10 @@
       "properties": {
         "name": "Kerkakkers",
         "id": "S2377",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2004,7 +2405,10 @@
       "properties": {
         "name": "Keuperheide",
         "id": "S2384",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "Midden Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2019,7 +2423,10 @@
       "properties": {
         "name": "Kielsterachterweg",
         "id": "S2389",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2034,7 +2441,10 @@
       "properties": {
         "name": "Kwadenoord",
         "id": "S2450",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2047,9 +2457,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Irchonwelz \\",
+        "name": "Irchonwelz \\La Bonne Fortune\\",
         "id": "S2474",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2064,7 +2477,10 @@
       "properties": {
         "name": "Laaghalerveld",
         "id": "S2576",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2079,7 +2495,10 @@
       "properties": {
         "name": "Lageland I",
         "id": "S2587",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2094,7 +2513,10 @@
       "properties": {
         "name": "Laren, Het Bluk",
         "id": "S2605",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2109,7 +2531,10 @@
       "properties": {
         "name": "Leek-AZC",
         "id": "S2704",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2124,7 +2549,10 @@
       "properties": {
         "name": "Leek-Mensumaweg",
         "id": "S2706",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2139,7 +2567,10 @@
       "properties": {
         "name": "Leffinge",
         "id": "S2707",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2154,7 +2585,10 @@
       "properties": {
         "name": "Leidschendam-Prinsenhof",
         "id": "S2708",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Vlaardingen",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -2169,7 +2603,10 @@
       "properties": {
         "name": "Lelystad",
         "id": "S2710",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Swifterbant",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2184,7 +2621,10 @@
       "properties": {
         "name": "Lommel-Fabriek",
         "id": "S2843",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2199,7 +2639,10 @@
       "properties": {
         "name": "Waremme-Longchamps",
         "id": "S2846",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2212,9 +2655,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Luiksgestel  ",
+        "name": "Luiksgestel",
         "id": "S2866",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2229,7 +2675,10 @@
       "properties": {
         "name": "Luiksgestel 2",
         "id": "S2867",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2244,7 +2693,10 @@
       "properties": {
         "name": "Lunteren",
         "id": "S2870",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2259,7 +2711,10 @@
       "properties": {
         "name": "Maarheeze",
         "id": "S2883",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2274,7 +2729,10 @@
       "properties": {
         "name": "Maarn de Halm",
         "id": "S2884",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2289,7 +2747,10 @@
       "properties": {
         "name": "Mander 1957",
         "id": "S2920",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2304,7 +2765,10 @@
       "properties": {
         "name": "Marienberg Overijssel",
         "id": "S2933",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2319,7 +2783,10 @@
       "properties": {
         "name": "Marienberg",
         "id": "S2934",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2334,7 +2801,10 @@
       "properties": {
         "name": "Markelo-Friezenberg",
         "id": "S2938",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2349,7 +2819,10 @@
       "properties": {
         "name": "Marrant",
         "id": "S2942",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2364,7 +2837,10 @@
       "properties": {
         "name": "Mastellebrug",
         "id": "S2952",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2379,7 +2855,10 @@
       "properties": {
         "name": "Meer I, Meirberg",
         "id": "S2959",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum, MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2394,7 +2873,10 @@
       "properties": {
         "name": "Meer II, Meirberg",
         "id": "S2960",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "MM, Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2409,7 +2891,10 @@
       "properties": {
         "name": "Meerberg",
         "id": "S2961",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2424,7 +2909,10 @@
       "properties": {
         "name": "Merselo",
         "id": "S2975",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2439,7 +2927,10 @@
       "properties": {
         "name": "Midlaren",
         "id": "S2986",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2454,7 +2945,10 @@
       "properties": {
         "name": "Milheeze II",
         "id": "S2995",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2469,7 +2963,10 @@
       "properties": {
         "name": "Moerkuilen",
         "id": "S3003",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2484,7 +2981,10 @@
       "properties": {
         "name": "Molenaarsgraaf",
         "id": "S3006",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker, Trichterbecher",
+        "period": "Laat Neolithicum, EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2499,7 +2999,10 @@
       "properties": {
         "name": "Mont-à-Henry",
         "id": "S3017",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Bischheim",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2514,7 +3017,10 @@
       "properties": {
         "name": "Mont-sur-March",
         "id": "S3020",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2529,7 +3035,10 @@
       "properties": {
         "name": "Moordenaarsven",
         "id": "S3044",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2544,7 +3053,10 @@
       "properties": {
         "name": "Nagele Flevoland",
         "id": "S3086",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2559,7 +3071,10 @@
       "properties": {
         "name": "Nederweert -De Banen",
         "id": "S3101",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2574,7 +3089,10 @@
       "properties": {
         "name": "Nieuw Dordrecht",
         "id": "S3127",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2589,7 +3107,10 @@
       "properties": {
         "name": "Nieuw-Schoonebeek",
         "id": "S3128",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2604,7 +3125,10 @@
       "properties": {
         "name": "Nijnsel",
         "id": "S3129",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2619,7 +3143,10 @@
       "properties": {
         "name": "Noordbarge",
         "id": "S3135",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2634,7 +3161,10 @@
       "properties": {
         "name": "NP-16",
         "id": "S3156",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2649,7 +3179,10 @@
       "properties": {
         "name": "Odoorn",
         "id": "S3174",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Trichterbecher",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2664,7 +3197,10 @@
       "properties": {
         "name": "Oirschot",
         "id": "S3186",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "Onbekend Mesolithicum, MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2679,7 +3215,10 @@
       "properties": {
         "name": "Oldeboorn",
         "id": "S3191",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2694,7 +3233,10 @@
       "properties": {
         "name": "Oldeholtwolde",
         "id": "S3192",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2709,7 +3251,10 @@
       "properties": {
         "name": "Onstwedder Holte",
         "id": "S3197",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2724,7 +3269,10 @@
       "properties": {
         "name": "Oostwoud",
         "id": "S3198",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2739,7 +3287,10 @@
       "properties": {
         "name": "Ottoland, Kromme Ellebog",
         "id": "S3226",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2754,7 +3305,10 @@
       "properties": {
         "name": "Oudemolen",
         "id": "S3228",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2769,7 +3323,10 @@
       "properties": {
         "name": "Ourlaine",
         "id": "S3231",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2784,7 +3341,10 @@
       "properties": {
         "name": "Paardsdrank",
         "id": "S3243",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2799,7 +3359,10 @@
       "properties": {
         "name": "Petit-Spiennes",
         "id": "S3286",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2814,7 +3377,10 @@
       "properties": {
         "name": "Place Saint-Lambert",
         "id": "S3320",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum, Onbekend Mesolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -2829,7 +3395,10 @@
       "properties": {
         "name": "Porte Ouverte",
         "id": "S3362",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2844,7 +3413,10 @@
       "properties": {
         "name": "Posterholt",
         "id": "S3368",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2859,7 +3431,10 @@
       "properties": {
         "name": "Prinsenveld",
         "id": "S3386",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum, MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2874,7 +3449,10 @@
       "properties": {
         "name": "Putten, Zuiderveld",
         "id": "S3397",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Trichterbecher",
+        "period": "EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2889,7 +3467,10 @@
       "properties": {
         "name": "Raalte-Raan",
         "id": "S3417",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2904,7 +3485,10 @@
       "properties": {
         "name": "Rechteren",
         "id": "S3443",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2919,7 +3503,10 @@
       "properties": {
         "name": "Rekem",
         "id": "S3454",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2934,7 +3521,10 @@
       "properties": {
         "name": "Rietveld",
         "id": "S3472",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2947,9 +3537,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Rijkholt ",
+        "name": "Rijkholt",
         "id": "S3473",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Michelsberg",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2964,7 +3557,10 @@
       "properties": {
         "name": "Rotsterhaule",
         "id": "S3544",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2979,7 +3575,10 @@
       "properties": {
         "name": "Rotterdam-Ijsselmonde",
         "id": "S3549",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -2994,7 +3593,10 @@
       "properties": {
         "name": "S-51",
         "id": "S3567",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3007,9 +3609,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "S-6 ",
+        "name": "S-6",
         "id": "S3568",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3024,7 +3629,10 @@
       "properties": {
         "name": "Scheemda",
         "id": "S3687",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3039,7 +3647,10 @@
       "properties": {
         "name": "Schuilingsoord",
         "id": "S3696",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Trichterbecher",
+        "period": "EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3054,7 +3665,10 @@
       "properties": {
         "name": "Siegerswoude II",
         "id": "S3764",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3069,7 +3683,10 @@
       "properties": {
         "name": "Siegerswoude I",
         "id": "S3765",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3084,7 +3701,10 @@
       "properties": {
         "name": "Sint-Andries",
         "id": "S3773",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3099,7 +3719,10 @@
       "properties": {
         "name": "Sint-Donaaskerk",
         "id": "S3774",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3114,7 +3737,10 @@
       "properties": {
         "name": "Sippenfennen",
         "id": "S3778",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3129,7 +3755,10 @@
       "properties": {
         "name": "Sittard",
         "id": "S3783",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3144,7 +3773,10 @@
       "properties": {
         "name": "Slochteren",
         "id": "S3794",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3159,7 +3791,10 @@
       "properties": {
         "name": "Smalle Ee",
         "id": "S3797",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3174,7 +3809,10 @@
       "properties": {
         "name": "Sonnisse Heide",
         "id": "S3809",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum, MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3189,7 +3827,10 @@
       "properties": {
         "name": "St. Walrick",
         "id": "S3848",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "EBA, Bell Beaker",
+        "period": "EBA, Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3204,7 +3845,10 @@
       "properties": {
         "name": "Stadskanaal",
         "id": "S3849",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3219,7 +3863,10 @@
       "properties": {
         "name": "Station Leduc",
         "id": "S3864",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3234,7 +3881,10 @@
       "properties": {
         "name": "Stein",
         "id": "S3872",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Seine Oise Marne",
+        "period": "Midden Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3249,7 +3899,10 @@
       "properties": {
         "name": "Strepy, Mons",
         "id": "S3888",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3264,7 +3917,10 @@
       "properties": {
         "name": "Swifterbant-Klingenweg",
         "id": "S3916",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3279,7 +3935,10 @@
       "properties": {
         "name": "Swifterbant",
         "id": "S3917",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Swifterbant",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3294,7 +3953,10 @@
       "properties": {
         "name": "Texel-Den-Burg",
         "id": "S3962",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3309,7 +3971,10 @@
       "properties": {
         "name": "Tietjerk-Lytse Geast",
         "id": "S3982",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3324,7 +3989,10 @@
       "properties": {
         "name": "Tilburg-Kraaiven",
         "id": "S3983",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3339,7 +4007,10 @@
       "properties": {
         "name": "Trou al 'Wesse",
         "id": "S4034",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3354,7 +4025,10 @@
       "properties": {
         "name": "Trou de Frontal",
         "id": "S4037",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3369,7 +4043,10 @@
       "properties": {
         "name": "Trou la Cauche",
         "id": "S4041",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Villeneuve-Saint-Germain",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3384,7 +4061,10 @@
       "properties": {
         "name": "Ubbena",
         "id": "S4065",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3399,7 +4079,10 @@
       "properties": {
         "name": "Nieuwe Pekela",
         "id": "S4069",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3414,7 +4097,10 @@
       "properties": {
         "name": "Ulft",
         "id": "S4070",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3429,7 +4115,10 @@
       "properties": {
         "name": "Urk-E4",
         "id": "S4084",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3444,7 +4133,10 @@
       "properties": {
         "name": "Vaassen",
         "id": "S4097",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Trichterbecher, Corded Ware",
+        "period": "EBA, Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3459,7 +4151,10 @@
       "properties": {
         "name": "Valkenburg, Geböske",
         "id": "S4105",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3474,7 +4169,10 @@
       "properties": {
         "name": "Valkenburg, Sangen",
         "id": "S4106",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3489,7 +4187,10 @@
       "properties": {
         "name": "Valthermond-Exloerkijl",
         "id": "S4110",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3504,7 +4205,10 @@
       "properties": {
         "name": "Vasse-De-Steenbrei",
         "id": "S4120",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3517,9 +4221,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Vaux-et-Borset \\",
+        "name": "Vaux-et-Borset \\La Chapelle Blanche\\",
         "id": "S4127",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik, Villeneuve-Saint-Germain",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3534,7 +4241,10 @@
       "properties": {
         "name": "Velzen",
         "id": "S4130",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "EBA",
+        "period": "EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3549,7 +4259,10 @@
       "properties": {
         "name": "Verrebroeck",
         "id": "S4135",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3564,7 +4277,10 @@
       "properties": {
         "name": "Vlaardingen",
         "id": "S4164",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker, Corded Ware, Vlaardingen",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -3579,7 +4295,10 @@
       "properties": {
         "name": "Vledder",
         "id": "S4167",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3594,7 +4313,10 @@
       "properties": {
         "name": "Vlootbeekdal",
         "id": "S4168",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3609,7 +4331,10 @@
       "properties": {
         "name": "Vm-24",
         "id": "S4169",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3624,7 +4349,10 @@
       "properties": {
         "name": "Vm-25",
         "id": "S4170",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3639,7 +4367,10 @@
       "properties": {
         "name": "Vm-38",
         "id": "S4171",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3654,7 +4385,10 @@
       "properties": {
         "name": "Voorschoten-Boschgeest",
         "id": "S4176",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Vlaardingen",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -3669,7 +4403,10 @@
       "properties": {
         "name": "Wageningen",
         "id": "S4181",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3684,7 +4421,10 @@
       "properties": {
         "name": "Overhespen",
         "id": "S4187",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3699,7 +4439,10 @@
       "properties": {
         "name": "Wange-Neerhespenveld",
         "id": "S4188",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3714,7 +4457,10 @@
       "properties": {
         "name": "Warns",
         "id": "S4203",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3729,7 +4475,10 @@
       "properties": {
         "name": "Wartena",
         "id": "S4204",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3744,7 +4493,10 @@
       "properties": {
         "name": "Waskemeer-West",
         "id": "S4205",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3759,7 +4511,10 @@
       "properties": {
         "name": "Waubach",
         "id": "S4206",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3774,7 +4529,10 @@
       "properties": {
         "name": "Weerselo-Gammelke",
         "id": "S4212",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3789,7 +4547,10 @@
       "properties": {
         "name": "Westelbeers",
         "id": "S4218",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3804,7 +4565,10 @@
       "properties": {
         "name": "Wijster",
         "id": "S4229",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3819,7 +4583,10 @@
       "properties": {
         "name": "Wildervank Wv-42",
         "id": "S4230",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3834,7 +4601,10 @@
       "properties": {
         "name": "Wildervank Wv-500",
         "id": "S4231",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3849,7 +4619,10 @@
       "properties": {
         "name": "Witrijt",
         "id": "S4236",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3864,7 +4637,10 @@
       "properties": {
         "name": "Woudbloem",
         "id": "S4242",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3879,7 +4655,10 @@
       "properties": {
         "name": "Wijchen, Het Vormer",
         "id": "S4244",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3894,7 +4673,10 @@
       "properties": {
         "name": "Zandwerven",
         "id": "S4271",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3909,7 +4691,10 @@
       "properties": {
         "name": "Zonhoven Molenheide",
         "id": "S4285",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "MM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3924,7 +4709,10 @@
       "properties": {
         "name": "Zutphen",
         "id": "S4301",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3939,7 +4727,10 @@
       "properties": {
         "name": "Zwolle",
         "id": "S4303",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3954,7 +4745,10 @@
       "properties": {
         "name": "Zwolle-Hanzeland",
         "id": "S4304",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3969,7 +4763,10 @@
       "properties": {
         "name": "Zwolle-Ittersumallee",
         "id": "S4305",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3984,7 +4781,10 @@
       "properties": {
         "name": "Zwolle-Oude Deventerstraatweg",
         "id": "S4306",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -3999,7 +4799,10 @@
       "properties": {
         "name": "Beek",
         "id": "S4320",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4012,9 +4815,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Aubechies \\",
+        "name": "Aubechies \\Coron-Maton\\",
         "id": "S4346",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4029,7 +4835,10 @@
       "properties": {
         "name": "Crisnée",
         "id": "S4348",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4044,7 +4853,10 @@
       "properties": {
         "name": "Darion",
         "id": "S4350",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4059,7 +4871,10 @@
       "properties": {
         "name": "Geleen-Haesselderveld",
         "id": "S4367",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4074,7 +4889,10 @@
       "properties": {
         "name": "Geleen-Urmonderbaan",
         "id": "S4368",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4089,7 +4907,10 @@
       "properties": {
         "name": "Hazendonk",
         "id": "S4381",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Swifterbant, Hazendonk, Trichterbecher, Vlaardingen",
+        "period": "Vroeg Neolithicum, Midden Neolithicum, Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4104,7 +4925,10 @@
       "properties": {
         "name": "Hollogne-Douze Bonniers",
         "id": "S4388",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4119,7 +4943,10 @@
       "properties": {
         "name": "Maastricht-Randwijck",
         "id": "S4417",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Rossen",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4134,7 +4961,10 @@
       "properties": {
         "name": "Swifterbant S3",
         "id": "S4469",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Swifterbant",
+        "period": "Vroeg Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4149,7 +4979,10 @@
       "properties": {
         "name": "Waremme-Vinâve",
         "id": "S4499",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4164,7 +4997,10 @@
       "properties": {
         "name": "Boitsfort",
         "id": "S4553",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4179,7 +5015,10 @@
       "properties": {
         "name": "Barendrecht-Vrijenburg 20-125",
         "id": "S4636",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Hazendonk",
+        "period": "Midden Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4194,7 +5033,10 @@
       "properties": {
         "name": "Bergschenhoek",
         "id": "S4646",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Swifterbant",
+        "period": "Midden Neolithicum",
+        "type": "Camp"
       },
       "geometry": {
         "type": "Point",
@@ -4209,7 +5051,10 @@
       "properties": {
         "name": "Doel-Deurganckdok",
         "id": "S4700",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Swifterbant",
+        "period": "Vroeg Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4224,7 +5069,10 @@
       "properties": {
         "name": "Hardinxveld-Giessendam De Bruin",
         "id": "S4786",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Ertebolle, Swifterbant",
+        "period": "LM, Vroeg Neolithicum",
+        "type": "Camp"
       },
       "geometry": {
         "type": "Point",
@@ -4239,7 +5087,10 @@
       "properties": {
         "name": "Hardinxveld-Giessendam Polderweg",
         "id": "S4787",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Late Meso, Swifterbant",
+        "period": "LM, Laat Mesolithicum / Vroeg Neolithicum, Vroeg Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4254,7 +5105,10 @@
       "properties": {
         "name": "Hoge Vaart - A27",
         "id": "S4797",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Swifterbant",
+        "period": "Vroeg Neolithicum",
+        "type": "Camp"
       },
       "geometry": {
         "type": "Point",
@@ -4269,7 +5123,10 @@
       "properties": {
         "name": "Neufvilles-Le Gué du Plantin",
         "id": "S4895",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Midden Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4284,7 +5141,10 @@
       "properties": {
         "name": "Oudenaarde",
         "id": "S4910",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Midden Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4299,7 +5159,10 @@
       "properties": {
         "name": "Schipluiden-Harnaschpolder",
         "id": "S4982",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Hazendonk",
+        "period": "Midden Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4312,9 +5175,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Spiennes \\",
+        "name": "Spiennes \\Camp-à-Cayaux\\",
         "id": "S5002",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Midden Neolithicum",
+        "type": "Flint-Mine"
       },
       "geometry": {
         "type": "Point",
@@ -4329,7 +5195,10 @@
       "properties": {
         "name": "Thieusis",
         "id": "S5027",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Midden Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4344,7 +5213,10 @@
       "properties": {
         "name": "Wateringen 4",
         "id": "S5061",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Hazendonk",
+        "period": "Midden Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4359,7 +5231,10 @@
       "properties": {
         "name": "Swifterbant S2",
         "id": "S5109",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4374,7 +5249,10 @@
       "properties": {
         "name": "Zwyndrecht",
         "id": "S5124",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4387,9 +5265,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Spiennes \\",
+        "name": "Spiennes \\Siedlung mit Gruben\\",
         "id": "S5130",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4404,7 +5285,10 @@
       "properties": {
         "name": "Avennes",
         "id": "S7304",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4419,7 +5303,10 @@
       "properties": {
         "name": "Bosch St.Pietersvoeren",
         "id": "S7306",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4434,7 +5321,10 @@
       "properties": {
         "name": "Harmignies CBR",
         "id": "S7307",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4449,7 +5339,10 @@
       "properties": {
         "name": "Jandrain-Jandrenouille",
         "id": "S7308",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4464,7 +5357,10 @@
       "properties": {
         "name": "Cadier en Keer",
         "id": "S7314",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4479,7 +5375,10 @@
       "properties": {
         "name": "Mesvin-sans-Pareil",
         "id": "S7330",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4492,9 +5391,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Obourg ",
+        "name": "Obourg",
         "id": "S7331",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4509,7 +5411,10 @@
       "properties": {
         "name": "Rullen",
         "id": "S7336",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4524,7 +5429,10 @@
       "properties": {
         "name": "Valkenburg",
         "id": "S7342",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4537,9 +5445,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Ormeignies-Blicquy \\",
+        "name": "Ormeignies-Blicquy \\La Petite Rosière\\",
         "id": "S7364",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4554,7 +5465,10 @@
       "properties": {
         "name": "Grotte Margaux",
         "id": "S8385",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Onbekend Mesolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4569,7 +5483,10 @@
       "properties": {
         "name": "Sclaigneaux",
         "id": "S8432",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Seine Oise Marne",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4584,7 +5501,10 @@
       "properties": {
         "name": "trou de la Heid",
         "id": "S8442",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4599,7 +5519,10 @@
       "properties": {
         "name": "Darion-Colia",
         "id": "S8513",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": "Omheining"
       },
       "geometry": {
         "type": "Point",
@@ -4614,7 +5537,10 @@
       "properties": {
         "name": "Hekelingen 3",
         "id": "S8929",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Vlaardingen",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4629,7 +5555,10 @@
       "properties": {
         "name": "Aartswoud",
         "id": "S8934",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4644,7 +5573,10 @@
       "properties": {
         "name": "Molenkolk I",
         "id": "S8936",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4659,7 +5591,10 @@
       "properties": {
         "name": "Molenkolk II",
         "id": "S8937",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4674,7 +5609,10 @@
       "properties": {
         "name": "Mienakker",
         "id": "S8939",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4689,7 +5627,10 @@
       "properties": {
         "name": "De Veken",
         "id": "S8940",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware, Bell Beaker",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4704,7 +5645,10 @@
       "properties": {
         "name": "Portelwoid",
         "id": "S8941",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4719,7 +5663,10 @@
       "properties": {
         "name": "Ewijk-Ewijkse Veld",
         "id": "S8942",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Vlaardingen",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4734,7 +5681,10 @@
       "properties": {
         "name": "Hellevoetsluis-Ossenhoek",
         "id": "S8943",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Vlaardingen",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4749,7 +5699,10 @@
       "properties": {
         "name": "Barendrecht-Zuidpolder",
         "id": "S8945",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Vlaardingen",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4764,7 +5717,10 @@
       "properties": {
         "name": "Rijswijk-de Schilp",
         "id": "S8946",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Vlaardingen",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4779,7 +5735,10 @@
       "properties": {
         "name": "Zeewijk",
         "id": "S8947",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4794,7 +5753,10 @@
       "properties": {
         "name": "Rijswijk-Ypenburg",
         "id": "S8948",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Hazendonk",
+        "period": "Midden Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4809,7 +5771,10 @@
       "properties": {
         "name": "Maantjesland",
         "id": "S8949",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4824,7 +5789,10 @@
       "properties": {
         "name": "Kolhorn",
         "id": "S8950",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4839,7 +5807,10 @@
       "properties": {
         "name": "Bouwlust",
         "id": "S8951",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Trichterbecher",
+        "period": "Midden Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4854,7 +5825,10 @@
       "properties": {
         "name": "Keinsmerbrug",
         "id": "S8952",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Corded Ware",
+        "period": "Laat Neolithicum",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4869,7 +5843,10 @@
       "properties": {
         "name": "Schagen Hoep-Noord",
         "id": "S8953",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "EBA",
+        "period": "EBA",
+        "type": "Nederzetting"
       },
       "geometry": {
         "type": "Point",
@@ -4884,7 +5861,10 @@
       "properties": {
         "name": "Deinze Aquafin",
         "id": "S9076",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4899,7 +5879,10 @@
       "properties": {
         "name": "Doel",
         "id": "S9080",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Swifterbant",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4914,7 +5897,10 @@
       "properties": {
         "name": "Ename Stuw",
         "id": "S9085",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": null,
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4929,7 +5915,10 @@
       "properties": {
         "name": "Hansbeke Voordestraat",
         "id": "S9096",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Neolithique final",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4944,7 +5933,10 @@
       "properties": {
         "name": "Hertsberge",
         "id": "S9100",
-        "country": "Belgium"
+        "country": "België",
+        "culture": null,
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4959,7 +5951,10 @@
       "properties": {
         "name": "Kruishoutem",
         "id": "S9113",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Bell Beaker",
+        "period": "EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4972,9 +5967,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Pont-de-Bonne \\",
+        "name": "Pont-de-Bonne \\Rocher du Vieux Chateau\\",
         "id": "S9144",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Michelsberg",
+        "period": "Midden Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -4989,7 +5987,10 @@
       "properties": {
         "name": "Saeftinge",
         "id": "S9146",
-        "country": "Netherlands"
+        "country": "Nederland",
+        "culture": "Michelsberg",
+        "period": "Midden Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -5004,7 +6005,10 @@
       "properties": {
         "name": "Saint-Denijs-Westrem",
         "id": "S9147",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Bell Beaker",
+        "period": "EBA",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -5019,7 +6023,10 @@
       "properties": {
         "name": "Waardamme-Vijvers",
         "id": "S9167",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Deule Escaut",
+        "period": "Laat Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -5034,7 +6041,10 @@
       "properties": {
         "name": "Place Saint-Hilaire",
         "id": "S9178",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Late Meso",
+        "period": "LM",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -5049,7 +6059,10 @@
       "properties": {
         "name": "Alleur (zones 1-3)",
         "id": "S9179",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -5062,9 +6075,12 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Alleur \\",
+        "name": "Alleur \\l’Arbre de la Mère Dieu\\",
         "id": "S9180",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -5079,7 +6095,10 @@
       "properties": {
         "name": "Fexhe-le Haut-Clocher-Podrî l'Cortri",
         "id": "S9181",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -5094,7 +6113,10 @@
       "properties": {
         "name": "Remicourt - Fond de Momalle",
         "id": "S9182",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
@@ -5109,7 +6131,10 @@
       "properties": {
         "name": "Remicourt - En Bia Flo II",
         "id": "S9183",
-        "country": "Belgium"
+        "country": "België",
+        "culture": "Linearbandkeramik",
+        "period": "Vroeg Neolithicum",
+        "type": null
       },
       "geometry": {
         "type": "Point",
