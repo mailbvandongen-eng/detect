@@ -28,6 +28,7 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
 
       const map = new Map({
         target,
+        controls: [], // Hide default zoom controls - using custom ZoomButtons
         view: new View({
           center: fromLonLat(defaultView.center),
           zoom: defaultView.zoom,

@@ -38,13 +38,13 @@ export function MapContainer() {
       })
     })
 
-    // PDOK Luchtfoto - Dutch government aerial imagery (free, CC0)
+    // ESRI World Imagery - reliable free satellite imagery
     const satelliteLayer = new TileLayer({
-      properties: { title: 'Luchtfoto (PDOK)', type: 'base' },
+      properties: { title: 'Luchtfoto', type: 'base' },
       visible: false,
       source: new XYZ({
-        url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg',
-        attributions: '© Kadaster / PDOK',
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        attributions: '© Esri, Maxar, Earthstar Geographics',
         maxZoom: 19
       })
     })
@@ -101,7 +101,7 @@ export function MapContainer() {
     // Register base layers in store
     registerLayer('OpenStreetMap', osmLayer)
     registerLayer('CartoDB (licht)', cartoDBLayer)
-    registerLayer('Luchtfoto (PDOK)', satelliteLayer)
+    registerLayer('Luchtfoto', satelliteLayer)
     registerLayer('Labels Overlay', labelsLayer)
     registerLayer('TMK 1850', tmk1850Layer)
     registerLayer('Bonnebladen 1900', bonne1900Layer)

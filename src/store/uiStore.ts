@@ -5,6 +5,8 @@ interface UIState {
   // Panel states
   layerControlOpen: boolean
   legendOpen: boolean
+  backgroundsPanelOpen: boolean
+  themesPanelOpen: boolean
 
   // Collapsed categories
   collapsedCategories: Set<string>
@@ -12,6 +14,8 @@ interface UIState {
   // Actions
   toggleLayerControl: () => void
   toggleLegend: () => void
+  toggleBackgroundsPanel: () => void
+  toggleThemesPanel: () => void
   toggleCategory: (category: string) => void
   setLayerControlOpen: (open: boolean) => void
   setLegendOpen: (open: boolean) => void
@@ -21,6 +25,8 @@ export const useUIStore = create<UIState>()(
   immer((set, get) => ({
     layerControlOpen: false,
     legendOpen: false,
+    backgroundsPanelOpen: false,
+    themesPanelOpen: false,
     collapsedCategories: new Set<string>(),
 
     toggleLayerControl: () => {
@@ -32,6 +38,18 @@ export const useUIStore = create<UIState>()(
     toggleLegend: () => {
       set(state => {
         state.legendOpen = !state.legendOpen
+      })
+    },
+
+    toggleBackgroundsPanel: () => {
+      set(state => {
+        state.backgroundsPanelOpen = !state.backgroundsPanelOpen
+      })
+    },
+
+    toggleThemesPanel: () => {
+      set(state => {
+        state.themesPanelOpen = !state.themesPanelOpen
       })
     },
 

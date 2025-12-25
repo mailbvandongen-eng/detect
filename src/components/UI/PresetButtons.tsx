@@ -114,7 +114,7 @@ const ALL_OVERLAYS = [
 const BASE_LAYERS = [
   'CartoDB (licht)',
   'OpenStreetMap',
-  'Luchtfoto (PDOK)',
+  'Luchtfoto',
   'TMK 1850',
   'Bonnebladen 1900'
 ]
