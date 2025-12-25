@@ -34,7 +34,9 @@ export const useLayerStore = create<LayerState>()(
     visible: {
       // Base layers
       'CartoDB (licht)': true,
+      'CartoDB (donker)': false,
       'OpenStreetMap': false,
+      'OpenTopoMap': false,
       'Luchtfoto': false,
       'Labels Overlay': false,
       'TMK 1850': false,

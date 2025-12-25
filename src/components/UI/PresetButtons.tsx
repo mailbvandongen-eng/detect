@@ -1,14 +1,19 @@
 import { useState } from 'react'
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Settings } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLayerStore, useGPSStore } from '../../store'
+import { useLayerStore, useGPSStore, useUIStore } from '../../store'
 
 // Layer presets - NL only
-const DETECTIE_LAYERS = [
-  'AMK Monumenten',
-  'Romeinse wegen',
-  'IKAW'
-]
+// Detectie preset with specific opacities
+const DETECTIE_PRESET = {
+  layers: ['AHN4 Multi-Hillshade NL', 'AHN 0.5m', 'Geomorfologie', 'AMK Monumenten'],
+  opacities: {
+    'AHN4 Multi-Hillshade NL': 0.56,
+    'AHN 0.5m': 0.60,
+    'Geomorfologie': 0.69,
+    'AMK Monumenten': 0.40
+  }
+}
 
 const RECREATIE_LAYERS = [
   'Parken',
@@ -122,7 +127,9 @@ const BASE_LAYERS = [
 export function PresetButtons() {
   const [isOpen, setIsOpen] = useState(false)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
+  const setLayerOpacity = useLayerStore(state => state.setLayerOpacity)
   const stopTracking = useGPSStore(state => state.stopTracking)
+  const toggleSettingsPanel = useUIStore(state => state.toggleSettingsPanel)
 
   const resetAll = () => {
     // Turn off all overlay layers
@@ -144,6 +151,19 @@ export function PresetButtons() {
     ALL_OVERLAYS.forEach(layer => setLayerVisibility(layer, false))
     // Then enable preset layers
     layers.forEach(layer => setLayerVisibility(layer, true))
+    setIsOpen(false)
+  }
+
+  const applyDetectiePreset = () => {
+    // First clear all overlays
+    ALL_OVERLAYS.forEach(layer => setLayerVisibility(layer, false))
+    // Enable layers and set opacities
+    DETECTIE_PRESET.layers.forEach(layer => {
+      setLayerVisibility(layer, true)
+      if (DETECTIE_PRESET.opacities[layer]) {
+        setLayerOpacity(layer, DETECTIE_PRESET.opacities[layer])
+      }
+    })
     setIsOpen(false)
   }
 
@@ -169,6 +189,13 @@ export function PresetButtons() {
         >
           <RotateCcw size={22} className="text-gray-600" />
         </button>
+        <button
+          onClick={toggleSettingsPanel}
+          className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+          title="Instellingen"
+        >
+          <Settings size={22} className="text-gray-600" />
+        </button>
       </div>
 
       {/* Expanded: preset options */}
@@ -186,7 +213,7 @@ export function PresetButtons() {
             </div>
             <div className="p-2">
             <button
-              onClick={() => applyPreset(DETECTIE_LAYERS)}
+              onClick={applyDetectiePreset}
               className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-purple-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
             >
               <Compass size={14} className="text-purple-600" />

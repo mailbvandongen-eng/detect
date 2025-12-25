@@ -3,7 +3,6 @@ import { MapContainer } from './components/Map/MapContainer'
 import { GpsButton } from './components/GPS/GpsButton'
 import { GpsMarker } from './components/GPS/GpsMarker'
 import { LayerControlButton } from './components/LayerControl/LayerControlButton'
-import { BackgroundsPanel } from './components/LayerControl/BackgroundsPanel'
 import { ThemesPanel } from './components/LayerControl/ThemesPanel'
 import { Popup } from './components/Map/Popup'
 import { LongPressMenu } from './components/Map/LongPressMenu'
@@ -13,6 +12,7 @@ import { InfoButton } from './components/UI/InfoButton'
 import { OpacitySliders } from './components/UI/OpacitySliders'
 import { SearchBox } from './components/UI/SearchBox'
 import { ZoomButtons } from './components/UI/ZoomButtons'
+import { SettingsPanel } from './components/UI/SettingsPanel'
 import { RouteLayer } from './components/Navigation/RouteLayer'
 import { NavigationBar } from './components/Navigation/NavigationBar'
 import { useDeviceOrientation } from './hooks/useDeviceOrientation'
@@ -37,12 +37,12 @@ function App() {
       <GpsButton />
       <ZoomButtons />
       <LayerControlButton />
-      <BackgroundsPanel />
       <ThemesPanel />
       <OpacitySliders />
       <BuildLabel />
       <PresetButtons />
       <InfoButton />
+      <SettingsPanel />
     </>
   )
 }

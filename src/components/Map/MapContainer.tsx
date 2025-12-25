@@ -38,6 +38,25 @@ export function MapContainer() {
       })
     })
 
+    const cartoDBDarkLayer = new TileLayer({
+      properties: { title: 'CartoDB (donker)', type: 'base' },
+      visible: false,
+      source: new XYZ({
+        url: 'https://{a-d}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+        attributions: '© OpenStreetMap contributors © CARTO'
+      })
+    })
+
+    const openTopoMapLayer = new TileLayer({
+      properties: { title: 'OpenTopoMap', type: 'base' },
+      visible: false,
+      source: new XYZ({
+        url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png',
+        attributions: '© OpenTopoMap (CC-BY-SA)',
+        maxZoom: 17
+      })
+    })
+
     // ESRI World Imagery - reliable free satellite imagery
     const satelliteLayer = new TileLayer({
       properties: { title: 'Luchtfoto', type: 'base' },
@@ -88,6 +107,8 @@ export function MapContainer() {
     // Add base layers to map
     map.addLayer(osmLayer)
     map.addLayer(cartoDBLayer)
+    map.addLayer(cartoDBDarkLayer)
+    map.addLayer(openTopoMapLayer)
     map.addLayer(satelliteLayer)
     map.addLayer(labelsLayer) // Labels overlay for hybrid map
     map.addLayer(tmk1850Layer)
@@ -101,6 +122,8 @@ export function MapContainer() {
     // Register base layers in store
     registerLayer('OpenStreetMap', osmLayer)
     registerLayer('CartoDB (licht)', cartoDBLayer)
+    registerLayer('CartoDB (donker)', cartoDBDarkLayer)
+    registerLayer('OpenTopoMap', openTopoMapLayer)
     registerLayer('Luchtfoto', satelliteLayer)
     registerLayer('Labels Overlay', labelsLayer)
     registerLayer('TMK 1850', tmk1850Layer)

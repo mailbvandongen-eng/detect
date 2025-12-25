@@ -10,7 +10,7 @@ export function BackgroundsPanel() {
     <AnimatePresence>
       {backgroundsPanelOpen && (
         <motion.div
-          className="fixed top-2.5 left-12 z-[999] bg-white rounded-lg shadow-lg overflow-hidden w-[180px]"
+          className="fixed top-2.5 left-14 z-[999] bg-white rounded-lg shadow-lg overflow-hidden w-[180px]"
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -10 }}

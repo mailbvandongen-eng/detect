@@ -7,6 +7,7 @@ interface UIState {
   legendOpen: boolean
   backgroundsPanelOpen: boolean
   themesPanelOpen: boolean
+  settingsPanelOpen: boolean
 
   // Collapsed categories
   collapsedCategories: Set<string>
@@ -16,6 +17,7 @@ interface UIState {
   toggleLegend: () => void
   toggleBackgroundsPanel: () => void
   toggleThemesPanel: () => void
+  toggleSettingsPanel: () => void
   toggleCategory: (category: string) => void
   setLayerControlOpen: (open: boolean) => void
   setLegendOpen: (open: boolean) => void
@@ -27,6 +29,7 @@ export const useUIStore = create<UIState>()(
     legendOpen: false,
     backgroundsPanelOpen: false,
     themesPanelOpen: false,
+    settingsPanelOpen: false,
     collapsedCategories: new Set<string>(),
 
     toggleLayerControl: () => {
@@ -50,6 +53,12 @@ export const useUIStore = create<UIState>()(
     toggleThemesPanel: () => {
       set(state => {
         state.themesPanelOpen = !state.themesPanelOpen
+      })
+    },
+
+    toggleSettingsPanel: () => {
+      set(state => {
+        state.settingsPanelOpen = !state.settingsPanelOpen
       })
     },
 
