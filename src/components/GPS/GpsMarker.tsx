@@ -1,11 +1,30 @@
 import { useEffect, useRef } from 'react'
 import { Feature } from 'ol'
-import { Point, Polygon } from 'ol/geom'
+import { Point } from 'ol/geom'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
-import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style'
+import { Style, Fill, Stroke, Icon } from 'ol/style'
 import { fromLonLat } from 'ol/proj'
 import { useMapStore, useGPSStore } from '../../store'
+
+// Create arrow SVG for GPS marker - Google Maps style navigation arrow
+function createArrowSVG(color: string = '#4285F4'): string {
+  // Arrow pointing up (north), will be rotated by heading
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+    <defs>
+      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.3"/>
+      </filter>
+    </defs>
+    <polygon points="20,4 32,32 20,26 8,32"
+      fill="${color}"
+      stroke="white"
+      stroke-width="2"
+      stroke-linejoin="round"
+      filter="url(#shadow)"/>
+  </svg>`
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
+}
 
 export function GpsMarker() {
   const map = useMapStore(state => state.map)
@@ -22,7 +41,6 @@ export function GpsMarker() {
 
   const markerRef = useRef<Feature | null>(null)
   const accuracyRef = useRef<Feature | null>(null)
-  const coneRef = useRef<Feature | null>(null)
   const layerRef = useRef<VectorLayer<VectorSource> | null>(null)
 
   // Initialize GPS marker layer
@@ -34,41 +52,21 @@ export function GpsMarker() {
     // Create features
     const defaultCoords = fromLonLat([5.1214, 52.0907])
 
-    // GPS marker (blue beacon - Google Maps style)
-    // 20px diameter = radius 10px, mooi wit randje
+    // GPS marker (navigation arrow - Google Maps style)
     markerRef.current = new Feature({
       geometry: new Point(defaultCoords)
     })
-    markerRef.current.setStyle(
-      new Style({
-        image: new CircleStyle({
-          radius: 10,                             // 20px diameter - iets kleiner dan 27px
-          fill: new Fill({ color: '#4285F4' }),   // Google Blue
-          stroke: new Stroke({ color: 'white', width: 4 }) // 4px mooi wit randje
-        })
-      })
-    )
+    // Arrow style will be set in the heading update effect
 
     // Accuracy circle
     accuracyRef.current = new Feature({
       geometry: new Point(defaultCoords)
     })
 
-    // Direction cone
-    coneRef.current = new Feature({
-      geometry: new Polygon([[[0, 0], [0, 0], [0, 0], [0, 0]]])
-    })
-    coneRef.current.setStyle(
-      new Style({
-        fill: new Fill({ color: 'rgba(66, 133, 244, 0.5)' }),
-        stroke: new Stroke({ color: '#4285f4', width: 2 })
-      })
-    )
-
-    // Create layer
+    // Create layer (no cone needed - arrow shows direction)
     layerRef.current = new VectorLayer({
       source: new VectorSource({
-        features: [accuracyRef.current, coneRef.current, markerRef.current]
+        features: [accuracyRef.current, markerRef.current]
       }),
       zIndex: 1000
     })
@@ -126,69 +124,37 @@ export function GpsMarker() {
     }
   }, [map, tracking, position, accuracy, firstFix, resetFirstFix, centerOnUser, animationDuration])
 
-  // Update direction cone
+  // Update arrow rotation based on heading
   useEffect(() => {
-    if (!map || !position || !coneRef.current || !markerRef.current) return
+    if (!map || !markerRef.current) return
 
-    const coords = fromLonLat([position.lng, position.lat])
     const view = map.getView()
-    const resolution = view.getResolution() || 1
-
-    // Google Maps style cone: "Zaklamp straal" / kijkrichting indicator
-    // Beacon diameter: 20px (radius 10), cone start vanaf zijkant beacon
-    const beaconRadius = 10
-    const coneLength = beaconRadius * 3 * resolution  // ~45px vanaf beacon edge
-    const coneAngle = Math.PI / 4                     // ~51° totale openingshoek (45-60° range)
-
-    // Cone rotation based on navigation mode
     const mapRotation = view.getRotation()
 
-    let coneHeading: number
+    // Calculate arrow rotation
+    let arrowRotation: number
     if (navigationMode === 'free') {
-      // Vrije modus: cone rotates with phone orientation (compass heading)
+      // Free mode: arrow rotates with compass/GPS heading
       // If no heading available, point north (0)
-      coneHeading = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
+      arrowRotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
     } else {
-      // Rijmodus: cone counter-rotates to stay pointing up on screen
-      // If map rotation = R, cone heading = -R, so cone appears at 0° (up)
-      coneHeading = -mapRotation
+      // Drive mode: arrow counter-rotates to stay pointing up on screen
+      arrowRotation = -mapRotation
     }
 
-    // Cone start point: vanaf de RAND van de beacon (niet center)
-    const startX = coords[0] + Math.sin(coneHeading) * beaconRadius * resolution
-    const startY = coords[1] + Math.cos(coneHeading) * beaconRadius * resolution
-
-    // Calculate cone edges from start point
-    // Left edge of cone
-    const leftAngle = coneHeading - coneAngle / 2
-    const leftX = startX + Math.sin(leftAngle) * coneLength
-    const leftY = startY + Math.cos(leftAngle) * coneLength
-
-    // Right edge of cone
-    const rightAngle = coneHeading + coneAngle / 2
-    const rightX = startX + Math.sin(rightAngle) * coneLength
-    const rightY = startY + Math.cos(rightAngle) * coneLength
-
-    // Cone coordinates: Start from edge of beacon, fan out
-    const coneCoords = [
-      [startX, startY],  // Edge of beacon (start point)
-      [leftX, leftY],    // Left edge
-      [rightX, rightY],  // Right edge
-      [startX, startY]   // Back to start (close polygon)
-    ]
-
-    coneRef.current.setGeometry(new Polygon([coneCoords]))
-
-    // Google Maps style: "Zaklamp straal" effect
-    // Gradient van 40% bij beacon → 5% bij punt (gemiddeld ~25% opacity)
-    // Zachte/vervagde randen (geen harde stroke)
-    coneRef.current.setStyle(
+    // Set arrow style with rotation
+    markerRef.current.setStyle(
       new Style({
-        fill: new Fill({ color: 'rgba(66, 133, 244, 0.18)' }), // Gemiddelde opacity tussen basis (40%) en punt (5%)
-        stroke: new Stroke({ color: 'rgba(66, 133, 244, 0.1)', width: 0.5 }) // Zeer subtiele rand
+        image: new Icon({
+          src: createArrowSVG('#4285F4'),
+          scale: 1,
+          rotation: arrowRotation,
+          rotateWithView: false, // We handle rotation ourselves
+          anchor: [0.5, 0.5] // Center of the arrow
+        })
       })
     )
-  }, [map, position, rotation, navigationMode, smoothHeading])
+  }, [map, navigationMode, smoothHeading, rotation])
 
   return null // No visual component, just OpenLayers features
 }
