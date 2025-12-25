@@ -133,9 +133,9 @@ export function PresetButtons() {
   }
 
   return (
-    <div className="fixed bottom-[85px] md:bottom-[95px] left-2.5 z-[800]">
-      {/* Collapsed: just toggle button + reset */}
-      <div className="flex gap-2">
+    <div className="fixed bottom-[30px] md:bottom-10 left-2 z-[800]">
+      {/* Stacked vertically: preset on top, reset below */}
+      <div className="flex flex-col gap-2">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
@@ -164,7 +164,7 @@ export function PresetButtons() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-14 left-0 bg-white/95 rounded-xl shadow-lg p-2 min-w-[140px] backdrop-blur-sm"
+            className="absolute bottom-0 left-14 bg-white/95 rounded-xl shadow-lg p-2 min-w-[140px] backdrop-blur-sm"
           >
             <button
               onClick={() => applyPreset(DETECTIE_LAYERS)}

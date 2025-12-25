@@ -7,13 +7,13 @@ export function InfoButton() {
 
   return (
     <>
-      {/* Info Button - bottom left, next to version label */}
+      {/* Info Button - below zoom controls (top left) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-2.5 left-24 z-[800] w-8 h-8 flex items-center justify-center bg-white/90 hover:bg-gray-100 rounded-full shadow-sm transition-colors"
+        className="fixed top-[88px] left-2 z-[800] w-[29px] h-[29px] flex items-center justify-center bg-white hover:bg-gray-100 rounded-sm shadow-md border-0 outline-none transition-colors"
         title="Info & Attributies"
       >
-        <Info size={16} className="text-gray-600" />
+        <Info size={14} className="text-gray-700" />
       </button>
 
       {/* Modal */}
