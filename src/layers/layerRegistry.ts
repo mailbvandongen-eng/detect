@@ -252,30 +252,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: false
   },
-  'Castella (punten)': {
-    name: 'Castella (punten)',
-    factory: async () => {
-      const { createCastellaPuntenLayerOL } = await import('./castellaPuntenOL')
-      return createCastellaPuntenLayerOL()
-    },
-    immediateLoad: false
-  },
-  'Castella (lijnen)': {
-    name: 'Castella (lijnen)',
-    factory: async () => {
-      const { createCastellaLijnenLayerOL } = await import('./castellaLijnenOL')
-      return createCastellaLijnenLayerOL()
-    },
-    immediateLoad: false
-  },
-  'Oppida': {
-    name: 'Oppida',
-    factory: async () => {
-      const { createOppidaLayerOL } = await import('./oppidaOL')
-      return createOppidaLayerOL()
-    },
-    immediateLoad: false
-  },
   'Kastelen': {
     name: 'Kastelen',
     factory: async () => {

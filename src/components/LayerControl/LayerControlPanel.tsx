@@ -48,9 +48,6 @@ export function LayerControlPanel() {
               <LayerGroup title="Archeologische lagen" defaultExpanded={false}>
                 <LayerItem name="AMK Monumenten" type="overlay" />
                 <LayerItem name="Romeinse wegen" type="overlay" />
-                <LayerItem name="Castella (punten)" type="overlay" />
-                <LayerItem name="Castella (lijnen)" type="overlay" />
-                <LayerItem name="Oppida" type="overlay" />
                 <LayerItem name="Kastelen" type="overlay" />
                 <LayerItem name="IKAW" type="overlay" />
                 <LayerItem name="Archeo Landschappen" type="overlay" />

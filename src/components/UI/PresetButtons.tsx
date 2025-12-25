@@ -7,8 +7,7 @@ import { useLayerStore, useGPSStore } from '../../store'
 const DETECTIE_LAYERS = [
   'AMK Monumenten',
   'Romeinse wegen',
-  'Castella (punten)',
-  'Castella (lijnen)'
+  'IKAW'
 ]
 
 const RECREATIE_LAYERS = [
@@ -49,9 +48,6 @@ const ALL_OVERLAYS = [
   // Archaeological layers
   'AMK Monumenten',
   'Romeinse wegen',
-  'Castella (punten)',
-  'Castella (lijnen)',
-  'Oppida',
   'Kastelen',
   'IKAW',
   'Archeo Landschappen',

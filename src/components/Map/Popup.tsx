@@ -449,19 +449,6 @@ export function Popup() {
           }
         }
 
-        // Oppida / Castella
-        if (dataProps.type_site || dataProps.dating) {
-          if (dataProps.type_site) {
-            html += `<br/><span class="text-sm text-red-700">${dataProps.type_site}</span>`
-          }
-          if (dataProps.dating) {
-            html += `<br/><span class="text-xs text-purple-600">${dataProps.dating}</span>`
-          }
-          if (dataProps.culture) {
-            html += `<br/><span class="text-xs text-gray-500">${dataProps.culture}</span>`
-          }
-        }
-
         // Bretagne Archaeological Sites (Carte Archeologique Nationale)
         if (dataProps.nature && dataProps.debut) {
           html += `<br/><span class="text-sm text-purple-700">${dataProps.nature}</span>`

@@ -82,11 +82,6 @@ export function InfoButton() {
                       <span className="text-xs">Romeinse wegen - Brughmans, Pažout, de Soto & Bjerregaard Vahlstrup</span>
                     </li>
                     <li>
-                      <strong>Vici.org</strong> (CC BY-SA 3.0)
-                      <br />
-                      <span className="text-xs">Castella, Oppida</span>
-                    </li>
-                    <li>
                       <strong>CARTO</strong> (CC BY 3.0)
                       <br />
                       <span className="text-xs">CartoDB basiskaart</span>
@@ -136,7 +131,7 @@ export function InfoButton() {
                 {/* Version */}
                 <section className="pt-2 border-t border-gray-200">
                   <p className="text-xs text-gray-400 text-center">
-                    Detectorapp NL v1.9.0
+                    Detectorapp NL v2.0.0
                   </p>
                 </section>
               </div>

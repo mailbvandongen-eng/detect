@@ -46,9 +46,6 @@ export const useLayerStore = create<LayerState>()(
       // Archeologische lagen
       'AMK Monumenten': false,
       'Romeinse wegen': false,
-      'Castella (punten)': false,
-      'Castella (lijnen)': false,
-      'Oppida': false,
       'Kastelen': false,
       'IKAW': false,
       'Archeo Landschappen': false,
