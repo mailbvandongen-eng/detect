@@ -7,10 +7,10 @@ export function InfoButton() {
 
   return (
     <>
-      {/* Info Button - top left corner */}
+      {/* Info Button - bottom left, next to version label */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed top-2.5 left-2.5 z-[800] w-8 h-8 flex items-center justify-center bg-white/90 hover:bg-gray-100 rounded-full shadow-sm transition-colors"
+        className="fixed bottom-2.5 left-24 z-[800] w-8 h-8 flex items-center justify-center bg-white/90 hover:bg-gray-100 rounded-full shadow-sm transition-colors"
         title="Info & Attributies"
       >
         <Info size={16} className="text-gray-600" />

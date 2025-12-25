@@ -44,7 +44,7 @@ interface GPSState {
 export const useGPSStore = create<GPSState>()(
   immer((set, get) => ({
     // Initial state
-    tracking: true, // GPS always on by default
+    tracking: false, // GPS off by default
     navigationMode: 'free', // Default: vrije modus (north-up, cone rotates)
     position: null,
     heading: null,
