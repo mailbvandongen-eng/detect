@@ -31,7 +31,7 @@ export function LayerControlPanel() {
               <LayerGroup title="Achtergrond" defaultExpanded={false}>
                 <LayerItem name="CartoDB (licht)" type="base" />
                 <LayerItem name="OpenStreetMap" type="base" />
-                <LayerItem name="Google Hybride" type="base" />
+                <LayerItem name="Luchtfoto (PDOK)" type="base" />
                 <LayerItem name="TMK 1850" type="base" />
                 <LayerItem name="Bonnebladen 1900" type="base" />
               </LayerGroup>
@@ -39,7 +39,6 @@ export function LayerControlPanel() {
               {/* Steentijd (Stone Age) */}
               <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false}>
                 <LayerItem name="Hunebedden" type="overlay" />
-                <LayerItem name="EUROEVOL Sites" type="overlay" />
                 <LayerItem name="FAMKE Steentijd" type="overlay" />
                 <LayerItem name="Grafheuvels" type="overlay" />
                 <LayerItem name="Terpen" type="overlay" />

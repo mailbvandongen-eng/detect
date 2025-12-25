@@ -38,12 +38,13 @@ export function MapContainer() {
       })
     })
 
+    // PDOK Luchtfoto - Dutch government aerial imagery (free, CC0)
     const satelliteLayer = new TileLayer({
-      properties: { title: 'Google Hybride', type: 'base' },
+      properties: { title: 'Luchtfoto (PDOK)', type: 'base' },
       visible: false,
       source: new XYZ({
-        url: 'https://mt{0-3}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-        attributions: '© Google'
+        url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
+        attributions: '© Kadaster / PDOK'
       })
     })
 
@@ -86,7 +87,7 @@ export function MapContainer() {
     // Register base layers in store
     registerLayer('OpenStreetMap', osmLayer)
     registerLayer('CartoDB (licht)', cartoDBLayer)
-    registerLayer('Google Hybride', satelliteLayer)
+    registerLayer('Luchtfoto (PDOK)', satelliteLayer)
     registerLayer('TMK 1850', tmk1850Layer)
     registerLayer('Bonnebladen 1900', bonne1900Layer)
 

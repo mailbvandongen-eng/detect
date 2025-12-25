@@ -449,22 +449,6 @@ export function Popup() {
           }
         }
 
-        // EUROEVOL Neolithic Sites
-        if (dataProps.id && dataProps.id.startsWith('S') && (dataProps.country === 'Nederland' || dataProps.country === 'België')) {
-          html += `<br/><span class="text-xs text-amber-800">EUROEVOL ${dataProps.id}</span>`
-          if (dataProps.culture) {
-            html += `<br/><span class="text-sm text-purple-700">${dataProps.culture}</span>`
-          }
-          if (dataProps.period) {
-            html += `<br/><span class="text-sm text-gray-700">${dataProps.period}</span>`
-          }
-          if (dataProps.type) {
-            html += `<br/><span class="text-xs text-gray-600">Type: ${dataProps.type}</span>`
-          }
-          html += `<br/><span class="text-xs text-gray-500">${dataProps.country}</span>`
-          html += `<br/><a href="https://discovery.ucl.ac.uk/id/eprint/1469811/" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">EUROEVOL Database →</a>`
-        }
-
         // Oppida / Castella
         if (dataProps.type_site || dataProps.dating) {
           if (dataProps.type_site) {

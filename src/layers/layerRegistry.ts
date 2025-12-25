@@ -302,15 +302,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: false
   },
-  'EUROEVOL Sites': {
-    name: 'EUROEVOL Sites',
-    factory: async () => {
-      const { createEuroevolLayerOL } = await import('./euroevolOL')
-      return createEuroevolLayerOL()
-    },
-    immediateLoad: false
-  },
-
   // UIKAV layers
   'UIKAV Punten': {
     name: 'UIKAV Punten',

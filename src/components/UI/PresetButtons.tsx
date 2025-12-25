@@ -43,7 +43,6 @@ const ANALYSE_LAYERS = [
 const ALL_OVERLAYS = [
   // Steentijd layers
   'Hunebedden',
-  'EUROEVOL Sites',
   'FAMKE Steentijd',
   'Grafheuvels',
   'Terpen',
@@ -104,7 +103,7 @@ const ALL_OVERLAYS = [
 const BASE_LAYERS = [
   'CartoDB (licht)',
   'OpenStreetMap',
-  'Google Hybride',
+  'Luchtfoto (PDOK)',
   'TMK 1850',
   'Bonnebladen 1900'
 ]

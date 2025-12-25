@@ -35,12 +35,11 @@ export const useLayerStore = create<LayerState>()(
       // Base layers
       'CartoDB (licht)': true,
       'OpenStreetMap': false,
-      'Google Hybride': false,
+      'Luchtfoto (PDOK)': false,
       'TMK 1850': false,
       'Bonnebladen 1900': false,
       // Steentijd
       'Hunebedden': false,
-      'EUROEVOL Sites': false,
       'FAMKE Steentijd': false,
       'Grafheuvels': false,
       'Terpen': false,

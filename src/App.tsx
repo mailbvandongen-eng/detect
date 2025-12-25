@@ -8,6 +8,7 @@ import { Popup } from './components/Map/Popup'
 import { LongPressMenu } from './components/Map/LongPressMenu'
 import { BuildLabel } from './components/UI/BuildLabel'
 import { PresetButtons } from './components/UI/PresetButtons'
+import { InfoButton } from './components/UI/InfoButton'
 import { OpacitySliders } from './components/UI/OpacitySliders'
 import { SearchBox } from './components/UI/SearchBox'
 import { RouteLayer } from './components/Navigation/RouteLayer'
@@ -43,6 +44,7 @@ function App() {
       {/* <AuthButton /> */}
       <BuildLabel />
       <PresetButtons />
+      <InfoButton />
     </>
   )
 }
