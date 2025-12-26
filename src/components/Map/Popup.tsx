@@ -572,6 +572,380 @@ export function Popup() {
           continue
         }
 
+        // === PROVINCIALE WAARDENKAARTEN ===
+
+        // Zuid-Holland: Scheepswrakken
+        if (title === 'Scheepswrakken') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 100
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://geodata.zuid-holland.nl/geoserver/cultuur/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=CHS_2015_ARCHEOLOGIE_SCHEEPSRESTANTEN&QUERY_LAYERS=CHS_2015_ARCHEOLOGIE_SCHEEPSRESTANTEN&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-cyan-800">Scheepswrak</strong>`
+
+              if (props.naam || props.NAAM) {
+                html += `<br/><span class="text-sm font-semibold text-cyan-700">${props.naam || props.NAAM}</span>`
+              }
+              if (props.type || props.TYPE) {
+                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
+              }
+              if (props.datering || props.DATERING) {
+                html += `<br/><span class="text-xs text-gray-500">Datering: ${props.datering || props.DATERING}</span>`
+              }
+              if (props.bron || props.BRON) {
+                html += `<br/><span class="text-xs text-gray-400">${props.bron || props.BRON}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Scheepswrakken WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Zuid-Holland: Woonheuvels
+        if (title === 'Woonheuvels ZH') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 100
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://geodata.zuid-holland.nl/geoserver/cultuur/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=CHS_2015_ARCHEOLOGIE_WOONHEUVEL&QUERY_LAYERS=CHS_2015_ARCHEOLOGIE_WOONHEUVEL&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-orange-800">Woonheuvel</strong>`
+
+              if (props.naam || props.NAAM) {
+                html += `<br/><span class="text-sm font-semibold text-orange-700">${props.naam || props.NAAM}</span>`
+              }
+              if (props.type || props.TYPE) {
+                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Woonheuvels WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Zuid-Holland: Romeinse Forten
+        if (title === 'Romeinse Forten') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 200
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://geodata.zuid-holland.nl/geoserver/cultuur/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=CHS_2015_ARCHEOLOGIE_ROMEINSFORT&QUERY_LAYERS=CHS_2015_ARCHEOLOGIE_ROMEINSFORT&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-red-800">Romeins Fort</strong>`
+
+              if (props.naam || props.NAAM) {
+                html += `<br/><span class="text-sm font-semibold text-red-700">${props.naam || props.NAAM}</span>`
+              }
+              if (props.type || props.TYPE) {
+                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
+              }
+              if (props.periode || props.PERIODE) {
+                html += `<br/><span class="text-xs text-gray-500">${props.periode || props.PERIODE}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Romeinse Forten WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Zuid-Holland: Windmolens
+        if (title === 'Windmolens') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 50
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://geodata.zuid-holland.nl/geoserver/cultuur/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=CHS_2015_NEDERZETTING_WINDMOLENS&QUERY_LAYERS=CHS_2015_NEDERZETTING_WINDMOLENS&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-amber-800">Windmolen</strong>`
+
+              if (props.naam || props.NAAM) {
+                html += `<br/><span class="text-sm font-semibold text-amber-700">${props.naam || props.NAAM}</span>`
+              }
+              if (props.type || props.TYPE || props.functie || props.FUNCTIE) {
+                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE || props.functie || props.FUNCTIE}</span>`
+              }
+              if (props.bouwjaar || props.BOUWJAAR) {
+                html += `<br/><span class="text-xs text-gray-500">Bouwjaar: ${props.bouwjaar || props.BOUWJAAR}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Windmolens WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Zuid-Holland: Erfgoedlijnen
+        if (title === 'Erfgoedlijnen') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 200
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://geodata.zuid-holland.nl/geoserver/cultuur/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=CHS_ERFGOEDLIJN_HOOFDSTRUCTUUR&QUERY_LAYERS=CHS_ERFGOEDLIJN_HOOFDSTRUCTUUR&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-purple-800">Erfgoedlijn</strong>`
+
+              if (props.naam || props.NAAM || props.erfgoedlijn) {
+                html += `<br/><span class="text-sm font-semibold text-purple-700">${props.naam || props.NAAM || props.erfgoedlijn}</span>`
+              }
+              if (props.type || props.TYPE) {
+                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
+              }
+              if (props.omschrijving || props.OMSCHRIJVING) {
+                html += `<br/><span class="text-xs text-gray-500">${props.omschrijving || props.OMSCHRIJVING}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Erfgoedlijnen WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Zuid-Holland: Oude Kernen
+        if (title === 'Oude Kernen') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 200
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://geodata.zuid-holland.nl/geoserver/cultuur/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=CHS_2015_ARCHEOLOGIE_KERNEN&QUERY_LAYERS=CHS_2015_ARCHEOLOGIE_KERNEN&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-stone-800">Historische Kern</strong>`
+
+              if (props.naam || props.NAAM) {
+                html += `<br/><span class="text-sm font-semibold text-stone-700">${props.naam || props.NAAM}</span>`
+              }
+              if (props.type || props.TYPE) {
+                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
+              }
+              if (props.periode || props.PERIODE) {
+                html += `<br/><span class="text-xs text-gray-500">${props.periode || props.PERIODE}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Oude Kernen WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Gelderland: Relictenkaart Punten
+        if (title === 'Relictenkaart Punten') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 50
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://geoserver.gelderland.nl/geoserver/ngr_a/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=ChAr_Relictenkaart_p&QUERY_LAYERS=ChAr_Relictenkaart_p&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+
+              // Decode type codes to readable names
+              const typeMap: Record<string, string> = {
+                'KV': 'Kasteel/Vesting', 'K': 'Kapel', 'KE': 'Kerkhof',
+                'B': 'Buitenhuis', 'OB': 'Oud Bebouwingsrelict', 'OV': 'Oude Verkaveling',
+                'NR': 'Nijverheidsrelict', 'GH': 'Grafheuvel', 'BP': 'Begraafplaats',
+                'HH': 'Havezate', 'RM': 'Rosmolen', 'WM': 'Windmolen',
+                'PM': 'Poldermolen', 'EK': 'Eendenkooi', 'SH': 'Scholtenhoeve'
+              }
+
+              const typeCode = props.type?.replace(/[0-9]/g, '') || ''
+              const typeName = typeMap[typeCode] || props.type || 'Cultuurhistorisch object'
+
+              let html = `<strong class="text-emerald-800">Relict</strong>`
+              html += `<br/><span class="text-sm font-semibold text-emerald-700">${typeName}</span>`
+
+              if (props.type && typeCode !== props.type) {
+                html += `<br/><span class="text-xs text-gray-500">Code: ${props.type}</span>`
+              }
+              if (props.streek) {
+                html += `<br/><span class="text-xs text-gray-400">Streek: ${props.streek}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Relictenkaart Punten WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Gelderland: Relictenkaart Lijnen
+        if (title === 'Relictenkaart Lijnen') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 50
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://geoserver.gelderland.nl/geoserver/ngr_a/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=ChAr_Relictenkaart_l&QUERY_LAYERS=ChAr_Relictenkaart_l&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+
+              // Decode klasse to readable names
+              const klasseMap: Record<number, string> = {
+                1: 'Sprengenbeek', 2: 'Oude waterloop', 3: 'Doorgaande weg',
+                4: 'Hessenweg', 5: 'Oude weg', 6: 'Historische grens',
+                7: 'Trekpad', 8: 'Jaagpad'
+              }
+
+              const klasseName = klasseMap[props.klasse] || `Historisch lijnrelict (${props.klasse})`
+
+              let html = `<strong class="text-teal-800">Lijnrelict</strong>`
+              html += `<br/><span class="text-sm font-semibold text-teal-700">${klasseName}</span>`
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Relictenkaart Lijnen WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Gelderland: Relictenkaart Vlakken
+        if (title === 'Relictenkaart Vlakken') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 100
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://geoserver.gelderland.nl/geoserver/ngr_a/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=ChAr_Relictenkaart_v&QUERY_LAYERS=ChAr_Relictenkaart_v&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+
+              // Decode klasse to readable names
+              const klasseMap: Record<number, string> = {
+                1: 'Onveranderd agrarisch (voor 1850)', 2: 'Jonge heideontginning (1850-1950)',
+                3: 'Open essencomplex', 4: 'Kampenlandschap', 5: 'Heiderelict (1850)',
+                6: 'Bosrelict (1850)', 7: 'Stuifzandrelict', 8: 'Oud bouwland',
+                9: 'Historisch grasland', 10: 'Beekdal'
+              }
+
+              const klasseName = klasseMap[props.klasse] || `Historisch landschap (${props.klasse})`
+
+              let html = `<strong class="text-lime-800">Landschapsrelict</strong>`
+              html += `<br/><span class="text-sm font-semibold text-lime-700">${klasseName}</span>`
+
+              if (props.st_area_shape_) {
+                const ha = (props.st_area_shape_ / 10000).toFixed(1)
+                html += `<br/><span class="text-xs text-gray-500">${ha} ha</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Relictenkaart Vlakken WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Zeeland: Verdronken Dorpen
+        if (title === 'Verdronken Dorpen') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 200
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://opengeodata.zeeland.nl/geoserver/chs/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=geocmd_vrddrppnt&QUERY_LAYERS=geocmd_vrddrppnt&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-blue-800">Verdronken Dorp</strong>`
+
+              if (props.naam || props.NAAM) {
+                html += `<br/><span class="text-sm font-semibold text-blue-700">${props.naam || props.NAAM}</span>`
+              }
+              if (props.verdronken || props.VERDRONKEN || props.jaar || props.JAAR) {
+                html += `<br/><span class="text-xs text-gray-600">Verdronken: ${props.verdronken || props.VERDRONKEN || props.jaar || props.JAAR}</span>`
+              }
+              if (props.gemeente || props.GEMEENTE) {
+                html += `<br/><span class="text-xs text-gray-500">${props.gemeente || props.GEMEENTE}</span>`
+              }
+              if (props.bron || props.BRON) {
+                html += `<br/><span class="text-xs text-gray-400">${props.bron || props.BRON}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Verdronken Dorpen WMS query failed:', error)
+          }
+          continue
+        }
+
         const url = source.getFeatureInfoUrl(
           coordinate,
           viewResolution,
