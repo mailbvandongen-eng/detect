@@ -81,7 +81,6 @@ export const useLayerStore = create<LayerState>()(
       // Hillshade NL
       'AHN4 Hillshade NL': false,
       'AHN4 Multi-Hillshade NL': false,
-      'AHN4 Helling NL': false,
       'AHN 0.5m': false,
       'World Hillshade': false,
       // Terrein
@@ -112,7 +111,6 @@ export const useLayerStore = create<LayerState>()(
       'Archeo Landschappen': 0.5,
       'AHN4 Hillshade NL': 0.7,
       'AHN4 Multi-Hillshade NL': 0.7,
-      'AHN4 Helling NL': 0.6,
       'World Hillshade': 0.7,
       'Terpen': 0.7,
       'Verdedigingslinies': 0.7,

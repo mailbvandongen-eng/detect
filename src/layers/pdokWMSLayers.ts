@@ -248,7 +248,7 @@ export function createBRPGewaspercelenLayerOL() {
     source: new TileWMS({
       url: 'https://service.pdok.nl/rvo/brpgewaspercelen/wms/v1_0',
       params: {
-        'LAYERS': 'brpgewaspercelen',
+        'LAYERS': 'BrpGewas',
         'STYLES': '',
         'TILED': true,
         'FORMAT': 'image/png'
@@ -270,7 +270,7 @@ export function createKadastraleKaartLayerOL() {
     source: new TileWMS({
       url: 'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0',
       params: {
-        'LAYERS': 'Perceel,OpenbareRuimteNaam,Bebouwing',
+        'LAYERS': 'Perceel',
         'STYLES': '',
         'TILED': true,
         'FORMAT': 'image/png'

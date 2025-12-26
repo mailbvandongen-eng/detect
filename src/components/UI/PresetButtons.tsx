@@ -101,7 +101,6 @@ const ALL_OVERLAYS = [
   // Hillshade layers NL
   'AHN4 Hillshade NL',
   'AHN4 Multi-Hillshade NL',
-  'AHN4 Helling NL',
   'World Hillshade',
   // Fossil layers
   'Fossielen Nederland',

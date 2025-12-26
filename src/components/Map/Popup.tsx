@@ -321,6 +321,257 @@ export function Popup() {
           continue
         }
 
+        // Verdedigingslinies (RCE Linies en Stellingen)
+        if (title === 'Verdedigingslinies') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 100
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://services.rce.geovoorziening.nl/liniesenstellingen/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=linies&QUERY_LAYERS=linies&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-amber-800">Verdedigingslinie</strong>`
+
+              if (props.naam || props.lin_naam) {
+                html += `<br/><span class="text-sm font-semibold text-amber-700">${props.naam || props.lin_naam}</span>`
+              }
+              if (props.lin_period) {
+                html += `<br/><span class="text-xs text-gray-500">${props.lin_period}</span>`
+              }
+              if (props.status) {
+                html += `<br/><span class="text-xs text-gray-400">${props.status}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Verdedigingslinies WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Rijksmonumenten (RCE)
+        if (title === 'Rijksmonumenten') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 50
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://data.geo.cultureelerfgoed.nl/openbaar/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=rijksmonumentpunten&QUERY_LAYERS=rijksmonumentpunten&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-red-800">Rijksmonument</strong>`
+
+              if (props.cbsNaam || props.cbs_naam) {
+                html += `<br/><span class="text-sm font-semibold">${props.cbsNaam || props.cbs_naam}</span>`
+              }
+              if (props.hoofdcategorie) {
+                html += `<br/><span class="text-sm text-red-700">${props.hoofdcategorie}</span>`
+              }
+              if (props.subcategorie) {
+                html += `<br/><span class="text-xs text-gray-600">${props.subcategorie}</span>`
+              }
+              if (props.rijksmonumentnummer) {
+                html += `<br/><span class="text-xs text-gray-500">Nr: ${props.rijksmonumentnummer}</span>`
+              }
+              if (props.bouwjaar || props.oorspronkelijkebouwjaar) {
+                html += `<br/><span class="text-xs text-gray-500">Bouwjaar: ${props.bouwjaar || props.oorspronkelijkebouwjaar}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Rijksmonumenten WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Werelderfgoed (UNESCO)
+        if (title === 'Werelderfgoed') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 500
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://service.pdok.nl/rce/ps-ch/wms/v1_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=PS.ProtectedSite&QUERY_LAYERS=PS.ProtectedSite&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-cyan-800">UNESCO Werelderfgoed</strong>`
+
+              if (props.siteName || props.naam) {
+                html += `<br/><span class="text-sm font-semibold text-cyan-700">${props.siteName || props.naam}</span>`
+              }
+              if (props.siteDesignation) {
+                html += `<br/><span class="text-xs text-gray-600">${props.siteDesignation}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Werelderfgoed WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Terpen (Friesland)
+        if (title === 'Terpen') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 100
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://geoportaal.fryslan.nl/arcgis/services/Themas/cultuurhistorie/MapServer/WMSServer?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=terpen3335&QUERY_LAYERS=terpen3335&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-orange-800">Terp</strong>`
+
+              if (props.naam || props.NAAM) {
+                html += `<br/><span class="text-sm font-semibold text-orange-700">${props.naam || props.NAAM}</span>`
+              }
+              if (props.plaats || props.PLAATS) {
+                html += `<br/><span class="text-xs text-gray-600">${props.plaats || props.PLAATS}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Terpen WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Religieus Erfgoed (RCE)
+        if (title === 'Religieus Erfgoed') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 50
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://services.rce.geovoorziening.nl/religieuserfgoed/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=religieuserfgoedpunt&QUERY_LAYERS=religieuserfgoedpunt&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-purple-800">Religieus Erfgoed</strong>`
+
+              if (props.naam) {
+                html += `<br/><span class="text-sm font-semibold text-purple-700">${props.naam}</span>`
+              }
+              if (props.denominatie) {
+                html += `<br/><span class="text-sm text-gray-700">${props.denominatie}</span>`
+              }
+              if (props.type) {
+                html += `<br/><span class="text-xs text-gray-600">${props.type}</span>`
+              }
+              if (props.bouwjaar) {
+                html += `<br/><span class="text-xs text-gray-500">Bouwjaar: ${props.bouwjaar}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Religieus Erfgoed WMS query failed:', error)
+          }
+          continue
+        }
+
+        // BRP Gewaspercelen
+        if (title === 'BRP Gewaspercelen') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 50
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://service.pdok.nl/rvo/brpgewaspercelen/wms/v1_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=BrpGewas&QUERY_LAYERS=BrpGewas&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-green-800">Landbouwperceel</strong>`
+
+              if (props.gewas || props.gewasnaam) {
+                html += `<br/><span class="text-sm font-semibold text-green-700">${props.gewas || props.gewasnaam}</span>`
+              }
+              if (props.categorie || props.category) {
+                html += `<br/><span class="text-xs text-gray-600">${props.categorie || props.category}</span>`
+              }
+              if (props.oppervlakte) {
+                html += `<br/><span class="text-xs text-gray-500">${props.oppervlakte} ha</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('BRP Gewaspercelen WMS query failed:', error)
+          }
+          continue
+        }
+
+        // Kadastrale Grenzen
+        if (title === 'Kadastrale Grenzen') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 20
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=Perceel&QUERY_LAYERS=Perceel&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-indigo-800">Kadastraal Perceel</strong>`
+
+              if (props.perceelNummer || props.perceelnummer) {
+                html += `<br/><span class="text-sm font-semibold text-indigo-700">${props.perceelNummer || props.perceelnummer}</span>`
+              }
+              if (props.kadastraleGemeenteCode || props.gemeentecode) {
+                html += `<br/><span class="text-xs text-gray-600">Gemeente: ${props.kadastraleGemeenteCode || props.gemeentecode}</span>`
+              }
+              if (props.sectie) {
+                html += `<br/><span class="text-xs text-gray-500">Sectie: ${props.sectie}</span>`
+              }
+              if (props.oppervlakte) {
+                html += `<br/><span class="text-xs text-gray-500">${props.oppervlakte} m²</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Kadastrale Grenzen WMS query failed:', error)
+          }
+          continue
+        }
+
         const url = source.getFeatureInfoUrl(
           coordinate,
           viewResolution,

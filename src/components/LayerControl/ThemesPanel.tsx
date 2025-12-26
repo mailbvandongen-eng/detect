@@ -64,6 +64,7 @@ export function ThemesPanel() {
               <LayerGroup title="Erfgoed & Monumenten" defaultExpanded={false}>
                 <LayerItem name="Rijksmonumenten" type="overlay" />
                 <LayerItem name="Werelderfgoed" type="overlay" />
+                <LayerItem name="Religieus Erfgoed" type="overlay" />
                 <LayerItem name="Kastelen" type="overlay" />
               </LayerGroup>
 
@@ -88,10 +89,6 @@ export function ThemesPanel() {
                 <LayerItem name="Paleokaart 9000 v.Chr." type="overlay" />
               </LayerGroup>
 
-              {/* Religieus erfgoed */}
-              <LayerGroup title="Religieus Erfgoed" defaultExpanded={false}>
-                <LayerItem name="Religieus Erfgoed" type="overlay" />
-              </LayerGroup>
 
               {/* Uiterwaarden Layers */}
               <LayerGroup title="Uiterwaarden (UIKAV)" defaultExpanded={false}>
@@ -106,7 +103,6 @@ export function ThemesPanel() {
               <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false}>
                 <LayerItem name="AHN4 Hillshade NL" type="overlay" />
                 <LayerItem name="AHN4 Multi-Hillshade NL" type="overlay" />
-                <LayerItem name="AHN4 Helling NL" type="overlay" />
                 <LayerItem name="AHN 0.5m" type="overlay" />
                 <LayerItem name="World Hillshade" type="overlay" />
               </LayerGroup>

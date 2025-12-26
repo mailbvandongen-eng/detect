@@ -213,14 +213,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: true
   },
-  'AHN4 Helling NL': {
-    name: 'AHN4 Helling NL',
-    factory: async () => {
-      const { createAHN4SlopeLayerOL } = await import('./hillshadeLayers')
-      return createAHN4SlopeLayerOL()
-    },
-    immediateLoad: true
-  },
   'World Hillshade': {
     name: 'World Hillshade',
     factory: async () => {
