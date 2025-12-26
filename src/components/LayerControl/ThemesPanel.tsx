@@ -64,6 +64,7 @@ export function ThemesPanel() {
               <LayerGroup title="Erfgoed & Monumenten" defaultExpanded={false}>
                 <LayerItem name="Rijksmonumenten" type="overlay" />
                 <LayerItem name="Werelderfgoed" type="overlay" />
+                <LayerItem name="Kastelen" type="overlay" />
               </LayerGroup>
 
               {/* WOII & Militair */}
@@ -133,7 +134,6 @@ export function ThemesPanel() {
 
               {/* Recreation */}
               <LayerGroup title="Recreatie" defaultExpanded={false}>
-                <LayerItem name="Kastelen" type="overlay" />
                 <LayerItem name="Parken" type="overlay" />
                 <LayerItem name="Speeltuinen" type="overlay" />
                 <LayerItem name="Musea" type="overlay" />
