@@ -248,6 +248,44 @@ export function Popup() {
           continue
         }
 
+        // Inundatiegebieden (RCE Linies en Stellingen)
+        if (title === 'Inundatiegebieden') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 100
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://services.rce.geovoorziening.nl/liniesenstellingen/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=inundaties&QUERY_LAYERS=inundaties&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-blue-800">Inundatiegebied</strong>`
+
+              if (props['linie-naam'] || props.linie_naam) {
+                html += `<br/><span class="text-sm font-semibold text-blue-700">${props['linie-naam'] || props.linie_naam}</span>`
+              }
+              if (props.naam) {
+                html += `<br/><span class="text-sm text-gray-700">${props.naam}</span>`
+              }
+              if (props.periode) {
+                html += `<br/><span class="text-xs text-gray-500">${props.periode}</span>`
+              }
+              if (props.lin_period) {
+                html += `<br/><span class="text-xs text-gray-400">${props.lin_period}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Inundatiegebieden WMS query failed:', error)
+          }
+          continue
+        }
+
         // Militaire Objecten (RCE Linies en Stellingen)
         if (title === 'Militaire Objecten') {
           try {
