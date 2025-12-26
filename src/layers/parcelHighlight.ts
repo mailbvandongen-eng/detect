@@ -91,11 +91,22 @@ export async function showParcelHeightMap(
       return false
     }
 
-    // Get extent for the AHN layer
+    // Get extent for zooming and buffering
     const extent = geometry.getExtent()
 
+    // Buffer the extent by 20% for better context
+    const width = extent[2] - extent[0]
+    const height = extent[3] - extent[1]
+    const buffer = Math.max(width, height) * 0.2
+    const bufferedExtent = [
+      extent[0] - buffer,
+      extent[1] - buffer,
+      extent[2] + buffer,
+      extent[3] + buffer
+    ]
+
     // Create AHN layer using Esri ArcGIS ImageServer with Hillshade rendering
-    // This provides visual relief shading instead of raw elevation values
+    // Shows the full hillshade layer - the parcel outline shows the boundaries
     ahnLayer = new ImageLayer({
       source: new ImageArcGISRest({
         url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_5m/ImageServer',
@@ -106,9 +117,8 @@ export async function showParcelHeightMap(
         },
         crossOrigin: 'anonymous'
       }),
-      extent: extent,
       zIndex: 998,
-      opacity: 0.85
+      opacity: 0.8
     })
 
     // Create vector layer with parcel outline on top
@@ -134,7 +144,13 @@ export async function showParcelHeightMap(
     map.addLayer(ahnLayer)
     map.addLayer(highlightLayer)
 
-    console.log('✅ Parcel height map displayed')
+    // Zoom to the parcel with some padding
+    map.getView().fit(bufferedExtent as [number, number, number, number], {
+      duration: 500,
+      maxZoom: 18
+    })
+
+    console.log('✅ Parcel height map displayed, zoomed to extent')
     return true
 
   } catch (error) {
