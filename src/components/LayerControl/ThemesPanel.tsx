@@ -56,7 +56,6 @@ export function ThemesPanel() {
               <LayerGroup title="Archeologische lagen" defaultExpanded={false}>
                 <LayerItem name="AMK Monumenten" type="overlay" />
                 <LayerItem name="Romeinse wegen" type="overlay" />
-                <LayerItem name="Kastelen" type="overlay" />
                 <LayerItem name="IKAW" type="overlay" />
                 <LayerItem name="Archeo Landschappen" type="overlay" />
               </LayerGroup>
@@ -134,6 +133,7 @@ export function ThemesPanel() {
 
               {/* Recreation */}
               <LayerGroup title="Recreatie" defaultExpanded={false}>
+                <LayerItem name="Kastelen" type="overlay" />
                 <LayerItem name="Parken" type="overlay" />
                 <LayerItem name="Speeltuinen" type="overlay" />
                 <LayerItem name="Musea" type="overlay" />
