@@ -248,6 +248,41 @@ export function Popup() {
           continue
         }
 
+        // Militaire Objecten (RCE Linies en Stellingen)
+        if (title === 'Militaire Objecten') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+            const buffer = 50
+            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+
+            const url = `https://services.rce.geovoorziening.nl/liniesenstellingen/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=objecten&QUERY_LAYERS=objecten&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const props = data.features[0].properties
+              let html = `<strong class="text-stone-800">Militair Object</strong>`
+
+              if (props.objectsoort) {
+                html += `<br/><span class="text-sm font-semibold text-stone-700">${props.objectsoort}</span>`
+              }
+              if (props.objectnaam) {
+                html += `<br/><span class="text-sm text-gray-700">${props.objectnaam}</span>`
+              }
+              if (props.periode) {
+                html += `<br/><span class="text-xs text-gray-500">${props.periode}</span>`
+              }
+
+              return html
+            }
+          } catch (error) {
+            console.warn('Militaire Objecten WMS query failed:', error)
+          }
+          continue
+        }
+
         const url = source.getFeatureInfoUrl(
           coordinate,
           viewResolution,
