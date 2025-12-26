@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import { fromLonLat } from 'ol/proj'
-import { useMapStore } from '../store'
+import { ScaleLine } from 'ol/control'
+import { useMapStore, useSettingsStore } from '../store'
 import type { MapViewOptions } from '../types/map'
 
 interface UseMapOptions {
@@ -12,7 +13,9 @@ interface UseMapOptions {
 
 export function useMap({ target, viewOptions }: UseMapOptions) {
   const mapRef = useRef<Map | null>(null)
+  const scaleLineRef = useRef<ScaleLine | null>(null)
   const setMap = useMapStore(state => state.setMap)
+  const showScaleBar = useSettingsStore(state => state.showScaleBar)
 
   useEffect(() => {
     // Create map only once
@@ -54,6 +57,31 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
       }
     }
   }, [target, viewOptions, setMap])
+
+  // Handle ScaleLine control based on settings
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    if (showScaleBar) {
+      // Add ScaleLine if not already added
+      if (!scaleLineRef.current) {
+        scaleLineRef.current = new ScaleLine({
+          units: 'metric',
+          bar: false,
+          text: true,
+          minWidth: 80
+        })
+        map.addControl(scaleLineRef.current)
+      }
+    } else {
+      // Remove ScaleLine if present
+      if (scaleLineRef.current) {
+        map.removeControl(scaleLineRef.current)
+        scaleLineRef.current = null
+      }
+    }
+  }, [showScaleBar])
 
   return mapRef.current
 }

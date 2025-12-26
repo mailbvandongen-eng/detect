@@ -3,16 +3,28 @@ import 'ol/ol.css'
 import { Tile as TileLayer } from 'ol/layer'
 import { OSM, XYZ } from 'ol/source'
 import { useMap } from '../../hooks/useMap'
-import { useLayerStore, useMapStore } from '../../store'
+import { useLayerStore, useMapStore, useSettingsStore } from '../../store'
 import { useNavigationStore } from '../../store/navigationStore'
 import { layerRegistry, getImmediateLoadLayers } from '../../layers/layerRegistry'
 
+// Base layer names
+const BASE_LAYERS = [
+  'CartoDB (licht)',
+  'OpenStreetMap',
+  'Luchtfoto',
+  'TMK 1850',
+  'Bonnebladen 1900'
+]
+
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const initialBgApplied = useRef(false)
   useMap({ target: 'map' }) // Initialize map
   const map = useMapStore(state => state.map) // Get reactive map from store
   const registerLayer = useLayerStore(state => state.registerLayer)
+  const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
   const isNavigating = useNavigationStore(state => state.isNavigating)
+  const defaultBackground = useSettingsStore(state => state.defaultBackground)
 
   useEffect(() => {
     if (!map) {
@@ -35,25 +47,6 @@ export function MapContainer() {
       source: new XYZ({
         url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
         attributions: '© OpenStreetMap contributors © CARTO'
-      })
-    })
-
-    const cartoDBDarkLayer = new TileLayer({
-      properties: { title: 'CartoDB (donker)', type: 'base' },
-      visible: false,
-      source: new XYZ({
-        url: 'https://{a-d}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-        attributions: '© OpenStreetMap contributors © CARTO'
-      })
-    })
-
-    const openTopoMapLayer = new TileLayer({
-      properties: { title: 'OpenTopoMap', type: 'base' },
-      visible: false,
-      source: new XYZ({
-        url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png',
-        attributions: '© OpenTopoMap (CC-BY-SA)',
-        maxZoom: 17
       })
     })
 
@@ -107,8 +100,6 @@ export function MapContainer() {
     // Add base layers to map
     map.addLayer(osmLayer)
     map.addLayer(cartoDBLayer)
-    map.addLayer(cartoDBDarkLayer)
-    map.addLayer(openTopoMapLayer)
     map.addLayer(satelliteLayer)
     map.addLayer(labelsLayer) // Labels overlay for hybrid map
     map.addLayer(tmk1850Layer)
@@ -122,8 +113,6 @@ export function MapContainer() {
     // Register base layers in store
     registerLayer('OpenStreetMap', osmLayer)
     registerLayer('CartoDB (licht)', cartoDBLayer)
-    registerLayer('CartoDB (donker)', cartoDBDarkLayer)
-    registerLayer('OpenTopoMap', openTopoMapLayer)
     registerLayer('Luchtfoto', satelliteLayer)
     registerLayer('Labels Overlay', labelsLayer)
     registerLayer('TMK 1850', tmk1850Layer)
@@ -181,6 +170,23 @@ export function MapContainer() {
     console.log(`📊 Total layers on map: ${map.getLayers().getLength()}`)
     console.log('💤 Vector layers will load on first toggle (lazy loading enabled)')
   }
+
+  // Apply default background setting on first load
+  useEffect(() => {
+    if (!map || initialBgApplied.current) return
+
+    // Wait a tick for layers to be registered
+    const timer = setTimeout(() => {
+      // Turn off all base layers, then turn on the default
+      BASE_LAYERS.forEach(layer => {
+        setLayerVisibility(layer, layer === defaultBackground)
+      })
+      initialBgApplied.current = true
+      console.log(`🗺️ Default background: ${defaultBackground}`)
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [map, defaultBackground, setLayerVisibility])
 
   // 3D tilt effect during navigation (Google Maps style)
   const mapStyle: React.CSSProperties = {

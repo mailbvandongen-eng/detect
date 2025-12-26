@@ -96,7 +96,7 @@ export function OpacitySliders() {
                         onChange={(e) => setLayerOpacity(layer.name, parseInt(e.target.value) / 100)}
                         className={`flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer ${COLOR_CLASSES[layer.color]}`}
                       />
-                      <span className="text-xs text-gray-500 w-8 text-right">
+                      <span className="text-xs text-gray-500 w-8 text-right select-none pointer-events-none">
                         {Math.round(opacity * 100)}%
                       </span>
                     </div>

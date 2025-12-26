@@ -239,10 +239,10 @@ export function createWerelderfgoedLayerOL() {
 // Percelen - Kadaster & Landbouw
 // ============================================
 
-// BRP Gewaspercelen - 700.000 landbouwpercelen met gewastype
-export function createBRPGewaspercelenLayerOL() {
+// Gewaspercelen (BRP) - 700.000 landbouwpercelen met gewastype
+export function createGewaspercelenLayerOL() {
   const layer = new TileLayer({
-    properties: { title: 'BRP Gewaspercelen', type: 'wms' },
+    properties: { title: 'Gewaspercelen', type: 'wms' },
     visible: false,
     opacity: 0.6,
     source: new TileWMS({

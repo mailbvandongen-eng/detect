@@ -1,11 +1,23 @@
-import { X, Settings, Globe, Palette, Ruler, Map, Navigation, Eye, Smartphone } from 'lucide-react'
+import { useState } from 'react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useUIStore, useSettingsStore } from '../../store'
-import type { Language, ColorScheme, Units, DefaultBackground } from '../../store/settingsStore'
+import { useUIStore, useSettingsStore, usePresetStore } from '../../store'
+import type { DefaultBackground } from '../../store/settingsStore'
 
 export function SettingsPanel() {
   const { settingsPanelOpen, toggleSettingsPanel } = useUIStore()
   const settings = useSettingsStore()
+  const { presets, createPreset, deletePreset } = usePresetStore()
+  const [newPresetName, setNewPresetName] = useState('')
+  const [showNewPresetInput, setShowNewPresetInput] = useState(false)
+
+  const handleCreatePreset = () => {
+    if (newPresetName.trim()) {
+      createPreset(newPresetName.trim(), 'Layers')
+      setNewPresetName('')
+      setShowNewPresetInput(false)
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -43,38 +55,6 @@ export function SettingsPanel() {
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 space-y-5">
-              {/* Algemeen */}
-              <Section title="Algemeen" icon={<Globe size={16} />}>
-                <OptionRow label="Taal">
-                  <div className="flex gap-1">
-                    <OptionButton
-                      active={settings.language === 'nl'}
-                      onClick={() => settings.setLanguage('nl')}
-                      label="NL"
-                    />
-                    <OptionButton
-                      active={settings.language === 'en'}
-                      onClick={() => settings.setLanguage('en')}
-                      label="EN"
-                    />
-                  </div>
-                </OptionRow>
-                <OptionRow label="Eenheden">
-                  <div className="flex gap-1">
-                    <OptionButton
-                      active={settings.units === 'metric'}
-                      onClick={() => settings.setUnits('metric')}
-                      label="km"
-                    />
-                    <OptionButton
-                      active={settings.units === 'imperial'}
-                      onClick={() => settings.setUnits('imperial')}
-                      label="mi"
-                    />
-                  </div>
-                </OptionRow>
-              </Section>
-
               {/* Kaart */}
               <Section title="Kaart" icon={<Map size={16} />}>
                 <OptionRow label="Standaard achtergrond">
@@ -84,16 +64,10 @@ export function SettingsPanel() {
                     className="px-2 py-1 text-sm bg-gray-100 rounded border-0 outline-none"
                   >
                     <option value="CartoDB (licht)">Licht</option>
-                    <option value="CartoDB (donker)">Donker</option>
+                    <option value="OpenStreetMap">OSM</option>
                     <option value="Luchtfoto">Luchtfoto</option>
-                    <option value="OpenTopoMap">Topo</option>
                   </select>
                 </OptionRow>
-                <ToggleRow
-                  label="Onthoud locatie"
-                  checked={settings.rememberLastLocation}
-                  onChange={settings.setRememberLastLocation}
-                />
                 <ToggleRow
                   label="Schaalbalk tonen"
                   checked={settings.showScaleBar}
@@ -120,20 +94,6 @@ export function SettingsPanel() {
                 />
               </Section>
 
-              {/* Weergave */}
-              <Section title="Weergave" icon={<Eye size={16} />}>
-                <ToggleRow
-                  label="Marker clustering"
-                  checked={settings.markerClustering}
-                  onChange={settings.setMarkerClustering}
-                />
-                <ToggleRow
-                  label="Coordinaten tonen"
-                  checked={settings.showCoordinates}
-                  onChange={settings.setShowCoordinates}
-                />
-              </Section>
-
               {/* Feedback */}
               <Section title="Feedback" icon={<Smartphone size={16} />}>
                 <ToggleRow
@@ -141,6 +101,66 @@ export function SettingsPanel() {
                   checked={settings.hapticFeedback}
                   onChange={settings.setHapticFeedback}
                 />
+              </Section>
+
+              {/* Presets */}
+              <Section title="Presets" icon={<Layers size={16} />}>
+                <div className="space-y-2">
+                  {presets.map(preset => (
+                    <div key={preset.id} className="flex items-center justify-between py-1">
+                      <span className="text-sm text-gray-600">
+                        {preset.name}
+                        {preset.isBuiltIn && (
+                          <span className="ml-1 text-[10px] text-gray-400">(standaard)</span>
+                        )}
+                      </span>
+                      {!preset.isBuiltIn && (
+                        <button
+                          onClick={() => deletePreset(preset.id)}
+                          className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors border-0 outline-none"
+                          title="Verwijderen"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* New preset input */}
+                  {showNewPresetInput ? (
+                    <div className="flex gap-2 mt-2">
+                      <input
+                        type="text"
+                        value={newPresetName}
+                        onChange={(e) => setNewPresetName(e.target.value)}
+                        placeholder="Naam nieuwe preset"
+                        className="flex-1 px-2 py-1 text-sm bg-gray-100 rounded border-0 outline-none"
+                        onKeyDown={(e) => e.key === 'Enter' && handleCreatePreset()}
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleCreatePreset}
+                        className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors border-0 outline-none"
+                      >
+                        Opslaan
+                      </button>
+                      <button
+                        onClick={() => setShowNewPresetInput(false)}
+                        className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors border-0 outline-none"
+                      >
+                        Annuleren
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowNewPresetInput(true)}
+                      className="flex items-center gap-2 mt-2 px-2 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none w-full"
+                    >
+                      <Plus size={14} />
+                      <span>Huidige lagen als preset opslaan</span>
+                    </button>
+                  )}
+                </div>
               </Section>
             </div>
 
@@ -201,18 +221,3 @@ function ToggleRow({ label, checked, onChange }: { label: string; checked: boole
   )
 }
 
-// Option button
-function OptionButton({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-2.5 py-1 rounded text-xs border-0 outline-none transition-colors ${
-        active
-          ? 'bg-blue-500 text-white'
-          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-      }`}
-    >
-      {label}
-    </button>
-  )
-}

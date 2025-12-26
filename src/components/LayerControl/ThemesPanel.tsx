@@ -10,32 +10,39 @@ export function ThemesPanel() {
   return (
     <AnimatePresence>
       {themesPanelOpen && (
-        <motion.div
-          className="fixed top-2.5 right-2.5 z-[999] bg-white rounded-lg shadow-lg overflow-hidden w-[240px] max-h-[calc(100vh-200px)] flex flex-col"
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 10 }}
-          transition={{ duration: 0.15 }}
-        >
-          <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-            <div className="flex items-center gap-2">
-              <Layers size={14} />
-              <span className="font-medium text-sm">Kaartlagen</span>
+        <>
+          {/* Invisible backdrop - click to close */}
+          <motion.div
+            className="fixed inset-0 z-[998]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={toggleThemesPanel}
+          />
+          <motion.div
+            className="fixed top-2.5 right-2.5 z-[999] bg-white rounded-lg shadow-lg overflow-hidden w-[240px] max-h-[calc(100vh-200px)] flex flex-col"
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            transition={{ duration: 0.15 }}
+          >
+            <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+              <div className="flex items-center gap-2">
+                <Layers size={14} />
+                <span className="font-medium text-sm">Kaartlagen</span>
+              </div>
+              <button
+                onClick={toggleThemesPanel}
+                className="p-0.5 rounded border-0 outline-none hover:bg-white/20 transition-colors"
+              >
+                <X size={16} />
+              </button>
             </div>
-            <button
-              onClick={toggleThemesPanel}
-              className="p-0.5 rounded border-0 outline-none hover:bg-white/20 transition-colors"
-            >
-              <X size={16} />
-            </button>
-          </div>
           <div className="p-2 overflow-y-auto flex-1">
             {/* Achtergronden */}
             <LayerGroup title="Achtergronden" defaultExpanded={true}>
               <LayerItem name="CartoDB (licht)" type="base" />
-              <LayerItem name="CartoDB (donker)" type="base" />
               <LayerItem name="OpenStreetMap" type="base" />
-              <LayerItem name="OpenTopoMap" type="base" />
               <LayerItem name="Luchtfoto" type="base" />
               <LayerItem name="Labels Overlay" type="overlay" />
               <LayerItem name="TMK 1850" type="base" />
@@ -116,7 +123,7 @@ export function ThemesPanel() {
 
               {/* Percelen - Kadaster & Landbouw */}
               <LayerGroup title="Percelen" defaultExpanded={false}>
-                <LayerItem name="BRP Gewaspercelen" type="overlay" />
+                <LayerItem name="Gewaspercelen" type="overlay" />
                 <LayerItem name="Kadastrale Grenzen" type="overlay" />
               </LayerGroup>
 
@@ -161,6 +168,7 @@ export function ThemesPanel() {
             </LayerGroup>
           </div>
         </motion.div>
+        </>
       )}
     </AnimatePresence>
   )

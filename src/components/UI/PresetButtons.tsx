@@ -1,120 +1,59 @@
-import { useState } from 'react'
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Settings } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Settings, Grid3X3, LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLayerStore, useGPSStore, useUIStore } from '../../store'
+import { useLayerStore, useGPSStore, useUIStore, usePresetStore } from '../../store'
 
-// Layer presets - NL only
-// Detectie preset with specific opacities
-const DETECTIE_PRESET = {
-  layers: ['AHN4 Multi-Hillshade NL', 'AHN 0.5m', 'Geomorfologie', 'AMK Monumenten'],
-  opacities: {
-    'AHN4 Multi-Hillshade NL': 0.56,
-    'AHN 0.5m': 0.60,
-    'Geomorfologie': 0.69,
-    'AMK Monumenten': 0.40
-  }
+// Icon mapping for dynamic icon rendering
+const ICON_MAP: Record<string, LucideIcon> = {
+  Compass,
+  TreePalm,
+  Mountain,
+  Waves,
+  Search,
+  Target,
+  Layers,
+  Grid: Grid3X3
 }
 
-const RECREATIE_LAYERS = [
-  'Parken',
-  'Speeltuinen',
-  'Strandjes'
-]
+// Icon color mapping
+const ICON_COLORS: Record<string, string> = {
+  Compass: 'text-purple-600',
+  Waves: 'text-cyan-600',
+  TreePalm: 'text-green-600',
+  Mountain: 'text-stone-600',
+  Search: 'text-amber-600',
+  Target: 'text-red-600',
+  Layers: 'text-blue-600',
+  Grid: 'text-lime-600'
+}
 
-const UITERWAARDEN_LAYERS = [
-  'UIKAV Punten',
-  'UIKAV Vlakken',
-  'UIKAV Expert',
-  'UIKAV Buffer',
-  'UIKAV Indeling'
-]
+const HOVER_COLORS: Record<string, string> = {
+  Compass: 'hover:bg-purple-50',
+  Waves: 'hover:bg-cyan-50',
+  TreePalm: 'hover:bg-green-50',
+  Mountain: 'hover:bg-stone-50',
+  Search: 'hover:bg-amber-50',
+  Target: 'hover:bg-red-50',
+  Layers: 'hover:bg-blue-50',
+  Grid: 'hover:bg-lime-50'
+}
 
-const HILLSHADE_LAYERS = [
-  'AHN 0.5m',
-  'Geomorfologie',
-  'AHN4 Multi-Hillshade NL'
-]
-
-const ANALYSE_LAYERS = [
-  'IKAW',
-  'Geomorfologie',
-  'Bodemkaart',
-  'AHN4 Multi-Hillshade NL',
-  'AMK Monumenten'
-]
-
-const WOII_LAYERS = [
-  'WWII Bunkers',
-  'Slagvelden',
-  'Militaire Vliegvelden',
-  'Verdedigingslinies',
-  'Militaire Objecten'
-]
-
-// All overlay layers - NL only
+// All overlay layers for reset
 const ALL_OVERLAYS = [
-  // Labels overlay (for hybrid map)
   'Labels Overlay',
-  // Steentijd layers
-  'Hunebedden',
-  'FAMKE Steentijd',
-  'Grafheuvels',
-  'Terpen',
-  // Archaeological layers
-  'AMK Monumenten',
-  'Romeinse wegen',
-  'Kastelen',
-  'IKAW',
-  'Archeo Landschappen',
-  // Erfgoed & Monumenten
-  'Rijksmonumenten',
-  'Werelderfgoed',
-  // WOII & Militair
-  'WWII Bunkers',
-  'Slagvelden',
-  'Militaire Vliegvelden',
-  // Verdedigingswerken
-  'Verdedigingslinies',
-  'Inundatiegebieden',
-  'Militaire Objecten',
-  // Paleokaarten
-  'Paleokaart 800 n.Chr.',
-  'Paleokaart 100 n.Chr.',
-  'Paleokaart 500 v.Chr.',
-  'Paleokaart 1500 v.Chr.',
-  'Paleokaart 2750 v.Chr.',
-  'Paleokaart 5500 v.Chr.',
-  'Paleokaart 9000 v.Chr.',
-  // Religieus erfgoed
+  'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
+  'AMK Monumenten', 'Romeinse wegen', 'Kastelen', 'IKAW', 'Archeo Landschappen',
+  'Rijksmonumenten', 'Werelderfgoed',
+  'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
+  'Verdedigingslinies', 'Inundatiegebieden', 'Militaire Objecten',
+  'Paleokaart 800 n.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 500 v.Chr.',
+  'Paleokaart 1500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 9000 v.Chr.',
   'Religieus Erfgoed',
-  // UIKAV layers
-  'UIKAV Punten',
-  'UIKAV Vlakken',
-  'UIKAV Expert',
-  'UIKAV Buffer',
-  'UIKAV Indeling',
-  // Terrain layers
-  'Veengebieden',
-  'AHN 0.5m',
-  'Geomorfologie',
-  'Bodemkaart',
-  // Hillshade layers NL
-  'AHN4 Hillshade NL',
-  'AHN4 Multi-Hillshade NL',
-  'World Hillshade',
-  // Fossil layers
-  'Fossielen Nederland',
-  'Fossielen België',
-  'Fossielen Duitsland',
-  'Fossielen Frankrijk',
-  // Recreation layers
-  'Parken',
-  'Speeltuinen',
-  'Musea',
-  'Strandjes',
-  // Percelen
-  'BRP Gewaspercelen',
-  'Kadastrale Grenzen'
+  'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling',
+  'Veengebieden', 'AHN 0.5m', 'Geomorfologie', 'Bodemkaart',
+  'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'World Hillshade',
+  'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
+  'Parken', 'Speeltuinen', 'Musea', 'Strandjes',
+  'Gewaspercelen', 'Kadastrale Grenzen'
 ]
 
 // Base layers
@@ -127,13 +66,15 @@ const BASE_LAYERS = [
 ]
 
 export function PresetButtons() {
-  const [isOpen, setIsOpen] = useState(false)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
-  const setLayerOpacity = useLayerStore(state => state.setLayerOpacity)
   const stopTracking = useGPSStore(state => state.stopTracking)
-  const toggleSettingsPanel = useUIStore(state => state.toggleSettingsPanel)
+  const { presetsPanelOpen, togglePresetsPanel, toggleSettingsPanel, closeAllPanels } = useUIStore()
+  const { presets, applyPreset } = usePresetStore()
 
   const resetAll = () => {
+    // Close any open panels
+    closeAllPanels()
+
     // Turn off all overlay layers
     ALL_OVERLAYS.forEach(layer => setLayerVisibility(layer, false))
 
@@ -148,25 +89,9 @@ export function PresetButtons() {
     console.log('🔄 Reset: CartoDB (licht), alle lagen uit, GPS uit')
   }
 
-  const applyPreset = (layers: string[]) => {
-    // First clear all overlays
-    ALL_OVERLAYS.forEach(layer => setLayerVisibility(layer, false))
-    // Then enable preset layers
-    layers.forEach(layer => setLayerVisibility(layer, true))
-    setIsOpen(false)
-  }
-
-  const applyDetectiePreset = () => {
-    // First clear all overlays
-    ALL_OVERLAYS.forEach(layer => setLayerVisibility(layer, false))
-    // Enable layers and set opacities
-    DETECTIE_PRESET.layers.forEach(layer => {
-      setLayerVisibility(layer, true)
-      if (DETECTIE_PRESET.opacities[layer]) {
-        setLayerOpacity(layer, DETECTIE_PRESET.opacities[layer])
-      }
-    })
-    setIsOpen(false)
+  const handleApplyPreset = (id: string) => {
+    applyPreset(id)
+    closeAllPanels()
   }
 
   return (
@@ -174,11 +99,11 @@ export function PresetButtons() {
       {/* Stacked vertically: preset on top, reset below */}
       <div className="flex flex-col gap-2">
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={togglePresetsPanel}
           className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
           title="Presets"
         >
-          {isOpen ? (
+          {presetsPanelOpen ? (
             <ChevronUp size={22} className="text-blue-600" />
           ) : (
             <Layers size={22} className="text-blue-600" />
@@ -202,62 +127,49 @@ export function PresetButtons() {
 
       {/* Expanded: preset options */}
       <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="absolute bottom-0 left-14 bg-white/95 rounded-xl shadow-lg overflow-hidden min-w-[140px] backdrop-blur-sm"
-          >
-            <div className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-medium">
-              Presets
-            </div>
-            <div className="p-2">
-            <button
-              onClick={applyDetectiePreset}
-              className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-purple-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
+        {presetsPanelOpen && (
+          <>
+            {/* Invisible backdrop - click to close */}
+            <motion.div
+              className="fixed inset-0 z-[-1]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={togglePresetsPanel}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-0 left-14 bg-white/95 rounded-xl shadow-lg overflow-hidden min-w-[140px] backdrop-blur-sm"
             >
-              <Compass size={14} className="text-purple-600" />
-              <span className="text-xs text-gray-700">Detectie</span>
-            </button>
-            <button
-              onClick={() => applyPreset(UITERWAARDEN_LAYERS)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-cyan-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
-            >
-              <Waves size={14} className="text-cyan-600" />
-              <span className="text-xs text-gray-700">Uiterwaarden</span>
-            </button>
-            <button
-              onClick={() => applyPreset(RECREATIE_LAYERS)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-green-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
-            >
-              <TreePalm size={14} className="text-green-600" />
-              <span className="text-xs text-gray-700">Recreatie</span>
-            </button>
-            <button
-              onClick={() => applyPreset(HILLSHADE_LAYERS)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-stone-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
-            >
-              <Mountain size={14} className="text-stone-600" />
-              <span className="text-xs text-gray-700">Hillshade</span>
-            </button>
-            <button
-              onClick={() => applyPreset(ANALYSE_LAYERS)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-amber-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
-            >
-              <Search size={14} className="text-amber-600" />
-              <span className="text-xs text-gray-700">Analyse</span>
-            </button>
-            <button
-              onClick={() => applyPreset(WOII_LAYERS)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-red-50 rounded text-left transition-colors border-0 outline-none bg-transparent"
-            >
-              <Target size={14} className="text-red-600" />
-              <span className="text-xs text-gray-700">WOII</span>
-            </button>
-            </div>
-          </motion.div>
+              <div className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-medium">
+                Presets
+              </div>
+              <div className="p-2">
+                {presets.map(preset => {
+                  const IconComponent = ICON_MAP[preset.icon] || Layers
+                  const iconColor = ICON_COLORS[preset.icon] || 'text-blue-600'
+                  const hoverColor = HOVER_COLORS[preset.icon] || 'hover:bg-blue-50'
+
+                  return (
+                    <button
+                      key={preset.id}
+                      onClick={() => handleApplyPreset(preset.id)}
+                      className={`w-full flex items-center gap-2 px-2 py-1.5 ${hoverColor} rounded text-left transition-colors border-0 outline-none bg-transparent`}
+                    >
+                      <IconComponent size={14} className={iconColor} />
+                      <span className="text-xs text-gray-700">{preset.name}</span>
+                      {!preset.isBuiltIn && (
+                        <span className="ml-auto text-[10px] text-gray-400">custom</span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>

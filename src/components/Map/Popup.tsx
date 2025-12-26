@@ -4,8 +4,9 @@ import TileWMS from 'ol/source/TileWMS'
 import TileLayer from 'ol/layer/Tile'
 import { toLonLat } from 'ol/proj'
 import proj4 from 'proj4'
-import { X } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Mountain, Loader2 } from 'lucide-react'
 import { useMapStore } from '../../store'
+import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
 import type { MapBrowserEvent } from 'ol'
 
 // Register RD New projection
@@ -58,8 +59,62 @@ const IKAW_VALUES: Record<number, string> = {
 
 export function Popup() {
   const map = useMapStore(state => state.map)
-  const [content, setContent] = useState<string>('')
+  const [allContents, setAllContents] = useState<string[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
   const [visible, setVisible] = useState(false)
+  const [parcelCoordinate, setParcelCoordinate] = useState<number[] | null>(null)
+  const [showingHeightMap, setShowingHeightMap] = useState(false)
+  const [loadingHeightMap, setLoadingHeightMap] = useState(false)
+
+  // Current content based on index
+  const content = allContents[currentIndex] || ''
+  const hasMultiple = allContents.length > 1
+
+  // Extract title from content (first <strong> tag) and remove it from content
+  const extractTitleAndContent = (html: string): { title: string; contentWithoutTitle: string } => {
+    const match = html.match(/<strong[^>]*>(.*?)<\/strong>/)
+    if (match) {
+      const title = match[1].replace(/<[^>]+>/g, '') // Strip any inner tags
+      const contentWithoutTitle = html.replace(match[0], '').replace(/^(<br\s*\/?>)+/, '') // Remove title and leading <br>
+      return { title, contentWithoutTitle }
+    }
+    return { title: '', contentWithoutTitle: html }
+  }
+
+  const { title: extractedTitle, contentWithoutTitle } = extractTitleAndContent(content)
+
+  // Check if current content is a parcel
+  const isParcel = content.includes('Landbouwperceel')
+
+  const goToPrevious = () => {
+    setCurrentIndex(i => (i - 1 + allContents.length) % allContents.length)
+  }
+
+  const goToNext = () => {
+    setCurrentIndex(i => (i + 1) % allContents.length)
+  }
+
+  const handleShowHeightMap = async () => {
+    if (!map || !parcelCoordinate || loadingHeightMap) return
+    setLoadingHeightMap(true)
+    try {
+      const success = await showParcelHeightMap(map, parcelCoordinate)
+      if (success) {
+        setShowingHeightMap(true)
+      }
+    } catch (error) {
+      console.error('Failed to load height map:', error)
+    } finally {
+      setLoadingHeightMap(false)
+    }
+  }
+
+  const handleHideHeightMap = () => {
+    if (map) {
+      clearParcelHighlight(map)
+      setShowingHeightMap(false)
+    }
+  }
 
   useEffect(() => {
     if (!map) return
@@ -86,8 +141,9 @@ export function Popup() {
       return html
     }
 
-    // Query WMS layers for feature info
-    const queryWMSLayers = async (coordinate: number[], viewResolution: number) => {
+    // Query WMS layers for feature info - returns array of all results
+    const queryWMSLayers = async (coordinate: number[], viewResolution: number): Promise<string[]> => {
+      const results: string[] = []
       const wmsLayers = map.getLayers().getArray().filter(layer => {
         if (layer instanceof TileLayer && layer.getVisible()) {
           const source = layer.getSource()
@@ -124,7 +180,7 @@ export function Popup() {
               if (props.omschrijving) {
                 html += `<br/><span class="text-xs text-gray-600">${props.omschrijving}</span>`
               }
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Archeo Landschappen WMS query failed:', error)
@@ -151,7 +207,7 @@ export function Popup() {
               if (props.advies || props.Advies) {
                 html += `<br/><span class="text-sm text-amber-700">${props.advies || props.Advies}</span>`
               }
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('FAMKE WMS query failed:', error)
@@ -211,7 +267,7 @@ export function Popup() {
                 }
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Archeo Onderzoeken WMS query failed:', error)
@@ -240,7 +296,7 @@ export function Popup() {
               let html = `<strong class="text-orange-800">IKAW (2008)</strong>`
               html += `<br/><span class="text-sm text-orange-700">${label}</span>`
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('IKAW WMS query failed:', error)
@@ -278,7 +334,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-400">${props.lin_period}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Inundatiegebieden WMS query failed:', error)
@@ -313,7 +369,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-500">${props.lin_period}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Militaire Objecten WMS query failed:', error)
@@ -348,7 +404,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-400">${props.status}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Verdedigingslinies WMS query failed:', error)
@@ -389,7 +445,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-500">Bouwjaar: ${props.bouwjaar || props.oorspronkelijkebouwjaar}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Rijksmonumenten WMS query failed:', error)
@@ -421,7 +477,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-600">${props.siteDesignation}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Werelderfgoed WMS query failed:', error)
@@ -453,7 +509,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-600">${props.plaats || props.PLAATS}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Terpen WMS query failed:', error)
@@ -461,7 +517,7 @@ export function Popup() {
           continue
         }
 
-        // Religieus Erfgoed (RCE)
+        // Religieus Erfgoed (RCE Landschapsatlas)
         if (title === 'Religieus Erfgoed') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -469,7 +525,8 @@ export function Popup() {
             const buffer = 50
             const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
 
-            const url = `https://services.rce.geovoorziening.nl/religieuserfgoed/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=religieuserfgoedpunt&QUERY_LAYERS=religieuserfgoedpunt&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+            // Correct WMS URL matching the layer definition
+            const url = `https://services.rce.geovoorziening.nl/landschapsatlas_view/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=religieuserfgoed&QUERY_LAYERS=religieuserfgoed&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
 
             const response = await fetch(url)
             const data = await response.json()
@@ -478,20 +535,29 @@ export function Popup() {
               const props = data.features[0].properties
               let html = `<strong class="text-purple-800">Religieus Erfgoed</strong>`
 
-              if (props.naam) {
-                html += `<br/><span class="text-sm font-semibold text-purple-700">${props.naam}</span>`
+              // Handle various field name variations
+              const naam = props.naam || props.NAAM || props.name || props.NAME
+              if (naam) {
+                html += `<br/><span class="text-sm font-semibold text-purple-700">${naam}</span>`
               }
-              if (props.denominatie) {
-                html += `<br/><span class="text-sm text-gray-700">${props.denominatie}</span>`
+              const denominatie = props.denominatie || props.DENOMINATIE || props.religie
+              if (denominatie) {
+                html += `<br/><span class="text-sm text-gray-700">${denominatie}</span>`
               }
-              if (props.type) {
-                html += `<br/><span class="text-xs text-gray-600">${props.type}</span>`
+              const type = props.type || props.TYPE || props.functie
+              if (type) {
+                html += `<br/><span class="text-xs text-gray-600">${type}</span>`
               }
-              if (props.bouwjaar) {
-                html += `<br/><span class="text-xs text-gray-500">Bouwjaar: ${props.bouwjaar}</span>`
+              const bouwjaar = props.bouwjaar || props.BOUWJAAR || props.jaar
+              if (bouwjaar) {
+                html += `<br/><span class="text-xs text-gray-500">Bouwjaar: ${bouwjaar}</span>`
+              }
+              const gemeente = props.gemeente || props.GEMEENTE || props.plaats
+              if (gemeente) {
+                html += `<br/><span class="text-xs text-gray-400">${gemeente}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Religieus Erfgoed WMS query failed:', error)
@@ -499,8 +565,8 @@ export function Popup() {
           continue
         }
 
-        // BRP Gewaspercelen
-        if (title === 'BRP Gewaspercelen') {
+        // Gewaspercelen (BRP)
+        if (title === 'Gewaspercelen') {
           try {
             const lonLat = toLonLat(coordinate)
             const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
@@ -526,7 +592,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-500">${props.oppervlakte} ha</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('BRP Gewaspercelen WMS query failed:', error)
@@ -564,7 +630,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-500">${props.oppervlakte} m²</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Kadastrale Grenzen WMS query failed:', error)
@@ -604,7 +670,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-400">${props.bron || props.BRON}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Scheepswrakken WMS query failed:', error)
@@ -636,7 +702,7 @@ export function Popup() {
                 html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Woonheuvels WMS query failed:', error)
@@ -671,7 +737,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-500">${props.periode || props.PERIODE}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Romeinse Forten WMS query failed:', error)
@@ -706,7 +772,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-500">Bouwjaar: ${props.bouwjaar || props.BOUWJAAR}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Windmolens WMS query failed:', error)
@@ -741,7 +807,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-500">${props.omschrijving || props.OMSCHRIJVING}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Erfgoedlijnen WMS query failed:', error)
@@ -776,7 +842,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-500">${props.periode || props.PERIODE}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Oude Kernen WMS query failed:', error)
@@ -822,7 +888,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-400">Streek: ${props.streek}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Relictenkaart Punten WMS query failed:', error)
@@ -858,7 +924,7 @@ export function Popup() {
               let html = `<strong class="text-teal-800">Lijnrelict</strong>`
               html += `<br/><span class="text-sm font-semibold text-teal-700">${klasseName}</span>`
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Relictenkaart Lijnen WMS query failed:', error)
@@ -900,7 +966,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-500">${ha} ha</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Relictenkaart Vlakken WMS query failed:', error)
@@ -938,7 +1004,7 @@ export function Popup() {
                 html += `<br/><span class="text-xs text-gray-400">${props.bron || props.BRON}</span>`
               }
 
-              return html
+              results.push(html)
             }
           } catch (error) {
             console.warn('Verdronken Dorpen WMS query failed:', error)
@@ -962,6 +1028,84 @@ export function Popup() {
           if (data.features && data.features.length > 0) {
             const props = data.features[0].properties
 
+            // AHN 0.5m specific handling - show height in meters NAP
+            if (title === 'AHN 0.5m') {
+              console.log('📏 AHN props:', props) // DEBUG
+              let html = `<strong class="text-blue-800">AHN Hoogtekaart</strong>`
+
+              // Try various property name patterns for height value
+              const height = props.GRAY_INDEX ?? props.value ?? props.gray_index ??
+                             props.dtm_05m ?? props.DTM_05M ?? props.hoogte ?? props.HOOGTE ??
+                             props.elevation ?? props.ELEVATION
+
+              if (height !== undefined && height !== null && !isNaN(Number(height))) {
+                const heightValue = typeof height === 'number' ? height.toFixed(2) : Number(height).toFixed(2)
+                html += `<br/><span class="text-sm text-blue-700">Hoogte: ${heightValue} m NAP</span>`
+                results.push(html)
+              } else {
+                // Fallback: show all properties
+                let hasContent = false
+                const skipKeys = ['geometry', 'id', 'fid', 'gml_id', 'bbox']
+                for (const [key, value] of Object.entries(props)) {
+                  if (!skipKeys.includes(key.toLowerCase()) && value !== null && value !== '') {
+                    html += `<br/><span class="text-xs text-gray-600">${key}: ${value}</span>`
+                    hasContent = true
+                  }
+                }
+                if (hasContent) {
+                  results.push(html)
+                }
+              }
+              continue
+            }
+
+            // Geomorfologie specific handling - clean output
+            if (title === 'Geomorfologie') {
+              console.log('🏔️ Geomorfologie props:', props) // DEBUG
+              let html = `<strong class="text-green-800">Geomorfologie</strong>`
+              let hasContent = false
+
+              // Try various property name patterns
+              const areaName = props.geomorphological_area_name ?? props.gm_ar_naam ?? props.gea_name ?? props.GEA_NAME
+              const unitName = props.geomorphological_unit_name ?? props.gm_en_naam ?? props.gee_name ?? props.GEE_NAME
+              const relief = props.relief ?? props.relieftype ?? props.RELIEFTYPE
+              const genesis = props.genesis_name ?? props.gn_naam ?? props.genesis ?? props.GENESIS
+
+              // Main landform type
+              if (areaName) {
+                html += `<br/><span class="text-sm text-green-700">${areaName}</span>`
+                hasContent = true
+              }
+              // Detailed description
+              if (unitName && unitName !== areaName) {
+                html += `<br/><span class="text-xs text-green-600">${unitName}</span>`
+                hasContent = true
+              }
+              // Relief info
+              if (relief && relief !== 'Niet opgenomen') {
+                html += `<br/><span class="text-xs text-gray-600">Relief: ${relief}</span>`
+                hasContent = true
+              }
+              // Genesis (origin)
+              if (genesis && genesis !== 'Niet opgenomen') {
+                html += `<br/><span class="text-xs text-gray-500">Ontstaan: ${genesis}</span>`
+                hasContent = true
+              }
+
+              // Fallback: show all properties if no specific ones found
+              if (!hasContent) {
+                const skipKeys = ['geometry', 'id', 'fid', 'gml_id', 'bbox']
+                for (const [key, value] of Object.entries(props)) {
+                  if (!skipKeys.includes(key.toLowerCase()) && value !== null && value !== '') {
+                    html += `<br/><span class="text-xs text-gray-600">${key}: ${value}</span>`
+                  }
+                }
+              }
+
+              results.push(html)
+              continue
+            }
+
             let html = `<strong>${title}</strong>`
 
             // Bodemkaart specific fields
@@ -975,17 +1119,9 @@ export function Popup() {
               html += `<br/><span class="text-xs text-gray-500">Helling: ${props.soilslope}</span>`
             }
 
-            // Geomorfologie specific fields
-            if (props.geomorphological_area_name) {
-              html += `<br/><span class="text-sm text-green-700">${props.geomorphological_area_name}</span>`
-            }
-            if (props.relief) {
-              html += `<br/><span class="text-xs text-gray-500">Relief: ${props.relief}</span>`
-            }
-
             // Generic fallback for other properties
-            if (!props.first_soilname && !props.soilname && !props.geomorphological_area_name) {
-              const skipKeys = ['geometry', 'id', 'fid', 'gml_id']
+            if (!props.first_soilname && !props.soilname) {
+              const skipKeys = ['geometry', 'id', 'fid', 'gml_id', 'GRAY_INDEX', 'gray_index', 'value']
               for (const [key, value] of Object.entries(props)) {
                 if (!skipKeys.includes(key) && value && value !== 'Niet opgenomen') {
                   html += `<br/><span class="text-xs text-gray-600">${key}: ${value}</span>`
@@ -993,23 +1129,31 @@ export function Popup() {
               }
             }
 
-            return html
+            results.push(html)
           }
         } catch (error) {
           console.warn('WMS GetFeatureInfo failed:', error)
         }
       }
-      return null
+      return results
     }
 
     // Handle map clicks
     const handleClick = async (evt: MapBrowserEvent<any>) => {
+      // Collect all popup contents from all sources
+      const collectedContents: string[] = []
+
       // Query AHN height in parallel with feature lookup
       const heightPromise = queryAHNHeight(evt.coordinate)
 
-      const feature = map.forEachFeatureAtPixel(evt.pixel, f => f)
+      // Collect ALL vector features at click location
+      const features: any[] = []
+      map.forEachFeatureAtPixel(evt.pixel, f => {
+        features.push(f)
+      })
 
-      if (feature) {
+      // Process each vector feature
+      for (const feature of features) {
         const properties = feature.getProperties()
 
         // Skip geometry property
@@ -1018,18 +1162,35 @@ export function Popup() {
         // Check if this is an AMK feature - use local data (no WMS needed)
         if (dataProps.kwaliteitswaarde && dataProps.kwaliteitswaarde.includes('archeologische waarde')) {
           const amkHtml = formatAMKPopup(dataProps)
-          setContent(amkHtml)
-          setVisible(true)
-          return
+          collectedContents.push(amkHtml)
+          continue
         }
 
-        // Try to find a title/name
-        const name = dataProps.name || dataProps.naam || dataProps.title ||
-                     dataProps.NAAM || dataProps.NAME || dataProps.label ||
-                     dataProps.route_name || dataProps.road_name || 'Info'
+        // Try to find a title/name - with better fallbacks for OSM data
+        let name = dataProps.name || dataProps.naam || dataProps.title ||
+                   dataProps.NAAM || dataProps.NAME || dataProps.label ||
+                   dataProps.route_name || dataProps.road_name
+
+        // Better fallback for OSM recreation data (Parken, Speeltuinen, Musea, Strandjes)
+        if (!name) {
+          if (dataProps.leisure === 'playground') {
+            name = 'Speeltuin'
+          } else if (dataProps.leisure === 'park') {
+            name = 'Park'
+          } else if (dataProps.leisure === 'swimming_area' || dataProps.sport === 'swimming') {
+            name = 'Zwemplek'
+          } else if (dataProps.tourism === 'museum') {
+            name = 'Museum'
+          } else if (dataProps.amenity === 'cafe' || dataProps.amenity === 'restaurant') {
+            name = dataProps.amenity === 'cafe' ? 'Café' : 'Restaurant'
+          } else if (dataProps.historic === 'castle') {
+            name = 'Kasteel'
+          } else {
+            name = 'Info'
+          }
+        }
 
         let html = `<strong>${name}</strong>`
-
 
         // Archis / Kromme Rijn Aardewerk: Show category
         if (dataProps.category) {
@@ -1091,17 +1252,21 @@ export function Popup() {
           html += `<br/><span class="text-sm text-gray-700">${dataProps.Beschrijvi}</span>`
         }
 
-        // Speeltuinen/Parken (OSM data)
-        if (dataProps.leisure) {
-          const typeLabel = dataProps.leisure === 'playground' ? 'Speeltuin' : 'Park'
-          html += `<br/><span class="text-xs text-gray-500">${typeLabel}</span>`
+        // Speeltuinen/Parken (OSM data) - only show type if we have a real name
+        if (dataProps.leisure && dataProps.name) {
+          const typeLabel = dataProps.leisure === 'playground' ? 'Speeltuin' :
+                           dataProps.leisure === 'park' ? 'Park' :
+                           dataProps.leisure === 'swimming_area' ? 'Zwemplek' : null
+          if (typeLabel) {
+            html += `<br/><span class="text-xs text-green-600">${typeLabel}</span>`
+          }
         }
-        // Musea (OSM data)
-        if (dataProps.tourism === 'museum' || dataProps.museum) {
+        // Musea (OSM data) - only show type if we have a real name
+        if ((dataProps.tourism === 'museum' || dataProps.museum) && dataProps.name) {
           html += `<br/><span class="text-xs text-purple-600">Museum</span>`
         }
-        // Strandjes/Zwemplekken (OSM data)
-        if (dataProps.leisure === 'swimming_area' || dataProps.sport === 'swimming') {
+        // Strandjes/Zwemplekken (OSM data) - only show type if we have a real name
+        if ((dataProps.leisure === 'swimming_area' || dataProps.sport === 'swimming') && dataProps.name) {
           html += `<br/><span class="text-xs text-cyan-600">Zwemplek</span>`
         }
         // Kringloopwinkels (OSM data)
@@ -1114,9 +1279,11 @@ export function Popup() {
             html += `<br/><span class="text-xs text-gray-600">${dataProps.phone}</span>`
           }
         }
-        // Kastelen (OSM data)
+        // Kastelen (OSM data) - only show "Kasteel" type if we have a real name
         if (dataProps.historic === 'castle' || dataProps.castle_type) {
-          html += `<br/><span class="text-xs text-purple-600">Kasteel</span>`
+          if (dataProps.name) {
+            html += `<br/><span class="text-xs text-purple-600">Kasteel</span>`
+          }
           if (dataProps.castle_type) {
             html += `<br/><span class="text-xs text-gray-500">Type: ${dataProps.castle_type}</span>`
           }
@@ -1338,41 +1505,40 @@ export function Popup() {
           html += `<br/><span class="text-sm text-gray-600">${description}</span>`
         }
 
-        // Add AHN height if available
-        const height = await heightPromise
-        if (height !== null) {
-          html += `<br/><div class="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1">
+        collectedContents.push(html)
+      }
+
+      // Also query WMS layers (they may have info even with vector features)
+      const viewResolution = map.getView().getResolution() || 1
+      const wmsResults = await queryWMSLayers(evt.coordinate, viewResolution)
+      collectedContents.push(...wmsResults)
+
+      // If no features found anywhere, check for just height info
+      const height = await heightPromise
+      if (collectedContents.length === 0 && height !== null) {
+        const heightHtml = `<strong class="text-blue-800">Terrein</strong>
+          <br/><div class="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1">
             <span class="text-xs text-gray-400">Hoogte:</span>
             <span class="text-sm font-medium text-blue-600">${height.toFixed(2)} m NAP</span>
           </div>`
-        }
+        collectedContents.push(heightHtml)
+      }
 
-        setContent(html)
+      // Add height info to first popup if we have features
+      if (collectedContents.length > 0 && height !== null) {
+        collectedContents[0] += `<br/><div class="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1">
+          <span class="text-xs text-gray-400">Hoogte:</span>
+          <span class="text-sm font-medium text-blue-600">${height.toFixed(2)} m NAP</span>
+        </div>`
+      }
+
+      // Show popup if we found any content
+      if (collectedContents.length > 0) {
+        setAllContents(collectedContents)
+        setCurrentIndex(0)
+        setParcelCoordinate(evt.coordinate) // Store coordinate for height map
+        setShowingHeightMap(false) // Reset height map state
         setVisible(true)
-      } else {
-        // No vector feature found - try WMS GetFeatureInfo
-        const viewResolution = map.getView().getResolution() || 1
-        const wmsHtml = await queryWMSLayers(evt.coordinate, viewResolution)
-        const height = await heightPromise
-
-        if (wmsHtml || height !== null) {
-          let html = wmsHtml || ''
-
-          // Add AHN height
-          if (height !== null) {
-            if (!html) {
-              // If no other info, show height as main content
-              html = `<strong class="text-blue-800">Terrein</strong>`
-            }
-            html += `<br/><div class="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1">
-              <span class="text-xs text-gray-400">Hoogte:</span>
-              <span class="text-sm font-medium text-blue-600">${height.toFixed(2)} m NAP</span>
-            </div>`
-          }
-
-          setContent(html)
-          setVisible(true)
-        }
       }
     }
 
@@ -1385,12 +1551,17 @@ export function Popup() {
 
   const handleClose = () => {
     setVisible(false)
+    // Clear height map when closing popup
+    if (map && showingHeightMap) {
+      clearParcelHighlight(map)
+      setShowingHeightMap(false)
+    }
   }
 
   const handleDragEnd = (_: any, info: PanInfo) => {
     // Close if dragged down more than 100px
     if (info.offset.y > 100) {
-      setVisible(false)
+      handleClose()
     }
   }
 
@@ -1420,24 +1591,90 @@ export function Popup() {
             onDragEnd={handleDragEnd}
           >
             {/* Drag handle */}
-            <div className="flex justify-center pt-3 pb-2">
+            <div className="flex justify-center pt-2 pb-1">
               <div className="w-10 h-1 bg-gray-300 rounded-full" />
             </div>
 
-            {/* Close button */}
-            <button
-              onClick={handleClose}
-              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Sluiten"
-            >
-              <X size={20} />
-            </button>
+            {/* Header row: navigation + title + close */}
+            <div className="flex items-center gap-2 px-3 pb-2 border-b border-gray-100">
+              {/* Navigation buttons (only if multiple) */}
+              {hasMultiple && (
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button
+                    onClick={goToPrevious}
+                    className="w-7 h-7 flex items-center justify-center text-blue-600 hover:bg-blue-50 rounded-full transition-colors border-0 outline-none"
+                    aria-label="Vorige laag"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <span className="text-xs text-gray-500 font-medium min-w-[32px] text-center">
+                    {currentIndex + 1}/{allContents.length}
+                  </span>
+                  <button
+                    onClick={goToNext}
+                    className="w-7 h-7 flex items-center justify-center text-blue-600 hover:bg-blue-50 rounded-full transition-colors border-0 outline-none"
+                    aria-label="Volgende laag"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              )}
 
-            {/* Content - scrollable */}
+              {/* Title - takes remaining space */}
+              <span className="flex-1 font-semibold text-gray-800 truncate text-sm">
+                {extractedTitle || 'Info'}
+              </span>
+
+              {/* Close button */}
+              <button
+                onClick={handleClose}
+                className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+                aria-label="Sluiten"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Content - scrollable, without title */}
             <div
-              className="px-4 pb-6 max-h-[50vh] overflow-y-auto"
-              dangerouslySetInnerHTML={{ __html: content }}
+              className="px-4 py-3 max-h-[50vh] overflow-y-auto"
+              dangerouslySetInnerHTML={{ __html: contentWithoutTitle }}
             />
+
+            {/* Height map button for parcels */}
+            {isParcel && parcelCoordinate && (
+              <div className="px-4 pb-4 border-t border-gray-100">
+                {showingHeightMap ? (
+                  <button
+                    onClick={handleHideHeightMap}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 mt-3 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none"
+                  >
+                    <Mountain size={16} />
+                    <span>Hoogtekaart verbergen</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleShowHeightMap}
+                    disabled={loadingHeightMap}
+                    className={`w-full flex items-center justify-center gap-2 px-3 py-2 mt-3 text-sm text-white rounded-lg transition-colors border-0 outline-none ${
+                      loadingHeightMap ? 'bg-blue-400 cursor-wait' : 'bg-blue-500 hover:bg-blue-600'
+                    }`}
+                  >
+                    {loadingHeightMap ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        <span>Laden...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Mountain size={16} />
+                        <span>Hoogtekaart tonen</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            )}
           </motion.div>
         </>
       )}

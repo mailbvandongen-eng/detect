@@ -24,24 +24,24 @@ export function ZoomButtons() {
   }
 
   return (
-    <div className="fixed bottom-[30px] md:bottom-10 right-14 z-[800] flex gap-1">
+    <div className="fixed top-14 left-2.5 z-[800] flex flex-col gap-1">
       <motion.button
-        className="w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
-        onClick={handleZoomOut}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        title="Uitzoomen"
-      >
-        <Minus size={20} className="text-gray-600" />
-      </motion.button>
-      <motion.button
-        className="w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        className="w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-lg shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         onClick={handleZoomIn}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Inzoomen"
       >
-        <Plus size={20} className="text-gray-600" />
+        <Plus size={16} className="text-gray-600" />
+      </motion.button>
+      <motion.button
+        className="w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-lg shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        onClick={handleZoomOut}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        title="Uitzoomen"
+      >
+        <Minus size={16} className="text-gray-600" />
       </motion.button>
     </div>
   )

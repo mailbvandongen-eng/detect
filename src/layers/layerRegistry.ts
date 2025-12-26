@@ -223,11 +223,11 @@ export const layerRegistry: Record<string, LayerDefinition> = {
   },
 
   // Percelen - Kadaster & Landbouw
-  'BRP Gewaspercelen': {
-    name: 'BRP Gewaspercelen',
+  'Gewaspercelen': {
+    name: 'Gewaspercelen',
     factory: async () => {
-      const { createBRPGewaspercelenLayerOL } = await import('./pdokWMSLayers')
-      return createBRPGewaspercelenLayerOL()
+      const { createGewaspercelenLayerOL } = await import('./pdokWMSLayers')
+      return createGewaspercelenLayerOL()
     },
     immediateLoad: true
   },

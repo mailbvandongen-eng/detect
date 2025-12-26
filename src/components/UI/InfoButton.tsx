@@ -1,15 +1,15 @@
-import { useState } from 'react'
 import { Info, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useUIStore } from '../../store'
 
 export function InfoButton() {
-  const [isOpen, setIsOpen] = useState(false)
+  const { infoPanelOpen, toggleInfoPanel } = useUIStore()
 
   return (
     <>
       {/* Info Button - top right corner */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={toggleInfoPanel}
         className="fixed top-2.5 right-2.5 z-[800] w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-lg shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         title="Info & Attributies"
       >
@@ -18,7 +18,7 @@ export function InfoButton() {
 
       {/* Modal */}
       <AnimatePresence>
-        {isOpen && (
+        {infoPanelOpen && (
           <>
             {/* Backdrop */}
             <motion.div
@@ -26,7 +26,7 @@ export function InfoButton() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
+              onClick={toggleInfoPanel}
             />
 
             {/* Modal Content */}
@@ -40,7 +40,7 @@ export function InfoButton() {
               <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                 <span className="font-medium">Info & Attributies</span>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={toggleInfoPanel}
                   className="p-1 rounded hover:bg-white/20 transition-colors"
                 >
                   <X size={18} />

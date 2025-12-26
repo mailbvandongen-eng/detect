@@ -34,9 +34,7 @@ export const useLayerStore = create<LayerState>()(
     visible: {
       // Base layers
       'CartoDB (licht)': true,
-      'CartoDB (donker)': false,
       'OpenStreetMap': false,
-      'OpenTopoMap': false,
       'Luchtfoto': false,
       'Labels Overlay': false,
       'TMK 1850': false,
@@ -98,7 +96,7 @@ export const useLayerStore = create<LayerState>()(
       'Musea': false,
       'Strandjes': false,
       // Percelen (Kadaster & Landbouw)
-      'BRP Gewaspercelen': false,
+      'Gewaspercelen': false,
       'Kadastrale Grenzen': false,
       // Provinciale Waardenkaarten - Zuid-Holland
       'Scheepswrakken': false,
@@ -138,7 +136,7 @@ export const useLayerStore = create<LayerState>()(
       'Paleokaart 9000 v.Chr.': 0.7,
       'Religieus Erfgoed': 0.8,
       // Percelen
-      'BRP Gewaspercelen': 0.6,
+      'Gewaspercelen': 0.6,
       'Kadastrale Grenzen': 0.7,
       // Provinciale Waardenkaarten
       'Erfgoedlijnen': 0.7,
