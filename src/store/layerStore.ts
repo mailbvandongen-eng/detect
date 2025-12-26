@@ -99,7 +99,20 @@ export const useLayerStore = create<LayerState>()(
       'Strandjes': false,
       // Percelen (Kadaster & Landbouw)
       'BRP Gewaspercelen': false,
-      'Kadastrale Grenzen': false
+      'Kadastrale Grenzen': false,
+      // Provinciale Waardenkaarten - Zuid-Holland
+      'Scheepswrakken': false,
+      'Woonheuvels ZH': false,
+      'Romeinse Forten': false,
+      'Windmolens': false,
+      'Erfgoedlijnen': false,
+      'Oude Kernen': false,
+      // Provinciale Waardenkaarten - Gelderland
+      'Relictenkaart Punten': false,
+      'Relictenkaart Lijnen': false,
+      'Relictenkaart Vlakken': false,
+      // Provinciale Waardenkaarten - Zeeland
+      'Verdronken Dorpen': false
     },
 
     // Initial opacity state
@@ -126,7 +139,11 @@ export const useLayerStore = create<LayerState>()(
       'Religieus Erfgoed': 0.8,
       // Percelen
       'BRP Gewaspercelen': 0.6,
-      'Kadastrale Grenzen': 0.7
+      'Kadastrale Grenzen': 0.7,
+      // Provinciale Waardenkaarten
+      'Erfgoedlijnen': 0.7,
+      'Oude Kernen': 0.6,
+      'Relictenkaart Vlakken': 0.5
     },
 
     // Loading state for lazy-loaded layers

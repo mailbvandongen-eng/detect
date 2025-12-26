@@ -240,6 +240,94 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: true
   },
 
+  // Provinciale Cultuurhistorische Waardenkaarten
+
+  // Zuid-Holland
+  'Scheepswrakken': {
+    name: 'Scheepswrakken',
+    factory: async () => {
+      const { createScheepswrakkenLayerOL } = await import('./pdokWMSLayers')
+      return createScheepswrakkenLayerOL()
+    },
+    immediateLoad: true
+  },
+  'Woonheuvels ZH': {
+    name: 'Woonheuvels ZH',
+    factory: async () => {
+      const { createWoonheuvelsLayerOL } = await import('./pdokWMSLayers')
+      return createWoonheuvelsLayerOL()
+    },
+    immediateLoad: true
+  },
+  'Romeinse Forten': {
+    name: 'Romeinse Forten',
+    factory: async () => {
+      const { createRomeinseFortenLayerOL } = await import('./pdokWMSLayers')
+      return createRomeinseFortenLayerOL()
+    },
+    immediateLoad: true
+  },
+  'Windmolens': {
+    name: 'Windmolens',
+    factory: async () => {
+      const { createWindmolensLayerOL } = await import('./pdokWMSLayers')
+      return createWindmolensLayerOL()
+    },
+    immediateLoad: true
+  },
+  'Erfgoedlijnen': {
+    name: 'Erfgoedlijnen',
+    factory: async () => {
+      const { createErfgoedlijnenLayerOL } = await import('./pdokWMSLayers')
+      return createErfgoedlijnenLayerOL()
+    },
+    immediateLoad: true
+  },
+  'Oude Kernen': {
+    name: 'Oude Kernen',
+    factory: async () => {
+      const { createOudeKernenLayerOL } = await import('./pdokWMSLayers')
+      return createOudeKernenLayerOL()
+    },
+    immediateLoad: true
+  },
+
+  // Gelderland - Relictenkaart
+  'Relictenkaart Punten': {
+    name: 'Relictenkaart Punten',
+    factory: async () => {
+      const { createRelictenkaartPuntenLayerOL } = await import('./pdokWMSLayers')
+      return createRelictenkaartPuntenLayerOL()
+    },
+    immediateLoad: true
+  },
+  'Relictenkaart Lijnen': {
+    name: 'Relictenkaart Lijnen',
+    factory: async () => {
+      const { createRelictenkaartLijnenLayerOL } = await import('./pdokWMSLayers')
+      return createRelictenkaartLijnenLayerOL()
+    },
+    immediateLoad: true
+  },
+  'Relictenkaart Vlakken': {
+    name: 'Relictenkaart Vlakken',
+    factory: async () => {
+      const { createRelictenkaartVlakkenLayerOL } = await import('./pdokWMSLayers')
+      return createRelictenkaartVlakkenLayerOL()
+    },
+    immediateLoad: true
+  },
+
+  // Zeeland
+  'Verdronken Dorpen': {
+    name: 'Verdronken Dorpen',
+    factory: async () => {
+      const { createVerdronkenDorpenLayerOL } = await import('./pdokWMSLayers')
+      return createVerdronkenDorpenLayerOL()
+    },
+    immediateLoad: true
+  },
+
   // ============================================
   // LAZY LOAD - Vector layers
   // These are only loaded when first toggled on

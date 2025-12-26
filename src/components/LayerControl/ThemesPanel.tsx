@@ -120,6 +120,29 @@ export function ThemesPanel() {
                 <LayerItem name="Kadastrale Grenzen" type="overlay" />
               </LayerGroup>
 
+              {/* Provinciale Waardenkaarten */}
+              <LayerGroup title="Provinciale Kaarten" defaultExpanded={false}>
+                {/* Zuid-Holland */}
+                <LayerGroup title="Zuid-Holland" defaultExpanded={false}>
+                  <LayerItem name="Scheepswrakken" type="overlay" />
+                  <LayerItem name="Woonheuvels ZH" type="overlay" />
+                  <LayerItem name="Romeinse Forten" type="overlay" />
+                  <LayerItem name="Windmolens" type="overlay" />
+                  <LayerItem name="Erfgoedlijnen" type="overlay" />
+                  <LayerItem name="Oude Kernen" type="overlay" />
+                </LayerGroup>
+                {/* Gelderland */}
+                <LayerGroup title="Gelderland" defaultExpanded={false}>
+                  <LayerItem name="Relictenkaart Punten" type="overlay" />
+                  <LayerItem name="Relictenkaart Lijnen" type="overlay" />
+                  <LayerItem name="Relictenkaart Vlakken" type="overlay" />
+                </LayerGroup>
+                {/* Zeeland */}
+                <LayerGroup title="Zeeland" defaultExpanded={false}>
+                  <LayerItem name="Verdronken Dorpen" type="overlay" />
+                </LayerGroup>
+              </LayerGroup>
+
               {/* Fossils */}
               <LayerGroup title="Fossielen (vondsten)" defaultExpanded={false}>
                 <LayerItem name="Fossielen Nederland" type="overlay" />

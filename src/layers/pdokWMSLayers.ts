@@ -282,3 +282,233 @@ export function createKadastraleKaartLayerOL() {
 
   return layer
 }
+
+// ============================================
+// Provinciale Cultuurhistorische Waardenkaarten
+// ============================================
+
+// --- Zuid-Holland ---
+
+// Scheepswrakken - historische scheepsrestanten
+export function createScheepswrakkenLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Scheepswrakken', type: 'wms' },
+    visible: false,
+    opacity: 0.8,
+    source: new TileWMS({
+      url: 'https://geodata.zuid-holland.nl/geoserver/cultuur/wms',
+      params: {
+        'LAYERS': 'CHS_2015_ARCHEOLOGIE_SCHEEPSRESTANTEN',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// Woonheuvels - prehistorische terpen/woonheuvels
+export function createWoonheuvelsLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Woonheuvels ZH', type: 'wms' },
+    visible: false,
+    opacity: 0.8,
+    source: new TileWMS({
+      url: 'https://geodata.zuid-holland.nl/geoserver/cultuur/wms',
+      params: {
+        'LAYERS': 'CHS_2015_ARCHEOLOGIE_WOONHEUVEL',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// Romeinse forten - castellum locaties
+export function createRomeinseFortenLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Romeinse Forten', type: 'wms' },
+    visible: false,
+    opacity: 0.8,
+    source: new TileWMS({
+      url: 'https://geodata.zuid-holland.nl/geoserver/cultuur/wms',
+      params: {
+        'LAYERS': 'CHS_2015_ARCHEOLOGIE_ROMEINSFORT',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// Historische windmolens
+export function createWindmolensLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Windmolens', type: 'wms' },
+    visible: false,
+    opacity: 0.8,
+    source: new TileWMS({
+      url: 'https://geodata.zuid-holland.nl/geoserver/cultuur/wms',
+      params: {
+        'LAYERS': 'CHS_2015_NEDERZETTING_WINDMOLENS',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// Erfgoedlijnen - Limes, Atlantikwall, trekvaarten
+export function createErfgoedlijnenLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Erfgoedlijnen', type: 'wms' },
+    visible: false,
+    opacity: 0.7,
+    source: new TileWMS({
+      url: 'https://geodata.zuid-holland.nl/geoserver/cultuur/wms',
+      params: {
+        'LAYERS': 'CHS_ERFGOEDLIJN_HOOFDSTRUCTUUR',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// Oude stads- en dorpskernen
+export function createOudeKernenLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Oude Kernen', type: 'wms' },
+    visible: false,
+    opacity: 0.7,
+    source: new TileWMS({
+      url: 'https://geodata.zuid-holland.nl/geoserver/cultuur/wms',
+      params: {
+        'LAYERS': 'CHS_2015_ARCHEOLOGIE_KERNEN',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// --- Gelderland ---
+
+// Relictenkaart punten - havezaten, molens, eendenkooien, kastelen, etc.
+export function createRelictenkaartPuntenLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Relictenkaart Punten', type: 'wms' },
+    visible: false,
+    opacity: 0.8,
+    source: new TileWMS({
+      url: 'https://geoserver.gelderland.nl/geoserver/ngr_a/wms',
+      params: {
+        'LAYERS': 'ChAr_Relictenkaart_p',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// Relictenkaart lijnen - historische wegen, waterlopen, etc.
+export function createRelictenkaartLijnenLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Relictenkaart Lijnen', type: 'wms' },
+    visible: false,
+    opacity: 0.7,
+    source: new TileWMS({
+      url: 'https://geoserver.gelderland.nl/geoserver/ngr_a/wms',
+      params: {
+        'LAYERS': 'ChAr_Relictenkaart_l',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// Relictenkaart vlakken - essen, heiderelicten, bossen, etc.
+export function createRelictenkaartVlakkenLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Relictenkaart Vlakken', type: 'wms' },
+    visible: false,
+    opacity: 0.5,
+    source: new TileWMS({
+      url: 'https://geoserver.gelderland.nl/geoserver/ngr_a/wms',
+      params: {
+        'LAYERS': 'ChAr_Relictenkaart_v',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// --- Zeeland ---
+
+// Verdronken dorpen - 200+ verdronken nederzettingen
+export function createVerdronkenDorpenLayerOL() {
+  const layer = new TileLayer({
+    properties: { title: 'Verdronken Dorpen', type: 'wms' },
+    visible: false,
+    opacity: 0.8,
+    source: new TileWMS({
+      url: 'https://opengeodata.zeeland.nl/geoserver/chs/wms',
+      params: {
+        'LAYERS': 'geocmd_vrddrppnt',
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
