@@ -303,14 +303,14 @@ export function Popup() {
               const props = data.features[0].properties
               let html = `<strong class="text-stone-800">Militair Object</strong>`
 
-              if (props.objectsoort) {
-                html += `<br/><span class="text-sm font-semibold text-stone-700">${props.objectsoort}</span>`
+              if (props.obj_soort) {
+                html += `<br/><span class="text-sm font-semibold text-stone-700">${props.obj_soort}</span>`
               }
-              if (props.objectnaam) {
-                html += `<br/><span class="text-sm text-gray-700">${props.objectnaam}</span>`
+              if (props.obj_naam) {
+                html += `<br/><span class="text-sm text-gray-700">${props.obj_naam}</span>`
               }
-              if (props.periode) {
-                html += `<br/><span class="text-xs text-gray-500">${props.periode}</span>`
+              if (props.lin_period) {
+                html += `<br/><span class="text-xs text-gray-500">${props.lin_period}</span>`
               }
 
               return html
