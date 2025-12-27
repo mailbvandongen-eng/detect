@@ -1,20 +1,19 @@
 import { Map } from 'ol'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
-import ImageLayer from 'ol/layer/Image'
-import ImageArcGISRest from 'ol/source/ImageArcGISRest'
 import { Fill, Stroke, Style } from 'ol/style'
 import { GeoJSON } from 'ol/format'
 import { toLonLat } from 'ol/proj'
 import proj4 from 'proj4'
 import type { Polygon, MultiPolygon } from 'ol/geom'
+import { useLayerStore } from '../store'
 
 // Register RD projection if not already done
 proj4.defs('EPSG:28992', '+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs')
 
-// Store reference to the highlight layers
+// Store reference to the highlight layer
 let highlightLayer: VectorLayer<VectorSource> | null = null
-let ahnLayer: ImageLayer<ImageArcGISRest> | null = null
+let hillshadeWasVisible = false
 
 /**
  * Clear any existing parcel highlight from the map
@@ -24,14 +23,16 @@ export function clearParcelHighlight(map: Map) {
     map.removeLayer(highlightLayer)
     highlightLayer = null
   }
-  if (ahnLayer) {
-    map.removeLayer(ahnLayer)
-    ahnLayer = null
+
+  // Restore hillshade visibility to what it was before
+  if (!hillshadeWasVisible) {
+    useLayerStore.getState().setLayerVisibility('AHN4 Hillshade NL', false)
   }
 }
 
 /**
  * Fetch parcel geometry from BRP WFS and show height map overlay
+ * Uses the existing AHN4 Hillshade layer instead of creating a new one
  */
 export async function showParcelHeightMap(
   map: Map,
@@ -58,7 +59,7 @@ export async function showParcelHeightMap(
 
     // Add timeout to prevent hanging
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
 
     const response = await fetch(wfsUrl, { signal: controller.signal })
     clearTimeout(timeoutId)
@@ -91,37 +92,28 @@ export async function showParcelHeightMap(
       return false
     }
 
-    // Get extent for zooming and buffering
+    // Get extent for zooming
     const extent = geometry.getExtent()
 
-    // Buffer the extent by 20% for better context
+    // Buffer the extent by 30% for better context
     const width = extent[2] - extent[0]
     const height = extent[3] - extent[1]
-    const buffer = Math.max(width, height) * 0.2
-    const bufferedExtent = [
+    const buffer = Math.max(width, height) * 0.3
+    const bufferedExtent: [number, number, number, number] = [
       extent[0] - buffer,
       extent[1] - buffer,
       extent[2] + buffer,
       extent[3] + buffer
     ]
 
-    // Create AHN layer using Esri ArcGIS ImageServer with Hillshade rendering
-    // Shows the full hillshade layer - the parcel outline shows the boundaries
-    ahnLayer = new ImageLayer({
-      source: new ImageArcGISRest({
-        url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_5m/ImageServer',
-        params: {
-          renderingRule: JSON.stringify({
-            rasterFunction: 'AHN - Hillshade (Multidirectionaal)'
-          })
-        },
-        crossOrigin: 'anonymous'
-      }),
-      zIndex: 998,
-      opacity: 0.8
-    })
+    // Remember if hillshade was already visible
+    const layerStore = useLayerStore.getState()
+    hillshadeWasVisible = layerStore.visible['AHN4 Hillshade NL'] ?? false
 
-    // Create vector layer with parcel outline on top
+    // Turn on the existing AHN4 Hillshade layer
+    layerStore.setLayerVisibility('AHN4 Hillshade NL', true)
+
+    // Create vector layer with parcel outline
     const vectorSource = new VectorSource({
       features: [feature]
     })
@@ -130,7 +122,7 @@ export async function showParcelHeightMap(
       source: vectorSource,
       style: new Style({
         fill: new Fill({
-          color: 'rgba(0, 0, 0, 0)' // transparent fill
+          color: 'rgba(220, 38, 38, 0.1)' // light red fill
         }),
         stroke: new Stroke({
           color: '#dc2626', // red outline
@@ -140,17 +132,16 @@ export async function showParcelHeightMap(
       zIndex: 999
     })
 
-    // Add layers to map
-    map.addLayer(ahnLayer)
+    // Add highlight layer to map
     map.addLayer(highlightLayer)
 
-    // Zoom to the parcel with some padding
-    map.getView().fit(bufferedExtent as [number, number, number, number], {
-      duration: 500,
-      maxZoom: 18
+    // Zoom to the parcel
+    map.getView().fit(bufferedExtent, {
+      duration: 300,
+      maxZoom: 17
     })
 
-    console.log('✅ Parcel height map displayed, zoomed to extent')
+    console.log('✅ Parcel highlighted, hillshade enabled')
     return true
 
   } catch (error) {
