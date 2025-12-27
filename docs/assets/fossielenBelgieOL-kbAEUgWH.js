@@ -1,2 +1,0 @@
-import{c as e}from"./fossielUtils-D3uxFyTN.js";import"./index-BXV6tCvc.js";import"./iconStyles-Dt49S1g9.js";async function c(){return e("BE","Fossielen België")}export{c as createFossielenBelgieLayerOL};
-//# sourceMappingURL=fossielenBelgieOL-kbAEUgWH.js.map

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useMapStore } from '../../store'
+import { useMapStore, useLayerStore } from '../../store'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
@@ -39,8 +39,10 @@ const TYPE_LABELS: Record<string, string> = {
 export function LocalVondstMarkers() {
   const map = useMapStore(state => state.map)
   const vondsten = useLocalVondstenStore(state => state.vondsten)
+  const visible = useLayerStore(state => state.visible['Mijn Vondsten'])
   const layerRef = useRef<VectorLayer<VectorSource> | null>(null)
 
+  // Create/update layer with markers
   useEffect(() => {
     if (!map) return
 
@@ -83,6 +85,7 @@ export function LocalVondstMarkers() {
         zIndex: 1000,
         properties: { title: 'Mijn Vondsten' }
       })
+      layerRef.current.setVisible(visible)
       map.addLayer(layerRef.current)
     }
 
@@ -93,6 +96,13 @@ export function LocalVondstMarkers() {
       }
     }
   }, [map, vondsten])
+
+  // Update visibility when toggled
+  useEffect(() => {
+    if (layerRef.current) {
+      layerRef.current.setVisible(visible)
+    }
+  }, [visible])
 
   return null // This is a render-less component
 }

@@ -4,7 +4,6 @@ import { Tile as TileLayer } from 'ol/layer'
 import { OSM, XYZ } from 'ol/source'
 import { useMap } from '../../hooks/useMap'
 import { useLayerStore, useMapStore, useSettingsStore } from '../../store'
-import { useNavigationStore } from '../../store/navigationStore'
 import { layerRegistry, getImmediateLoadLayers } from '../../layers/layerRegistry'
 
 // Base layer names
@@ -23,7 +22,6 @@ export function MapContainer() {
   const map = useMapStore(state => state.map) // Get reactive map from store
   const registerLayer = useLayerStore(state => state.registerLayer)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
-  const isNavigating = useNavigationStore(state => state.isNavigating)
   const defaultBackground = useSettingsStore(state => state.defaultBackground)
 
   useEffect(() => {
@@ -200,16 +198,9 @@ export function MapContainer() {
     return () => clearTimeout(timer)
   }, [map, defaultBackground, setLayerVisibility])
 
-  // 3D tilt effect during navigation (Google Maps style)
   const mapStyle: React.CSSProperties = {
     width: '100%',
     height: '100vh',
-    transition: 'transform 0.5s ease-out',
-    transformOrigin: 'center bottom',
-    // Apply 3D perspective tilt when navigating
-    ...(isNavigating ? {
-      transform: 'perspective(1000px) rotateX(25deg) scale(1.1)',
-    } : {})
   }
 
   return (

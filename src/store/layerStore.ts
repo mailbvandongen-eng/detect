@@ -111,7 +111,9 @@ export const useLayerStore = create<LayerState>()(
       'Relictenkaart Lijnen': false,
       'Relictenkaart Vlakken': false,
       // Provinciale Waardenkaarten - Zeeland
-      'Verdronken Dorpen': false
+      'Verdronken Dorpen': false,
+      // Persoonlijk
+      'Mijn Vondsten': true
     },
 
     // Initial opacity state

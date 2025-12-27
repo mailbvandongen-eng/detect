@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useMapStore } from '../store/mapStore'
 import { useGPSStore } from '../store/gpsStore'
+import { useSettingsStore } from '../store/settingsStore'
 
 // Original smooth easing (worked well before)
 const easeInOutQuad = (t: number): number => {
@@ -13,30 +14,13 @@ export function useMapRotation() {
   const setRotation = useMapStore(state => state.setRotation)
   const smoothHeading = useGPSStore(state => state.smoothHeading)
   const tracking = useGPSStore(state => state.tracking)
-  const navigationMode = useGPSStore(state => state.navigationMode)
+  const headingUpMode = useSettingsStore(state => state.headingUpMode)
   const lastRotationRef = useRef<number | null>(null)
-  const lastModeRef = useRef<string | null>(null)
 
-  // Handle zoom when switching to drive mode
+  // Handle map rotation based on headingUpMode setting
   useEffect(() => {
-    if (!map) return
-
-    // Switching to drive mode: jump to neighborhood zoom (15)
-    if (navigationMode === 'drive' && lastModeRef.current !== 'drive') {
-      map.getView().animate({
-        zoom: 15,
-        duration: 500
-      })
-      console.log('🚗 Rijmodus: zoom naar wijkniveau (15)')
-    }
-
-    lastModeRef.current = navigationMode
-  }, [map, navigationMode])
-
-  // Handle map rotation based on mode
-  useEffect(() => {
-    // Vrije modus: keep map north-up (rotation = 0)
-    if (navigationMode === 'free') {
+    // headingUpMode OFF: keep map north-up (rotation = 0)
+    if (!headingUpMode) {
       if (map && map.getView().getRotation() !== 0) {
         map.getView().animate({ rotation: 0, duration: 500 })
         setRotation(0)
@@ -45,7 +29,7 @@ export function useMapRotation() {
       return
     }
 
-    // Rijmodus: rotate map with movement direction
+    // headingUpMode ON: rotate map with movement direction
     if (!map || !tracking || !rotationEnabled || smoothHeading === null) {
       // Reset rotation if disabled or not tracking
       if (map && !tracking) {
@@ -56,8 +40,8 @@ export function useMapRotation() {
       return
     }
 
-    // Convert heading to radians for OpenLayers
-    const targetRotation = (smoothHeading * Math.PI) / 180
+    // Convert heading to radians for OpenLayers (negative because map rotates opposite)
+    const targetRotation = -(smoothHeading * Math.PI) / 180
     const currentRotation = lastRotationRef.current ?? map.getView().getRotation()
 
     // Calculate angular difference (handle wrap-around)
@@ -69,14 +53,14 @@ export function useMapRotation() {
     const ROTATION_THRESHOLD = 0.087 // ~5 degrees
     if (Math.abs(diff) < ROTATION_THRESHOLD) return
 
-    // Original smooth animation (worked well)
+    // Smooth animation
     map.getView().animate({
       rotation: targetRotation,
-      duration: 250, // Original timing
-      easing: easeInOutQuad // Original easing
+      duration: 250,
+      easing: easeInOutQuad
     })
 
     lastRotationRef.current = targetRotation
     setRotation(smoothHeading)
-  }, [map, tracking, rotationEnabled, smoothHeading, setRotation])
+  }, [map, tracking, rotationEnabled, smoothHeading, setRotation, headingUpMode])
 }

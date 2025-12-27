@@ -4,9 +4,10 @@ import TileWMS from 'ol/source/TileWMS'
 import TileLayer from 'ol/layer/Tile'
 import { toLonLat } from 'ol/proj'
 import proj4 from 'proj4'
-import { X, ChevronLeft, ChevronRight, Mountain, Loader2 } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2 } from 'lucide-react'
 import { useMapStore } from '../../store'
 import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
+import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondstenStore'
 import type { MapBrowserEvent } from 'ol'
 
 // Register RD New projection
@@ -80,12 +81,14 @@ const IKAW_VALUES: Record<number, string> = {
 
 export function Popup() {
   const map = useMapStore(state => state.map)
+  const removeVondst = useLocalVondstenStore(state => state.removeVondst)
   const [allContents, setAllContents] = useState<string[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [visible, setVisible] = useState(false)
   const [parcelCoordinate, setParcelCoordinate] = useState<number[] | null>(null)
   const [showingHeightMap, setShowingHeightMap] = useState(false)
   const [loadingHeightMap, setLoadingHeightMap] = useState(false)
+  const [currentVondstId, setCurrentVondstId] = useState<string | null>(null)
 
   // Current content based on index
   const content = allContents[currentIndex] || ''
@@ -106,6 +109,8 @@ export function Popup() {
 
   // Check if current content is a parcel
   const isParcel = content.includes('Landbouwperceel')
+  // Check if current content is a vondst
+  const isVondst = content.includes('data-vondst-id=')
 
   const goToPrevious = () => {
     setCurrentIndex(i => (i - 1 + allContents.length) % allContents.length)
@@ -1190,6 +1195,21 @@ export function Popup() {
         // Skip geometry property
         const { geometry, ...dataProps } = properties
 
+        // Check if this is a vondst marker
+        if (dataProps.vondst) {
+          const v = dataProps.vondst as LocalVondst
+          const vondstHtml = `<strong>${v.objectType}</strong>
+            <div data-vondst-id="${v.id}"></div>
+            <br/><span class="text-sm text-gray-600"><strong>Materiaal:</strong> ${v.material}</span>
+            <br/><span class="text-sm text-gray-600"><strong>Periode:</strong> ${v.period}</span>
+            ${v.depth ? `<br/><span class="text-sm text-gray-600"><strong>Diepte:</strong> ${v.depth} cm</span>` : ''}
+            ${v.notes ? `<br/><span class="text-sm text-gray-600"><strong>Notities:</strong> ${v.notes}</span>` : ''}
+            <br/><span class="text-xs text-gray-400">${new Date(v.timestamp).toLocaleDateString('nl-NL')}</span>`
+          collectedContents.push(vondstHtml)
+          setCurrentVondstId(v.id)
+          continue
+        }
+
         // Check if this is an AMK feature - use local data (no WMS needed)
         if (dataProps.kwaliteitswaarde && dataProps.kwaliteitswaarde.includes('archeologische waarde')) {
           const amkHtml = formatAMKPopup(dataProps)
@@ -1672,6 +1692,23 @@ export function Popup() {
               className="px-4 py-3 max-h-[50vh] overflow-y-auto"
               dangerouslySetInnerHTML={{ __html: contentWithoutTitle }}
             />
+
+            {/* Delete button for vondsten */}
+            {isVondst && currentVondstId && (
+              <div className="px-4 pb-4">
+                <button
+                  onClick={() => {
+                    removeVondst(currentVondstId)
+                    setVisible(false)
+                    setCurrentVondstId(null)
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors border-0 outline-none"
+                >
+                  <Trash2 size={16} />
+                  <span>Vondst verwijderen</span>
+                </button>
+              </div>
+            )}
 
             {/* Height map button for parcels */}
             {isParcel && parcelCoordinate && (

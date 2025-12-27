@@ -5,7 +5,7 @@ import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Style, Fill, Icon, Circle as CircleStyle } from 'ol/style'
 import { fromLonLat } from 'ol/proj'
-import { useMapStore, useGPSStore } from '../../store'
+import { useMapStore, useGPSStore, useSettingsStore } from '../../store'
 
 // Pre-create arrow SVG data URL (only once)
 const ARROW_SVG = (() => {
@@ -21,8 +21,8 @@ export function GpsMarker() {
   const position = useGPSStore(state => state.position)
   const accuracy = useGPSStore(state => state.accuracy)
   const tracking = useGPSStore(state => state.tracking)
-  const navigationMode = useGPSStore(state => state.navigationMode)
   const smoothHeading = useGPSStore(state => state.smoothHeading)
+  const headingUpMode = useSettingsStore(state => state.headingUpMode)
   const firstFix = useGPSStore(state => state.firstFix)
   const resetFirstFix = useGPSStore(state => state.resetFirstFix)
   const centerOnUser = useGPSStore(state => state.config.centerOnUser)
@@ -135,12 +135,13 @@ export function GpsMarker() {
 
     // Calculate arrow rotation
     let arrowRotation: number
-    if (navigationMode === 'free') {
-      // Free mode: arrow rotates with compass/GPS heading
+    if (!headingUpMode) {
+      // North-up mode: arrow rotates with compass/GPS heading to show travel direction
       // If no heading available, point north (0)
       arrowRotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
     } else {
-      // Drive mode: arrow counter-rotates to stay pointing up on screen
+      // Heading-up mode: arrow counter-rotates to stay pointing up on screen
+      // (because the map is already rotated to match heading)
       arrowRotation = -mapRotation
     }
 
@@ -169,7 +170,7 @@ export function GpsMarker() {
         })
       })
     )
-  }, [map, navigationMode, smoothHeading, rotation])
+  }, [map, headingUpMode, smoothHeading, rotation])
 
   return null // No visual component, just OpenLayers features
 }

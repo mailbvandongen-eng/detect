@@ -63,7 +63,7 @@ export function NavigationBar() {
     <AnimatePresence>
       {isNavigating && (
         <motion.div
-          className="fixed top-16 left-2 right-2 z-[1100] bg-white rounded-xl shadow-lg overflow-hidden"
+          className="fixed top-16 left-2 right-2 z-[1100] bg-white rounded-xl shadow-md overflow-hidden"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -101,7 +101,7 @@ export function NavigationBar() {
           )}
 
           {/* Destination info row */}
-          <div className="flex items-center gap-3 px-4 py-3 border-t border-gray-100">
+          <div className="flex items-center gap-3 px-4 py-3">
             {/* Navigation icon */}
             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
               <Navigation size={20} className="text-gray-600" />

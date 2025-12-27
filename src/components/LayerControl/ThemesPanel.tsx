@@ -39,6 +39,11 @@ export function ThemesPanel() {
               </button>
             </div>
           <div className="p-2 overflow-y-auto flex-1">
+            {/* Persoonlijk */}
+            <LayerGroup title="Persoonlijk" defaultExpanded={true} layerNames={['Mijn Vondsten']}>
+              <LayerItem name="Mijn Vondsten" type="overlay" />
+            </LayerGroup>
+
             {/* Achtergronden */}
             <LayerGroup title="Achtergronden" defaultExpanded={true}>
               <LayerItem name="CartoDB (licht)" type="base" />
