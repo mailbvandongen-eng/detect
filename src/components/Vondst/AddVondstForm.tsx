@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useVondstenStore } from '../../store/vondstenStore'
+import { useLocalVondstenStore } from '../../store/localVondstenStore'
 import { useAuthStore } from '../../store/authStore'
 import { useGPSStore } from '../../store/gpsStore'
+import { useSettingsStore } from '../../store/settingsStore'
 import type { VondstObjectType, VondstMaterial, VondstPeriod } from '../../types/vondst'
 
 interface Props {
@@ -12,7 +14,9 @@ interface Props {
 export function AddVondstForm({ onClose }: Props) {
   const user = useAuthStore(state => state.user)
   const position = useGPSStore(state => state.position)
-  const addVondst = useVondstenStore(state => state.addVondst)
+  const addCloudVondst = useVondstenStore(state => state.addVondst)
+  const addLocalVondst = useLocalVondstenStore(state => state.addVondst)
+  const vondstenLocalOnly = useSettingsStore(state => state.vondstenLocalOnly)
 
   const [notes, setNotes] = useState('')
   const [objectType, setObjectType] = useState<VondstObjectType>('Munt')
@@ -24,29 +28,51 @@ export function AddVondstForm({ onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user || !position) return
+    if (!position) return
+
+    // For cloud storage, require user
+    if (!vondstenLocalOnly && !user) {
+      alert('Log in om vondsten in de cloud op te slaan')
+      return
+    }
 
     setSaving(true)
     try {
-      await addVondst({
-        userId: user.uid,
-        location: {
-          lat: position.lat,
-          lng: position.lng,
-          accuracy: 5
-        },
-        timestamp: new Date().toISOString(),
-        photos: [], // TODO: Photo upload
-        notes,
-        objectType,
-        material,
-        period,
-        depth,
-        tags: [period.toLowerCase(), objectType.toLowerCase()],
-        private: isPrivate
-      })
-
-      alert('Vondst opgeslagen! ✅')
+      if (vondstenLocalOnly) {
+        // Save locally (no login needed)
+        addLocalVondst({
+          location: {
+            lat: position.lat,
+            lng: position.lng
+          },
+          notes,
+          objectType,
+          material,
+          period,
+          depth
+        })
+        alert('Vondst lokaal opgeslagen! ✅')
+      } else {
+        // Save to Firebase (requires login)
+        await addCloudVondst({
+          userId: user!.uid,
+          location: {
+            lat: position.lat,
+            lng: position.lng,
+            accuracy: 5
+          },
+          timestamp: new Date().toISOString(),
+          photos: [],
+          notes,
+          objectType,
+          material,
+          period,
+          depth,
+          tags: [period.toLowerCase(), objectType.toLowerCase()],
+          private: isPrivate
+        })
+        alert('Vondst opgeslagen in cloud! ✅')
+      }
       onClose()
     } catch (error: any) {
       alert('Fout bij opslaan: ' + error.message)

@@ -15,6 +15,8 @@ import { ZoomButtons } from './components/UI/ZoomButtons'
 import { SettingsPanel } from './components/UI/SettingsPanel'
 import { RouteLayer } from './components/Navigation/RouteLayer'
 import { NavigationBar } from './components/Navigation/NavigationBar'
+import { AddVondstButton } from './components/Vondst/AddVondstButton'
+import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
 import { useDeviceOrientation } from './hooks/useDeviceOrientation'
 import { useMapRotation } from './hooks/useMapRotation'
 import { useNavigation } from './hooks/useNavigation'
@@ -32,6 +34,7 @@ function App() {
       <MapContainer />
       <GpsMarker />
       <RouteLayer />
+      <LocalVondstMarkers />
       <Popup />
       <LongPressMenu />
       <SearchBox />
@@ -43,6 +46,7 @@ function App() {
       <OpacitySliders />
       <BuildLabel />
       <PresetButtons />
+      <AddVondstButton />
       <InfoButton />
       <SettingsPanel />
     </>

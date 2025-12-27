@@ -44,6 +44,27 @@ async function queryAHNHeight(coordinate: number[]): Promise<number | null> {
   return null
 }
 
+// Kadastrale gemeente codes naar namen (meest voorkomende)
+const KADASTRALE_GEMEENTEN: Record<string, string> = {
+  'ABG': 'Alphen-Chaam', 'ACM': 'Alkmaar', 'ALF': 'Alfen', 'ALK': 'Alkemade',
+  'AML': 'Ameland', 'AMR': 'Amerongen', 'AMS': 'Amsterdam', 'ANL': 'Anloo',
+  'APD': 'Apeldoorn', 'ARN': 'Arnhem', 'ASN': 'Assen', 'AVW': 'Avenhorn',
+  'BDA': 'Breda', 'BLK': 'Blokker', 'BRN': 'Barneveld', 'DEL': 'Delft',
+  'DHG': 'Den Haag', 'DRD': 'Dordrecht', 'EHV': 'Eindhoven', 'EMN': 'Emmen',
+  'EPE': 'Epe', 'GNP': 'Gennep', 'GRN': 'Groningen', 'GRV': 'Grave',
+  'GTB': 'Giethoorn', 'HDK': 'Harderwijk', 'HLM': 'Haarlem', 'HLN': 'Heiloo',
+  'HRL': 'Harlingen', 'HTN': 'Houten', 'LDN': 'Leiden', 'LWR': 'Leeuwarden',
+  'MST': 'Maastricht', 'NKK': 'Nijkerk', 'NMG': 'Nijmegen', 'OTM': 'Ootmarsum',
+  'RTD': 'Rotterdam', 'SND': 'Sneek', 'TBG': 'Tilburg', 'UTR': 'Utrecht',
+  'VLO': 'Venlo', 'WGN': 'Wageningen', 'ZWL': 'Zwolle', 'ZTP': 'Zutphen',
+  // Numerieke codes (kadastrale gemeentecodes)
+  '444': 'Houten', '811': 'Gouda', '310': 'Utrecht', '344': 'Amsterdam',
+  '363': 'Rotterdam', '518': 'Den Haag', '758': 'Eindhoven', '772': 'Tilburg',
+  '855': 'Breda', '85': 'Arnhem', '268': 'Nijmegen', '14': 'Groningen',
+  '80': 'Leeuwarden', '995': 'Maastricht', '106': 'Enschede', '153': 'Zwolle',
+  '34': 'Almere',
+}
+
 // IKAW trefkans waarden
 const IKAW_VALUES: Record<number, string> = {
   1: 'Zeer lage trefkans op archeologische resten',
@@ -95,7 +116,15 @@ export function Popup() {
   }
 
   const handleShowHeightMap = async () => {
-    if (!map || !parcelCoordinate || loadingHeightMap) return
+    console.log('🔘 HOOGTEKAART KNOP GEKLIKT')
+    console.log('🔘 parcelCoordinate uit state:', parcelCoordinate)
+
+    if (!map || !parcelCoordinate || loadingHeightMap) {
+      console.log('🔘 STOP - map:', !!map, 'coord:', parcelCoordinate, 'loading:', loadingHeightMap)
+      return
+    }
+
+    console.log(`🔘 DOORGEVEN AAN showParcelHeightMap: [${parcelCoordinate[0]}, ${parcelCoordinate[1]}]`)
     setLoadingHeightMap(true)
     try {
       const success = await showParcelHeightMap(map, parcelCoordinate)
@@ -621,7 +650,9 @@ export function Popup() {
                 html += `<br/><span class="text-sm font-semibold text-indigo-700">${props.perceelNummer || props.perceelnummer}</span>`
               }
               if (props.kadastraleGemeenteCode || props.gemeentecode) {
-                html += `<br/><span class="text-xs text-gray-600">Gemeente: ${props.kadastraleGemeenteCode || props.gemeentecode}</span>`
+                const code = String(props.kadastraleGemeenteCode || props.gemeentecode)
+                const naam = KADASTRALE_GEMEENTEN[code] || code
+                html += `<br/><span class="text-xs text-gray-600">Gemeente: ${naam}</span>`
               }
               if (props.sectie) {
                 html += `<br/><span class="text-xs text-gray-500">Sectie: ${props.sectie}</span>`
@@ -1536,6 +1567,7 @@ export function Popup() {
       if (collectedContents.length > 0) {
         setAllContents(collectedContents)
         setCurrentIndex(0)
+        console.log(`📌 KLIK OPGESLAGEN: [${evt.coordinate[0].toFixed(0)}, ${evt.coordinate[1].toFixed(0)}]`)
         setParcelCoordinate(evt.coordinate) // Store coordinate for height map
         setShowingHeightMap(false) // Reset height map state
         setVisible(true)

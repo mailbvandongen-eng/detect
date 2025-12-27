@@ -1,15 +1,29 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { MapPin } from 'lucide-react'
 import { AddVondstForm } from './AddVondstForm'
 import { useAuth } from '../../hooks/useAuth'
+import { useSettingsStore } from '../../store/settingsStore'
 
 export function AddVondstButton() {
   const [showForm, setShowForm] = useState(false)
   const { isAuthenticated, loginAnonymous } = useAuth()
+  const vondstenLocalOnly = useSettingsStore(state => state.vondstenLocalOnly)
+  const showVondstButton = useSettingsStore(state => state.showVondstButton)
+
+  // Don't render if disabled in settings
+  if (!showVondstButton) return null
 
   const handleClick = () => {
+    // If using local storage, no auth needed
+    if (vondstenLocalOnly) {
+      setShowForm(true)
+      return
+    }
+
+    // If using cloud, require auth
     if (!isAuthenticated) {
-      if (confirm('Je moet ingelogd zijn om vondsten toe te voegen. Anoniem inloggen?')) {
+      if (confirm('Je moet ingelogd zijn om vondsten in de cloud op te slaan. Anoniem inloggen?')) {
         loginAnonymous()
       }
       return
@@ -19,14 +33,15 @@ export function AddVondstButton() {
 
   return (
     <>
+      {/* Square button, same size as GPS button, positioned to its left */}
       <motion.button
-        className="fixed bottom-24 md:bottom-32 right-2.5 z-[1000] w-14 h-14 bg-orange-600 hover:bg-orange-700 text-white rounded-full shadow-lg flex items-center justify-center text-2xl"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        className="fixed bottom-[30px] md:bottom-10 right-[60px] z-[1000] w-11 h-11 bg-orange-500 hover:bg-orange-600 text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none backdrop-blur-sm"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={handleClick}
         title="Vondst toevoegen"
       >
-        +
+        <MapPin size={22} strokeWidth={2} />
       </motion.button>
 
       <AnimatePresence>

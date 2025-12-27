@@ -4,35 +4,43 @@ import VectorSource from 'ol/source/Vector'
 import { Fill, Stroke, Style } from 'ol/style'
 import { GeoJSON } from 'ol/format'
 import { toLonLat } from 'ol/proj'
+import { register } from 'ol/proj/proj4'
 import proj4 from 'proj4'
 import type { Polygon, MultiPolygon } from 'ol/geom'
-import { useLayerStore } from '../store'
+import ImageLayer from 'ol/layer/Image'
+import ImageArcGISRest from 'ol/source/ImageArcGISRest'
+import type { RenderEvent } from 'ol/render/Event'
 
-// Register RD projection if not already done
+// Version for debugging
+console.log('📦 parcelHighlight.ts v3.0 loaded - with polygon clipping')
+
+// Register RD projection with both proj4 and OpenLayers
 proj4.defs('EPSG:28992', '+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs')
+register(proj4)
 
-// Store reference to the highlight layer
-let highlightLayer: VectorLayer<VectorSource> | null = null
-let hillshadeWasVisible = false
+// Store reference to the layers and geometry for clipping
+let hillshadeLayer: ImageLayer<ImageArcGISRest> | null = null
+let outlineLayer: VectorLayer<VectorSource> | null = null
+let clipGeometry: Polygon | MultiPolygon | null = null
 
 /**
  * Clear any existing parcel highlight from the map
  */
 export function clearParcelHighlight(map: Map) {
-  if (highlightLayer) {
-    map.removeLayer(highlightLayer)
-    highlightLayer = null
+  if (hillshadeLayer) {
+    map.removeLayer(hillshadeLayer)
+    hillshadeLayer = null
   }
-
-  // Restore hillshade visibility to what it was before
-  if (!hillshadeWasVisible) {
-    useLayerStore.getState().setLayerVisibility('AHN4 Hillshade NL', false)
+  if (outlineLayer) {
+    map.removeLayer(outlineLayer)
+    outlineLayer = null
   }
+  clipGeometry = null
 }
 
 /**
  * Fetch parcel geometry from BRP WFS and show height map overlay
- * Uses the existing AHN4 Hillshade layer instead of creating a new one
+ * Shows hillshade within parcel bounding box with parcel outline
  */
 export async function showParcelHeightMap(
   map: Map,
@@ -41,21 +49,30 @@ export async function showParcelHeightMap(
   try {
     // Convert click coordinate to RD
     const lonLat = toLonLat(coordinate)
+    console.log(`🖱️ Click (3857): ${coordinate[0].toFixed(0)}, ${coordinate[1].toFixed(0)}`)
+    console.log(`🖱️ LonLat (WGS84): ${lonLat[0].toFixed(5)}, ${lonLat[1].toFixed(5)}`)
+
     const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+    console.log(`🖱️ RD (28992): ${rd ? rd[0].toFixed(0) + ', ' + rd[1].toFixed(0) : 'FAILED'}`)
 
     // Check if within Netherlands bounds
-    if (rd[0] < 7000 || rd[0] > 300000 || rd[1] < 289000 || rd[1] > 629000) {
+    if (!rd || rd[0] < 7000 || rd[0] > 300000 || rd[1] < 289000 || rd[1] > 629000) {
+      console.error('❌ Coordinate outside Netherlands or transformation failed:', rd)
       return false
     }
 
     // Clear any existing highlight
     clearParcelHighlight(map)
 
-    // Fetch parcel geometry via WFS with timeout
+    // Fetch parcel geometry via WFS with BBOX filter (more reliable than CQL_FILTER)
+    const buffer = 1 // 1 meter buffer around click point
+    const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+    const cacheBuster = Date.now()
     const wfsUrl = `https://service.pdok.nl/rvo/brpgewaspercelen/wfs/v1_0?` +
       `SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=brpgewaspercelen:BrpGewas&` +
       `OUTPUTFORMAT=json&SRSNAME=EPSG:28992&` +
-      `CQL_FILTER=INTERSECTS(geom,POINT(${rd[0]} ${rd[1]}))`
+      `BBOX=${bbox},EPSG:28992&_=${cacheBuster}`
+    console.log('🌐 WFS URL:', wfsUrl)
 
     // Add timeout to prevent hanging
     const controller = new AbortController()
@@ -70,6 +87,7 @@ export async function showParcelHeightMap(
     }
 
     const data = await response.json()
+    console.log('📥 WFS RESPONSE:', JSON.stringify(data).substring(0, 500))
 
     if (!data.features || data.features.length === 0) {
       console.log('No parcel found at location')
@@ -78,8 +96,10 @@ export async function showParcelHeightMap(
 
     // Get the parcel feature
     const parcelFeature = data.features[0]
+    console.log('📥 PARCEL ID:', parcelFeature.id || parcelFeature.properties?.id || 'geen ID')
+    console.log('📥 PARCEL BBOX:', JSON.stringify(parcelFeature.bbox || 'geen bbox'))
 
-    // Parse the geometry (in RD coordinates)
+    // Parse the geometry (in RD coordinates → Web Mercator)
     const geojsonFormat = new GeoJSON()
     const feature = geojsonFormat.readFeature(parcelFeature, {
       dataProjection: 'EPSG:28992',
@@ -92,37 +112,132 @@ export async function showParcelHeightMap(
       return false
     }
 
-    // Get extent for zooming
+    // Debug: log parcel info
+    const props = parcelFeature.properties || {}
+    console.log(`📍 Parcel: ${props.category || 'unknown'} - ${props.gewasnaam || props.gewas || 'geen gewas'}`)
+    console.log(`📍 Geometry type: ${geometry.getType()}, extent: ${geometry.getExtent().map((v: number) => v.toFixed(0)).join(', ')}`)
+
+    // Get extent for the hillshade layer
     const extent = geometry.getExtent()
 
-    // Buffer the extent by 30% for better context
+    // Buffer the extent slightly for the hillshade
     const width = extent[2] - extent[0]
     const height = extent[3] - extent[1]
-    const buffer = Math.max(width, height) * 0.3
-    const bufferedExtent: [number, number, number, number] = [
-      extent[0] - buffer,
-      extent[1] - buffer,
-      extent[2] + buffer,
-      extent[3] + buffer
+    const hillshadeBuffer = Math.max(width, height) * 0.05
+    const hillshadeExtent: [number, number, number, number] = [
+      extent[0] - hillshadeBuffer,
+      extent[1] - hillshadeBuffer,
+      extent[2] + hillshadeBuffer,
+      extent[3] + hillshadeBuffer
     ]
 
-    // Remember if hillshade was already visible
-    const layerStore = useLayerStore.getState()
-    hillshadeWasVisible = layerStore.visible['AHN4 Hillshade NL'] ?? false
+    // Buffer for zooming (larger)
+    const zoomBuffer = Math.max(width, height) * 0.3
+    const zoomExtent: [number, number, number, number] = [
+      extent[0] - zoomBuffer,
+      extent[1] - zoomBuffer,
+      extent[2] + zoomBuffer,
+      extent[3] + zoomBuffer
+    ]
 
-    // Turn on the existing AHN4 Hillshade layer
-    layerStore.setLayerVisibility('AHN4 Hillshade NL', true)
+    // Store geometry for clipping
+    clipGeometry = geometry
 
-    // Create vector layer with parcel outline
+    // Create colored elevation layer with polygon clipping
+    // Using AHN4 DTM 50cm from Esri Nederland ImageServer with DYNAMIC color ramp
+    hillshadeLayer = new ImageLayer({
+      source: new ImageArcGISRest({
+        url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
+        params: {
+          renderingRule: JSON.stringify({
+            rasterFunction: 'AHN - Color Ramp D'  // DYNAMISCH! blauw→groen→geel→bruin
+          })
+        },
+        crossOrigin: 'anonymous'
+      }),
+      extent: hillshadeExtent,
+      zIndex: 998
+    })
+
+    // Add canvas clipping to render only within polygon
+    hillshadeLayer.on('prerender', (evt: RenderEvent) => {
+      if (!clipGeometry) return
+      const ctx = evt.context as CanvasRenderingContext2D
+      if (!ctx) return
+
+      const frameState = evt.frameState
+      if (!frameState) return
+
+      ctx.save()
+      ctx.beginPath()
+
+      // Get polygon coordinates and convert to render pixels using frameState
+      const coords = clipGeometry.getType() === 'Polygon'
+        ? (clipGeometry as Polygon).getCoordinates()[0]
+        : (clipGeometry as MultiPolygon).getCoordinates()[0][0]
+
+      // Get the pixel ratio and view state for correct transformation
+      const pixelRatio = frameState.pixelRatio
+      const viewState = frameState.viewState
+      const center = viewState.center
+      const resolution = viewState.resolution
+      const rotation = viewState.rotation
+
+      // Canvas is already transformed, so we need to apply the same transform
+      const size = frameState.size
+      if (!size) return
+
+      coords.forEach((coord, i) => {
+        // Convert map coordinate to pixel coordinate
+        // Taking into account center, resolution, rotation
+        let x = (coord[0] - center[0]) / resolution
+        let y = (center[1] - coord[1]) / resolution
+
+        // Apply rotation if any
+        if (rotation !== 0) {
+          const cos = Math.cos(rotation)
+          const sin = Math.sin(rotation)
+          const newX = x * cos - y * sin
+          const newY = x * sin + y * cos
+          x = newX
+          y = newY
+        }
+
+        // Translate to canvas center and apply pixel ratio
+        const px = (x + size[0] / 2) * pixelRatio
+        const py = (y + size[1] / 2) * pixelRatio
+
+        if (i === 0) {
+          ctx.moveTo(px, py)
+        } else {
+          ctx.lineTo(px, py)
+        }
+      })
+
+      ctx.closePath()
+      ctx.clip()
+    })
+
+    hillshadeLayer.on('postrender', (evt: RenderEvent) => {
+      const ctx = evt.context as CanvasRenderingContext2D
+      if (ctx) {
+        ctx.restore()
+      }
+    })
+
+    // Add hillshade layer to map
+    map.addLayer(hillshadeLayer)
+
+    // Create vector layer with parcel outline (on top)
     const vectorSource = new VectorSource({
       features: [feature]
     })
 
-    highlightLayer = new VectorLayer({
+    outlineLayer = new VectorLayer({
       source: vectorSource,
       style: new Style({
         fill: new Fill({
-          color: 'rgba(220, 38, 38, 0.1)' // light red fill
+          color: 'rgba(0, 0, 0, 0)' // transparent fill to show hillshade
         }),
         stroke: new Stroke({
           color: '#dc2626', // red outline
@@ -132,16 +247,11 @@ export async function showParcelHeightMap(
       zIndex: 999
     })
 
-    // Add highlight layer to map
-    map.addLayer(highlightLayer)
+    // Add outline layer to map
+    map.addLayer(outlineLayer)
 
-    // Zoom to the parcel
-    map.getView().fit(bufferedExtent, {
-      duration: 300,
-      maxZoom: 17
-    })
-
-    console.log('✅ Parcel highlighted, hillshade enabled')
+    // Don't zoom - just show the overlay in place
+    console.log('✅ Parcel height map displayed')
     return true
 
   } catch (error) {

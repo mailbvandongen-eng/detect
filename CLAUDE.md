@@ -11,10 +11,17 @@
 ## EERSTE ACTIE BIJ NIEUWE SESSIE
 **Lees ALTIJD eerst `.claude/notes.md` voor lopende taken, plannen en context uit vorige sessies!**
 
+## 🚨 VERSIE BUMPEN BIJ NIEUWE FEATURES/FIXES
+**ALTIJD bij nieuwe functionaliteit of bugfixes:**
+1. `npm version patch` (of minor/major)
+2. Update `VERSION` in `src/main.tsx`
+3. Console toont: `🚀 DetectorApp vX.X.X`
+4. Gebruiker kan zo zien dat nieuwe code geladen is!
+
 ## Belangrijke Regels
 - **NOOIT pushen naar GitHub zonder expliciete toestemming**
 - Screenshots staan in: `C:\VSCode\_Screenshots`
-- Vite base path is `/webapp/` - alle data paden moeten `/webapp/data/...` zijn
+- Vite base path is `/detectorapp-nl/` - alle data paden moeten `/detectorapp-nl/data/...` zijn
 
 ## Dutch RD Shapefiles (EPSG:28992)
 

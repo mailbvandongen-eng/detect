@@ -77,6 +77,7 @@ export const useLayerStore = create<LayerState>()(
       'UIKAV Expert': false,
       'UIKAV Indeling': false,
       // Hillshade NL
+      'AHN4 Hoogtekaart Kleur': false,
       'AHN4 Hillshade NL': false,
       'AHN4 Multi-Hillshade NL': false,
       'AHN 0.5m': false,
@@ -120,6 +121,7 @@ export const useLayerStore = create<LayerState>()(
       'Bodemkaart': 0.6,
       'IKAW': 0.5,
       'Archeo Landschappen': 0.5,
+      'AHN4 Hoogtekaart Kleur': 0.85,
       'AHN4 Hillshade NL': 0.7,
       'AHN4 Multi-Hillshade NL': 0.7,
       'World Hillshade': 0.7,

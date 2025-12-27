@@ -6,6 +6,7 @@ import { useLayerStore } from '../../store/layerStore'
 // All layers that should have opacity sliders - NL only
 const OPACITY_LAYERS = [
   // Hillshade NL
+  { name: 'AHN4 Hoogtekaart Kleur', color: 'blue', default: 0.85 },
   { name: 'AHN4 Hillshade NL', color: 'blue', default: 0.7 },
   { name: 'AHN4 Multi-Hillshade NL', color: 'blue', default: 0.7 },
   { name: 'AHN4 Helling NL', color: 'blue', default: 0.6 },

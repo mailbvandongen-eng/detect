@@ -197,6 +197,14 @@ export const layerRegistry: Record<string, LayerDefinition> = {
   },
 
   // Hillshade layers - NL only
+  'AHN4 Hoogtekaart Kleur': {
+    name: 'AHN4 Hoogtekaart Kleur',
+    factory: async () => {
+      const { createAHN4ColorElevationLayerOL } = await import('./hillshadeLayers')
+      return createAHN4ColorElevationLayerOL()
+    },
+    immediateLoad: true
+  },
   'AHN4 Hillshade NL': {
     name: 'AHN4 Hillshade NL',
     factory: async () => {

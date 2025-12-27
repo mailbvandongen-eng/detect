@@ -52,7 +52,7 @@ export function ThemesPanel() {
             {/* Thema's - alle overlay lagen */}
             <LayerGroup title="Thema's" defaultExpanded={false}>
               {/* Steentijd (Stone Age) */}
-              <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false}>
+              <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false} layerNames={['Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen']}>
                 <LayerItem name="Hunebedden" type="overlay" />
                 <LayerItem name="FAMKE Steentijd" type="overlay" />
                 <LayerItem name="Grafheuvels" type="overlay" />
@@ -60,7 +60,7 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Archaeological Layers */}
-              <LayerGroup title="Archeologische lagen" defaultExpanded={false}>
+              <LayerGroup title="Archeologische lagen" defaultExpanded={false} layerNames={['AMK Monumenten', 'Romeinse wegen', 'IKAW', 'Archeo Landschappen']}>
                 <LayerItem name="AMK Monumenten" type="overlay" />
                 <LayerItem name="Romeinse wegen" type="overlay" />
                 <LayerItem name="IKAW" type="overlay" />
@@ -68,7 +68,7 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Erfgoed & Monumenten */}
-              <LayerGroup title="Erfgoed & Monumenten" defaultExpanded={false}>
+              <LayerGroup title="Erfgoed & Monumenten" defaultExpanded={false} layerNames={['Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Kastelen']}>
                 <LayerItem name="Rijksmonumenten" type="overlay" />
                 <LayerItem name="Werelderfgoed" type="overlay" />
                 <LayerItem name="Religieus Erfgoed" type="overlay" />
@@ -76,7 +76,7 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* WOII & Militair */}
-              <LayerGroup title="WOII & Militair" defaultExpanded={false}>
+              <LayerGroup title="WOII & Militair" defaultExpanded={false} layerNames={['WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden', 'Verdedigingslinies', 'Militaire Objecten', 'Inundatiegebieden']}>
                 <LayerItem name="WWII Bunkers" type="overlay" />
                 <LayerItem name="Slagvelden" type="overlay" />
                 <LayerItem name="Militaire Vliegvelden" type="overlay" />
@@ -86,7 +86,7 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Paleogeografische kaarten */}
-              <LayerGroup title="Paleokaarten (tijdreizen)" defaultExpanded={false}>
+              <LayerGroup title="Paleokaarten (tijdreizen)" defaultExpanded={false} layerNames={['Paleokaart 800 n.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 500 v.Chr.', 'Paleokaart 1500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 9000 v.Chr.']}>
                 <LayerItem name="Paleokaart 800 n.Chr." type="overlay" />
                 <LayerItem name="Paleokaart 100 n.Chr." type="overlay" />
                 <LayerItem name="Paleokaart 500 v.Chr." type="overlay" />
@@ -98,7 +98,7 @@ export function ThemesPanel() {
 
 
               {/* Uiterwaarden Layers */}
-              <LayerGroup title="Uiterwaarden (UIKAV)" defaultExpanded={false}>
+              <LayerGroup title="Uiterwaarden (UIKAV)" defaultExpanded={false} layerNames={['UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling']}>
                 <LayerItem name="UIKAV Punten" type="overlay" />
                 <LayerItem name="UIKAV Vlakken" type="overlay" />
                 <LayerItem name="UIKAV Expert" type="overlay" />
@@ -107,7 +107,8 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Hillshade & LiDAR Layers */}
-              <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false}>
+              <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false} layerNames={['AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m', 'World Hillshade']}>
+                <LayerItem name="AHN4 Hoogtekaart Kleur" type="overlay" />
                 <LayerItem name="AHN4 Hillshade NL" type="overlay" />
                 <LayerItem name="AHN4 Multi-Hillshade NL" type="overlay" />
                 <LayerItem name="AHN 0.5m" type="overlay" />
@@ -115,22 +116,22 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Terrain Layers */}
-              <LayerGroup title="Terrein & Bodem" defaultExpanded={false}>
+              <LayerGroup title="Terrein & Bodem" defaultExpanded={false} layerNames={['Veengebieden', 'Geomorfologie', 'Bodemkaart']}>
                 <LayerItem name="Veengebieden" type="overlay" />
                 <LayerItem name="Geomorfologie" type="overlay" />
                 <LayerItem name="Bodemkaart" type="overlay" />
               </LayerGroup>
 
               {/* Percelen - Kadaster & Landbouw */}
-              <LayerGroup title="Percelen" defaultExpanded={false}>
+              <LayerGroup title="Percelen" defaultExpanded={false} layerNames={['Gewaspercelen', 'Kadastrale Grenzen']}>
                 <LayerItem name="Gewaspercelen" type="overlay" />
                 <LayerItem name="Kadastrale Grenzen" type="overlay" />
               </LayerGroup>
 
               {/* Provinciale Waardenkaarten */}
-              <LayerGroup title="Provinciale Kaarten" defaultExpanded={false}>
+              <LayerGroup title="Provinciale Kaarten" defaultExpanded={false} layerNames={['Scheepswrakken', 'Woonheuvels ZH', 'Romeinse Forten', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen', 'Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken', 'Verdronken Dorpen']}>
                 {/* Zuid-Holland */}
-                <LayerGroup title="Zuid-Holland" defaultExpanded={false}>
+                <LayerGroup title="Zuid-Holland" defaultExpanded={false} layerNames={['Scheepswrakken', 'Woonheuvels ZH', 'Romeinse Forten', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen']}>
                   <LayerItem name="Scheepswrakken" type="overlay" />
                   <LayerItem name="Woonheuvels ZH" type="overlay" />
                   <LayerItem name="Romeinse Forten" type="overlay" />
@@ -139,19 +140,19 @@ export function ThemesPanel() {
                   <LayerItem name="Oude Kernen" type="overlay" />
                 </LayerGroup>
                 {/* Gelderland */}
-                <LayerGroup title="Gelderland" defaultExpanded={false}>
+                <LayerGroup title="Gelderland" defaultExpanded={false} layerNames={['Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken']}>
                   <LayerItem name="Relictenkaart Punten" type="overlay" />
                   <LayerItem name="Relictenkaart Lijnen" type="overlay" />
                   <LayerItem name="Relictenkaart Vlakken" type="overlay" />
                 </LayerGroup>
                 {/* Zeeland */}
-                <LayerGroup title="Zeeland" defaultExpanded={false}>
+                <LayerGroup title="Zeeland" defaultExpanded={false} layerNames={['Verdronken Dorpen']}>
                   <LayerItem name="Verdronken Dorpen" type="overlay" />
                 </LayerGroup>
               </LayerGroup>
 
               {/* Fossils */}
-              <LayerGroup title="Fossielen (vondsten)" defaultExpanded={false}>
+              <LayerGroup title="Fossielen (vondsten)" defaultExpanded={false} layerNames={['Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk']}>
                 <LayerItem name="Fossielen Nederland" type="overlay" />
                 <LayerItem name="Fossielen België" type="overlay" />
                 <LayerItem name="Fossielen Duitsland" type="overlay" />
@@ -159,7 +160,7 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Recreation */}
-              <LayerGroup title="Recreatie" defaultExpanded={false}>
+              <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Parken', 'Speeltuinen', 'Musea', 'Strandjes']}>
                 <LayerItem name="Parken" type="overlay" />
                 <LayerItem name="Speeltuinen" type="overlay" />
                 <LayerItem name="Musea" type="overlay" />

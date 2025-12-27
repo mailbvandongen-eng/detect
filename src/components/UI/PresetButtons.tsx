@@ -50,7 +50,7 @@ const ALL_OVERLAYS = [
   'Religieus Erfgoed',
   'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling',
   'Veengebieden', 'AHN 0.5m', 'Geomorfologie', 'Bodemkaart',
-  'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'World Hillshade',
+  'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN4 Hoogtekaart Kleur', 'World Hillshade',
   'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
   'Parken', 'Speeltuinen', 'Musea', 'Strandjes',
   'Gewaspercelen', 'Kadastrale Grenzen'

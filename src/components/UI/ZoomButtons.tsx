@@ -24,7 +24,7 @@ export function ZoomButtons() {
   }
 
   return (
-    <div className="fixed top-14 left-2.5 z-[800] flex flex-col gap-1">
+    <div className="fixed top-2.5 left-2.5 z-[800] flex flex-col gap-1">
       <motion.button
         className="w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-lg shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         onClick={handleZoomIn}

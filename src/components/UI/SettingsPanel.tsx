@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2 } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUIStore, useSettingsStore, usePresetStore } from '../../store'
 import type { DefaultBackground } from '../../store/settingsStore'
@@ -101,6 +101,25 @@ export function SettingsPanel() {
                   checked={settings.hapticFeedback}
                   onChange={settings.setHapticFeedback}
                 />
+              </Section>
+
+              {/* Vondsten */}
+              <Section title="Vondsten" icon={<MapPin size={16} />}>
+                <ToggleRow
+                  label="Vondsten knop tonen"
+                  checked={settings.showVondstButton}
+                  onChange={settings.setShowVondstButton}
+                />
+                <ToggleRow
+                  label="Alleen lokaal opslaan"
+                  checked={settings.vondstenLocalOnly}
+                  onChange={settings.setVondstenLocalOnly}
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  {settings.vondstenLocalOnly
+                    ? 'Vondsten worden op dit apparaat opgeslagen (geen login nodig)'
+                    : 'Vondsten worden in de cloud opgeslagen (login vereist)'}
+                </p>
               </Section>
 
               {/* Presets */}

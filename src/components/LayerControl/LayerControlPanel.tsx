@@ -97,6 +97,7 @@ export function LayerControlPanel() {
 
               {/* Hillshade & LiDAR Layers - NL only */}
               <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false}>
+                <LayerItem name="AHN4 Hoogtekaart Kleur" type="overlay" />
                 <LayerItem name="AHN4 Hillshade NL" type="overlay" />
                 <LayerItem name="AHN4 Multi-Hillshade NL" type="overlay" />
                 <LayerItem name="AHN4 Helling NL" type="overlay" />

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:ahn.arcgisonline.nl)",
+      "Bash(cat:*)",
+      "Bash(npm pkg set:*)",
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:boerenbunder.nl)",
+      "WebSearch",
+      "WebFetch(domain:apps.arcgisonline.nl)",
+      "WebFetch(domain:kadastralekaart.com)",
+      "Bash(npm version:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

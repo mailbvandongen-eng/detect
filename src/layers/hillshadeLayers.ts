@@ -4,6 +4,29 @@ import TileWMS from 'ol/source/TileWMS'
 import XYZ from 'ol/source/XYZ'
 import ImageArcGISRest from 'ol/source/ImageArcGISRest'
 
+// AHN4 Hoogtekaart Kleur - 50cm resolutie met dynamische kleuren
+// Toont hoogteverschillen in kleur (blauw=laag → groen → oranje/bruin=hoog)
+// Dynamische color ramp past zich aan aan lokale hoogteverschillen
+export function createAHN4ColorElevationLayerOL() {
+  const layer = new ImageLayer({
+    properties: { title: 'AHN4 Hoogtekaart Kleur', type: 'arcgis' },
+    visible: false,
+    opacity: 1.0,  // Volle dekking voor beste kleuren
+    source: new ImageArcGISRest({
+      url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
+      params: {
+        renderingRule: JSON.stringify({
+          rasterFunction: 'AHN - Color Ramp D'  // Dynamisch! blauw→groen→geel→bruin
+        })
+      },
+      crossOrigin: 'anonymous',
+      attributions: '© Esri Nederland, AHN4 50cm'
+    })
+  })
+
+  return layer
+}
+
 // AHN4 Hillshade Netherlands - Esri Nederland ImageServer
 // Uses dynamic hillshade rendering from AHN4 DTM data
 export function createAHN4HillshadeLayerOL() {
