@@ -177,12 +177,24 @@ export function MapContainer() {
 
     // Wait a tick for layers to be registered
     const timer = setTimeout(() => {
-      // Turn off all base layers, then turn on the default
+      // Always ensure CartoDB is the default fallback
+      const bgToApply = defaultBackground || 'CartoDB (licht)'
+
+      // Turn off all base layers first
       BASE_LAYERS.forEach(layer => {
-        setLayerVisibility(layer, layer === defaultBackground)
+        setLayerVisibility(layer, false)
       })
+
+      // Then turn on the default (or CartoDB as fallback)
+      if (BASE_LAYERS.includes(bgToApply)) {
+        setLayerVisibility(bgToApply, true)
+      } else {
+        // Fallback to CartoDB if invalid setting
+        setLayerVisibility('CartoDB (licht)', true)
+      }
+
       initialBgApplied.current = true
-      console.log(`🗺️ Default background: ${defaultBackground}`)
+      console.log(`🗺️ Default background: ${bgToApply}`)
     }, 100)
 
     return () => clearTimeout(timer)
