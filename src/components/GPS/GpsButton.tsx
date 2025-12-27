@@ -8,7 +8,7 @@ export function GpsButton() {
   return (
     <motion.button
       className={`
-        fixed bottom-[30px] md:bottom-10 right-2.5 z-[1000]
+        fixed bottom-[45px] md:bottom-[55px] right-2.5 z-[1000]
         w-11 h-11 cursor-pointer border-0 outline-none
         flex items-center justify-center
         rounded-xl backdrop-blur-sm
