@@ -17,6 +17,7 @@ import { RouteLayer } from './components/Navigation/RouteLayer'
 import { NavigationBar } from './components/Navigation/NavigationBar'
 import { AddVondstButton } from './components/Vondst/AddVondstButton'
 import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
+import { PasswordGate } from './components/Auth/PasswordGate'
 import { useDeviceOrientation } from './hooks/useDeviceOrientation'
 import { useMapRotation } from './hooks/useMapRotation'
 import { useNavigation } from './hooks/useNavigation'
@@ -42,26 +43,28 @@ function App() {
   const fontSizeClass = FONT_SIZE_CLASSES[fontSize] || FONT_SIZE_CLASSES.small
 
   return (
-    <div className={fontSizeClass}>
-      <MapContainer />
-      <GpsMarker />
-      <RouteLayer />
-      <LocalVondstMarkers />
-      <Popup />
-      <LongPressMenu />
-      <SearchBox />
-      <NavigationBar />
-      <GpsButton />
-      <ZoomButtons />
-      <LayerControlButton />
-      <ThemesPanel />
-      <OpacitySliders />
-      <BuildLabel />
-      <PresetButtons />
-      <AddVondstButton />
-      <InfoButton />
-      <SettingsPanel />
-    </div>
+    <PasswordGate>
+      <div className={fontSizeClass}>
+        <MapContainer />
+        <GpsMarker />
+        <RouteLayer />
+        <LocalVondstMarkers />
+        <Popup />
+        <LongPressMenu />
+        <SearchBox />
+        <NavigationBar />
+        <GpsButton />
+        <ZoomButtons />
+        <LayerControlButton />
+        <ThemesPanel />
+        <OpacitySliders />
+        <BuildLabel />
+        <PresetButtons />
+        <AddVondstButton />
+        <InfoButton />
+        <SettingsPanel />
+      </div>
+    </PasswordGate>
   )
 }
 

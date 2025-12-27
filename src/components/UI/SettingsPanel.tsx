@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Type, Download } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Type, Download, LogOut } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUIStore, useSettingsStore, usePresetStore } from '../../store'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
+import { clearPasswordAuth } from '../Auth/PasswordGate'
 import type { DefaultBackground, FontSize } from '../../store/settingsStore'
 
 export function SettingsPanel() {
@@ -194,8 +195,17 @@ export function SettingsPanel() {
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2 border-t border-gray-100 text-xs text-gray-400 text-center">
-              Instellingen worden lokaal opgeslagen
+            <div className="px-4 py-3 border-t border-gray-100 space-y-2">
+              <button
+                onClick={clearPasswordAuth}
+                className="flex items-center justify-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors border-0 outline-none"
+              >
+                <LogOut size={16} />
+                <span>Uitloggen</span>
+              </button>
+              <p className="text-xs text-gray-400 text-center">
+                Instellingen worden lokaal opgeslagen
+              </p>
             </div>
           </motion.div>
         </>
