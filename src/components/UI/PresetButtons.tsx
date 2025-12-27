@@ -95,9 +95,9 @@ export function PresetButtons() {
   }
 
   return (
-    <div className="fixed bottom-[30px] md:bottom-10 left-2 z-[800]">
-      {/* Stacked vertically: preset on top, reset below */}
-      <div className="flex flex-col gap-2">
+    <>
+      {/* Preset + Reset buttons - bottom left */}
+      <div className="fixed bottom-[30px] md:bottom-10 left-2 z-[800] flex gap-2">
         <button
           onClick={togglePresetsPanel}
           className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
@@ -116,14 +116,16 @@ export function PresetButtons() {
         >
           <RotateCcw size={22} className="text-gray-600" />
         </button>
-        <button
-          onClick={toggleSettingsPanel}
-          className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
-          title="Instellingen"
-        >
-          <Settings size={22} className="text-gray-600" />
-        </button>
       </div>
+
+      {/* Settings button - bottom left, next to preset/reset */}
+      <button
+        onClick={toggleSettingsPanel}
+        className="fixed bottom-[30px] md:bottom-10 left-[120px] z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        title="Instellingen"
+      >
+        <Settings size={22} className="text-gray-600" />
+      </button>
 
       {/* Expanded: preset options */}
       <AnimatePresence>
@@ -172,6 +174,6 @@ export function PresetButtons() {
           </>
         )}
       </AnimatePresence>
-    </div>
+    </>
   )
 }

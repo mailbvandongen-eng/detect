@@ -10,7 +10,7 @@ export function KaartlagenButton() {
     <motion.button
       className={`
         fixed bottom-[85px] md:bottom-[95px] right-2.5 z-[1000]
-        w-10 h-10 cursor-pointer border-0 outline-none
+        w-11 h-11 cursor-pointer border-0 outline-none
         flex items-center justify-center
         rounded-xl backdrop-blur-sm
         transition-all duration-200
@@ -25,7 +25,7 @@ export function KaartlagenButton() {
       aria-label={themesPanelOpen ? 'Kaartlagen sluiten' : 'Kaartlagen openen'}
       title="Kaartlagen"
     >
-      <Map size={20} strokeWidth={2} />
+      <Map size={22} strokeWidth={2} />
     </motion.button>
   )
 }
