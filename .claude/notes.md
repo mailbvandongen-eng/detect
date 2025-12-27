@@ -1,7 +1,7 @@
 # Detectorapp-NL - Sessienotities
 
 ## 🚨 VERSIE REGEL (27 dec 2024) - LOCKED!
-**HUIDIGE VERSIE: 2.5.23**
+**HUIDIGE VERSIE: 2.5.23** ✅ Gepusht naar GitHub
 
 ### DE REGEL (ALTIJD VOLGEN):
 1. **ELKE code wijziging = versie ophogen**
