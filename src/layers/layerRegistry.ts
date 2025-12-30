@@ -341,12 +341,52 @@ export const layerRegistry: Record<string, LayerDefinition> = {
   // These are only loaded when first toggled on
   // ============================================
 
-  // Archaeological vector layers
+  // Archaeological vector layers - AMK with period filters
   'AMK Monumenten': {
     name: 'AMK Monumenten',
     factory: async () => {
       const { createAMKLayerOL } = await import('./amkOL')
       return createAMKLayerOL()
+    },
+    immediateLoad: false
+  },
+  'AMK Romeins': {
+    name: 'AMK Romeins',
+    factory: async () => {
+      const { createAMKRomeinsLayerOL } = await import('./amkOL')
+      return createAMKRomeinsLayerOL()
+    },
+    immediateLoad: false
+  },
+  'AMK Steentijd': {
+    name: 'AMK Steentijd',
+    factory: async () => {
+      const { createAMKSteentijdLayerOL } = await import('./amkOL')
+      return createAMKSteentijdLayerOL()
+    },
+    immediateLoad: false
+  },
+  'AMK Vroege ME': {
+    name: 'AMK Vroege ME',
+    factory: async () => {
+      const { createAMKVroegeMELayerOL } = await import('./amkOL')
+      return createAMKVroegeMELayerOL()
+    },
+    immediateLoad: false
+  },
+  'AMK Late ME': {
+    name: 'AMK Late ME',
+    factory: async () => {
+      const { createAMKLateMELayerOL } = await import('./amkOL')
+      return createAMKLateMELayerOL()
+    },
+    immediateLoad: false
+  },
+  'AMK Overig': {
+    name: 'AMK Overig',
+    factory: async () => {
+      const { createAMKOverigLayerOL } = await import('./amkOL')
+      return createAMKOverigLayerOL()
     },
     immediateLoad: false
   },

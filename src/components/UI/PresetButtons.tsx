@@ -41,7 +41,8 @@ const HOVER_COLORS: Record<string, string> = {
 const ALL_OVERLAYS = [
   'Labels Overlay',
   'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
-  'AMK Monumenten', 'Romeinse wegen', 'Kastelen', 'IKAW', 'Archeo Landschappen',
+  'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
+  'Romeinse wegen', 'Kastelen', 'IKAW', 'Archeo Landschappen',
   'Rijksmonumenten', 'Werelderfgoed',
   'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
   'Verdedigingslinies', 'Inundatiegebieden', 'Militaire Objecten',

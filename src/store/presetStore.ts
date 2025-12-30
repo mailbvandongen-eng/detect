@@ -16,7 +16,7 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'detectie',
     name: 'Detectie',
     icon: 'Compass',
-    layers: ['AMK Monumenten', 'Romeinse wegen', 'Gewaspercelen', 'Kadastrale Grenzen'],
+    layers: ['AMK Monumenten', 'Gewaspercelen'],
     isBuiltIn: true  // Protected - cannot be deleted
   },
   {
@@ -77,7 +77,8 @@ interface PresetState {
 // All overlay layer names for clearing
 const ALL_OVERLAYS = [
   'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
-  'AMK Monumenten', 'Romeinse wegen', 'Kastelen', 'IKAW', 'Archeo Landschappen',
+  'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
+  'Romeinse wegen', 'Kastelen', 'IKAW', 'Archeo Landschappen',
   'Rijksmonumenten', 'Werelderfgoed', 'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
   'Verdedigingslinies', 'Inundatiegebieden', 'Militaire Objecten',
   'Paleokaart 800 n.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 500 v.Chr.',

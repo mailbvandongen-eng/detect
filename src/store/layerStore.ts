@@ -46,6 +46,11 @@ export const useLayerStore = create<LayerState>()(
       'Terpen': false,
       // Archeologische lagen
       'AMK Monumenten': false,
+      'AMK Romeins': false,
+      'AMK Steentijd': false,
+      'AMK Vroege ME': false,
+      'AMK Late ME': false,
+      'AMK Overig': false,
       'Romeinse wegen': false,
       'Kastelen': false,
       'IKAW': false,
