@@ -67,24 +67,40 @@ interface PresetState {
   resetToDefaults: () => void
 }
 
-// All overlay layer names for clearing
+// All overlay layer names for clearing - must match PresetButtons.tsx
 const ALL_OVERLAYS = [
+  // Base layer overlays
+  'Labels Overlay', 'TMK 1850', 'Bonnebladen 1900',
+  // Steentijd
   'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
+  // Archeologie
   'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
   'Romeinse wegen', 'Kastelen', 'IKAW', 'Archeo Landschappen',
-  'Rijksmonumenten', 'Werelderfgoed', 'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
+  // Erfgoed
+  'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed',
+  // Militair
+  'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
   'Verdedigingslinies', 'Inundatiegebieden', 'Militaire Objecten',
+  // Paleokaarten
   'Paleokaart 800 n.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 500 v.Chr.',
   'Paleokaart 1500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 9000 v.Chr.',
-  'Religieus Erfgoed',
-  'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Buffer', 'UIKAV Expert', 'UIKAV Indeling',
-  'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m', 'World Hillshade',
+  // UIKAV
+  'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling',
+  // Hoogtekaarten
+  'AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m', 'World Hillshade',
+  // Terrein
   'Veengebieden', 'Geomorfologie', 'Bodemkaart',
+  // Fossielen
   'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
+  // Recreatie
   'Parken', 'Speeltuinen', 'Musea', 'Strandjes',
+  // Percelen
   'Gewaspercelen', 'Kadastrale Grenzen',
+  // Provinciale Waardenkaarten - Zuid-Holland
   'Scheepswrakken', 'Woonheuvels ZH', 'Romeinse Forten', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen',
+  // Provinciale Waardenkaarten - Gelderland
   'Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken',
+  // Provinciale Waardenkaarten - Zeeland
   'Verdronken Dorpen'
 ]
 

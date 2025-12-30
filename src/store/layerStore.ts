@@ -121,28 +121,37 @@ export const useLayerStore = create<LayerState>()(
       'Mijn Vondsten': true
     },
 
-    // Initial opacity state
+    // Initial opacity state - all overlay/vlak layers
     opacity: {
-      'AHN 0.5m': 0.7,
-      'Geomorfologie': 0.5,
-      'Bodemkaart': 0.6,
-      'IKAW': 0.5,
-      'Archeo Landschappen': 0.5,
+      // Hoogtekaarten
       'AHN4 Hoogtekaart Kleur': 0.85,
       'AHN4 Hillshade NL': 0.7,
       'AHN4 Multi-Hillshade NL': 0.7,
+      'AHN 0.5m': 0.7,
       'World Hillshade': 0.7,
+      // Historische kaarten
+      'TMK 1850': 0.8,
+      'Bonnebladen 1900': 0.8,
+      // Terrein/bodem
+      'Geomorfologie': 0.5,
+      'Bodemkaart': 0.6,
+      'Veengebieden': 0.6,
+      // Archeologie
+      'IKAW': 0.5,
+      'Archeo Landschappen': 0.5,
       'Terpen': 0.7,
+      // Paleokaarten
+      'Paleokaart 9000 v.Chr.': 0.7,
+      'Paleokaart 5500 v.Chr.': 0.7,
+      'Paleokaart 2750 v.Chr.': 0.7,
+      'Paleokaart 1500 v.Chr.': 0.7,
+      'Paleokaart 500 v.Chr.': 0.7,
+      'Paleokaart 100 n.Chr.': 0.7,
+      'Paleokaart 800 n.Chr.': 0.7,
+      // Militair
       'Verdedigingslinies': 0.7,
       'Inundatiegebieden': 0.5,
       'Militaire Objecten': 0.8,
-      'Paleokaart 800 n.Chr.': 0.7,
-      'Paleokaart 100 n.Chr.': 0.7,
-      'Paleokaart 500 v.Chr.': 0.7,
-      'Paleokaart 1500 v.Chr.': 0.7,
-      'Paleokaart 2750 v.Chr.': 0.7,
-      'Paleokaart 5500 v.Chr.': 0.7,
-      'Paleokaart 9000 v.Chr.': 0.7,
       'Religieus Erfgoed': 0.8,
       // Percelen
       'Gewaspercelen': 0.6,

@@ -3,22 +3,43 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { SlidersHorizontal, ChevronDown, ChevronUp } from 'lucide-react'
 import { useLayerStore } from '../../store/layerStore'
 
-// All layers that should have opacity sliders - NL only
+// All layers that should have opacity sliders - vlak/overlay lagen, geen punten
 const OPACITY_LAYERS = [
-  // Hillshade NL
+  // Hoogtekaarten
   { name: 'AHN4 Hoogtekaart Kleur', color: 'blue', default: 0.85 },
   { name: 'AHN4 Hillshade NL', color: 'blue', default: 0.7 },
   { name: 'AHN4 Multi-Hillshade NL', color: 'blue', default: 0.7 },
-  { name: 'AHN4 Helling NL', color: 'blue', default: 0.6 },
   { name: 'AHN 0.5m', color: 'blue', default: 0.7 },
   { name: 'World Hillshade', color: 'blue', default: 0.7 },
-  // Terrain layers
+  // Historische kaarten
+  { name: 'TMK 1850', color: 'amber', default: 0.8 },
+  { name: 'Bonnebladen 1900', color: 'amber', default: 0.8 },
+  // Terrein/bodem
   { name: 'Geomorfologie', color: 'green', default: 0.5 },
   { name: 'Bodemkaart', color: 'amber', default: 0.6 },
+  { name: 'Veengebieden', color: 'amber', default: 0.6 },
+  // Archeologie (vlakken)
   { name: 'IKAW', color: 'orange', default: 0.5 },
   { name: 'Archeo Landschappen', color: 'green', default: 0.5 },
-  // Archaeological layers
-  { name: 'AMK Monumenten', color: 'purple', default: 0.8 },
+  { name: 'Terpen', color: 'orange', default: 0.7 },
+  // Paleokaarten
+  { name: 'Paleokaart 9000 v.Chr.', color: 'indigo', default: 0.7 },
+  { name: 'Paleokaart 5500 v.Chr.', color: 'indigo', default: 0.7 },
+  { name: 'Paleokaart 2750 v.Chr.', color: 'indigo', default: 0.7 },
+  { name: 'Paleokaart 1500 v.Chr.', color: 'indigo', default: 0.7 },
+  { name: 'Paleokaart 500 v.Chr.', color: 'indigo', default: 0.7 },
+  { name: 'Paleokaart 100 n.Chr.', color: 'indigo', default: 0.7 },
+  { name: 'Paleokaart 800 n.Chr.', color: 'indigo', default: 0.7 },
+  // Militair (vlakken/lijnen)
+  { name: 'Verdedigingslinies', color: 'red', default: 0.7 },
+  { name: 'Inundatiegebieden', color: 'red', default: 0.5 },
+  // Percelen
+  { name: 'Gewaspercelen', color: 'green', default: 0.6 },
+  { name: 'Kadastrale Grenzen', color: 'purple', default: 0.7 },
+  // Provinciaal (vlakken)
+  { name: 'Erfgoedlijnen', color: 'purple', default: 0.7 },
+  { name: 'Oude Kernen', color: 'orange', default: 0.6 },
+  { name: 'Relictenkaart Vlakken', color: 'green', default: 0.5 },
 ]
 
 const COLOR_CLASSES: Record<string, string> = {
