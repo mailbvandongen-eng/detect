@@ -22,6 +22,7 @@ export interface LocalVondst {
   photoUrl?: string // Link to photo (Google Photos, iCloud, etc.)
   condition?: VondstCondition // Object condition
   weight?: number // Weight in grams
+  length?: number // Length in mm
 }
 
 interface LocalVondstenState {
@@ -90,7 +91,8 @@ export const useLocalVondstenStore = create<LocalVondstenState>()(
               timestamp: v.timestamp,
               photoUrl: v.photoUrl,
               condition: v.condition,
-              weight: v.weight
+              weight: v.weight,
+              length: v.length
             }
           }))
         }
@@ -114,11 +116,11 @@ export const useLocalVondstenStore = create<LocalVondstenState>()(
           return
         }
 
-        const header = 'ID,Latitude,Longitude,Datum,Type,Materiaal,Periode,Diepte (cm),Conditie,Gewicht (g),Notities,Foto URL\n'
+        const header = 'ID,Latitude,Longitude,Datum,Type,Materiaal,Periode,Diepte (cm),Conditie,Gewicht (g),Lengte (mm),Notities,Foto URL\n'
         const rows = vondsten.map(v => {
           const date = new Date(v.timestamp).toLocaleDateString('nl-NL')
           const notes = v.notes ? `"${v.notes.replace(/"/g, '""')}"` : ''
-          return `${v.id},${v.location.lat},${v.location.lng},${date},${v.objectType},${v.material},${v.period},${v.depth || ''},${v.condition || ''},${v.weight || ''},${notes},${v.photoUrl || ''}`
+          return `${v.id},${v.location.lat},${v.location.lng},${date},${v.objectType},${v.material},${v.period},${v.depth || ''},${v.condition || ''},${v.weight || ''},${v.length || ''},${notes},${v.photoUrl || ''}`
         }).join('\n')
 
         const csv = header + rows
@@ -152,6 +154,7 @@ export const useLocalVondstenStore = create<LocalVondstenState>()(
           'Diepte (cm)': v.depth || '',
           'Conditie': v.condition || '',
           'Gewicht (g)': v.weight || '',
+          'Lengte (mm)': v.length || '',
           'Notities': v.notes || '',
           'Foto URL': v.photoUrl || ''
         }))
@@ -173,6 +176,7 @@ export const useLocalVondstenStore = create<LocalVondstenState>()(
           { wch: 12 }, // Diepte
           { wch: 12 }, // Conditie
           { wch: 12 }, // Gewicht
+          { wch: 12 }, // Lengte
           { wch: 40 }, // Notities
           { wch: 50 }  // Foto URL
         ]
@@ -193,7 +197,7 @@ export const useLocalVondstenStore = create<LocalVondstenState>()(
           const date = new Date(v.timestamp).toISOString()
           return `  <wpt lat="${v.location.lat}" lon="${v.location.lng}">
     <name>${v.objectType} - ${v.material}</name>
-    <desc>${v.period}${v.depth ? `, ${v.depth}cm diep` : ''}${v.condition && v.condition !== 'Onbekend' ? `, ${v.condition}` : ''}${v.weight ? `, ${v.weight}g` : ''}${v.notes ? `. ${v.notes}` : ''}</desc>
+    <desc>${v.period}${v.depth ? `, ${v.depth}cm diep` : ''}${v.condition && v.condition !== 'Onbekend' ? `, ${v.condition}` : ''}${v.weight ? `, ${v.weight}g` : ''}${v.length ? `, ${v.length}mm` : ''}${v.notes ? `. ${v.notes}` : ''}</desc>
     <time>${date}</time>
     <sym>Pin</sym>
   </wpt>`
@@ -236,6 +240,7 @@ ${waypoints}
             ${v.depth ? `<b>Diepte:</b> ${v.depth} cm<br/>` : ''}
             ${v.condition && v.condition !== 'Onbekend' ? `<b>Conditie:</b> ${v.condition}<br/>` : ''}
             ${v.weight ? `<b>Gewicht:</b> ${v.weight} gram<br/>` : ''}
+            ${v.length ? `<b>Lengte:</b> ${v.length} mm<br/>` : ''}
             <b>Datum:</b> ${date}<br/>
             ${v.notes ? `<b>Notities:</b> ${v.notes}<br/>` : ''}
             ${v.photoUrl ? `<a href="${v.photoUrl}">Bekijk foto</a>` : ''}

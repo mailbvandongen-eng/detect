@@ -1,16 +1,38 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3 } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useUIStore, useSettingsStore, usePresetStore } from '../../store'
+import { useUIStore, useSettingsStore, usePresetStore, useLayerStore } from '../../store'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
 import { clearPasswordAuth } from '../Auth/PasswordGate'
 import { VondstenDashboard } from '../Vondst/VondstenDashboard'
 import type { DefaultBackground } from '../../store/settingsStore'
 
+// All overlay layer names for updating presets
+const ALL_OVERLAYS = [
+  'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
+  'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
+  'Romeinse wegen', 'Kastelen', 'IKAW', 'Archeo Landschappen',
+  'Rijksmonumenten', 'Werelderfgoed', 'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
+  'Verdedigingslinies', 'Inundatiegebieden', 'Militaire Objecten',
+  'Paleokaart 800 n.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 500 v.Chr.',
+  'Paleokaart 1500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 9000 v.Chr.',
+  'Religieus Erfgoed',
+  'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Buffer', 'UIKAV Expert', 'UIKAV Indeling',
+  'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN4 Hoogtekaart Kleur', 'AHN 0.5m', 'World Hillshade',
+  'Veengebieden', 'Geomorfologie', 'Bodemkaart',
+  'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
+  'Parken', 'Speeltuinen', 'Musea', 'Strandjes',
+  'Gewaspercelen', 'Kadastrale Grenzen',
+  'Scheepswrakken', 'Woonheuvels ZH', 'Romeinse Forten', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen',
+  'Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken',
+  'Verdronken Dorpen'
+]
+
 export function SettingsPanel() {
   const { settingsPanelOpen, toggleSettingsPanel, vondstDashboardOpen, toggleVondstDashboard } = useUIStore()
   const settings = useSettingsStore()
-  const { presets, createPreset, deletePreset } = usePresetStore()
+  const { presets, createPreset, deletePreset, updatePreset } = usePresetStore()
+  const visibleLayers = useLayerStore(state => state.visible)
   const vondsten = useLocalVondstenStore(state => state.vondsten)
   const [newPresetName, setNewPresetName] = useState('')
   const [showNewPresetInput, setShowNewPresetInput] = useState(false)
@@ -21,6 +43,21 @@ export function SettingsPanel() {
       setNewPresetName('')
       setShowNewPresetInput(false)
     }
+  }
+
+  const handleUpdatePreset = (id: string, name: string) => {
+    // Get currently visible overlay layers
+    const currentLayers = Object.entries(visibleLayers)
+      .filter(([layerName, isVisible]) => isVisible && ALL_OVERLAYS.includes(layerName))
+      .map(([layerName]) => layerName)
+
+    if (currentLayers.length === 0) {
+      alert('Zet eerst minimaal één kaartlaag aan voordat je de preset bijwerkt.')
+      return
+    }
+
+    updatePreset(id, { layers: currentLayers })
+    console.log(`✏️ Preset "${name}" bijgewerkt met ${currentLayers.length} lagen`)
   }
 
   return (
@@ -134,20 +171,34 @@ export function SettingsPanel() {
                 <div className="space-y-2">
                   {presets.map(preset => (
                     <div key={preset.id} className="flex items-center justify-between py-1">
-                      <span className="text-sm text-gray-600">
-                        {preset.name}
-                        {preset.isBuiltIn && (
-                          <span className="ml-1 text-[10px] text-gray-400">(standaard)</span>
-                        )}
-                      </span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm text-gray-600">
+                          {preset.name}
+                          {preset.isBuiltIn && (
+                            <span className="ml-1 text-[10px] text-gray-400">(standaard)</span>
+                          )}
+                        </span>
+                        <span className="ml-1 text-[10px] text-gray-400">
+                          ({preset.layers.length} lagen)
+                        </span>
+                      </div>
                       {!preset.isBuiltIn && (
-                        <button
-                          onClick={() => deletePreset(preset.id)}
-                          className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors border-0 outline-none"
-                          title="Verwijderen"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleUpdatePreset(preset.id, preset.name)}
+                            className="p-1 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none"
+                            title="Bijwerken met huidige lagen"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            onClick={() => deletePreset(preset.id)}
+                            className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors border-0 outline-none"
+                            title="Verwijderen"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       )}
                     </div>
                   ))}

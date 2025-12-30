@@ -10,15 +10,6 @@ export function ThemesPanel() {
   return (
     <AnimatePresence>
       {themesPanelOpen && (
-        <>
-          {/* Invisible backdrop - click to close */}
-          <motion.div
-            className="fixed inset-0 z-[1100]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={toggleThemesPanel}
-          />
           <motion.div
             className="fixed top-2.5 right-2 z-[1101] bg-white rounded-lg shadow-lg overflow-hidden w-[240px] max-h-[calc(100vh-200px)] flex flex-col"
             initial={{ opacity: 0, x: 10 }}
@@ -55,7 +46,7 @@ export function ThemesPanel() {
             </LayerGroup>
 
             {/* Thema's - alle overlay lagen */}
-            <LayerGroup title="Thema's" defaultExpanded={false}>
+            <LayerGroup title="Thema's" defaultExpanded={true}>
               {/* Steentijd (Stone Age) */}
               <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false} layerNames={['Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen']}>
                 <LayerItem name="Hunebedden" type="overlay" />
@@ -182,7 +173,6 @@ export function ThemesPanel() {
             </LayerGroup>
           </div>
         </motion.div>
-        </>
       )}
     </AnimatePresence>
   )

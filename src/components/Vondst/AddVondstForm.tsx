@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, Navigation, Crosshair, Link, Scale } from 'lucide-react'
+import { MapPin, Navigation, Crosshair, Link } from 'lucide-react'
 import { toLonLat } from 'ol/proj'
 import { useVondstenStore } from '../../store/vondstenStore'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
@@ -34,6 +34,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
   // New fields v2.6.0
   const [photoUrl, setPhotoUrl] = useState('')
   const [weight, setWeight] = useState<number | undefined>(undefined)
+  const [length, setLength] = useState<number | undefined>(undefined)
 
   // Location state - use initialLocation if provided
   const [locationSource, setLocationSource] = useState<LocationSource>(
@@ -120,7 +121,8 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
           material,
           period,
           photoUrl: photoUrl || undefined,
-          weight
+          weight,
+          length
         })
         alert('Vondst lokaal opgeslagen! ✅')
       } else {
@@ -192,9 +194,9 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
       >
-        <div className="sticky top-0 z-10 bg-blue-600 text-white px-4 py-3 flex justify-between items-center">
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 flex justify-between items-center">
           <h2 className="text-lg font-semibold">Nieuwe Vondst</h2>
-          <button onClick={onClose} className="text-2xl">&times;</button>
+          <button onClick={onClose} className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none">&times;</button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
@@ -206,8 +208,8 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
             {effectiveLocation && (
               <div className={`p-2 rounded text-sm flex items-center gap-2 ${
                 locationSource === 'gps'
-                  ? 'bg-green-50 border border-green-200 text-green-800'
-                  : 'bg-orange-50 border border-orange-200 text-orange-800'
+                  ? 'bg-green-50 text-green-800'
+                  : 'bg-orange-50 text-orange-800'
               }`}>
                 {locationSource === 'gps' ? (
                   <Navigation size={16} className="text-green-600" />
@@ -233,7 +235,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
                 <button
                   type="button"
                   onClick={handleUseGPS}
-                  className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors border-0 outline-none"
                 >
                   <Navigation size={14} />
                   <span>GPS gebruiken</span>
@@ -242,7 +244,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
               <button
                 type="button"
                 onClick={handlePickLocation}
-                className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs text-blue-700 rounded hover:bg-blue-100 transition-colors bg-blue-50 outline-none border-0"
               >
                 <Crosshair size={14} />
                 <span>Kies op kaart</span>
@@ -256,7 +258,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
             <select
               value={objectType}
               onChange={(e) => setObjectType(e.target.value as VondstObjectType)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full rounded px-3 py-2 bg-gray-50 outline-none focus:bg-blue-50 border-0"
             >
               <option>Munt</option>
               <option>Aardewerk</option>
@@ -277,7 +279,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
             <select
               value={material}
               onChange={(e) => setMaterial(e.target.value as VondstMaterial)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full rounded px-3 py-2 bg-gray-50 outline-none focus:bg-blue-50 border-0"
             >
               <option>Brons</option>
               <option>IJzer</option>
@@ -296,7 +298,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
             <select
               value={period}
               onChange={(e) => setPeriod(e.target.value as VondstPeriod)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full rounded px-3 py-2 bg-gray-50 outline-none focus:bg-blue-50 border-0"
             >
               <option>Romeins (12 v.Chr.-450 n.Chr.)</option>
               <option>IJzertijd</option>
@@ -307,21 +309,32 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
             </select>
           </div>
 
-          {/* Weight */}
-          <div>
-            <label className="block text-sm font-medium mb-1 flex items-center gap-1">
-              <Scale size={14} className="text-gray-500" />
-              Gewicht (gram, optioneel)
-            </label>
-            <input
-              type="number"
-              value={weight ?? ''}
-              onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : undefined)}
-              className="w-full border rounded px-3 py-2"
-              min="0"
-              step="0.1"
-              placeholder="bijv. 12.5"
-            />
+          {/* Weight & Length */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-1">Gewicht (g)</label>
+              <input
+                type="number"
+                value={weight ?? ''}
+                onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : undefined)}
+                className="w-full rounded px-3 py-2 bg-gray-50 outline-none focus:bg-blue-50 border-0"
+                min="0"
+                step="0.1"
+                placeholder="12.5"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-1">Lengte (mm)</label>
+              <input
+                type="number"
+                value={length ?? ''}
+                onChange={(e) => setLength(e.target.value ? parseFloat(e.target.value) : undefined)}
+                className="w-full rounded px-3 py-2 bg-gray-50 outline-none focus:bg-blue-50 border-0"
+                min="0"
+                step="0.1"
+                placeholder="25"
+              />
+            </div>
           </div>
 
           {/* Photo URL */}
@@ -334,7 +347,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
               type="url"
               value={photoUrl}
               onChange={(e) => setPhotoUrl(e.target.value)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full rounded px-3 py-2 bg-gray-50 outline-none focus:bg-blue-50 border-0"
               placeholder="https://photos.google.com/..."
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -348,37 +361,29 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full border rounded px-3 py-2 h-24"
+              className="w-full rounded px-3 py-2 h-24 bg-gray-50 outline-none focus:bg-blue-50 border-0"
               placeholder="Beschrijving, omstandigheden, etc..."
             />
           </div>
 
-          {/* Privacy */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={isPrivate}
-              onChange={(e) => setIsPrivate(e.target.checked)}
-              id="private"
-            />
-            <label htmlFor="private" className="text-sm">
-              Privé (alleen jij kunt deze vondst zien)
-            </label>
-          </div>
+          {/* Privacy notice */}
+          <p className="text-xs text-gray-500 bg-gray-50 rounded px-3 py-2">
+            Vondsten worden lokaal opgeslagen op dit apparaat.
+          </p>
 
           {/* Submit */}
           <div className="flex gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border rounded hover:bg-gray-50"
+              className="flex-1 px-4 py-2 rounded hover:bg-blue-50 transition-colors bg-gray-100 outline-none border-0"
             >
               Annuleren
             </button>
             <button
               type="submit"
               disabled={saving || !effectiveLocation || pickingLocation}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 border-0 outline-none"
             >
               {saving ? 'Opslaan...' : 'Opslaan'}
             </button>

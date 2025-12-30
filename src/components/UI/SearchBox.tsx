@@ -136,18 +136,6 @@ export function SearchBox() {
     inputRef.current?.focus()
   }
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'adres': return '🏠'
-      case 'weg': return '🛣️'
-      case 'woonplaats': return '🏘️'
-      case 'gemeente': return '🏛️'
-      case 'provincie': return '🗺️'
-      case 'postcode': return '📮'
-      default: return '📍'
-    }
-  }
-
   return (
     <div className="search-box">
       <div className="search-input-wrapper">
@@ -182,9 +170,6 @@ export function SearchBox() {
                 className="search-result-content"
                 onClick={() => handleSelect(result)}
               >
-                <span className="search-result-icon">
-                  {getTypeIcon(result.type)}
-                </span>
                 <span className="search-result-text">
                   {result.weergavenaam}
                 </span>
