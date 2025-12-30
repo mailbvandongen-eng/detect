@@ -164,17 +164,28 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 2,
+      version: 3,
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as PresetState
-        if (version < 2) {
-          // Migration: ensure only Detectie is protected
+
+        // v2.7.0: Reset Detectie preset to new layers (AMK Monumenten + Gewaspercelen)
+        if (version < 3) {
           return {
             ...state,
-            presets: state.presets.map(p => ({
-              ...p,
-              isBuiltIn: p.id === 'detectie'
-            }))
+            presets: state.presets.map(p => {
+              if (p.id === 'detectie') {
+                // Force update Detectie to new layers
+                return {
+                  ...p,
+                  layers: ['AMK Monumenten', 'Gewaspercelen'],
+                  isBuiltIn: true
+                }
+              }
+              return {
+                ...p,
+                isBuiltIn: p.id === 'detectie'
+              }
+            })
           }
         }
         return state
