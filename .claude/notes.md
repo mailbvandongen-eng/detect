@@ -1,6 +1,20 @@
 # Detectorapp-NL - Sessienotities
 
-## Huidige versie: 2.7.0
+## Huidige versie: 2.7.3
+
+---
+
+## v2.7.3 - UI verbeteringen & bugfixes
+
+### Wijzigingen:
+1. **Long press menu** - Blauwe header, geen borders, consistente styling
+2. **Vondst formulier** - Alle borders verwijderd, lichte achtergronden
+3. **Lengte veld** toegevoegd (mm) naast gewicht
+4. **Privé checkbox** verwijderd → mededeling "lokaal opgeslagen"
+5. **Zoek iconen** verwijderd uit navigatie zoekresultaten
+6. **Vondsten markers** schalen mee met zoom niveau (kleiner bij uitzoomen)
+7. **Thema's** standaard uitgeklapt in kaartlagen panel
+8. **Zoom fix** - Niet meer geblokkeerd bij open kaartlagen panel
 
 ---
 
