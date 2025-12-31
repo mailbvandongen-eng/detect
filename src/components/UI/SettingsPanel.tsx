@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Type } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUIStore, useSettingsStore, usePresetStore, useLayerStore } from '../../store'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
@@ -163,6 +163,28 @@ export function SettingsPanel() {
                   checked={settings.hapticFeedback}
                   onChange={settings.setHapticFeedback}
                 />
+              </Section>
+
+              {/* Weergave */}
+              <Section title="Weergave" icon={<Type size={16} />}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Tekstgrootte</span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min="80"
+                      max="150"
+                      step="10"
+                      value={settings.fontScale}
+                      onChange={(e) => settings.setFontScale(parseInt(e.target.value))}
+                      className="w-24 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                    />
+                    <span className="text-xs text-gray-400 w-10 text-right">{settings.fontScale}%</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  Past de tekstgrootte aan voor menu's en knoppen.
+                </p>
               </Section>
 
               {/* Vondsten */}

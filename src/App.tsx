@@ -25,13 +25,6 @@ import { useNavigation } from './hooks/useNavigation'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useSettingsStore } from './store'
 
-// Font size classes
-const FONT_SIZE_CLASSES = {
-  small: 'text-sm',   // 14px
-  medium: 'text-base', // 16px
-  large: 'text-lg'    // 18px
-} as const
-
 function App() {
   // Initialize hooks
   useDeviceOrientation()
@@ -39,13 +32,14 @@ function App() {
   useNavigation()
   useDynamicAHN()
 
-  // Get font size setting
-  const fontSize = useSettingsStore(state => state.fontSize)
-  const fontSizeClass = FONT_SIZE_CLASSES[fontSize] || FONT_SIZE_CLASSES.small
+  // Get font scale setting (80-150%)
+  const fontScale = useSettingsStore(state => state.fontScale)
+  // Base size is 14px, scale it based on setting
+  const baseFontSize = 14 * fontScale / 100
 
   return (
     <PasswordGate>
-      <div className={fontSizeClass}>
+      <div style={{ fontSize: `${baseFontSize}px` }}>
         <MapContainer />
         <GpsMarker />
         <RouteLayer />

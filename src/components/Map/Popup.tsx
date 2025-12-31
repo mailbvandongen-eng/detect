@@ -123,14 +123,23 @@ export function Popup() {
   // Transform HTML to use em-based font sizes instead of rem-based Tailwind classes
   // This allows the font size slider to actually scale the text
   const transformForScaling = (html: string): string => {
-    return html
-      // Remove text-sm class (will inherit from container)
-      .replace(/\btext-sm\b/g, '')
-      // Replace text-xs with inline em-based style (0.857em = 12/14)
-      .replace(/class="([^"]*)\btext-xs\b([^"]*)"/g, 'style="font-size:0.857em" class="$1$2"')
-      // Clean up empty class attributes
-      .replace(/class="\s*"/g, '')
-      .replace(/class="(\s+)"/g, '')
+    // First pass: convert text-xs to em-based (0.857em = 12/14)
+    let result = html.replace(/class="([^"]*)"/g, (match, classes) => {
+      if (classes.includes('text-xs')) {
+        const newClasses = classes.replace(/\btext-xs\b/g, '').trim()
+        return newClasses
+          ? `style="font-size:0.857em" class="${newClasses}"`
+          : 'style="font-size:0.857em"'
+      }
+      if (classes.includes('text-sm')) {
+        // Remove text-sm, will inherit 1em from parent
+        const newClasses = classes.replace(/\btext-sm\b/g, '').trim()
+        return newClasses ? `class="${newClasses}"` : ''
+      }
+      return match
+    })
+    // Clean up empty class attributes
+    return result.replace(/class=""/g, '')
   }
 
   const { title: extractedTitle, contentWithoutTitle: rawContent } = extractTitleAndContent(content)
@@ -1667,6 +1676,7 @@ export function Popup() {
           {/* Bottom Sheet */}
           <motion.div
             className="fixed bottom-0 left-0 right-0 z-[1501] bg-white rounded-t-2xl shadow-2xl"
+            style={{ fontSize: `${14 * textScale / 100}px` }}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -1693,7 +1703,7 @@ export function Popup() {
                   >
                     <ChevronLeft size={18} />
                   </button>
-                  <span className="text-xs text-gray-500 font-medium min-w-[32px] text-center">
+                  <span className="text-gray-500 font-medium min-w-[32px] text-center" style={{ fontSize: '0.857em' }}>
                     {currentIndex + 1}/{allContents.length}
                   </span>
                   <button
@@ -1707,7 +1717,7 @@ export function Popup() {
               )}
 
               {/* Title - takes remaining space */}
-              <span className="flex-1 font-semibold text-gray-800 truncate text-sm">
+              <span className="flex-1 font-semibold text-gray-800 truncate" style={{ fontSize: '1em' }}>
                 {extractedTitle || 'Info'}
               </span>
 
@@ -1724,7 +1734,6 @@ export function Popup() {
             {/* Content - scrollable, without title */}
             <div
               className="px-4 py-3 max-h-[45vh] overflow-y-auto"
-              style={{ fontSize: `${14 * textScale / 100}px` }}
               dangerouslySetInnerHTML={{ __html: contentWithoutTitle }}
             />
 
@@ -1739,7 +1748,7 @@ export function Popup() {
                 onChange={(e) => handleTextScaleChange(parseInt(e.target.value))}
                 className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
               />
-              <span className="text-xs text-gray-400 w-8 text-right">{textScale}%</span>
+              <span className="text-gray-400 w-8 text-right" style={{ fontSize: '0.857em' }}>{textScale}%</span>
             </div>
 
             {/* Delete button for vondsten */}
@@ -1751,7 +1760,7 @@ export function Popup() {
                     setVisible(false)
                     setCurrentVondstId(null)
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors border-0 outline-none"
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors border-0 outline-none"
                 >
                   <Trash2 size={16} />
                   <span>Vondst verwijderen</span>
@@ -1765,7 +1774,7 @@ export function Popup() {
                 {showingHeightMap ? (
                   <button
                     onClick={handleHideHeightMap}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 mt-3 text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none"
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 mt-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none"
                   >
                     <Mountain size={16} />
                     <span>Hoogtekaart verbergen</span>
@@ -1774,7 +1783,7 @@ export function Popup() {
                   <button
                     onClick={handleShowHeightMap}
                     disabled={loadingHeightMap}
-                    className={`w-full flex items-center justify-center gap-2 px-3 py-2 mt-3 text-sm text-white rounded-lg transition-colors border-0 outline-none ${
+                    className={`w-full flex items-center justify-center gap-2 px-3 py-2 mt-3 text-white rounded-lg transition-colors border-0 outline-none ${
                       loadingHeightMap ? 'bg-blue-400 cursor-wait' : 'bg-blue-500 hover:bg-blue-600'
                     }`}
                   >

@@ -2,7 +2,6 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export type DefaultBackground = 'CartoDB (licht)' | 'Luchtfoto' | 'OpenStreetMap'
-export type FontSize = 'xs' | 'small' | 'medium' | 'large' | 'xl'
 
 interface SettingsState {
   // Kaart
@@ -22,7 +21,7 @@ interface SettingsState {
   showVondstButton: boolean   // Show/hide the add vondst button
 
   // Weergave
-  fontSize: FontSize
+  fontScale: number  // 80-150, percentage scale for app text
 
   // Actions
   setDefaultBackground: (bg: DefaultBackground) => void
@@ -33,7 +32,7 @@ interface SettingsState {
   setHapticFeedback: (value: boolean) => void
   setVondstenLocalOnly: (value: boolean) => void
   setShowVondstButton: (value: boolean) => void
-  setFontSize: (value: FontSize) => void
+  setFontScale: (value: number) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -48,7 +47,7 @@ export const useSettingsStore = create<SettingsState>()(
       hapticFeedback: true,
       vondstenLocalOnly: true,  // Default to local storage (no login needed)
       showVondstButton: true,   // Shown by default
-      fontSize: 'xs',           // Default font size (current = xs)
+      fontScale: 100,           // Default 100% = 14px base
 
       // Actions
       setDefaultBackground: (defaultBackground) => set({ defaultBackground }),
@@ -59,7 +58,7 @@ export const useSettingsStore = create<SettingsState>()(
       setHapticFeedback: (hapticFeedback) => set({ hapticFeedback }),
       setVondstenLocalOnly: (vondstenLocalOnly) => set({ vondstenLocalOnly }),
       setShowVondstButton: (showVondstButton) => set({ showVondstButton }),
-      setFontSize: (fontSize) => set({ fontSize })
+      setFontScale: (fontScale) => set({ fontScale })
     }),
     {
       name: 'detectorapp-settings'
