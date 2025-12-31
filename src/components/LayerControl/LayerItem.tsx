@@ -45,7 +45,7 @@ export function LayerItem({ name, type }: Props) {
             : 'bg-transparent hover:bg-blue-50'
       }`}
     >
-      <span className={`text-sm ${hasError ? 'text-red-500' : 'text-gray-600'}`}>
+      <span className={hasError ? 'text-red-500' : 'text-gray-600'} style={{ fontSize: '1em' }}>
         {name}
         {hasError && <AlertCircle size={12} className="inline ml-1 text-red-500" />}
       </span>

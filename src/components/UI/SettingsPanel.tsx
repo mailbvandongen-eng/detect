@@ -57,6 +57,9 @@ export function SettingsPanel() {
   const [showNewPresetInput, setShowNewPresetInput] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
 
+  // Calculate font size based on fontScale setting
+  const baseFontSize = 14 * settings.fontScale / 100
+
   const handleCreatePreset = () => {
     if (newPresetName.trim()) {
       createPreset(newPresetName.trim(), 'Layers')
@@ -115,15 +118,16 @@ export function SettingsPanel() {
               </button>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-5">
+            {/* Content - apply font scaling directly */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-5" style={{ fontSize: `${baseFontSize}px` }}>
               {/* Kaart */}
               <Section title="Kaart" icon={<Map size={16} />}>
                 <OptionRow label="Standaard achtergrond">
                   <select
                     value={settings.defaultBackground}
                     onChange={(e) => settings.setDefaultBackground(e.target.value as DefaultBackground)}
-                    className="px-2 py-1 text-sm bg-gray-100 rounded border-0 outline-none"
+                    className="px-2 py-1 bg-gray-100 rounded border-0 outline-none"
+                    style={{ fontSize: '0.9em' }}
                   >
                     <option value="CartoDB (licht)">Licht</option>
                     <option value="OpenStreetMap">OSM</option>
@@ -168,7 +172,7 @@ export function SettingsPanel() {
               {/* Weergave */}
               <Section title="Weergave" icon={<Type size={16} />}>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Tekstgrootte</span>
+                  <span className="text-gray-600" style={{ fontSize: '0.9em' }}>Tekstgrootte</span>
                   <div className="flex items-center gap-2">
                     <input
                       type="range"
@@ -179,10 +183,10 @@ export function SettingsPanel() {
                       onChange={(e) => settings.setFontScale(parseInt(e.target.value))}
                       className="w-24 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
                     />
-                    <span className="text-xs text-gray-400 w-10 text-right">{settings.fontScale}%</span>
+                    <span className="text-gray-400 w-10 text-right" style={{ fontSize: '0.75em' }}>{settings.fontScale}%</span>
                   </div>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-gray-400 mt-1" style={{ fontSize: '0.75em' }}>
                   Past de tekstgrootte aan voor menu's en knoppen.
                 </p>
               </Section>
@@ -194,13 +198,14 @@ export function SettingsPanel() {
                   checked={settings.showVondstButton}
                   onChange={settings.setShowVondstButton}
                 />
-                <p className="text-xs text-gray-500 mt-1 py-1">
+                <p className="text-gray-500 mt-1 py-1" style={{ fontSize: '0.75em' }}>
                   Vondsten worden altijd lokaal op dit apparaat opgeslagen.
                 </p>
                 {/* Dashboard button */}
                 <button
                   onClick={toggleVondstDashboard}
-                  className="flex items-center gap-2 mt-2 px-2 py-1.5 text-sm text-orange-600 hover:bg-orange-50 rounded transition-colors border-0 outline-none w-full"
+                  className="flex items-center gap-2 mt-2 px-2 py-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors border-0 outline-none w-full"
+                  style={{ fontSize: '0.9em' }}
                 >
                   <BarChart3 size={14} />
                   <span>Dashboard ({vondsten.length} vondsten)</span>
@@ -212,7 +217,7 @@ export function SettingsPanel() {
               <Section title="Eigen Lagen" icon={<Upload size={16} />}>
                 <div className="space-y-1">
                   {customLayers.length === 0 ? (
-                    <p className="text-xs text-gray-500 py-1">
+                    <p className="text-gray-500 py-1" style={{ fontSize: '0.75em' }}>
                       Nog geen eigen lagen geïmporteerd.
                     </p>
                   ) : (
@@ -222,12 +227,13 @@ export function SettingsPanel() {
                   )}
                   <button
                     onClick={() => setImportModalOpen(true)}
-                    className="flex items-center gap-2 mt-2 px-2 py-1.5 text-sm text-purple-600 hover:bg-purple-50 rounded transition-colors border-0 outline-none w-full"
+                    className="flex items-center gap-2 mt-2 px-2 py-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors border-0 outline-none w-full"
+                    style={{ fontSize: '0.9em' }}
                   >
                     <Plus size={14} />
                     <span>Laag importeren</span>
                   </button>
-                  <p className="text-[10px] text-gray-400 mt-1">
+                  <p className="text-gray-400 mt-1" style={{ fontSize: '0.7em' }}>
                     GeoJSON, KML (Google My Maps), GPX
                   </p>
                 </div>
@@ -239,13 +245,13 @@ export function SettingsPanel() {
                   {presets.map(preset => (
                     <div key={preset.id} className="flex items-center justify-between py-1">
                       <div className="flex-1 min-w-0">
-                        <span className="text-sm text-gray-600">
+                        <span className="text-gray-600" style={{ fontSize: '0.9em' }}>
                           {preset.name}
                           {preset.isBuiltIn && (
-                            <span className="ml-1 text-[10px] text-gray-400">(standaard)</span>
+                            <span className="ml-1 text-gray-400" style={{ fontSize: '0.7em' }}>(standaard)</span>
                           )}
                         </span>
-                        <span className="ml-1 text-[10px] text-gray-400">
+                        <span className="ml-1 text-gray-400" style={{ fontSize: '0.7em' }}>
                           ({preset.layers.length} lagen)
                         </span>
                       </div>
@@ -278,19 +284,22 @@ export function SettingsPanel() {
                         value={newPresetName}
                         onChange={(e) => setNewPresetName(e.target.value)}
                         placeholder="Naam nieuwe preset"
-                        className="flex-1 px-2 py-1 text-sm bg-gray-100 rounded border-0 outline-none"
+                        className="flex-1 px-2 py-1 bg-gray-100 rounded border-0 outline-none"
+                        style={{ fontSize: '0.9em' }}
                         onKeyDown={(e) => e.key === 'Enter' && handleCreatePreset()}
                         autoFocus
                       />
                       <button
                         onClick={handleCreatePreset}
-                        className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors border-0 outline-none"
+                        className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors border-0 outline-none"
+                        style={{ fontSize: '0.75em' }}
                       >
                         Opslaan
                       </button>
                       <button
                         onClick={() => setShowNewPresetInput(false)}
-                        className="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors border-0 outline-none"
+                        className="px-2 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors border-0 outline-none"
+                        style={{ fontSize: '0.75em' }}
                       >
                         Annuleren
                       </button>
@@ -298,7 +307,8 @@ export function SettingsPanel() {
                   ) : (
                     <button
                       onClick={() => setShowNewPresetInput(true)}
-                      className="flex items-center gap-2 mt-2 px-2 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none w-full"
+                      className="flex items-center gap-2 mt-2 px-2 py-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none w-full"
+                      style={{ fontSize: '0.9em' }}
                     >
                       <Plus size={14} />
                       <span>Huidige lagen als preset opslaan</span>
@@ -309,15 +319,16 @@ export function SettingsPanel() {
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-3 border-t border-gray-100 space-y-2">
+            <div className="px-4 py-3 border-t border-gray-100 space-y-2" style={{ fontSize: `${baseFontSize}px` }}>
               <button
                 onClick={clearPasswordAuth}
-                className="flex items-center justify-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors border-0 outline-none"
+                className="flex items-center justify-center gap-2 w-full px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border-0 outline-none"
+                style={{ fontSize: '0.9em' }}
               >
                 <LogOut size={16} />
                 <span>Uitloggen</span>
               </button>
-              <p className="text-xs text-gray-400 text-center">
+              <p className="text-gray-400 text-center" style={{ fontSize: '0.75em' }}>
                 Instellingen worden lokaal opgeslagen
               </p>
             </div>
@@ -341,13 +352,13 @@ export function SettingsPanel() {
   )
 }
 
-// Section component
+// Section component - uses em-based font sizes for scaling
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <section>
       <div className="flex items-center gap-2 mb-2 pb-1 border-b border-gray-100">
         <span className="text-blue-600">{icon}</span>
-        <span className="font-medium text-gray-800 text-sm">{title}</span>
+        <span className="font-medium text-gray-800" style={{ fontSize: '1em' }}>{title}</span>
       </div>
       <div className="space-y-2">
         {children}
@@ -356,21 +367,21 @@ function Section({ title, icon, children }: { title: string; icon: React.ReactNo
   )
 }
 
-// Option row with label and control
+// Option row with label and control - uses em-based font sizes
 function OptionRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm text-gray-600">{label}</span>
+      <span className="text-gray-600" style={{ fontSize: '0.9em' }}>{label}</span>
       {children}
     </div>
   )
 }
 
-// Toggle switch row
+// Toggle switch row - uses em-based font sizes
 function ToggleRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm text-gray-600">{label}</span>
+      <span className="text-gray-600" style={{ fontSize: '0.9em' }}>{label}</span>
       <button
         onClick={() => onChange(!checked)}
         className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
@@ -387,7 +398,7 @@ function ToggleRow({ label, checked, onChange }: { label: string; checked: boole
   )
 }
 
-// Export dropdown for vondsten
+// Export dropdown for vondsten - uses em-based font sizes
 function ExportButton() {
   const [showDropdown, setShowDropdown] = useState(false)
   const {
@@ -414,7 +425,7 @@ function ExportButton() {
 
   if (vondsten.length === 0) {
     return (
-      <div className="flex items-center gap-2 mt-2 px-2 py-1.5 text-sm text-gray-400 bg-gray-100 rounded w-full cursor-not-allowed">
+      <div className="flex items-center gap-2 mt-2 px-2 py-1.5 text-gray-400 bg-gray-100 rounded w-full cursor-not-allowed" style={{ fontSize: '0.9em' }}>
         <Download size={14} />
         <span>Geen vondsten om te exporteren</span>
       </div>
@@ -425,13 +436,14 @@ function ExportButton() {
     <div className="relative mt-2">
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="flex items-center justify-between gap-2 px-2 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none w-full"
+        className="flex items-center justify-between gap-2 px-2 py-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none w-full"
+        style={{ fontSize: '0.9em' }}
       >
         <div className="flex items-center gap-2">
           <Download size={14} />
           <span>Exporteer vondsten ({vondsten.length})</span>
         </div>
-        <span className="text-xs">▼</span>
+        <span style={{ fontSize: '0.8em' }}>▼</span>
       </button>
 
       {showDropdown && (
@@ -440,10 +452,11 @@ function ExportButton() {
             <button
               key={i}
               onClick={() => handleExport(option.action)}
-              className="w-full px-3 py-2 text-left text-sm hover:bg-blue-50 transition-colors border-0 outline-none flex justify-between items-center"
+              className="w-full px-3 py-2 text-left hover:bg-blue-50 transition-colors border-0 outline-none flex justify-between items-center"
+              style={{ fontSize: '0.9em' }}
             >
               <span className="text-gray-700">{option.label}</span>
-              <span className="text-xs text-gray-400">{option.desc}</span>
+              <span className="text-gray-400" style={{ fontSize: '0.8em' }}>{option.desc}</span>
             </button>
           ))}
         </div>

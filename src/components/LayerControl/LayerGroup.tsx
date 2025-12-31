@@ -51,10 +51,10 @@ export function LayerGroup({ title, children, defaultExpanded = true, layerNames
           ) : (
             <Folder size={16} className="text-blue-500" />
           )}
-          <span className="text-sm text-gray-700 font-medium">{title}</span>
+          <span className="text-gray-700 font-medium" style={{ fontSize: '1em' }}>{title}</span>
           {/* Active layers count - always visible when has active layers */}
           {activeCount > 0 && (
-            <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-600 rounded-full">
+            <span className="ml-1 px-1.5 py-0.5 font-medium bg-blue-100 text-blue-600 rounded-full" style={{ fontSize: '0.7em' }}>
               {activeCount}
             </span>
           )}

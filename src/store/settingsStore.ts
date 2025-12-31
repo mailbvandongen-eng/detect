@@ -22,6 +22,8 @@ interface SettingsState {
 
   // Weergave
   fontScale: number  // 80-150, percentage scale for app text
+  layerPanelFontScale: number  // 80-150, for Kaartlagen panel
+  presetPanelFontScale: number  // 80-150, for Presets panel
 
   // Actions
   setDefaultBackground: (bg: DefaultBackground) => void
@@ -33,6 +35,8 @@ interface SettingsState {
   setVondstenLocalOnly: (value: boolean) => void
   setShowVondstButton: (value: boolean) => void
   setFontScale: (value: number) => void
+  setLayerPanelFontScale: (value: number) => void
+  setPresetPanelFontScale: (value: number) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -48,6 +52,8 @@ export const useSettingsStore = create<SettingsState>()(
       vondstenLocalOnly: true,  // Default to local storage (no login needed)
       showVondstButton: true,   // Shown by default
       fontScale: 100,           // Default 100% = 14px base
+      layerPanelFontScale: 100, // Default 100%
+      presetPanelFontScale: 100, // Default 100%
 
       // Actions
       setDefaultBackground: (defaultBackground) => set({ defaultBackground }),
@@ -58,7 +64,9 @@ export const useSettingsStore = create<SettingsState>()(
       setHapticFeedback: (hapticFeedback) => set({ hapticFeedback }),
       setVondstenLocalOnly: (vondstenLocalOnly) => set({ vondstenLocalOnly }),
       setShowVondstButton: (showVondstButton) => set({ showVondstButton }),
-      setFontScale: (fontScale) => set({ fontScale })
+      setFontScale: (fontScale) => set({ fontScale }),
+      setLayerPanelFontScale: (layerPanelFontScale) => set({ layerPanelFontScale }),
+      setPresetPanelFontScale: (presetPanelFontScale) => set({ presetPanelFontScale })
     }),
     {
       name: 'detectorapp-settings'

@@ -1,13 +1,17 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRef, useEffect } from 'react'
-import { X, Layers } from 'lucide-react'
-import { useUIStore } from '../../store'
+import { X, Layers, Type } from 'lucide-react'
+import { useUIStore, useSettingsStore } from '../../store'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
 
 export function ThemesPanel() {
   const { themesPanelOpen, toggleThemesPanel } = useUIStore()
   const panelRef = useRef<HTMLDivElement>(null)
+  const { layerPanelFontScale, setLayerPanelFontScale } = useSettingsStore()
+
+  // Calculate font size based on panel-specific fontScale
+  const baseFontSize = 13 * layerPanelFontScale / 100
 
   // Close on click outside
   useEffect(() => {
@@ -35,25 +39,44 @@ export function ThemesPanel() {
       {themesPanelOpen && (
           <motion.div
             ref={panelRef}
-            className="fixed top-2.5 right-2 z-[1101] bg-white rounded-lg shadow-lg overflow-hidden w-[240px] max-h-[calc(100vh-200px)] flex flex-col"
+            className="fixed top-2.5 right-2 z-[1101] bg-white rounded-lg shadow-lg overflow-hidden w-[300px] max-h-[calc(100vh-200px)] flex flex-col"
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.15 }}
           >
-            <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-              <div className="flex items-center gap-2">
-                <Layers size={14} />
-                <span className="font-medium text-sm">Kaartlagen</span>
+            {/* Header with title and font size slider */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+              <div className="flex items-center justify-between px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <Layers size={14} />
+                  <span className="font-medium text-sm">Kaartlagen</span>
+                </div>
+                <button
+                  onClick={toggleThemesPanel}
+                  className="p-0.5 rounded border-0 outline-none hover:bg-white/20 transition-colors"
+                >
+                  <X size={16} />
+                </button>
               </div>
-              <button
-                onClick={toggleThemesPanel}
-                className="p-0.5 rounded border-0 outline-none hover:bg-white/20 transition-colors"
-              >
-                <X size={16} />
-              </button>
+              {/* Subtle font size slider */}
+              <div className="flex items-center gap-2 px-3 pb-2 opacity-80">
+                <Type size={10} className="text-white/70" />
+                <input
+                  type="range"
+                  min="80"
+                  max="130"
+                  step="10"
+                  value={layerPanelFontScale}
+                  onChange={(e) => setLayerPanelFontScale(parseInt(e.target.value))}
+                  className="flex-1 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-white"
+                  style={{ maxWidth: '80px' }}
+                  title={`Tekstgrootte: ${layerPanelFontScale}%`}
+                />
+                <Type size={14} className="text-white/70" />
+              </div>
             </div>
-          <div className="p-2 overflow-y-auto flex-1">
+          <div className="p-2 overflow-y-auto flex-1" style={{ fontSize: `${baseFontSize}px` }}>
             {/* Mijn Vondsten - direct weergeven, niet in groep */}
             <div className="mb-2 pb-1 border-b border-gray-100">
               <LayerItem name="Mijn Vondsten" type="overlay" />

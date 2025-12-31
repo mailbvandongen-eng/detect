@@ -1,6 +1,6 @@
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Settings, Grid3X3, LucideIcon } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Settings, Grid3X3, LucideIcon, Type } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLayerStore, useGPSStore, useUIStore, usePresetStore } from '../../store'
+import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore } from '../../store'
 
 // Icon mapping for dynamic icon rendering
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -88,6 +88,10 @@ export function PresetButtons() {
   const stopTracking = useGPSStore(state => state.stopTracking)
   const { presetsPanelOpen, togglePresetsPanel, toggleSettingsPanel, closeAllPanels } = useUIStore()
   const { presets, applyPreset } = usePresetStore()
+  const { presetPanelFontScale, setPresetPanelFontScale } = useSettingsStore()
+
+  // Calculate font size based on panel-specific fontScale
+  const baseFontSize = 12 * presetPanelFontScale / 100
 
   const resetAll = () => {
     // Close any open panels
@@ -162,12 +166,31 @@ export function PresetButtons() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="fixed bottom-[112px] left-[56px] bg-white/95 rounded-xl shadow-lg overflow-hidden min-w-[140px] backdrop-blur-sm z-[801]"
+              className="fixed bottom-[112px] left-[56px] bg-white/95 rounded-xl shadow-lg overflow-hidden min-w-[160px] backdrop-blur-sm z-[801]"
             >
-              <div className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-medium">
-                Presets
+              {/* Header with title and font size slider */}
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                <div className="px-3 py-1.5 text-xs font-medium">
+                  Presets
+                </div>
+                {/* Subtle font size slider */}
+                <div className="flex items-center gap-2 px-3 pb-1.5 opacity-80">
+                  <Type size={8} className="text-white/70" />
+                  <input
+                    type="range"
+                    min="80"
+                    max="130"
+                    step="10"
+                    value={presetPanelFontScale}
+                    onChange={(e) => setPresetPanelFontScale(parseInt(e.target.value))}
+                    className="flex-1 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-white"
+                    style={{ maxWidth: '60px' }}
+                    title={`Tekstgrootte: ${presetPanelFontScale}%`}
+                  />
+                  <Type size={12} className="text-white/70" />
+                </div>
               </div>
-              <div className="p-2">
+              <div className="p-2" style={{ fontSize: `${baseFontSize}px` }}>
                 {presets.map(preset => {
                   const IconComponent = ICON_MAP[preset.icon] || Layers
                   const iconColor = ICON_COLORS[preset.icon] || 'text-blue-600'
@@ -180,9 +203,9 @@ export function PresetButtons() {
                       className={`w-full flex items-center gap-2 px-2 py-1.5 ${hoverColor} rounded text-left transition-colors border-0 outline-none bg-transparent`}
                     >
                       <IconComponent size={14} className={iconColor} />
-                      <span className="text-xs text-gray-700">{preset.name}</span>
+                      <span className="text-gray-700" style={{ fontSize: '1em' }}>{preset.name}</span>
                       {!preset.isBuiltIn && (
-                        <span className="ml-auto text-[10px] text-gray-400">custom</span>
+                        <span className="ml-auto text-gray-400" style={{ fontSize: '0.8em' }}>custom</span>
                       )}
                     </button>
                   )
