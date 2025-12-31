@@ -72,12 +72,11 @@ export function ThemesPanel() {
             {/* Thema's - alle overlay lagen */}
             <LayerGroup title="Thema's" defaultExpanded={true}>
               {/* Steentijd (Stone Age) */}
-              <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false} layerNames={['Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen', 'Essen']}>
+              <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false} layerNames={['Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen']}>
                 <LayerItem name="Hunebedden" type="overlay" />
                 <LayerItem name="FAMKE Steentijd" type="overlay" />
                 <LayerItem name="Grafheuvels" type="overlay" />
                 <LayerItem name="Terpen" type="overlay" />
-                <LayerItem name="Essen" type="overlay" />
               </LayerGroup>
 
               {/* Archaeological Layers */}
@@ -98,11 +97,12 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Erfgoed & Monumenten */}
-              <LayerGroup title="Erfgoed & Monumenten" defaultExpanded={false} layerNames={['Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Kastelen']}>
+              <LayerGroup title="Erfgoed & Monumenten" defaultExpanded={false} layerNames={['Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Kastelen', 'Essen']}>
                 <LayerItem name="Rijksmonumenten" type="overlay" />
                 <LayerItem name="Werelderfgoed" type="overlay" />
                 <LayerItem name="Religieus Erfgoed" type="overlay" />
                 <LayerItem name="Kastelen" type="overlay" />
+                <LayerItem name="Essen" type="overlay" />
               </LayerGroup>
 
               {/* WOII & Militair */}

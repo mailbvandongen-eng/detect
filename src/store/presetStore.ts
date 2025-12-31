@@ -23,7 +23,7 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'steentijd',
     name: 'Steentijd',
     icon: 'Mountain',
-    layers: ['Hunebedden', 'Grafheuvels', 'Terpen', 'Essen', 'AMK Steentijd'],
+    layers: ['Hunebedden', 'Grafheuvels', 'Terpen', 'AMK Steentijd'],
     isBuiltIn: false
   },
   {
@@ -37,7 +37,7 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'midlaat-nieuwetijd',
     name: 'Mid laat - Nieuwe tijd',
     icon: 'Grid',
-    layers: ['Kadastrale Grenzen', 'AMK Late ME'],
+    layers: ['Kadastrale Grenzen', 'AMK Late ME', 'Essen'],
     isBuiltIn: false
   },
   {
@@ -72,12 +72,12 @@ const ALL_OVERLAYS = [
   // Base layer overlays
   'Labels Overlay', 'TMK 1850', 'Bonnebladen 1900',
   // Steentijd
-  'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen', 'Essen',
+  'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
   // Archeologie
   'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
   'Romeinse wegen', 'Romeinse wegen (Wereld)', 'Kastelen', 'IKAW', 'Archeo Landschappen',
   // Erfgoed
-  'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed',
+  'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Essen',
   // Militair
   'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
   'Verdedigingslinies', 'Inundatiegebieden', 'Militaire Objecten',

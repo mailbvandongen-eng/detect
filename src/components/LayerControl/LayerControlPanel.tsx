@@ -43,7 +43,6 @@ export function LayerControlPanel() {
                 <LayerItem name="FAMKE Steentijd" type="overlay" />
                 <LayerItem name="Grafheuvels" type="overlay" />
                 <LayerItem name="Terpen" type="overlay" />
-                <LayerItem name="Essen" type="overlay" />
               </LayerGroup>
 
               {/* Archaeological Layers */}
@@ -60,6 +59,7 @@ export function LayerControlPanel() {
               <LayerGroup title="Erfgoed & Monumenten" defaultExpanded={false}>
                 <LayerItem name="Rijksmonumenten" type="overlay" />
                 <LayerItem name="Werelderfgoed" type="overlay" />
+                <LayerItem name="Essen" type="overlay" />
               </LayerGroup>
 
               {/* WOII & Militair */}

@@ -14,12 +14,12 @@ const ALL_OVERLAYS = [
   // Base layer overlays
   'Labels Overlay', 'TMK 1850', 'Bonnebladen 1900',
   // Steentijd
-  'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen', 'Essen',
+  'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
   // Archeologie
   'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
   'Romeinse wegen', 'Romeinse wegen (Wereld)', 'Kastelen', 'IKAW', 'Archeo Landschappen',
   // Erfgoed
-  'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed',
+  'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Essen',
   // Militair
   'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
   'Verdedigingslinies', 'Inundatiegebieden', 'Militaire Objecten',
