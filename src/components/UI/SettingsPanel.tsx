@@ -351,13 +351,13 @@ function ToggleRow({ label, checked, onChange }: { label: string; checked: boole
       <span className="text-sm text-gray-600">{label}</span>
       <button
         onClick={() => onChange(!checked)}
-        className={`w-10 h-5 rounded-full transition-colors border-0 outline-none relative ${
-          checked ? 'bg-blue-500' : 'bg-gray-300'
+        className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
+          checked ? 'bg-gradient-to-r from-blue-500 to-blue-600' : 'bg-gray-300'
         }`}
       >
         <span
-          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-            checked ? 'translate-x-5' : 'translate-x-0.5'
+          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
+            checked ? 'left-[22px]' : 'left-0.5'
           }`}
         />
       </button>
