@@ -637,7 +637,7 @@ export function Popup() {
           continue
         }
 
-        // Gewaspercelen (BRP)
+        // Gewaspercelen (BRP) - enriched with soil type from Bodemkaart
         if (title === 'Gewaspercelen') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -645,13 +645,19 @@ export function Popup() {
             const buffer = 50
             const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
 
-            const url = `https://service.pdok.nl/rvo/brpgewaspercelen/wms/v1_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=BrpGewas&QUERY_LAYERS=BrpGewas&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+            // Query BRP and Bodemkaart in parallel
+            const brpUrl = `https://service.pdok.nl/rvo/brpgewaspercelen/wms/v1_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=BrpGewas&QUERY_LAYERS=BrpGewas&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+            const bodemUrl = `https://service.pdok.nl/bzk/bro-bodemkaart/wms/v1_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=soilarea&QUERY_LAYERS=soilarea&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
 
-            const response = await fetch(url)
-            const data = await response.json()
+            const [brpResponse, bodemResponse] = await Promise.all([
+              fetch(brpUrl),
+              fetch(bodemUrl).catch(() => null) // Don't fail if bodem query fails
+            ])
 
-            if (data.features && data.features.length > 0) {
-              const props = data.features[0].properties
+            const brpData = await brpResponse.json()
+
+            if (brpData.features && brpData.features.length > 0) {
+              const props = brpData.features[0].properties
               let html = `<strong class="text-green-800">Landbouwperceel</strong>`
 
               if (props.gewas || props.gewasnaam) {
@@ -662,6 +668,27 @@ export function Popup() {
               }
               if (props.oppervlakte) {
                 html += `<br/><span class="text-xs text-gray-500">${props.oppervlakte} ha</span>`
+              }
+
+              // Add soil type from Bodemkaart if available
+              if (bodemResponse) {
+                try {
+                  const bodemData = await bodemResponse.json()
+                  if (bodemData.features && bodemData.features.length > 0) {
+                    const bodemProps = bodemData.features[0].properties
+                    const soilName = bodemProps.first_soilname || bodemProps.soilname || bodemProps.bodemtype
+                    if (soilName) {
+                      html += `<br/><span class="text-xs text-amber-700 font-medium">Grondsoort: ${soilName}</span>`
+                    }
+                    // Show soil code if available
+                    const soilCode = bodemProps.first_soilcode || bodemProps.soilcode || bodemProps.maparea_soilcode
+                    if (soilCode) {
+                      html += `<br/><span class="text-xs text-gray-400">Bodemcode: ${soilCode}</span>`
+                    }
+                  }
+                } catch {
+                  // Ignore bodem parsing errors
+                }
               }
 
               results.push(html)
