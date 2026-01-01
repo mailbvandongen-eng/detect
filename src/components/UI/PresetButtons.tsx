@@ -1,4 +1,4 @@
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Settings, Grid3X3, LucideIcon, Type } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Settings, Grid3X3, LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore } from '../../store'
 
@@ -168,27 +168,25 @@ export function PresetButtons() {
               transition={{ duration: 0.15 }}
               className="fixed bottom-[112px] left-[56px] bg-white/95 rounded-xl shadow-lg overflow-hidden min-w-[160px] backdrop-blur-sm z-[801]"
             >
-              {/* Header with title and font size slider */}
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-                <div className="px-3 py-1.5 text-xs font-medium">
-                  Presets
-                </div>
-                {/* Subtle font size slider */}
-                <div className="flex items-center gap-2 px-3 pb-1.5 opacity-80">
-                  <Type size={8} className="text-white/70" />
-                  <input
-                    type="range"
-                    min="80"
-                    max="130"
-                    step="10"
-                    value={presetPanelFontScale}
-                    onChange={(e) => setPresetPanelFontScale(parseInt(e.target.value))}
-                    className="flex-1 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-white"
-                    style={{ maxWidth: '60px' }}
-                    title={`Tekstgrootte: ${presetPanelFontScale}%`}
-                  />
-                  <Type size={12} className="text-white/70" />
-                </div>
+              {/* Header with title and font size slider inline */}
+              <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                <span className="text-xs font-medium">Presets</span>
+                {/* Subtle font size slider - inline next to title */}
+                <input
+                  type="range"
+                  min="80"
+                  max="130"
+                  step="10"
+                  value={presetPanelFontScale}
+                  onChange={(e) => setPresetPanelFontScale(parseInt(e.target.value))}
+                  className="w-12 h-1 rounded-full cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
+                  style={{
+                    WebkitAppearance: 'none',
+                    appearance: 'none',
+                    background: 'rgba(255,255,255,0.4)',
+                  }}
+                  title={`Tekstgrootte: ${presetPanelFontScale}%`}
+                />
               </div>
               <div className="p-2" style={{ fontSize: `${baseFontSize}px` }}>
                 {presets.map(preset => {

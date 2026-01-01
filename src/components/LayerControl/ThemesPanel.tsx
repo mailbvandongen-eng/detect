@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRef, useEffect } from 'react'
-import { X, Layers, Type } from 'lucide-react'
+import { X, Layers } from 'lucide-react'
 import { useUIStore, useSettingsStore } from '../../store'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
@@ -45,23 +45,14 @@ export function ThemesPanel() {
             exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.15 }}
           >
-            {/* Header with title and font size slider */}
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-              <div className="flex items-center justify-between px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <Layers size={14} />
-                  <span className="font-medium text-sm">Kaartlagen</span>
-                </div>
-                <button
-                  onClick={toggleThemesPanel}
-                  className="p-0.5 rounded border-0 outline-none hover:bg-white/20 transition-colors"
-                >
-                  <X size={16} />
-                </button>
+            {/* Header with title and font size slider inline */}
+            <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+              <div className="flex items-center gap-2">
+                <Layers size={14} />
+                <span className="font-medium text-sm">Kaartlagen</span>
               </div>
-              {/* Subtle font size slider */}
-              <div className="flex items-center gap-2 px-3 pb-2 opacity-80">
-                <Type size={10} className="text-white/70" />
+              <div className="flex items-center gap-2">
+                {/* Subtle font size slider - inline next to title */}
                 <input
                   type="range"
                   min="80"
@@ -69,11 +60,20 @@ export function ThemesPanel() {
                   step="10"
                   value={layerPanelFontScale}
                   onChange={(e) => setLayerPanelFontScale(parseInt(e.target.value))}
-                  className="flex-1 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-white"
-                  style={{ maxWidth: '80px' }}
+                  className="w-14 h-1 rounded-full cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
+                  style={{
+                    WebkitAppearance: 'none',
+                    appearance: 'none',
+                    background: 'rgba(255,255,255,0.4)',
+                  }}
                   title={`Tekstgrootte: ${layerPanelFontScale}%`}
                 />
-                <Type size={14} className="text-white/70" />
+                <button
+                  onClick={toggleThemesPanel}
+                  className="p-0.5 rounded border-0 outline-none hover:bg-white/20 transition-colors"
+                >
+                  <X size={16} />
+                </button>
               </div>
             </div>
           <div className="p-2 overflow-y-auto flex-1" style={{ fontSize: `${baseFontSize}px` }}>

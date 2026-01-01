@@ -9,6 +9,7 @@ import { LongPressMenu } from './components/Map/LongPressMenu'
 import { BuildLabel } from './components/UI/BuildLabel'
 import { PresetButtons } from './components/UI/PresetButtons'
 import { InfoButton } from './components/UI/InfoButton'
+import { CompassButton } from './components/UI/CompassButton'
 import { OpacitySliders } from './components/UI/OpacitySliders'
 import { SearchBox } from './components/UI/SearchBox'
 import { ZoomButtons } from './components/UI/ZoomButtons'
@@ -58,6 +59,7 @@ function App() {
         <PresetButtons />
         <AddVondstButton />
         <InfoButton />
+        <CompassButton />
         <SettingsPanel />
       </div>
     </PasswordGate>
