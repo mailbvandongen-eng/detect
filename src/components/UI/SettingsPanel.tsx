@@ -35,7 +35,7 @@ const ALL_OVERLAYS = [
   // Fossielen
   'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
   // Recreatie
-  'Parken', 'Speeltuinen', 'Musea', 'Strandjes',
+  'Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Kringloopwinkels',
   // Percelen
   'Gewaspercelen', 'Kadastrale Grenzen',
   // Provinciale Waardenkaarten - Zuid-Holland

@@ -208,11 +208,12 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Recreation */}
-              <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Parken', 'Speeltuinen', 'Musea', 'Strandjes']}>
+              <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Kringloopwinkels']}>
                 <LayerItem name="Parken" type="overlay" />
                 <LayerItem name="Speeltuinen" type="overlay" />
                 <LayerItem name="Musea" type="overlay" />
                 <LayerItem name="Strandjes" type="overlay" />
+                <LayerItem name="Kringloopwinkels" type="overlay" />
               </LayerGroup>
             </LayerGroup>
           </div>

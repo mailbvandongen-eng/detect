@@ -515,6 +515,14 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: false
   },
+  'Kringloopwinkels': {
+    name: 'Kringloopwinkels',
+    factory: async () => {
+      const { createKringloopwinkelsLayerOL } = await import('./kringloopwinkelsOL')
+      return createKringloopwinkelsLayerOL()
+    },
+    immediateLoad: false
+  },
 
   // Fossil layers - PBDB data
   'Fossielen Nederland': {

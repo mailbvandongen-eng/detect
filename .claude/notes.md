@@ -1,6 +1,32 @@
 # Detectorapp-NL - Sessienotities
 
-## Huidige versie: 2.9.0
+## Huidige versie: 2.10.0
+
+---
+
+## v2.10.0 - Kringloopwinkels & UI fixes
+
+### Nieuwe features:
+1. **Kringloopwinkels laag** (`src/layers/kringloopwinkelsOL.ts`)
+   - Live data uit OpenStreetMap via Overpass API
+   - ~840+ locaties in Nederland
+   - 24-uur cache in localStorage (winkels die erbij komen/afgaan worden automatisch bijgewerkt)
+   - Tags: `shop=second_hand`, `shop=charity`, `second_hand=yes`
+   - Popup toont: naam, adres, website, openingstijden (indien beschikbaar in OSM)
+   - Groen recycle-icoon
+
+2. **Kompasknop verbeterd**
+   - Nu vierkant met afgeronde hoeken (consistent met InfoButton)
+   - Zelfde afmetingen als InfoButton (w-8 h-8)
+   - Gepositioneerd onder InfoButton met juiste spacing
+   - Blijft verschijnen bij kaartrotatie >5°
+
+### Bestanden gewijzigd:
+- `src/layers/kringloopwinkelsOL.ts` - NIEUW
+- `src/layers/layerRegistry.ts` - Kringloopwinkels toegevoegd
+- `src/components/LayerControl/ThemesPanel.tsx` - Toegevoegd onder Recreatie
+- `src/components/UI/SettingsPanel.tsx` - Toegevoegd aan ALL_OVERLAYS (reset-knop)
+- `src/components/UI/CompassButton.tsx` - Vierkante stijl, nieuwe positie
 
 ---
 

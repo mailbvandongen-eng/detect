@@ -51,13 +51,13 @@ export function CompassButton() {
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ duration: 0.2 }}
           onClick={resetToNorth}
-          className="fixed top-12 right-2.5 z-[800] w-9 h-9 flex items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-md border-0 outline-none transition-colors backdrop-blur-sm"
+          className="fixed top-[52px] right-2.5 z-[800] w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-lg shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
           title="Klik om noorden te herstellen"
         >
           {/* Google Maps style compass needle */}
           <svg
-            width="22"
-            height="22"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             style={{ transform: `rotate(${-rotation}deg)` }}
           >
