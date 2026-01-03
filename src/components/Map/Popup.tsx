@@ -826,8 +826,7 @@ export function Popup() {
               if (akrGemeenteCode && sectie && perceelnummer) {
                 kadasterUrl = `https://kadastralekaart.com/kaart/perceel/${akrGemeenteCode}/${sectie}/${perceelnummer}`
               }
-              html += `<br/><a href="${kadasterUrl}" target="_blank" rel="noopener" class="text-xs text-blue-600 hover:underline">Eigenaar opzoeken →</a>`
-              html += `<br/><span class="text-[10px] text-gray-400">(€3,70 via Kadaster.nl)</span>`
+              html += `<br/><a href="${kadasterUrl}" target="_blank" rel="noopener" class="text-xs text-blue-600 hover:underline">Eigenaar opzoeken</a> <span class="text-[10px] text-gray-400">(betaalde dienst)</span>`
 
               results.push(html)
             }
