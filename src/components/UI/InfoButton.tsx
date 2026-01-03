@@ -96,7 +96,7 @@ export function InfoButton() {
                     <span className="text-sm">Meld een bug</span>
                   </a>
                   <p className="text-xs text-gray-400 text-center">
-                    DetectorApp NL v2.10.6
+                    DetectorApp NL v2.10.7
                   </p>
                 </section>
               </div>
@@ -115,7 +115,7 @@ function InfoTab() {
         <h3 className="font-semibold text-gray-800 mb-2">Over deze app</h3>
         <p className="text-gray-600">
           DetectorApp NL is dé kaartapplicatie voor metaaldetectie en archeologische verkenning in Nederland.
-          Met 60+ kaartlagen, GPS tracking, Google Maps-style navigatie en vondstenbeheer.
+          Met 60+ kaartlagen, GPS tracking met richtingspijl en vondstenbeheer.
         </p>
       </section>
 
@@ -208,14 +208,14 @@ function FunctiesTab() {
       <section>
         <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
           <Navigation size={16} className="text-green-600" />
-          GPS & Navigatie
+          GPS Tracking
         </h3>
         <ul className="text-gray-600 space-y-1 text-xs">
           <li>Live GPS tracking met nauwkeurigheidscirkel</li>
-          <li>Google Maps-style navigatieknop (tik 1× = locatie, 2× = volgen, 3× = kompas)</li>
-          <li>Heading-up mode met kompasknop om terug te draaien</li>
-          <li>Route navigatie naar locatie (long-press → "Navigeer")</li>
+          <li>Richtingspijl draait mee met je telefoon (zoals Google Maps)</li>
+          <li>Kaart handmatig draaien + kompasknop om terug te draaien naar noorden</li>
           <li>Schaalbalk onderaan (instelbaar in Instellingen)</li>
+          <li>Open locatie in Google Maps (long-press → "Open in Google Maps")</li>
         </ul>
       </section>
 
@@ -274,11 +274,11 @@ function HandleidingTab() {
       </section>
 
       <section>
-        <h3 className="font-semibold text-gray-800 mb-2">GPS knop (Google Maps-style)</h3>
+        <h3 className="font-semibold text-gray-800 mb-2">GPS knop</h3>
         <div className="text-gray-600 space-y-2 text-xs">
-          <p><strong>1× tikken:</strong> Laat je huidige locatie zien (grijs icoon)</p>
-          <p><strong>2× tikken:</strong> Volg je locatie - kaart schuift mee (blauw icoon)</p>
-          <p><strong>3× tikken:</strong> Kompas-modus - kaart draait mee met je richting</p>
+          <p><strong>Uit (grijs icoon):</strong> GPS tracking uit, geen locatie zichtbaar.</p>
+          <p><strong>Aan (blauw icoon):</strong> GPS tracking aan, je locatie en richting worden getoond.</p>
+          <p><strong>Richtingspijl:</strong> De blauwe pijl draait vloeiend mee met de richting van je telefoon.</p>
           <p><strong>Kompasknop:</strong> Verschijnt rechtsboven als de kaart gedraaid is. Tik om terug naar noorden te draaien.</p>
         </div>
       </section>
@@ -303,10 +303,10 @@ function HandleidingTab() {
       </section>
 
       <section>
-        <h3 className="font-semibold text-gray-800 mb-2">Navigatie</h3>
+        <h3 className="font-semibold text-gray-800 mb-2">Zoeken & Navigatie</h3>
         <div className="text-gray-600 space-y-2 text-xs">
-          <p><strong>Route:</strong> Long-press op een locatie en kies "Navigeer hierheen".</p>
           <p><strong>Zoeken:</strong> Gebruik de zoekbalk bovenaan om een adres te vinden.</p>
+          <p><strong>Google Maps:</strong> Long-press op een locatie en kies "Open in Google Maps" om te navigeren.</p>
           <p><strong>Schaalbalk:</strong> Onderaan de kaart - aan/uit in Instellingen.</p>
         </div>
       </section>

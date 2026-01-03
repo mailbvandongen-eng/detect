@@ -14,23 +14,17 @@ import { OpacitySliders } from './components/UI/OpacitySliders'
 import { SearchBox } from './components/UI/SearchBox'
 import { ZoomButtons } from './components/UI/ZoomButtons'
 import { SettingsPanel } from './components/UI/SettingsPanel'
-import { RouteLayer } from './components/Navigation/RouteLayer'
-import { NavigationBar } from './components/Navigation/NavigationBar'
 import { AddVondstButton } from './components/Vondst/AddVondstButton'
 import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
 import { CustomLayerMarkers } from './components/CustomLayers'
 import { PasswordGate } from './components/Auth/PasswordGate'
 import { useHeading } from './hooks/useHeading'
-import { useMapRotation } from './hooks/useMapRotation'
-import { useNavigation } from './hooks/useNavigation'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useSettingsStore } from './store'
 
 function App() {
   // Initialize hooks
   useHeading()
-  useMapRotation()
-  useNavigation()
   useDynamicAHN()
 
   // Get font scale setting (80-150%)
@@ -43,13 +37,11 @@ function App() {
       <div style={{ fontSize: `${baseFontSize}px` }}>
         <MapContainer />
         <GpsMarker />
-        <RouteLayer />
         <LocalVondstMarkers />
         <CustomLayerMarkers />
         <Popup />
         <LongPressMenu />
         <SearchBox />
-        <NavigationBar />
         <GpsButton />
         <ZoomButtons />
         <LayerControlButton />

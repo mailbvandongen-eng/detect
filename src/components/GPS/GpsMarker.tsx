@@ -5,9 +5,10 @@ import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Style, Fill, Icon, Circle as CircleStyle } from 'ol/style'
 import { fromLonLat } from 'ol/proj'
-import { useMapStore, useGPSStore, useSettingsStore } from '../../store'
+import { useMapStore, useGPSStore } from '../../store'
+import { useSettingsStore } from '../../store/settingsStore'
 
-// Navigation arrow SVG - always points up
+// Arrow SVG - rotates with heading to show direction
 const ARROW_SVG = (() => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
     <polygon points="24,6 38,38 24,30 10,38" fill="#4285F4" stroke="white" stroke-width="3" stroke-linejoin="round"/>
@@ -21,7 +22,6 @@ export function GpsMarker() {
   const accuracy = useGPSStore(state => state.accuracy)
   const tracking = useGPSStore(state => state.tracking)
   const smoothHeading = useGPSStore(state => state.smoothHeading)
-  const headingUpMode = useSettingsStore(state => state.headingUpMode)
   const showAccuracyCircle = useSettingsStore(state => state.showAccuracyCircle)
   const firstFix = useGPSStore(state => state.firstFix)
   const resetFirstFix = useGPSStore(state => state.resetFirstFix)
@@ -31,7 +31,7 @@ export function GpsMarker() {
   const accuracyRef = useRef<Feature | null>(null)
   const layerRef = useRef<VectorLayer<VectorSource> | null>(null)
 
-  // Arrow style - rotates with heading in north-up mode, fixed in heading-up mode
+  // Arrow style - rotates with heading to show direction
   const createArrowStyle = useMemo(() => (rotation: number) => new Style({
     image: new Icon({
       src: ARROW_SVG,
@@ -111,50 +111,22 @@ export function GpsMarker() {
       return
     }
 
-    // Center on user with offset in heading-up mode
+    // Center on user when tracking
     if (tracking && centerOnUser && !firstFix) {
-      if (headingUpMode) {
-        // In heading-up mode: offset the view so GPS is at 30% from bottom
-        // This makes you "look ahead" on the map
-        const view = map.getView()
-        const resolution = view.getResolution() || 1
-        const size = map.getSize()
-        if (size) {
-          const offsetPixels = size[1] * 0.20 // 20% of screen height
-          const offsetMeters = offsetPixels * resolution
-          const rotation = view.getRotation()
-
-          // Calculate offset in map coordinates (opposite of rotation)
-          const offsetX = Math.sin(rotation) * offsetMeters
-          const offsetY = Math.cos(rotation) * offsetMeters
-
-          const centerCoords = [coords[0] + offsetX, coords[1] + offsetY]
-          view.setCenter(centerCoords)
-        }
-      } else {
-        // North-up mode: center directly on GPS
-        map.getView().animate({
-          center: coords,
-          duration: 150
-        })
-      }
+      map.getView().animate({
+        center: coords,
+        duration: 150
+      })
     }
-  }, [map, tracking, position, accuracy, firstFix, resetFirstFix, centerOnUser, headingUpMode, showAccuracyCircle])
+  }, [map, tracking, position, accuracy, firstFix, resetFirstFix, centerOnUser, showAccuracyCircle])
 
-  // Update arrow rotation
+  // Update arrow rotation - arrow always rotates with heading (like Google Maps)
   useEffect(() => {
     if (!markerRef.current) return
 
-    if (headingUpMode) {
-      // Heading-up mode: arrow always points UP (0 rotation)
-      // The map rotates, not the marker
-      markerRef.current.setStyle(createArrowStyle(0))
-    } else {
-      // North-up mode: arrow rotates with heading
-      const rotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
-      markerRef.current.setStyle(createArrowStyle(rotation))
-    }
-  }, [headingUpMode, smoothHeading, createArrowStyle])
+    const rotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
+    markerRef.current.setStyle(createArrowStyle(rotation))
+  }, [smoothHeading, createArrowStyle])
 
   return null
 }

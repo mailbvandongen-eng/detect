@@ -138,11 +138,6 @@ export function SettingsPanel() {
                   onChange={settings.setGpsAutoStart}
                 />
                 <ToggleRow
-                  label="Kaart draait mee (heading up)"
-                  checked={settings.headingUpMode}
-                  onChange={settings.setHeadingUpMode}
-                />
-                <ToggleRow
                   label="Nauwkeurigheidscirkel"
                   checked={settings.showAccuracyCircle}
                   onChange={settings.setShowAccuracyCircle}

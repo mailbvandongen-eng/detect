@@ -1,10 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Navigation, X, MapPin, Plus, ExternalLink } from 'lucide-react'
+import { X, MapPin, Plus, ExternalLink } from 'lucide-react'
 import { toLonLat } from 'ol/proj'
 import { useMapStore } from '../../store'
-import { useGPSStore } from '../../store/gpsStore'
-import { useNavigationStore } from '../../store/navigationStore'
 import { useUIStore } from '../../store/uiStore'
 
 interface LongPressLocation {
@@ -14,9 +12,6 @@ interface LongPressLocation {
 
 export function LongPressMenu() {
   const map = useMapStore(state => state.map)
-  const position = useGPSStore(state => state.position)
-  const startNavigation = useNavigationStore(state => state.startNavigation)
-  const isNavigating = useNavigationStore(state => state.isNavigating)
   const openVondstForm = useUIStore(state => state.openVondstForm)
 
   const [menuLocation, setMenuLocation] = useState<LongPressLocation | null>(null)
@@ -243,26 +238,6 @@ export function LongPressMenu() {
     setCanClose(false)
   }
 
-  const handleNavigate = async () => {
-    if (!menuLocation || !position) return
-
-    const [lng, lat] = menuLocation.coordinate
-
-    // Generate a name based on coordinates
-    const name = `${lat.toFixed(4)}, ${lng.toFixed(4)}`
-
-    await startNavigation(
-      { lng, lat },
-      name,
-      { lng: position.lng, lat: position.lat }
-    )
-
-    // Force close (bypass canClose check)
-    setVisible(false)
-    setMenuLocation(null)
-    setCanClose(false)
-  }
-
   const forceClose = () => {
     setVisible(false)
     setMenuLocation(null)
@@ -348,34 +323,6 @@ export function LongPressMenu() {
                 <Plus size={20} className="text-blue-500" />
                 <span className="font-medium">Vondst toevoegen</span>
               </button>
-
-              {/* Navigate to... */}
-              <button
-                onClick={handleNavigate}
-                disabled={!position || isNavigating}
-                className={`w-full px-4 py-3 flex items-center gap-3 transition-colors bg-white border-0 outline-none ${
-                  position && !isNavigating
-                    ? 'hover:bg-blue-50 text-gray-700'
-                    : 'text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                <Navigation size={20} className={position && !isNavigating ? 'text-blue-500' : 'text-gray-300'} />
-                <span className="font-medium">Navigeer hierheen</span>
-              </button>
-
-              {/* Show warning if no GPS */}
-              {!position && (
-                <div className="px-4 py-2 text-xs text-amber-600 bg-amber-50">
-                  GPS positie niet beschikbaar
-                </div>
-              )}
-
-              {/* Show warning if already navigating */}
-              {isNavigating && (
-                <div className="px-4 py-2 text-xs text-blue-600 bg-blue-50">
-                  Navigatie al actief
-                </div>
-              )}
 
               {/* Open in Google Maps */}
               <button

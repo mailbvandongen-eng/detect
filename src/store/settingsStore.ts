@@ -10,7 +10,6 @@ interface SettingsState {
 
   // GPS
   gpsAutoStart: boolean
-  headingUpMode: boolean
   showAccuracyCircle: boolean
 
   // Feedback
@@ -29,7 +28,6 @@ interface SettingsState {
   setDefaultBackground: (bg: DefaultBackground) => void
   setShowScaleBar: (value: boolean) => void
   setGpsAutoStart: (value: boolean) => void
-  setHeadingUpMode: (value: boolean) => void
   setShowAccuracyCircle: (value: boolean) => void
   setHapticFeedback: (value: boolean) => void
   setVondstenLocalOnly: (value: boolean) => void
@@ -46,7 +44,6 @@ export const useSettingsStore = create<SettingsState>()(
       defaultBackground: 'CartoDB (licht)',
       showScaleBar: true,
       gpsAutoStart: false,
-      headingUpMode: false,
       showAccuracyCircle: true,
       hapticFeedback: true,
       vondstenLocalOnly: true,  // Default to local storage (no login needed)
@@ -59,7 +56,6 @@ export const useSettingsStore = create<SettingsState>()(
       setDefaultBackground: (defaultBackground) => set({ defaultBackground }),
       setShowScaleBar: (showScaleBar) => set({ showScaleBar }),
       setGpsAutoStart: (gpsAutoStart) => set({ gpsAutoStart }),
-      setHeadingUpMode: (headingUpMode) => set({ headingUpMode }),
       setShowAccuracyCircle: (showAccuracyCircle) => set({ showAccuracyCircle }),
       setHapticFeedback: (hapticFeedback) => set({ hapticFeedback }),
       setVondstenLocalOnly: (vondstenLocalOnly) => set({ vondstenLocalOnly }),

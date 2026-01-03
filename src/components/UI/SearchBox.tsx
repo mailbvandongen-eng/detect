@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { Search, X, Navigation } from 'lucide-react'
+import { Search, X, ExternalLink } from 'lucide-react'
 import { useMapStore } from '../../store/mapStore'
-import { useGPSStore } from '../../store/gpsStore'
-import { useNavigationStore } from '../../store/navigationStore'
 import { fromLonLat } from 'ol/proj'
 
 interface SearchResult {
@@ -14,10 +12,6 @@ interface SearchResult {
 
 export function SearchBox() {
   const map = useMapStore(state => state.map)
-  const gpsPosition = useGPSStore(state => state.position)
-  const startNavigation = useNavigationStore(state => state.startNavigation)
-  const isNavigating = useNavigationStore(state => state.isNavigating)
-  const loading = useNavigationStore(state => state.loading)
 
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -107,21 +101,13 @@ export function SearchBox() {
     setIsOpen(false)
   }
 
-  const handleNavigate = async (result: SearchResult, e: React.MouseEvent) => {
+  const handleOpenGoogleMaps = async (result: SearchResult, e: React.MouseEvent) => {
     e.stopPropagation() // Don't trigger handleSelect
-
-    if (!gpsPosition) {
-      alert('GPS positie niet beschikbaar. Zet GPS aan.')
-      return
-    }
 
     const coords = await getCoordinates(result.id)
     if (coords) {
-      await startNavigation(
-        coords,
-        result.weergavenaam,
-        { lng: gpsPosition.lng, lat: gpsPosition.lat }
-      )
+      const url = `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
+      window.open(url, '_blank')
     }
 
     // Clear and close
@@ -176,11 +162,10 @@ export function SearchBox() {
               </div>
               <button
                 className="search-navigate-btn"
-                onClick={(e) => handleNavigate(result, e)}
-                disabled={loading || !gpsPosition}
-                title={gpsPosition ? 'Navigeer hierheen' : 'GPS niet actief'}
+                onClick={(e) => handleOpenGoogleMaps(result, e)}
+                title="Open in Google Maps"
               >
-                <Navigation size={16} />
+                <ExternalLink size={16} />
               </button>
             </li>
           ))}

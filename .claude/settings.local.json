@@ -26,7 +26,9 @@
       "WebFetch(domain:www.cultureelerfgoed.nl)",
       "WebFetch(domain:services.rce.geovoorziening.nl)",
       "WebFetch(domain:legendageomorfologie.wur.nl)",
-      "WebFetch(domain:overpass-api.de)"
+      "WebFetch(domain:overpass-api.de)",
+      "Bash(python3:*)",
+      "Bash(git reset:*)"
     ]
   }
 }

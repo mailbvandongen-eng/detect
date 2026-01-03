@@ -13,12 +13,9 @@ interface GPSPosition {
   lng: number
 }
 
-type NavigationMode = 'free' | 'drive'
-
 interface GPSState {
   // State
   tracking: boolean
-  navigationMode: NavigationMode
   position: GPSPosition | null
   heading: number | null
   smoothHeading: number | null
@@ -34,7 +31,6 @@ interface GPSState {
   // Actions
   startTracking: () => void
   stopTracking: () => void
-  toggleMode: () => void
   updatePosition: (pos: GeolocationPosition) => void
   updateHeading: (raw: number, source?: 'gps' | 'compass') => void
   setSmoothedHeading: (heading: number) => void
@@ -46,7 +42,6 @@ export const useGPSStore = create<GPSState>()(
   immer((set, get) => ({
     // Initial state
     tracking: false, // GPS off by default
-    navigationMode: 'free', // Default: vrije modus (north-up, cone rotates)
     position: null,
     heading: null,
     smoothHeading: null,
@@ -83,13 +78,6 @@ export const useGPSStore = create<GPSState>()(
         state.headingSource = null
         state.watchId = null
         // Don't reset position, heading, smoothHeading - beacon stays visible
-      })
-    },
-
-    toggleMode: () => {
-      set(state => {
-        state.navigationMode = state.navigationMode === 'free' ? 'drive' : 'free'
-        console.log(`🗺️ Navigation mode: ${state.navigationMode}`)
       })
     },
 
