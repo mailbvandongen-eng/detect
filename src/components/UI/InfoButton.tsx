@@ -254,7 +254,7 @@ function FunctiesTab() {
         <ul className="text-gray-600 space-y-1 text-xs">
           <li>Zet "Kadastrale Grenzen" aan en tik op een perceel</li>
           <li>Toont: kadastrale aanduiding (gemeente, sectie, nummer) + oppervlakte</li>
-          <li>Link naar eigenaar opzoeken (betaalde dienst via kadastralekaart.com)</li>
+          <li>Link naar eigenaar opzoeken (€3,70 via Kadaster.nl)</li>
           <li>Hoogtekaart per perceel (AHN4)</li>
         </ul>
       </section>
