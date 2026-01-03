@@ -53,19 +53,27 @@ export function ThemesPanel() {
               </div>
               <div className="flex items-center gap-2">
                 {/* Font size slider */}
+                <span className="text-[10px] opacity-70">T</span>
                 <input
                   type="range"
                   min="80"
                   max="130"
                   step="10"
                   value={layerPanelFontScale}
-                  onChange={(e) => setLayerPanelFontScale(parseInt(e.target.value))}
-                  className="header-slider w-14 opacity-70 hover:opacity-100 transition-opacity"
+                  onChange={(e) => {
+                    e.stopPropagation()
+                    setLayerPanelFontScale(parseInt(e.target.value))
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  className="header-slider w-20 opacity-70 hover:opacity-100 transition-opacity"
                   title={`Tekstgrootte: ${layerPanelFontScale}%`}
                 />
+                <span className="text-xs opacity-70">T</span>
                 <button
                   onClick={toggleThemesPanel}
-                  className="p-0.5 rounded border-0 outline-none hover:bg-white/20 transition-colors"
+                  className="p-0.5 rounded border-0 outline-none hover:bg-white/20 transition-colors ml-1"
                 >
                   <X size={16} />
                 </button>

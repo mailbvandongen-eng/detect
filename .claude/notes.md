@@ -1,6 +1,16 @@
 # Detectorapp-NL - Sessienotities
 
-## Huidige versie: 2.10.0
+## Huidige versie: 2.10.1
+
+---
+
+## v2.10.1 - Bug report formulier
+
+### Wijzigingen:
+1. **"Meld een bug" knop** gekoppeld aan Google Form
+   - URL: `https://forms.gle/R5LCk11Bzu5XrkBj8`
+   - Toegevoegd in InfoButton (info modal)
+   - Toegevoegd in SettingsPanel (footer)
 
 ---
 

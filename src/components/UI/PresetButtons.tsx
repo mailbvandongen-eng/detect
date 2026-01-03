@@ -169,19 +169,29 @@ export function PresetButtons() {
               className="fixed bottom-[112px] left-[56px] bg-white/95 rounded-xl shadow-lg overflow-hidden min-w-[160px] backdrop-blur-sm z-[801]"
             >
               {/* Header with title and font size slider inline */}
-              <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+              <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                 <span className="text-xs font-medium">Presets</span>
                 {/* Font size slider */}
-                <input
-                  type="range"
-                  min="80"
-                  max="130"
-                  step="10"
-                  value={presetPanelFontScale}
-                  onChange={(e) => setPresetPanelFontScale(parseInt(e.target.value))}
-                  className="header-slider w-12 opacity-70 hover:opacity-100 transition-opacity"
-                  title={`Tekstgrootte: ${presetPanelFontScale}%`}
-                />
+                <div className="flex items-center gap-1">
+                  <span className="text-[9px] opacity-70">T</span>
+                  <input
+                    type="range"
+                    min="80"
+                    max="130"
+                    step="10"
+                    value={presetPanelFontScale}
+                    onChange={(e) => {
+                      e.stopPropagation()
+                      setPresetPanelFontScale(parseInt(e.target.value))
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    className="header-slider w-16 opacity-70 hover:opacity-100 transition-opacity"
+                    title={`Tekstgrootte: ${presetPanelFontScale}%`}
+                  />
+                  <span className="text-[11px] opacity-70">T</span>
+                </div>
               </div>
               <div className="p-2" style={{ fontSize: `${baseFontSize}px` }}>
                 {presets.map(preset => {

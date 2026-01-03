@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Type, Bug } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Bug } from 'lucide-react'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
@@ -113,12 +113,31 @@ export function SettingsPanel() {
                 <Settings size={18} />
                 <span className="font-medium">Instellingen</span>
               </div>
-              <button
-                onClick={toggleSettingsPanel}
-                className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none"
-              >
-                <X size={18} />
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Font size slider in header */}
+                <span className="text-[10px] opacity-70">T</span>
+                <input
+                  type="range"
+                  min="80"
+                  max="150"
+                  step="10"
+                  value={settings.fontScale}
+                  onChange={(e) => {
+                    e.stopPropagation()
+                    settings.setFontScale(parseInt(e.target.value))
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="header-slider w-20 opacity-70 hover:opacity-100 transition-opacity"
+                  title={`Tekstgrootte: ${settings.fontScale}%`}
+                />
+                <span className="text-xs opacity-70">T</span>
+                <button
+                  onClick={toggleSettingsPanel}
+                  className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none ml-1"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Content - apply font scaling directly */}
@@ -170,28 +189,6 @@ export function SettingsPanel() {
                   checked={settings.hapticFeedback}
                   onChange={settings.setHapticFeedback}
                 />
-              </Section>
-
-              {/* Weergave */}
-              <Section title="Weergave" icon={<Type size={16} />}>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600" style={{ fontSize: '0.9em' }}>Tekstgrootte</span>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min="80"
-                      max="150"
-                      step="10"
-                      value={settings.fontScale}
-                      onChange={(e) => settings.setFontScale(parseInt(e.target.value))}
-                      className="w-24 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                    />
-                    <span className="text-gray-400 w-10 text-right" style={{ fontSize: '0.75em' }}>{settings.fontScale}%</span>
-                  </div>
-                </div>
-                <p className="text-gray-400 mt-1" style={{ fontSize: '0.75em' }}>
-                  Past de tekstgrootte aan voor menu's en knoppen.
-                </p>
               </Section>
 
               {/* Vondsten */}
