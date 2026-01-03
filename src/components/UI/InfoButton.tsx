@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Info, X, FileText, BookOpen, Map, Navigation, MapPin, Layers, MousePointer, Smartphone, Bug } from 'lucide-react'
+import { Info, X, FileText, BookOpen, Map, Navigation, MapPin, Layers, MousePointer, Bug, ExternalLink } from 'lucide-react'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
@@ -96,7 +96,7 @@ export function InfoButton() {
                     <span className="text-sm">Meld een bug</span>
                   </a>
                   <p className="text-xs text-gray-400 text-center">
-                    DetectorApp NL v2.10.9
+                    DetectorApp NL v2.11.0
                   </p>
                 </section>
               </div>
@@ -321,6 +321,39 @@ function HandleidingTab() {
           <li>Gebruik <strong>historische kaarten</strong> om oude structuren te vinden</li>
           <li>Zet <strong>GPS tracking</strong> aan om je route te volgen</li>
           <li>Tik op objecten (bunkers, musea, etc.) voor openingstijden en info</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+          <ExternalLink size={16} className="text-blue-600" />
+          Kaartlegenda's
+        </h3>
+        <p className="text-gray-600 text-xs mb-2">
+          Uitleg over de termen en codes op de kaartlagen:
+        </p>
+        <ul className="text-gray-600 space-y-2 text-xs">
+          <li>
+            <a href="https://legenda-bodemkaart.bodemdata.nl/" target="_blank" rel="noopener" className="text-blue-600 hover:underline font-medium">
+              Bodemkaart legenda
+            </a>
+            <br />
+            <span className="text-gray-500">Grondsoorten: enkeerdgrond, podzol, zavel, loss, etc.</span>
+          </li>
+          <li>
+            <a href="https://legendageomorfologie.wur.nl/" target="_blank" rel="noopener" className="text-blue-600 hover:underline font-medium">
+              Geomorfologie legenda (WUR)
+            </a>
+            <br />
+            <span className="text-gray-500">Landvormen: dekzandrug, stuwwal, rivierkom, etc.</span>
+          </li>
+          <li>
+            <a href="https://www.cultureelerfgoed.nl/onderwerpen/bronnen-en-kaarten/overzicht/archeologie-in-nederland-amk-en-ikaw" target="_blank" rel="noopener" className="text-blue-600 hover:underline font-medium">
+              IKAW uitleg (RCE)
+            </a>
+            <br />
+            <span className="text-gray-500">Archeologische trefkans: hoog, middelhoog, laag</span>
+          </li>
         </ul>
       </section>
     </>

@@ -428,6 +428,7 @@ export function Popup() {
 
               let html = `<strong class="text-orange-800">IKAW (2008)</strong>`
               html += `<br/><span class="text-sm text-orange-700">${label}</span>`
+              html += `<br/><a href="https://www.cultureelerfgoed.nl/onderwerpen/bronnen-en-kaarten/overzicht/archeologie-in-nederland-amk-en-ikaw" target="_blank" rel="noopener" class="text-xs text-blue-600 hover:underline">Wat betekent dit?</a>`
 
               results.push(html)
             }
@@ -818,7 +819,7 @@ export function Popup() {
               }
 
               // Eigenaar opzoeken uitleg met link naar Kadaster winkel
-              html += `<br/><br/><span class="text-xs text-gray-600">Eigenaar opzoeken? Kopieer bovenstaande code en zoek op </span><a href="https://www.kadaster.nl/winkel" target="_blank" rel="noopener" class="text-xs text-blue-600 hover:underline">kadaster.nl/winkel</a><span class="text-xs text-gray-400"> (€3,70)</span>`
+              html += `<br/><br/><span class="text-xs text-gray-600">Eigenaar opzoeken? Kopieer bovenstaande code, ga naar </span><a href="https://www.kadaster.nl/winkel" target="_blank" rel="noopener" class="text-xs text-blue-600 hover:underline">kadaster.nl/winkel</a><span class="text-xs text-gray-600"> en klik "Zoek op aanduiding"</span><span class="text-xs text-gray-400"> (betaalde dienst)</span>`
 
               results.push(html)
             }
@@ -1294,6 +1295,9 @@ export function Popup() {
                 }
               }
 
+              // Link naar WUR legenda
+              html += `<br/><a href="https://legendageomorfologie.wur.nl/" target="_blank" rel="noopener" class="text-xs text-blue-600 hover:underline">Wat betekent dit?</a>`
+
               results.push(html)
               continue
             }
@@ -1309,6 +1313,11 @@ export function Popup() {
             }
             if (props.soilslope && props.soilslope !== 'Niet opgenomen') {
               html += `<br/><span class="text-xs text-gray-500">Helling: ${props.soilslope}</span>`
+            }
+
+            // Link naar bodemkaart legenda voor Bodemkaart laag
+            if (title === 'Bodemkaart' && (props.first_soilname || props.soilname || props.soilcode)) {
+              html += `<br/><a href="https://legenda-bodemkaart.bodemdata.nl/" target="_blank" rel="noopener" class="text-xs text-blue-600 hover:underline">Wat betekent dit?</a>`
             }
 
             // Generic fallback for other properties
