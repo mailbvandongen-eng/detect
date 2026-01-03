@@ -165,7 +165,7 @@ export function SearchBox() {
                 onClick={(e) => handleOpenGoogleMaps(result, e)}
                 title="Open in Google Maps"
               >
-                <ExternalLink size={16} />
+                <ExternalLink size={20} />
               </button>
             </li>
           ))}
