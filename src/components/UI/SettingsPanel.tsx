@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Type } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Type, Bug } from 'lucide-react'
+
+// Bug report form URL
+const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUIStore, useSettingsStore, usePresetStore, useLayerStore } from '../../store'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
@@ -320,6 +323,16 @@ export function SettingsPanel() {
 
             {/* Footer */}
             <div className="px-4 py-3 border-t border-gray-100 space-y-2" style={{ fontSize: `${baseFontSize}px` }}>
+              <a
+                href={BUG_REPORT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full px-3 py-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors border-0 outline-none"
+                style={{ fontSize: '0.9em' }}
+              >
+                <Bug size={16} />
+                <span>Meld een bug</span>
+              </a>
               <button
                 onClick={clearPasswordAuth}
                 className="flex items-center justify-center gap-2 w-full px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border-0 outline-none"

@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { Info, X, FileText, BookOpen, Map, Navigation, MapPin, Layers, MousePointer, Smartphone } from 'lucide-react'
+import { Info, X, FileText, BookOpen, Map, Navigation, MapPin, Layers, MousePointer, Smartphone, Bug } from 'lucide-react'
+
+// Bug report form URL
+const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUIStore } from '../../store'
 
@@ -81,10 +84,19 @@ export function InfoButton() {
                 {activeTab === 'functies' && <FunctiesTab />}
                 {activeTab === 'handleiding' && <HandleidingTab />}
 
-                {/* Version */}
-                <section className="pt-2 border-t border-gray-200">
+                {/* Bug report & Version */}
+                <section className="pt-2 border-t border-gray-200 space-y-2">
+                  <a
+                    href={BUG_REPORT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full px-3 py-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                  >
+                    <Bug size={14} />
+                    <span className="text-sm">Meld een bug</span>
+                  </a>
                   <p className="text-xs text-gray-400 text-center">
-                    DetectorApp NL v2.10.0
+                    DetectorApp NL v2.10.1
                   </p>
                 </section>
               </div>
