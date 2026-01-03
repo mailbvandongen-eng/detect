@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Navigation, X, MapPin, Plus } from 'lucide-react'
+import { Navigation, X, MapPin, Plus, ExternalLink } from 'lucide-react'
 import { toLonLat } from 'ol/proj'
 import { useMapStore } from '../../store'
 import { useGPSStore } from '../../store/gpsStore'
@@ -283,6 +283,19 @@ export function LongPressMenu() {
     setCanClose(false)
   }
 
+  const handleOpenGoogleMaps = () => {
+    if (!menuLocation) return
+
+    const [lng, lat] = menuLocation.coordinate
+    const url = `https://www.google.com/maps?q=${lat},${lng}`
+    window.open(url, '_blank')
+
+    // Close menu
+    setVisible(false)
+    setMenuLocation(null)
+    setCanClose(false)
+  }
+
   // Format coordinate for display
   const formatCoordinate = (coord: [number, number]) => {
     const [lng, lat] = coord
@@ -308,7 +321,7 @@ export function LongPressMenu() {
             style={{
               // Position menu near the long press location
               left: Math.min(menuLocation.pixel[0], window.innerWidth - 220),
-              top: Math.min(menuLocation.pixel[1], window.innerHeight - 180)
+              top: Math.min(menuLocation.pixel[1], window.innerHeight - 240)
             }}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -363,6 +376,15 @@ export function LongPressMenu() {
                   Navigatie al actief
                 </div>
               )}
+
+              {/* Open in Google Maps */}
+              <button
+                onClick={handleOpenGoogleMaps}
+                className="w-full px-4 py-3 flex items-center gap-3 transition-colors hover:bg-blue-50 text-gray-700 bg-white border-0 outline-none"
+              >
+                <ExternalLink size={20} className="text-green-600" />
+                <span className="font-medium">Open in Google Maps</span>
+              </button>
             </div>
 
             {/* Cancel button */}
