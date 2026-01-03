@@ -788,13 +788,10 @@ export function Popup() {
               const oppervlakte = props.kadastraleGrootteWaarde || props.kadastrale_grootte_waarde ||
                                   props.kadastraleGrootte || props.oppervlakte
 
-              // Get AKR gemeente code for kadastralekaart.com link (e.g., "VBG01", "AMF00")
-              // Try multiple possible field names from PDOK
-              const akrGemeenteCode = props.akrKadastraleGemeenteCodeCode ||
-                                      props.akr_kadastrale_gemeente_code_code ||
-                                      props.AKRKadastraleGemeenteCode ||
-                                      props.kadastraleGemeenteCode ||
-                                      props.kadastrale_gemeente_code ||
+              // Get AKR gemeente code for kadastralekaart.com link (e.g., "VBG01", "AMF00", "APT00")
+              // The code is in AKRKadastraleGemeenteCodeWaarde field from PDOK WMS
+              const akrGemeenteCode = props.AKRKadastraleGemeenteCodeWaarde ||
+                                      props.akrKadastraleGemeenteCodeWaarde ||
                                       ''
 
               // Build kadastrale aanduiding for display (e.g., "Voorburg E 7139")
