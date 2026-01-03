@@ -28,7 +28,11 @@
       "WebFetch(domain:legendageomorfologie.wur.nl)",
       "WebFetch(domain:overpass-api.de)",
       "Bash(python3:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "WebFetch(domain:kadastralekaart.nl)",
+      "WebFetch(domain:www.waze.com)",
+      "WebFetch(domain:geogap.nl)",
+      "WebFetch(domain:api.pdok.nl)"
     ]
   }
 }

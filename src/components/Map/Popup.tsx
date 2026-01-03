@@ -776,19 +776,44 @@ export function Popup() {
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
 
-              // Extract parcel info
-              const gemeente = props.kadastraleGemeenteWaarde || KADASTRALE_GEMEENTEN[String(props.kadastraleGemeenteCode)] || props.kadastraleGemeenteCode
-              const sectie = props.sectie || ''
-              const perceelnummer = props.perceelnummer || props.perceelNummer || ''
-              const oppervlakte = props.kadastraleGrootteWaarde || props.oppervlakte
+              // Debug: log all properties to see what fields we get from PDOK WMS
+              console.log('Kadastrale Grenzen WMS properties:', props)
 
-              // Build kadastrale aanduiding (e.g., "Amersfoort E 7797")
+              // Extract parcel info - try multiple field name variations
+              const gemeente = props.kadastraleGemeenteWaarde || props.kadastrale_gemeente_waarde ||
+                               props.kadastraleGemeente || KADASTRALE_GEMEENTEN[String(props.kadastraleGemeenteCode)] ||
+                               props.kadastraleGemeenteCode
+              const sectie = props.sectie || props.Sectie || ''
+              const perceelnummer = props.perceelnummer || props.perceelNummer || props.Perceelnummer || ''
+              const oppervlakte = props.kadastraleGrootteWaarde || props.kadastrale_grootte_waarde ||
+                                  props.kadastraleGrootte || props.oppervlakte
+
+              // Get AKR gemeente code for kadastralekaart.com link (e.g., "VBG01", "AMF00")
+              // Try multiple possible field names from PDOK
+              const akrGemeenteCode = props.akrKadastraleGemeenteCodeCode ||
+                                      props.akr_kadastrale_gemeente_code_code ||
+                                      props.AKRKadastraleGemeenteCode ||
+                                      props.kadastraleGemeenteCode ||
+                                      props.kadastrale_gemeente_code ||
+                                      ''
+
+              // Build kadastrale aanduiding for display (e.g., "Voorburg E 7139")
               const aanduiding = [gemeente, sectie, perceelnummer].filter(Boolean).join(' ')
+
+              // Build perceelnummer for kadastralekaart.com (e.g., "VBG01-E-7139")
+              const perceelId = akrGemeenteCode && sectie && perceelnummer
+                ? `${akrGemeenteCode}-${sectie}-${perceelnummer}`
+                : ''
 
               let html = `<strong class="text-indigo-800">Kadastraal Perceel</strong>`
 
               if (aanduiding) {
                 html += `<br/><span class="text-sm font-semibold text-indigo-700">${aanduiding}</span>`
+              }
+
+              // Show perceelId if available (for easy searching on kadastralekaart.com)
+              if (perceelId) {
+                html += `<br/><span class="text-xs text-gray-500 font-mono">${perceelId}</span>`
               }
 
               if (oppervlakte) {
@@ -798,9 +823,12 @@ export function Popup() {
                 }
               }
 
-              // Add link to kadastralekaart.com for owner lookup
-              // Build URL with coordinates for the parcel center
-              const kadasterUrl = `https://kadastralekaart.com/kaart/@${lonLat[0].toFixed(6)},${lonLat[1].toFixed(6)},18`
+              // Build URL to kadastralekaart.com for owner lookup
+              // Direct link if we have AKR code, otherwise link to homepage
+              let kadasterUrl = 'https://kadastralekaart.com/'
+              if (akrGemeenteCode && sectie && perceelnummer) {
+                kadasterUrl = `https://kadastralekaart.com/kaart/perceel/${akrGemeenteCode}/${sectie}/${perceelnummer}`
+              }
               html += `<br/><a href="${kadasterUrl}" target="_blank" rel="noopener" class="text-xs text-blue-600 hover:underline">Eigenaar opzoeken →</a>`
               html += `<br/><span class="text-[10px] text-gray-400">(betaalde dienst, €2,45)</span>`
 
