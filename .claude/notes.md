@@ -1,6 +1,26 @@
 # Detectorapp-NL - Sessienotities
 
-## Huidige versie: 2.16.0
+## Huidige versie: 2.16.1
+
+---
+
+## v2.16.1 - Hunebedden popup B1 redesign
+
+### Wijzigingen:
+
+1. **Hunebedden popup volledig herschreven in B1 taal**
+   - "Wat zie je hier?" sectie met intro tekst
+   - Bullet points met stenen uitleg (dekstenen, draagstenen, etc.)
+   - Dynamische vraag ("Waarom is dit hunebed zo klein?", "Waarom liggen hier meerdere?", etc.)
+   - "Wat is de Trechterbeker cultuur?" - standaard uitleg voor iedereen
+   - "Wat is hier gevonden?" - vondsten sectie
+   - "Museum in de buurt" - indien aanwezig
+   - "Bezoeken" - toegankelijkheidsinfo
+   - "Meer weten?" - Wikipedia link
+
+2. **Google Maps navigatie-icoon (blauw)**
+   - Automatisch beschikbaar voor alle hunebedden via header
+   - Zelfde icoon als in long-press menu en adreszoekvenster
 
 ---
 

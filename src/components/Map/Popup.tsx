@@ -1752,58 +1752,103 @@ export function Popup() {
           }
         }
 
-        // Hunebedden (megalithische grafmonumenten)
+        // Hunebedden (megalithische grafmonumenten) - B1 stijl
         if (dataProps.layerType === 'hunebed') {
-          // Periode
+          // Periode direct onder titel
           if (dataProps.period) {
-            html += `<br/><span class="text-sm text-purple-700">${dataProps.period}</span>`
+            html += `<br/><span class="text-sm text-purple-700">Periode: ${dataProps.period}</span>`
           }
 
-          // Beschrijving als lopende tekst
-          const infoItems: string[] = []
+          // "Wat zie je hier?" sectie
+          html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat zie je hier?</span></div>`
+
+          // Intro tekst
           if (dataProps.description) {
-            infoItems.push(dataProps.description)
+            html += `<div class="text-sm text-gray-700 mt-1">${dataProps.description}</div>`
           }
+
+          // Bullet points voor stenen en afmetingen
+          const bulletPoints: string[] = []
           if (dataProps.stones) {
-            infoItems.push(`Dit hunebed heeft ${dataProps.stones.toLowerCase()}.`)
+            // Parse stones string into separate items
+            const stonesLower = dataProps.stones.toLowerCase()
+            const dekMatch = stonesLower.match(/(\d+)\s*dekst[^\s,]*/i)
+            const draagMatch = stonesLower.match(/(\d+)\s*draagst[^\s,]*/i)
+            const sluitMatch = stonesLower.match(/(\d+)\s*sluitst[^\s,]*/i)
+            const poortMatch = stonesLower.match(/(\d+)\s*poortst[^\s,]*/i)
+            const gangdekMatch = stonesLower.match(/(\d+)\s*gangdekst[^\s,]*/i)
+            const gangzijMatch = stonesLower.match(/(\d+)\s*gangzijst[^\s,]*/i)
+
+            if (dekMatch) bulletPoints.push(`${dekMatch[1]} deksteen${parseInt(dekMatch[1]) > 1 ? 'en' : ''} (de grote steen${parseInt(dekMatch[1]) > 1 ? 'en' : ''} bovenop)`)
+            if (draagMatch) bulletPoints.push(`${draagMatch[1]} draagstenen (de stenen die de dekstenen dragen)`)
+            if (sluitMatch) bulletPoints.push(`${sluitMatch[1]} sluitsteen${parseInt(sluitMatch[1]) > 1 ? 'en' : ''} (afsluiting aan de korte zijden)`)
+            if (poortMatch) bulletPoints.push(`${poortMatch[1]} poortsteen${parseInt(poortMatch[1]) > 1 ? 'en' : ''} (bij de ingang)`)
+            if (gangdekMatch) bulletPoints.push(`${gangdekMatch[1]} gangdeksteen${parseInt(gangdekMatch[1]) > 1 ? 'en' : ''} (boven de toegangsgang)`)
+            if (gangzijMatch) bulletPoints.push(`${gangzijMatch[1]} gangzijstenen (langs de toegangsgang)`)
           }
           if (dataProps.length) {
-            const lengthText = dataProps.width
-              ? `De grafkamer is ${dataProps.length} lang.`
-              : `De grafkamer is ${dataProps.length} lang.`
-            infoItems.push(lengthText)
+            bulletPoints.push(`Een grafkamer van ${dataProps.length} lang`)
           }
-          if (infoItems.length > 0) {
-            html += `<br/><span class="text-sm text-gray-700">${infoItems.join(' ')}</span>`
+          if (dataProps.width) {
+            bulletPoints.push(`${dataProps.width}`)
           }
 
-          // Aanvullende informatie
-          const extraInfo: string[] = []
-          if (dataProps.finds) {
-            extraInfo.push(`<span class="text-gray-600">Vondsten: ${dataProps.finds}</span>`)
+          if (bulletPoints.length > 0) {
+            html += `<div class="text-sm text-gray-700 mt-1">Het hunebed heeft:</div>`
+            html += `<ul class="list-disc list-inside text-sm text-gray-700 mt-1 space-y-0.5">`
+            bulletPoints.forEach(point => {
+              html += `<li>${point}</li>`
+            })
+            html += `</ul>`
           }
+
+          // "Waarom is dit hunebed bijzonder?" of andere notable info
           if (dataProps.notable) {
-            extraInfo.push(`<span class="text-gray-700">${dataProps.notable}</span>`)
-          }
-          if (dataProps.museum) {
-            extraInfo.push(`<span class="text-gray-600">Museum: ${dataProps.museum}</span>`)
-          }
-          if (dataProps.access) {
-            extraInfo.push(`<span class="text-gray-500">${dataProps.access}</span>`)
-          }
-          if (extraInfo.length > 0) {
-            html += `<div class="mt-2 pt-2 border-t border-gray-100">`
-            html += `<span class="text-xs font-medium text-gray-500 block mb-1">Aanvullende informatie</span>`
-            html += `<div class="text-xs space-y-0.5">${extraInfo.join('<br/>')}</div>`
-            html += `</div>`
+            // Bepaal een passende vraag op basis van de notable tekst
+            const notableLower = dataProps.notable.toLowerCase()
+            let questionTitle = 'Wat is hier bijzonder?'
+            if (notableLower.includes('grootste')) {
+              questionTitle = 'Waarom is dit het grootste hunebed?'
+            } else if (notableLower.includes('klein') || notableLower.includes('kindhunebed')) {
+              questionTitle = 'Waarom is dit hunebed zo klein?'
+            } else if (notableLower.includes('cluster') || notableLower.includes('naast elkaar')) {
+              questionTitle = 'Waarom liggen hier meerdere hunebedden?'
+            } else if (notableLower.includes('enige') || notableLower.includes('westelijk') || notableLower.includes('noordelijk')) {
+              questionTitle = 'Wat maakt deze locatie bijzonder?'
+            }
+
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">${questionTitle}</span></div>`
+            html += `<div class="text-sm text-gray-700 mt-1">${dataProps.notable}</div>`
           }
 
-          // Links sectie
+          // "Wat is de Trechterbeker cultuur?" - standaard uitleg
+          html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat is de Trechterbeker cultuur?</span></div>`
+          html += `<div class="text-sm text-gray-700 mt-1">De Trechterbeker cultuur is de naam voor de mensen die 5.000 jaar geleden in Nederland woonden. Ze maakten potten met een trechter-vorm. Daarom heten ze zo. Deze mensen bouwden de hunebedden als graven voor hun doden.</div>`
+
+          // Vondsten (als er zijn)
+          if (dataProps.finds) {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat is hier gevonden?</span></div>`
+            html += `<div class="text-sm text-gray-700 mt-1">${dataProps.finds}</div>`
+          }
+
+          // Museum info
+          if (dataProps.museum) {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Museum in de buurt</span></div>`
+            html += `<div class="text-sm text-gray-700 mt-1">${dataProps.museum}</div>`
+          }
+
+          // "Bezoeken" sectie
+          html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Bezoeken</span></div>`
+          if (dataProps.access) {
+            html += `<div class="text-sm text-gray-700 mt-1">${dataProps.access}</div>`
+          } else {
+            html += `<div class="text-sm text-gray-700 mt-1">Je kunt dit hunebed gratis bezoeken.</div>`
+          }
+
+          // "Meer weten?" sectie
           if (dataProps.wikipedia) {
-            html += `<div class="mt-2 pt-2 border-t border-gray-100">`
-            html += `<span class="text-xs font-medium text-gray-500 block mb-1">Links</span>`
-            html += `<a href="${dataProps.wikipedia}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">Wikipedia</a>`
-            html += `</div>`
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Meer weten?</span></div>`
+            html += `<div class="text-sm text-gray-700 mt-1">Lees meer op <a href="${dataProps.wikipedia}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Wikipedia</a></div>`
           }
         }
 
