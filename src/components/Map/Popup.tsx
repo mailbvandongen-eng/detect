@@ -4,7 +4,7 @@ import TileWMS from 'ol/source/TileWMS'
 import TileLayer from 'ol/layer/Tile'
 import { toLonLat } from 'ol/proj'
 import proj4 from 'proj4'
-import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2, Type } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2, Type, Navigation2 } from 'lucide-react'
 import { useMapStore } from '../../store'
 import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
 import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondstenStore'
@@ -164,6 +164,7 @@ export function Popup() {
   const [showingHeightMap, setShowingHeightMap] = useState(false)
   const [loadingHeightMap, setLoadingHeightMap] = useState(false)
   const [currentVondstId, setCurrentVondstId] = useState<string | null>(null)
+  const [mapsUrl, setMapsUrl] = useState<string | null>(null)
   // Popup text scale: 100 = normal, 120 = 20% bigger, etc
   const [textScale, setTextScale] = useState(() => {
     const saved = localStorage.getItem('popupTextScale')
@@ -389,13 +390,13 @@ export function Popup() {
                 // Uitleg per adviestype
                 const adviesLower = advies.toLowerCase()
                 if (adviesLower.includes('karterend')) {
-                  html += `<br/><span class="text-xs text-gray-600">→ Veldonderzoek aanbevolen bij bodemingrepen</span>`
+                  html += `<br/><span class="text-xs text-gray-600">Dit betekent: veldonderzoek aanbevolen bij bodemingrepen</span>`
                 } else if (adviesLower.includes('waarderend')) {
-                  html += `<br/><span class="text-xs text-gray-600">→ Proefsleuven nodig om waarde te bepalen</span>`
+                  html += `<br/><span class="text-xs text-gray-600">Dit betekent: proefsleuven nodig om waarde te bepalen</span>`
                 } else if (adviesLower.includes('geen')) {
-                  html += `<br/><span class="text-xs text-green-600">→ Geen archeologisch onderzoek nodig</span>`
+                  html += `<br/><span class="text-xs text-green-600">Dit betekent: geen archeologisch onderzoek nodig</span>`
                 } else if (adviesLower.includes('quickscan')) {
-                  html += `<br/><span class="text-xs text-gray-600">→ Bureau-onderzoek aanbevolen</span>`
+                  html += `<br/><span class="text-xs text-gray-600">Dit betekent: bureau-onderzoek aanbevolen</span>`
                 }
               }
               results.push(html)
@@ -444,7 +445,7 @@ export function Popup() {
               if (props.type_uri) {
                 const linkUrl = props.type_uri.replace('type_uri:', '').trim()
                 if (linkUrl.startsWith('http')) {
-                  html += `<br/><a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">Meer informatie →</a>`
+                  html += `<br/><a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">Meer informatie</a>`
                 }
               }
 
@@ -453,7 +454,7 @@ export function Popup() {
                 if (key.toLowerCase().includes('uri') && typeof value === 'string' && key !== 'type_uri') {
                   const linkUrl = value.replace(/^[a-z_]+:/i, '').trim()
                   if (linkUrl.startsWith('http')) {
-                    html += `<br/><a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">${key.replace('_uri', '')} →</a>`
+                    html += `<br/><a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">${key.replace('_uri', '')}</a>`
                   }
                 }
               }
@@ -499,7 +500,7 @@ export function Popup() {
                 7: 'Waterbodem met hoge archeologische waarde'
               }
               if (tips[value]) {
-                html += `<br/><span class="text-xs text-gray-600">→ ${tips[value]}</span>`
+                html += `<br/><span class="text-xs text-gray-600">Tip: ${tips[value]}</span>`
               }
 
               results.push(html)
@@ -1637,10 +1638,10 @@ export function Popup() {
             html += `<br/><span class="text-xs text-purple-600">${dataProps.period}</span>`
           }
           if (dataProps.address) {
-            html += `<br/><span class="text-xs text-gray-500">📍 ${dataProps.address}</span>`
+            html += `<br/><span class="text-xs text-gray-500">Adres: ${dataProps.address}</span>`
           }
           if (dataProps.website) {
-            html += `<br/><a href="${dataProps.website}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">Meer informatie →</a>`
+            html += `<br/><a href="${dataProps.website}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">Meer informatie</a>`
           }
         }
 
@@ -1657,7 +1658,7 @@ export function Popup() {
             const wikiUrl = dataProps.wikipedia.startsWith('http')
               ? dataProps.wikipedia
               : `https://nl.wikipedia.org/wiki/${dataProps.wikipedia.replace('nl:', '')}`
-            html += `<br/><a href="${wikiUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">📖 Wikipedia →</a>`
+            html += `<br/><a href="${wikiUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">Wikipedia</a>`
           }
         }
 
@@ -1753,47 +1754,56 @@ export function Popup() {
 
         // Hunebedden (megalithische grafmonumenten)
         if (dataProps.layerType === 'hunebed') {
-          if (dataProps.id) {
-            html += `<br/><span class="text-xs text-gray-500">Code: ${dataProps.id}</span>`
-          }
+          // Periode
           if (dataProps.period) {
             html += `<br/><span class="text-sm text-purple-700">${dataProps.period}</span>`
           }
+
+          // Beschrijving als lopende tekst
+          const infoItems: string[] = []
           if (dataProps.description) {
-            html += `<br/><span class="text-sm text-gray-700">${dataProps.description}</span>`
+            infoItems.push(dataProps.description)
           }
           if (dataProps.stones) {
-            html += `<br/><span class="text-sm text-amber-700">🪨 ${dataProps.stones}</span>`
+            infoItems.push(`Dit hunebed heeft ${dataProps.stones.toLowerCase()}.`)
           }
           if (dataProps.length) {
-            html += `<br/><span class="text-xs text-gray-600">Lengte: ${dataProps.length}</span>`
+            const lengthText = dataProps.width
+              ? `De grafkamer is ${dataProps.length} lang.`
+              : `De grafkamer is ${dataProps.length} lang.`
+            infoItems.push(lengthText)
           }
-          if (dataProps.width) {
-            html += `<br/><span class="text-xs text-gray-600">${dataProps.width}</span>`
+          if (infoItems.length > 0) {
+            html += `<br/><span class="text-sm text-gray-700">${infoItems.join(' ')}</span>`
           }
+
+          // Aanvullende informatie
+          const extraInfo: string[] = []
           if (dataProps.finds) {
-            html += `<br/><span class="text-sm text-green-700">🏺 Vondsten: ${dataProps.finds}</span>`
+            extraInfo.push(`<span class="text-gray-600">Vondsten: ${dataProps.finds}</span>`)
           }
           if (dataProps.notable) {
-            html += `<br/><span class="text-sm text-blue-700 font-medium">⭐ ${dataProps.notable}</span>`
+            extraInfo.push(`<span class="text-gray-700">${dataProps.notable}</span>`)
           }
           if (dataProps.museum) {
-            html += `<br/><span class="text-sm text-indigo-600">🏛️ ${dataProps.museum}</span>`
+            extraInfo.push(`<span class="text-gray-600">Museum: ${dataProps.museum}</span>`)
           }
           if (dataProps.access) {
-            html += `<br/><span class="text-xs text-gray-500">📍 ${dataProps.access}</span>`
+            extraInfo.push(`<span class="text-gray-500">${dataProps.access}</span>`)
           }
-          // Wikipedia link
+          if (extraInfo.length > 0) {
+            html += `<div class="mt-2 pt-2 border-t border-gray-100">`
+            html += `<span class="text-xs font-medium text-gray-500 block mb-1">Aanvullende informatie</span>`
+            html += `<div class="text-xs space-y-0.5">${extraInfo.join('<br/>')}</div>`
+            html += `</div>`
+          }
+
+          // Links sectie
           if (dataProps.wikipedia) {
-            html += `<br/><a href="${dataProps.wikipedia}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">📖 Wikipedia →</a>`
-          }
-          // Google Maps navigation - get coordinates from feature geometry
-          const geom = feature.getGeometry()
-          if (geom) {
-            const coords = geom.getCoordinates()
-            const lonLat = toLonLat(coords)
-            const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lonLat[1]},${lonLat[0]}`
-            html += `<br/><a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs text-green-600 hover:underline">🧭 Navigeer hierheen →</a>`
+            html += `<div class="mt-2 pt-2 border-t border-gray-100">`
+            html += `<span class="text-xs font-medium text-gray-500 block mb-1">Links</span>`
+            html += `<a href="${dataProps.wikipedia}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">Wikipedia</a>`
+            html += `</div>`
           }
         }
 
@@ -2011,6 +2021,9 @@ export function Popup() {
         console.log(`📌 KLIK OPGESLAGEN: [${evt.coordinate[0].toFixed(0)}, ${evt.coordinate[1].toFixed(0)}]`)
         setParcelCoordinate(evt.coordinate) // Store coordinate for height map
         setShowingHeightMap(false) // Reset height map state
+        // Generate Google Maps URL for navigation
+        const lonLat = toLonLat(evt.coordinate)
+        setMapsUrl(`https://www.google.com/maps/dir/?api=1&destination=${lonLat[1]},${lonLat[0]}`)
         setVisible(true)
       }
     }
@@ -2098,6 +2111,20 @@ export function Popup() {
               <span className="flex-1 font-semibold text-gray-800 truncate" style={{ fontSize: '1em' }}>
                 {extractedTitle || 'Info'}
               </span>
+
+              {/* Navigation button - Google Maps */}
+              {mapsUrl && (
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 flex items-center justify-center text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-colors flex-shrink-0"
+                  title="Navigeer met Google Maps"
+                  aria-label="Navigeer met Google Maps"
+                >
+                  <Navigation2 size={16} />
+                </a>
+              )}
 
               {/* Close button */}
               <button

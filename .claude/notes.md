@@ -1,6 +1,35 @@
 # Detectorapp-NL - Sessienotities
 
-## Huidige versie: 2.15.0
+## Huidige versie: 2.16.0
+
+---
+
+## v2.16.0 - Professionele popup redesign
+
+### Wijzigingen:
+
+1. **Google Maps navigatie-icoon in popup header**
+   - Herkenbaar navigatie-icoon (Navigation2) rechts naast titel
+   - Opent Google Maps met routebeschrijving naar locatie
+   - Hover tooltip: "Navigeer met Google Maps"
+
+2. **Hunebedden popup herstructureerd (B1 stijl)**
+   - Professionele tekst zonder emoji's
+   - Beschrijving als lopende, leesbare tekst
+   - "Aanvullende informatie" sectie voor vondsten, museum, toegang
+   - "Links" sectie voor Wikipedia
+
+3. **Emoji's en pijltjes verwijderd uit alle popups**
+   - Geen emoji's meer in content
+   - Pijltjes (→) vervangen door duidelijke tekst
+   - "Dit betekent:" voor uitleg (FAMKE)
+   - "Tip:" voor aanbevelingen (IKAW)
+   - "Adres:" voor locaties (bunkers)
+
+4. **Algemene popup verbeteringen**
+   - Links zonder pijltjes: "Wikipedia" i.p.v. "📖 Wikipedia →"
+   - "Meer informatie" i.p.v. "Meer informatie →"
+   - Consistente, professionele uitstraling
 
 ---
 
