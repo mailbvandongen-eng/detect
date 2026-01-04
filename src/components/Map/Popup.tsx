@@ -302,7 +302,7 @@ export function Popup() {
 
         const title = layer.get('title') || ''
 
-        // Special handling for RCE/Flemish WMS layers
+        // Archeo Landschappen (RCE) - B1 stijl
         if (title === 'Archeo Landschappen') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -317,13 +317,27 @@ export function Popup() {
 
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
-              let html = `<strong class="text-green-800">Archeologisch Landschap</strong>`
-              if (props.landschapsnaam || props.naam) {
-                html += `<br/><span class="text-sm font-semibold">${props.landschapsnaam || props.naam}</span>`
+              const naam = props.landschapsnaam || props.naam || 'Archeologisch Landschap'
+              const omschrijving = props.omschrijving || ''
+
+              let html = `<strong class="text-green-800">${naam}</strong>`
+
+              if (omschrijving) {
+                html += `<br/><span class="text-sm text-gray-600">${omschrijving}</span>`
               }
-              if (props.omschrijving) {
-                html += `<br/><span class="text-xs text-gray-600">${props.omschrijving}</span>`
-              }
+
+              // Wat zie je hier
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat zie je hier?</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">Een archeologisch landschap is een gebied waar het landschap nog sporen draagt van menselijke activiteit uit het verleden. Denk aan oude akkers, nederzettingen of verdedigingswerken.</div>`
+
+              // Wat kun je hier vinden
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat kun je hier vinden?</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">Aardewerk, munten, gereedschap en andere voorwerpen van vroegere bewoners. De kans op vondsten hangt af van het type landschap.</div>`
+
+              // Bezoeken
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Meer weten</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">Bekijk de Rijksdienst voor het Cultureel Erfgoed (RCE) voor meer informatie over archeologische landschappen.</div>`
+
               results.push(html)
             }
           } catch (error) {
@@ -836,7 +850,7 @@ export function Popup() {
           continue
         }
 
-        // Religieus Erfgoed (RCE Landschapsatlas)
+        // Religieus Erfgoed (RCE Landschapsatlas) - B1 stijl
         if (title === 'Religieus Erfgoed') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -844,7 +858,6 @@ export function Popup() {
             const buffer = 50
             const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
 
-            // Correct WMS URL matching the layer definition
             const url = `https://services.rce.geovoorziening.nl/landschapsatlas_view/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=religieuserfgoed&QUERY_LAYERS=religieuserfgoed&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
 
             const response = await fetch(url)
@@ -852,28 +865,67 @@ export function Popup() {
 
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
-              let html = `<strong class="text-purple-800">Religieus Erfgoed</strong>`
+              const naam = props.naam || props.NAAM || props.name || props.NAME || 'Onbekend'
+              const denominatie = props.denominatie || props.DENOMINATIE || props.religie || ''
+              const type = props.type || props.TYPE || props.functie || ''
+              const bouwjaar = props.bouwjaar || props.BOUWJAAR || props.jaar || ''
+              const gemeente = props.gemeente || props.GEMEENTE || props.plaats || ''
 
-              // Handle various field name variations
-              const naam = props.naam || props.NAAM || props.name || props.NAME
-              if (naam) {
-                html += `<br/><span class="text-sm font-semibold text-purple-700">${naam}</span>`
+              let html = `<strong class="text-purple-800">${naam}</strong>`
+
+              // Type en denominatie
+              const typeLabel = type.toLowerCase()
+              let typeUitleg = 'Een religieus gebouw of heilige plek.'
+              let typeVondsten = 'Munten van kerkgangers, knopen, gespen, religieuze voorwerpen'
+
+              if (typeLabel.includes('kerk') || typeLabel.includes('church')) {
+                typeUitleg = 'Een kerk was het hart van de gemeenschap. Hier kwamen mensen samen voor diensten, maar ook voor belangrijke gebeurtenissen.'
+                typeVondsten = 'Munten uit de collecte, knopen, gespen, pelgrimsinsignes, loden zegels'
+              } else if (typeLabel.includes('kapel') || typeLabel.includes('chapel')) {
+                typeUitleg = 'Een kapel is een klein gebedshuis, vaak bij een landgoed, langs een weg, of op een bijzondere plek.'
+                typeVondsten = 'Devotionalia, munten, kruisjes, rozenkransen'
+              } else if (typeLabel.includes('synagoge')) {
+                typeUitleg = 'Een synagoge is een Joods gebedshuis. Veel synagogen in Nederland zijn verwoest of herbestemd na de Tweede Wereldoorlog.'
+                typeVondsten = 'Munten, knopen, kleine religieuze voorwerpen'
+              } else if (typeLabel.includes('klooster') || typeLabel.includes('monastery')) {
+                typeUitleg = 'Een klooster was een woon- en werkplek voor monniken of nonnen. Veel kloosters hadden eigen werkplaatsen en landerijen.'
+                typeVondsten = 'Religieuze voorwerpen, zegels, gereedschap, aardewerk, middeleeuwse munten'
+              } else if (typeLabel.includes('toren') || typeLabel.includes('tower')) {
+                typeUitleg = 'Een kerktoren of klokkentoren. Soms is alleen de toren nog over van een verdwenen kerk.'
+                typeVondsten = 'Munten, knopen, bouwmateriaal'
+              } else if (typeLabel.includes('begraafplaats') || typeLabel.includes('cemetery')) {
+                typeUitleg = 'Een historische begraafplaats. Detecteren op begraafplaatsen is niet toegestaan zonder toestemming.'
+                typeVondsten = 'Detecteren hier niet toegestaan'
               }
-              const denominatie = props.denominatie || props.DENOMINATIE || props.religie
+
+              // Denominatie (Rooms-Katholiek, Protestant, etc.)
               if (denominatie) {
-                html += `<br/><span class="text-sm text-gray-700">${denominatie}</span>`
+                html += `<br/><span class="text-sm text-purple-600">${denominatie}</span>`
               }
-              const type = props.type || props.TYPE || props.functie
               if (type) {
-                html += `<br/><span class="text-xs text-gray-600">${type}</span>`
+                html += `<br/><span class="text-sm text-gray-600">${type}</span>`
               }
-              const bouwjaar = props.bouwjaar || props.BOUWJAAR || props.jaar
               if (bouwjaar) {
-                html += `<br/><span class="text-xs text-gray-500">Bouwjaar: ${bouwjaar}</span>`
+                html += `<br/><span class="text-sm text-gray-500">Bouwjaar: ${bouwjaar}</span>`
               }
-              const gemeente = props.gemeente || props.GEMEENTE || props.plaats
               if (gemeente) {
                 html += `<br/><span class="text-xs text-gray-400">${gemeente}</span>`
+              }
+
+              // Wat zie je hier
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat zie je hier?</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">${typeUitleg}</div>`
+
+              // Wat kun je hier vinden
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat kun je hier vinden?</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">${typeVondsten}</div>`
+
+              // Bezoeken
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Bezoeken</span></div>`
+              if (typeLabel.includes('begraafplaats')) {
+                html += `<div class="text-sm text-red-600 mt-1">Detecteren op begraafplaatsen is niet toegestaan. Respecteer de rust van de overledenen.</div>`
+              } else {
+                html += `<div class="text-sm text-gray-700 mt-1">Veel kerken en religieuze gebouwen zijn beschermd monument. Vraag altijd toestemming voordat je gaat detecteren op het terrein.</div>`
               }
 
               results.push(html)
@@ -1834,36 +1886,107 @@ export function Popup() {
           }
         }
 
-        // Bunkers (WOII)
+        // Bunkers (WOII) - B1 stijl
         if (dataProps.bunker_type || (dataProps.name && dataProps.name.toLowerCase().includes('bunker'))) {
-          const bunkerTypes: Record<string, string> = {
-            'munitions': 'Munitiebunker',
-            'personnel_shelter': 'Schuilbunker',
-            'command': 'Commandobunker',
-            'gun_emplacement': 'Geschutsbunker',
-            'mg_nest': 'Mitrailleursnest',
-            'technical': 'Technische bunker',
-            'storage': 'Opslagbunker',
-            'tobruk': 'Tobruk-bunker',
-            'kazemat': 'Kazemat',
-            'Flak': 'Luchtafweerbunker',
-            'hardened_aircraft_shelter': 'Vliegtuigbunker',
-            'shelter': 'Schuilkelder'
+          const bunkerTypes: Record<string, { label: string; uitleg: string; vondsten: string }> = {
+            'munitions': {
+              label: 'Munitiebunker',
+              uitleg: 'Een bunker voor de opslag van munitie. Deze bunkers hadden dikke muren om explosies tegen te houden.',
+              vondsten: 'Patronen, hulzen, granaatfragmenten, militaire uitrusting'
+            },
+            'personnel_shelter': {
+              label: 'Schuilbunker',
+              uitleg: 'Een bunker waar soldaten konden schuilen tijdens bombardementen. Vaak met slaapplaatsen en voorzieningen.',
+              vondsten: 'Persoonlijke voorwerpen, knopen, gespen, munten, bestek'
+            },
+            'command': {
+              label: 'Commandobunker',
+              uitleg: 'Het zenuwcentrum van een verdedigingslinie. Hier werden bevelen gegeven en communicatie gecoördineerd.',
+              vondsten: 'Communicatie-apparatuur, kaartmateriaal, uniformonderdelen'
+            },
+            'gun_emplacement': {
+              label: 'Geschutsbunker',
+              uitleg: 'Een bunker met een geschutspositie voor kanonnen of luchtafweer. Gericht op het beschieten van vijanden.',
+              vondsten: 'Hulzen, granaatdelen, optische instrumenten'
+            },
+            'mg_nest': {
+              label: 'Mitrailleursnest',
+              uitleg: 'Een kleine, goed gecamoufleerde positie voor een mitrailleur. Vaak met beperkt zicht naar één richting.',
+              vondsten: 'Patronen, hulzen, onderdelen van wapens'
+            },
+            'technical': {
+              label: 'Technische bunker',
+              uitleg: 'Een bunker voor technische installaties zoals generatoren, pompinstallaties of telefoonverbindingen.',
+              vondsten: 'Technische onderdelen, kabels, gereedschap'
+            },
+            'storage': {
+              label: 'Opslagbunker',
+              uitleg: 'Een bunker voor de opslag van voorraden, voedsel of materiaal.',
+              vondsten: 'Conservenblikken, flessen, gereedschap, dozen'
+            },
+            'tobruk': {
+              label: 'Tobruk-bunker',
+              uitleg: 'Een klein, rond betonnen nest voor één of twee soldaten. Genoemd naar de stad Tobruk in Libië.',
+              vondsten: 'Patronen, hulzen, persoonlijke voorwerpen'
+            },
+            'kazemat': {
+              label: 'Kazemat',
+              uitleg: 'Een versterkte betonnen positie, vaak onderdeel van een grotere verdedigingslinie.',
+              vondsten: 'Militaire uitrusting, patronen, uniformonderdelen'
+            },
+            'Flak': {
+              label: 'Luchtafweerbunker',
+              uitleg: 'Een bunker met luchtafweergeschut (Flak) om vliegtuigen neer te schieten.',
+              vondsten: 'Grote hulzen, optische instrumenten, uniformonderdelen'
+            },
+            'hardened_aircraft_shelter': {
+              label: 'Vliegtuigbunker',
+              uitleg: 'Een grote bunker om vliegtuigen te beschermen tegen bombardementen.',
+              vondsten: 'Vliegtuigonderdelen, gereedschap, brandstofvaten'
+            },
+            'shelter': {
+              label: 'Schuilkelder',
+              uitleg: 'Een ondergrondse ruimte waar burgers of soldaten konden schuilen tijdens luchtaanvallen.',
+              vondsten: 'Persoonlijke voorwerpen, speelgoed, bestek, flessen'
+            }
           }
-          const typeLabel = dataProps.bunker_type ? (bunkerTypes[dataProps.bunker_type] || dataProps.bunker_type) : 'Bunker'
-          html += `<br/><span class="text-xs text-gray-600">Type: ${typeLabel}</span>`
+
+          const typeInfo = dataProps.bunker_type ? bunkerTypes[dataProps.bunker_type] : null
+          const typeLabel = typeInfo?.label || (dataProps.bunker_type ? dataProps.bunker_type : 'Bunker')
+
+          html += `<br/><span class="text-sm text-gray-600">${typeLabel}</span>`
+
           if (dataProps.operator) {
-            const operatorLabel = dataProps.operator === 'germany' ? 'Duitse bezetter' : dataProps.operator
-            html += `<br/><span class="text-xs text-gray-500">Gebouwd door: ${operatorLabel}</span>`
+            const operatorLabel = dataProps.operator === 'germany' ? 'Duitse bezetter (1940-1945)' : dataProps.operator
+            html += `<br/><span class="text-sm text-gray-500">Gebouwd door: ${operatorLabel}</span>`
           }
           if (dataProps.period) {
-            html += `<br/><span class="text-xs text-purple-600">${dataProps.period}</span>`
+            html += `<br/><span class="text-sm text-purple-600">${dataProps.period}</span>`
           }
-          if (dataProps.address) {
-            html += `<br/><span class="text-xs text-gray-500">Adres: ${dataProps.address}</span>`
+
+          // Wat zie je hier
+          html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat zie je hier?</span></div>`
+          if (typeInfo) {
+            html += `<div class="text-sm text-gray-700 mt-1">${typeInfo.uitleg}</div>`
+          } else {
+            html += `<div class="text-sm text-gray-700 mt-1">Een bunker uit de Tweede Wereldoorlog. De meeste bunkers in Nederland zijn gebouwd door de Duitse bezetter tussen 1940 en 1945.</div>`
           }
+
+          // Wat kun je hier vinden
+          html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat kun je hier vinden?</span></div>`
+          if (typeInfo) {
+            html += `<div class="text-sm text-gray-700 mt-1">${typeInfo.vondsten}</div>`
+          } else {
+            html += `<div class="text-sm text-gray-700 mt-1">Patronen, hulzen, uniformonderdelen, persoonlijke voorwerpen van soldaten.</div>`
+          }
+
+          // Bezoeken / Veiligheid
+          html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Let op</span></div>`
+          html += `<div class="text-sm text-amber-700 mt-1">Bunkers kunnen gevaarlijk zijn. Betreed nooit een bunker zonder toestemming. Munitieresten nooit aanraken - bel 112 bij verdachte vondsten.</div>`
+
           if (dataProps.website) {
-            html += `<br/><a href="${dataProps.website}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">Meer informatie</a>`
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Meer weten?</span></div>`
+            html += `<div class="text-sm text-gray-700 mt-1"><a href="${dataProps.website}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Website bezoeken</a></div>`
           }
         }
 
