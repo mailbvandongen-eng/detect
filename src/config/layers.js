@@ -32,10 +32,10 @@ export const layerMetadata = {
     type: 'geojson',
     file: 'romeinse_wegen_itiner_e.geojson'
   },
-  'Romeinse wegen': {
+  'Romeinse wegen (regio)': {
     category: 'Romeinse Infrastructuur',
     period: 'Romeins (12 v.Chr.-450 n.Chr.)',
-    description: 'Romeinse wegen custom verzameling',
+    description: 'Romeinse wegen custom verzameling (NL regio)',
     type: 'geojson',
     file: 'romeinse_wegen_custom.geojson'
   },

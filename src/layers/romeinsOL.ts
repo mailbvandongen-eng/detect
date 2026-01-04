@@ -96,14 +96,14 @@ export async function createRomeinseWegenLayerOL() {
     const features = format.readFeatures(filteredGeojson)
 
     const layer = new VectorLayer({
-      properties: { title: 'Romeinse wegen' },
+      properties: { title: 'Romeinse wegen (regio)' },
       source: new VectorSource({ features }),
       style: (feature, resolution) => createStyle(resolution),
       opacity: 0.8,
       zIndex: 20
     })
 
-    console.log(`✓ Romeinse wegen loaded (${features.length}/${geojson.features.length} features in Benelux region)`)
+    console.log(`✓ Romeinse wegen (regio) loaded (${features.length}/${geojson.features.length} features in Benelux region)`)
     return layer
 
   } catch (error) {

@@ -92,11 +92,13 @@ export function createAHN4SlopeLayerOL() {
 }
 
 // Esri World Hillshade - Global coverage, good base layer
+// minZoom 8 prevents "Map data not yet available" at low zoom levels
 export function createWorldHillshadeLayerOL() {
   const layer = new TileLayer({
     properties: { title: 'World Hillshade', type: 'overlay' },
     visible: false,
     opacity: 0.6,
+    minZoom: 8,  // Voorkomt "Map data not yet available" foutmelding
     source: new XYZ({
       url: 'https://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
       attributions: '© Esri',

@@ -1,54 +1,747 @@
 {
   "type": "FeatureCollection",
   "name": "Hunebedden Nederland",
-  "source": "OpenStreetMap (via Overpass API)",
+  "source": "OpenStreetMap + Hunebedcentrum + RCE",
   "features": [
-    {"type": "Feature", "properties": {"name": "Hunebed D1 Steenbergen", "id": "D1"}, "geometry": {"type": "Point", "coordinates": [6.4105028, 53.1048512]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D2 Westervelde", "id": "D2"}, "geometry": {"type": "Point", "coordinates": [6.4458708, 53.0557045]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D3 Midlaren", "id": "D3"}, "geometry": {"type": "Point", "coordinates": [6.6715835, 53.1077938]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D4 Hunenborg", "id": "D4"}, "geometry": {"type": "Point", "coordinates": [6.6717887, 53.1077851]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D5 Zeijen", "id": "D5"}, "geometry": {"type": "Point", "coordinates": [6.5313689, 53.0618237]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D6 Tynaarlo", "id": "D6"}, "geometry": {"type": "Point", "coordinates": [6.6294782, 53.0747470]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D7 Boswachterij Schipborg", "id": "D7"}, "geometry": {"type": "Point", "coordinates": [6.6846733, 53.0610564]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D8 Boswachterij Schipborg", "id": "D8"}, "geometry": {"type": "Point", "coordinates": [6.6992988, 53.0599193]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D9 Annen", "id": "D9"}, "geometry": {"type": "Point", "coordinates": [6.7156152, 53.0615287]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D10 Gasteren", "id": "D10"}, "geometry": {"type": "Point", "coordinates": [6.6579533, 53.0424799]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D11 Anloo", "id": "D11"}, "geometry": {"type": "Point", "coordinates": [6.7080561, 53.0302173]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D12 Eexter Es", "id": "D12"}, "geometry": {"type": "Point", "coordinates": [6.7238249, 53.0149034]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D13 Eext", "id": "D13"}, "geometry": {"type": "Point", "coordinates": [6.7270307, 53.0113681]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D14 Eexterhalte", "id": "D14"}, "geometry": {"type": "Point", "coordinates": [6.7306125, 53.0017117]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D15 Loon", "id": "D15"}, "geometry": {"type": "Point", "coordinates": [6.6129268, 53.0227335]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D16 Balloo", "id": "D16"}, "geometry": {"type": "Point", "coordinates": [6.6188554, 53.0004005]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D17 Rolde", "id": "D17"}, "geometry": {"type": "Point", "coordinates": [6.6494212, 52.9901860]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D18 Rolde", "id": "D18"}, "geometry": {"type": "Point", "coordinates": [6.6491808, 52.9895511]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D19 Drouwen", "id": "D19"}, "geometry": {"type": "Point", "coordinates": [6.7853984, 52.9520381]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D20 Drouwen", "id": "D20"}, "geometry": {"type": "Point", "coordinates": [6.7857849, 52.9519822]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D21 Bronneger", "id": "D21"}, "geometry": {"type": "Point", "coordinates": [6.8002575, 52.9442024]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D22 Bronneger", "id": "D22"}, "geometry": {"type": "Point", "coordinates": [6.8005049, 52.9443389]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D23 Bronneger", "id": "D23"}, "geometry": {"type": "Point", "coordinates": [6.8026227, 52.9448276]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D24 Bronneger", "id": "D24"}, "geometry": {"type": "Point", "coordinates": [6.8024933, 52.9446429]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D25 Bronneger", "id": "D25"}, "geometry": {"type": "Point", "coordinates": [6.8030424, 52.9444835]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D26 Drouwenerveld", "id": "D26"}, "geometry": {"type": "Point", "coordinates": [6.7745221, 52.9431669]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D27 Borger", "id": "D27"}, "geometry": {"type": "Point", "coordinates": [6.7976864, 52.9302504]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D28 Buinen", "id": "D28"}, "geometry": {"type": "Point", "coordinates": [6.8112653, 52.9259250]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D29 Buinen", "id": "D29"}, "geometry": {"type": "Point", "coordinates": [6.8114585, 52.9256530]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D30 Boswachterij Exloo", "id": "D30"}, "geometry": {"type": "Point", "coordinates": [6.8458825, 52.8915909]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D31 Hunzebos", "id": "D31"}, "geometry": {"type": "Point", "coordinates": [6.8709076, 52.8678184]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D32 Odoorn", "id": "D32"}, "geometry": {"type": "Point", "coordinates": [6.8395333, 52.8568483]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D34 Valthe West", "id": "D34"}, "geometry": {"type": "Point", "coordinates": [6.8675457, 52.8426602]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D35 Valthe Zuid-west", "id": "D35"}, "geometry": {"type": "Point", "coordinates": [6.8708232, 52.8352245]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D36 Valthe-O", "id": "D36"}, "geometry": {"type": "Point", "coordinates": [6.8946580, 52.8397425]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D37 Valthe-O", "id": "D37"}, "geometry": {"type": "Point", "coordinates": [6.8950229, 52.8397685]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D41 Emmen Noord", "id": "D41"}, "geometry": {"type": "Point", "coordinates": [6.8858819, 52.7999263]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D42 Westenesch-N", "id": "D42"}, "geometry": {"type": "Point", "coordinates": [6.8704041, 52.7958806]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D44 Emmen Westenesch", "id": "D44"}, "geometry": {"type": "Point", "coordinates": [6.8722301, 52.7877222]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D49 Papeloze kerk", "id": "D49"}, "geometry": {"type": "Point", "coordinates": [6.7738625, 52.8200633]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D50 Noord-Sleen", "id": "D50"}, "geometry": {"type": "Point", "coordinates": [6.7872184, 52.7960657]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D51 Noord-Sleen", "id": "D51"}, "geometry": {"type": "Point", "coordinates": [6.7865059, 52.7947348]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D52 Diever", "id": "D52"}, "geometry": {"type": "Point", "coordinates": [6.3311613, 52.8589831]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D53 Havelterberg", "id": "D53"}, "geometry": {"type": "Point", "coordinates": [6.2181319, 52.7925538]}},
-    {"type": "Feature", "properties": {"name": "Hunebed D54 Havelterberg", "id": "D54"}, "geometry": {"type": "Point", "coordinates": [6.2204905, 52.7925895]}},
-    {"type": "Feature", "properties": {"name": "Hunebed G1 Noordlaren", "id": "G1"}, "geometry": {"type": "Point", "coordinates": [6.6591119, 53.1157380]}},
-    {"type": "Feature", "properties": {"name": "Voormalig Hunebed G3", "id": "G3"}, "geometry": {"type": "Point", "coordinates": [6.6389166, 53.1328500]}}
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D1 Steenbergen",
+        "id": "D1",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Klein hunebed in de bossen bij Steenbergen. Gerestaureerd in 1870.",
+        "stones": "3 dekstenen, 6 draagstenen",
+        "length": "5 meter",
+        "notable": "Een van de noordelijkste hunebedden",
+        "access": "Vrij toegankelijk, in bosgebied",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D1_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.4105028, 53.1048512]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D2 Westervelde",
+        "id": "D2",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed bij Westervelde, gerestaureerd in 1870.",
+        "stones": "2 dekstenen, 5 draagstenen",
+        "length": "4 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D2_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.4458708, 53.0557045]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D3 Midlaren",
+        "id": "D3",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed in het Noordlaarderbos bij Midlaren.",
+        "stones": "2 dekstenen, 5 draagstenen",
+        "length": "4,5 meter",
+        "access": "Vrij toegankelijk, in bosgebied",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D3_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6715835, 53.1077938]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D4 Hunenborg",
+        "id": "D4",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Klein restant van een hunebed, vlakbij D3.",
+        "stones": "Slechts 2 stenen over",
+        "notable": "Zwaar beschadigd in het verleden",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D4_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6717887, 53.1077851]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D5 Zeijen",
+        "id": "D5",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed bij Zeijen, onderdeel van een groep prehistorische monumenten.",
+        "stones": "3 dekstenen, 7 draagstenen",
+        "length": "6 meter",
+        "notable": "In de buurt liggen ook grafheuvels",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D5_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.5313689, 53.0618237]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D6 Tynaarlo",
+        "id": "D6",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Mooi gerestaureerd hunebed bij Tynaarlo.",
+        "stones": "5 dekstenen, 8 draagstenen",
+        "length": "9 meter",
+        "finds": "Trechterbekers, bijlen, amber kralen",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D6_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6294782, 53.0747470]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D7 Schipborg",
+        "id": "D7",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed in de Boswachterij Schipborg.",
+        "stones": "2 dekstenen, 5 draagstenen",
+        "length": "4,5 meter",
+        "access": "Vrij toegankelijk, in bosgebied",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D7_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6846733, 53.0610564]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D8 Schipborg",
+        "id": "D8",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Klein hunebed in de Boswachterij Schipborg.",
+        "stones": "1 deksteen, 3 draagstenen",
+        "length": "3 meter",
+        "access": "Vrij toegankelijk, in bosgebied",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D8_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6992988, 53.0599193]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D9 Annen",
+        "id": "D9",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed bij het dorp Annen.",
+        "stones": "3 dekstenen, 7 draagstenen",
+        "length": "7 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D9_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7156152, 53.0615287]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D10 Gasteren",
+        "id": "D10",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed aan de rand van het dorp Gasteren.",
+        "stones": "4 dekstenen, 9 draagstenen",
+        "length": "8,5 meter",
+        "notable": "Goed bewaard gebleven",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D10_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6579533, 53.0424799]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D11 Anloo",
+        "id": "D11",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed vlakbij het pittoreske dorpje Anloo met zijn oude kerk.",
+        "stones": "2 dekstenen, 6 draagstenen",
+        "length": "5 meter",
+        "notable": "Anloo is een van de oudste dorpen van Drenthe",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D11_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7080561, 53.0302173]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D12 Eexter Es",
+        "id": "D12",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed op de Eexter Es, een prehistorisch akkerbouwgebied.",
+        "stones": "2 dekstenen, 5 draagstenen",
+        "length": "4 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D12_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7238249, 53.0149034]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D13 Eext",
+        "id": "D13",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Groot hunebed bij het dorp Eext.",
+        "stones": "5 dekstenen, 10 draagstenen, 2 sluitstenen",
+        "length": "12 meter",
+        "finds": "Aardewerk, stenen bijlen, barnstenen kralen",
+        "notable": "Een van de grotere hunebedden",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D13_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7270307, 53.0113681]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D14 Eexterhalte",
+        "id": "D14",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed bij het gehucht Eexterhalte.",
+        "stones": "3 dekstenen, 6 draagstenen",
+        "length": "6 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D14_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7306125, 53.0017117]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D15 Loon",
+        "id": "D15",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed bij het dorpje Loon, in een bosrijke omgeving.",
+        "stones": "5 dekstenen, 10 draagstenen, 2 sluitstenen, 2 poortstenen",
+        "length": "14 meter",
+        "finds": "Rijke vondsten van aardewerk",
+        "notable": "Zeer compleet hunebed met entreeportaal",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D15_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6129268, 53.0227335]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D16 Balloo",
+        "id": "D16",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed bij Balloo, vlakbij een prehistorisch grafveld.",
+        "stones": "2 dekstenen, 4 draagstenen",
+        "length": "4 meter",
+        "notable": "In de buurt bevinden zich ook grafheuvels uit de bronstijd",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D16_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6188554, 53.0004005]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D17 Rolde",
+        "id": "D17",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Een van de twee hunebedden in Rolde, midden in het dorp.",
+        "stones": "5 dekstenen, 9 draagstenen",
+        "length": "11 meter",
+        "notable": "Ligt vlakbij D18, samen vormen ze een unieke combinatie",
+        "access": "Vrij toegankelijk, midden in het dorp",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D17_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6494212, 52.9901860]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D18 Rolde",
+        "id": "D18",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Het tweede hunebed in Rolde, vlak naast D17.",
+        "stones": "3 dekstenen, 6 draagstenen",
+        "length": "6 meter",
+        "notable": "Rolde is een van de weinige plaatsen met twee hunebedden naast elkaar",
+        "access": "Vrij toegankelijk, midden in het dorp",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D18_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6491808, 52.9895511]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D19 Drouwen",
+        "id": "D19",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Groot hunebed in het karakteristieke Drouwen.",
+        "stones": "5 dekstenen, 10 draagstenen",
+        "length": "14 meter",
+        "finds": "Trechterbekeraardewerk, vuurstenen werktuigen",
+        "notable": "Een van de best bewaarde hunebedden",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D19_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7853984, 52.9520381]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D20 Drouwen",
+        "id": "D20",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Klein hunebed vlak naast het grote D19.",
+        "stones": "1 deksteen, 3 draagstenen",
+        "length": "3 meter",
+        "notable": "Mogelijk een 'kindhunebed' of bijgraf",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D20_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7857849, 52.9519822]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D21 Bronneger",
+        "id": "D21",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Deel van een cluster van 5 hunebedden bij Bronneger.",
+        "stones": "3 dekstenen, 7 draagstenen",
+        "length": "7 meter",
+        "notable": "Unieke concentratie van 5 hunebedden (D21-D25)",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D21_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8002575, 52.9442024]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D22 Bronneger",
+        "id": "D22",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Klein hunebed in het Bronneger cluster.",
+        "stones": "1 deksteen, 3 draagstenen",
+        "length": "2,5 meter",
+        "notable": "Onderdeel van uniek 5-hunebedden cluster",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D22_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8005049, 52.9443389]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D23 Bronneger",
+        "id": "D23",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Middelgroot hunebed in het Bronneger cluster.",
+        "stones": "3 dekstenen, 6 draagstenen",
+        "length": "6 meter",
+        "notable": "Onderdeel van uniek 5-hunebedden cluster",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D23_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8026227, 52.9448276]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D24 Bronneger",
+        "id": "D24",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Klein hunebed in het Bronneger cluster.",
+        "stones": "1 deksteen, 3 draagstenen",
+        "length": "3 meter",
+        "notable": "Onderdeel van uniek 5-hunebedden cluster",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D24_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8024933, 52.9446429]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D25 Bronneger",
+        "id": "D25",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Klein hunebed, het vijfde in het Bronneger cluster.",
+        "stones": "1 deksteen, 2 draagstenen",
+        "length": "2 meter",
+        "notable": "Kleinste van het 5-hunebedden cluster",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D25_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8030424, 52.9444835]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D26 Drouwenerveld",
+        "id": "D26",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Groot hunebed op het Drouwenerveld, in een prachtige heideomgeving.",
+        "stones": "6 dekstenen, 11 draagstenen",
+        "length": "16 meter",
+        "finds": "Veel trechterbekeraardewerk, bijlen, sierraden",
+        "notable": "Op een heuvel met uitzicht over de heide",
+        "access": "Vrij toegankelijk, in heidegebied",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D26_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7745221, 52.9431669]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D27 Borger",
+        "id": "D27",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Het GROOTSTE hunebed van Nederland! Indrukwekkend megalithisch monument met 47 stenen. Vlakbij het Hunebedcentrum.",
+        "stones": "9 dekstenen (tot 20 ton!), 23 draagstenen, 2 sluitstenen, 2 gangdekstenen, 10 gangzijstenen",
+        "length": "22,5 meter",
+        "width": "7 meter breed, 3 meter hoog",
+        "finds": "Honderden fragmenten trechterbekeraardewerk, stenen bijlen, vuurstenen werktuigen, barnstenen sieraden",
+        "notable": "GROOTSTE hunebed van Nederland! Hier is ook het Hunebedcentrum (museum). Circa 5400 jaar oud.",
+        "access": "Vrij toegankelijk, parkeren bij Hunebedcentrum",
+        "museum": "Hunebedcentrum Borger - interactief museum over hunebedden",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D27_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7976864, 52.9302504]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D28 Buinen",
+        "id": "D28",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed bij het dorp Buinen, vlakbij D29.",
+        "stones": "3 dekstenen, 7 draagstenen",
+        "length": "7,5 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D28_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8112653, 52.9259250]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D29 Buinen",
+        "id": "D29",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Klein hunebed bij Buinen, vlakbij D28.",
+        "stones": "1 deksteen, 4 draagstenen",
+        "length": "4 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D29_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8114585, 52.9256530]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D30 Exloo",
+        "id": "D30",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed in de Boswachterij Exloo.",
+        "stones": "2 dekstenen, 5 draagstenen",
+        "length": "5 meter",
+        "access": "Vrij toegankelijk, in bosgebied",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D30_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8458825, 52.8915909]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D31 Hunzebos",
+        "id": "D31",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed in het Hunzebos bij Valthe.",
+        "stones": "2 dekstenen, 5 draagstenen",
+        "length": "5 meter",
+        "access": "Vrij toegankelijk, in bosgebied",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D31_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8709076, 52.8678184]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D32 Odoorn",
+        "id": "D32",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed bij het dorp Odoorn.",
+        "stones": "5 dekstenen, 9 draagstenen",
+        "length": "12,5 meter",
+        "finds": "Aardewerk, vuurstenen werktuigen",
+        "notable": "Een van de grotere hunebedden in zuidoost Drenthe",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D32_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8395333, 52.8568483]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D34 Valthe",
+        "id": "D34",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed ten westen van Valthe.",
+        "stones": "2 dekstenen, 5 draagstenen",
+        "length": "5 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D34_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8675457, 52.8426602]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D35 Valthe",
+        "id": "D35",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed ten zuidwesten van Valthe.",
+        "stones": "2 dekstenen, 4 draagstenen",
+        "length": "4 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D35_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8708232, 52.8352245]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D36 Valthe-Oost",
+        "id": "D36",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed ten oosten van Valthe, vlakbij D37.",
+        "stones": "2 dekstenen, 5 draagstenen",
+        "length": "5 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D36_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8946580, 52.8397425]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D37 Valthe-Oost",
+        "id": "D37",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Klein hunebed ten oosten van Valthe, naast D36.",
+        "stones": "1 deksteen, 3 draagstenen",
+        "length": "3 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D37_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8950229, 52.8397685]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D41 Emmen-Noord",
+        "id": "D41",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed in het noorden van Emmen.",
+        "stones": "3 dekstenen, 6 draagstenen",
+        "length": "7 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D41_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8858819, 52.7999263]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D42 Westenesch",
+        "id": "D42",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed in de wijk Westenesch in Emmen.",
+        "stones": "2 dekstenen, 5 draagstenen",
+        "length": "5 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D42_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8704041, 52.7958806]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D44 Westenesch",
+        "id": "D44",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed in Emmen-Westenesch.",
+        "stones": "3 dekstenen, 6 draagstenen",
+        "length": "6,5 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D44_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.8722301, 52.7877222]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D49 Papeloze Kerk",
+        "id": "D49",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed met de bijzondere naam 'Papeloze Kerk' (kerk zonder pastoor), verwijzend naar het prehistorische 'heidense' karakter.",
+        "stones": "4 dekstenen, 8 draagstenen",
+        "length": "10 meter",
+        "notable": "Bijzondere naam met folkloristische achtergrond. Volgens de legende zouden hier heidense rituelen zijn uitgevoerd.",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D49_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7738625, 52.8200633]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D50 Noord-Sleen",
+        "id": "D50",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed bij Noord-Sleen, vlakbij D51.",
+        "stones": "3 dekstenen, 7 draagstenen",
+        "length": "8 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D50_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7872184, 52.7960657]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D51 Noord-Sleen",
+        "id": "D51",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Klein hunebed bij Noord-Sleen, vlakbij D50.",
+        "stones": "1 deksteen, 4 draagstenen",
+        "length": "3,5 meter",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D51_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.7865059, 52.7947348]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D52 Diever",
+        "id": "D52",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed bij het pittoreske dorp Diever, bekend van het Shakespeare-openluchttheater.",
+        "stones": "3 dekstenen, 6 draagstenen",
+        "length": "7 meter",
+        "notable": "Het westelijkste hunebed van Drenthe",
+        "access": "Vrij toegankelijk",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D52_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.3311613, 52.8589831]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D53 Havelterberg",
+        "id": "D53",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Hunebed op de Havelterberg, het hoogste punt van Drenthe (16m). Een van de twee hunebedden hier.",
+        "stones": "6 dekstenen, 11 draagstenen",
+        "length": "17 meter",
+        "finds": "Rijke vondsten, waaronder unieke versierde trechterbekers",
+        "notable": "Op het hoogste punt van Drenthe! Prachtig uitzicht.",
+        "access": "Vrij toegankelijk, op de Havelterberg",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D53_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.2181319, 52.7925538]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed D54 Havelterberg",
+        "id": "D54",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Het tweede hunebed op de Havelterberg, naast D53.",
+        "stones": "7 dekstenen, 13 draagstenen, 2 sluitstenen",
+        "length": "20 meter",
+        "finds": "Veel aardewerk en vuurstenen werktuigen",
+        "notable": "Tweede grootste hunebed van Nederland! Op het hoogste punt van Drenthe.",
+        "access": "Vrij toegankelijk, op de Havelterberg",
+        "wikipedia": "https://nl.wikipedia.org/wiki/D54_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.2204905, 52.7925895]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hunebed G1 Noordlaren",
+        "id": "G1",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Het enige complete hunebed in de provincie Groningen. Bijzondere ligging in het Noordlaarderbos.",
+        "stones": "4 dekstenen, 9 draagstenen",
+        "length": "9 meter",
+        "finds": "Trechterbekeraardewerk",
+        "notable": "Enige hunebed in Groningen! (G = Groningen)",
+        "access": "Vrij toegankelijk, in bosgebied",
+        "wikipedia": "https://nl.wikipedia.org/wiki/G1_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6591119, 53.1157380]}
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Voormalig Hunebed G3",
+        "id": "G3",
+        "layerType": "hunebed",
+        "period": "Trechterbekercultuur (3400-3200 v.Chr.)",
+        "description": "Voormalige locatie van een hunebed. De stenen zijn in het verleden verwijderd en hergebruikt.",
+        "notable": "Helaas verdwenen - stenen werden vaak hergebruikt voor dijken en wegen",
+        "access": "Alleen de locatie is nog herkenbaar",
+        "wikipedia": "https://nl.wikipedia.org/wiki/G3_(hunebed)"
+      },
+      "geometry": {"type": "Point", "coordinates": [6.6389166, 53.1328500]}
+    }
   ]
 }

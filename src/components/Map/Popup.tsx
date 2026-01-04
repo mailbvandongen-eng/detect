@@ -364,7 +364,7 @@ export function Popup() {
           continue
         }
 
-        // FAMKE Steentijd
+        // FAMKE Steentijd (Friese Archeologische Monumentenkaart Extra)
         if (title === 'FAMKE Steentijd') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -380,8 +380,23 @@ export function Popup() {
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
               let html = `<strong class="text-amber-800">FAMKE Steentijd-Bronstijd</strong>`
-              if (props.advies || props.Advies) {
-                html += `<br/><span class="text-sm text-amber-700">${props.advies || props.Advies}</span>`
+              html += `<br/><span class="text-xs text-gray-500">Friese Archeologische Monumentenkaart Extra</span>`
+
+              const advies = props.advies || props.Advies || ''
+              if (advies) {
+                html += `<br/><span class="text-sm text-amber-700">${advies}</span>`
+
+                // Uitleg per adviestype
+                const adviesLower = advies.toLowerCase()
+                if (adviesLower.includes('karterend')) {
+                  html += `<br/><span class="text-xs text-gray-600">→ Veldonderzoek aanbevolen bij bodemingrepen</span>`
+                } else if (adviesLower.includes('waarderend')) {
+                  html += `<br/><span class="text-xs text-gray-600">→ Proefsleuven nodig om waarde te bepalen</span>`
+                } else if (adviesLower.includes('geen')) {
+                  html += `<br/><span class="text-xs text-green-600">→ Geen archeologisch onderzoek nodig</span>`
+                } else if (adviesLower.includes('quickscan')) {
+                  html += `<br/><span class="text-xs text-gray-600">→ Bureau-onderzoek aanbevolen</span>`
+                }
               }
               results.push(html)
             }
@@ -451,7 +466,7 @@ export function Popup() {
           continue
         }
 
-        // Special handling for IKAW (needs STYLES parameter and larger bbox for coarse raster)
+        // Special handling for IKAW (Indicatieve Kaart Archeologische Waarden)
         if (title === 'IKAW') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -469,8 +484,23 @@ export function Popup() {
               const value = Math.round(props.PALETTE_INDEX || props.palette_index || 0)
               const label = IKAW_VALUES[value] || `Trefkans onbekend (${value})`
 
-              let html = `<strong class="text-orange-800">IKAW (2008)</strong>`
+              let html = `<strong class="text-orange-800">IKAW</strong>`
+              html += `<br/><span class="text-xs text-gray-500">Indicatieve Kaart Archeologische Waarden (2008)</span>`
               html += `<br/><span class="text-sm text-orange-700">${label}</span>`
+
+              // Extra uitleg per trefkans categorie
+              const tips: Record<number, string> = {
+                1: 'Weinig kans op vondsten, maar nooit uitgesloten',
+                2: 'Occasionele vondsten mogelijk',
+                3: 'Goede kans op vondsten, interessant gebied',
+                4: 'Zeer goede kans op vondsten! Let op vergunningsplicht bij graven',
+                5: 'Waterbodem - speciale omstandigheden',
+                6: 'Waterbodem met archeologische potentie',
+                7: 'Waterbodem met hoge archeologische waarde'
+              }
+              if (tips[value]) {
+                html += `<br/><span class="text-xs text-gray-600">→ ${tips[value]}</span>`
+              }
 
               results.push(html)
             }
@@ -570,11 +600,34 @@ export function Popup() {
               const props = data.features[0].properties
               let html = `<strong class="text-amber-800">Verdedigingslinie</strong>`
 
-              if (props.naam || props.lin_naam) {
-                html += `<br/><span class="text-sm font-semibold text-amber-700">${props.naam || props.lin_naam}</span>`
+              // Uitleg per bekende linie
+              const linieInfo: Record<string, string> = {
+                'Hollandse Waterlinie': 'Verdedigingsstelsel (1815-1940) dat gebruik maakte van inundaties om Holland te beschermen. UNESCO Werelderfgoed.',
+                'Nieuwe Hollandse Waterlinie': 'Uitgebreide versie (1815-1940) met forten en inundatiegebieden van Muiden tot Gorinchem.',
+                'Stelling van Amsterdam': 'Ringverdediging rond Amsterdam (1880-1920) met 42 forten. UNESCO Werelderfgoed.',
+                'Grebbelinie': 'Verdedigingslinie langs de Grebbe (17e-20e eeuw). Zware gevechten in mei 1940.',
+                'IJssellinie': 'Koude Oorlog verdediging (1950-1968) langs de IJssel tegen Sovjet-invasie.',
+                'Atlantikwall': 'Duitse kustverdediging WOII (1942-1945) van Noorwegen tot Spanje.',
+                'Peel-Raamstelling': 'Verdedigingslinie in Brabant/Limburg. Gevechten mei 1940.',
+                'Maas-Waalstelling': 'Linie tussen Maas en Waal, onderdeel landsverdediging.',
+                'Zuiderwaterlinie': 'Waterlinie in West-Brabant en Zeeland (17e-19e eeuw).',
+                'Staats-Spaanse Linies': 'Vestingwerken uit de 80-jarige oorlog (1568-1648).'
+              }
+
+              const linieName = props.naam || props.lin_naam || ''
+              if (linieName) {
+                html += `<br/><span class="text-sm font-semibold text-amber-700">${linieName}</span>`
+                // Zoek uitleg (partial match)
+                const matchingInfo = Object.entries(linieInfo).find(([key]) =>
+                  linieName.toLowerCase().includes(key.toLowerCase()) ||
+                  key.toLowerCase().includes(linieName.toLowerCase())
+                )
+                if (matchingInfo) {
+                  html += `<br/><span class="text-sm text-gray-700">${matchingInfo[1]}</span>`
+                }
               }
               if (props.lin_period) {
-                html += `<br/><span class="text-xs text-gray-500">${props.lin_period}</span>`
+                html += `<br/><span class="text-xs text-purple-600">${props.lin_period}</span>`
               }
               if (props.status) {
                 html += `<br/><span class="text-xs text-gray-400">${props.status}</span>`
@@ -1558,6 +1611,56 @@ export function Popup() {
           }
         }
 
+        // Bunkers (WOII)
+        if (dataProps.bunker_type || (dataProps.name && dataProps.name.toLowerCase().includes('bunker'))) {
+          const bunkerTypes: Record<string, string> = {
+            'munitions': 'Munitiebunker',
+            'personnel_shelter': 'Schuilbunker',
+            'command': 'Commandobunker',
+            'gun_emplacement': 'Geschutsbunker',
+            'mg_nest': 'Mitrailleursnest',
+            'technical': 'Technische bunker',
+            'storage': 'Opslagbunker',
+            'tobruk': 'Tobruk-bunker',
+            'kazemat': 'Kazemat',
+            'Flak': 'Luchtafweerbunker',
+            'hardened_aircraft_shelter': 'Vliegtuigbunker',
+            'shelter': 'Schuilkelder'
+          }
+          const typeLabel = dataProps.bunker_type ? (bunkerTypes[dataProps.bunker_type] || dataProps.bunker_type) : 'Bunker'
+          html += `<br/><span class="text-xs text-gray-600">Type: ${typeLabel}</span>`
+          if (dataProps.operator) {
+            const operatorLabel = dataProps.operator === 'germany' ? 'Duitse bezetter' : dataProps.operator
+            html += `<br/><span class="text-xs text-gray-500">Gebouwd door: ${operatorLabel}</span>`
+          }
+          if (dataProps.period) {
+            html += `<br/><span class="text-xs text-purple-600">${dataProps.period}</span>`
+          }
+          if (dataProps.address) {
+            html += `<br/><span class="text-xs text-gray-500">📍 ${dataProps.address}</span>`
+          }
+          if (dataProps.website) {
+            html += `<br/><a href="${dataProps.website}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">Meer informatie →</a>`
+          }
+        }
+
+        // Slagvelden (battlefields)
+        if (dataProps.historic === 'battlefield') {
+          html += `<br/><span class="text-xs text-red-700 font-medium">Historisch slagveld</span>`
+          if (dataProps.date) {
+            html += `<br/><span class="text-xs text-gray-600">Datum: ${dataProps.date}</span>`
+          }
+          if (dataProps.description) {
+            html += `<br/><span class="text-sm text-gray-700">${dataProps.description}</span>`
+          }
+          if (dataProps.wikipedia) {
+            const wikiUrl = dataProps.wikipedia.startsWith('http')
+              ? dataProps.wikipedia
+              : `https://nl.wikipedia.org/wiki/${dataProps.wikipedia.replace('nl:', '')}`
+            html += `<br/><a href="${wikiUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">📖 Wikipedia →</a>`
+          }
+        }
+
         // Fossielen (PBDB data)
         if (dataProps.bron === 'Paleobiology Database') {
           if (dataProps.taxonomie && dataProps.taxonomie !== 'Onbekend') {
@@ -1586,6 +1689,111 @@ export function Popup() {
           }
           if (dataProps.vindplaats) {
             html += `<br/><span class="text-xs text-gray-500 italic">${dataProps.vindplaats}</span>`
+          }
+        }
+
+        // Fossiel Hotspots (populaire zoeklocaties)
+        if (dataProps.layerType === 'fossielHotspot') {
+          if (dataProps.type) {
+            html += `<br/><span class="text-xs text-amber-600 capitalize">${dataProps.type}</span>`
+          }
+          if (dataProps.finds) {
+            html += `<br/><span class="text-sm text-amber-800">${dataProps.finds}</span>`
+          }
+          if (dataProps.period) {
+            html += `<br/><span class="text-sm text-purple-700">${dataProps.period}</span>`
+          }
+          if (dataProps.tips) {
+            html += `<br/><span class="text-xs text-green-700 italic">${dataProps.tips}</span>`
+          }
+          if (dataProps.region) {
+            html += `<br/><span class="text-xs text-gray-500">${dataProps.region}</span>`
+          }
+        }
+
+        // Mineralen Hotspots (FR/BE/DE)
+        if (dataProps.layerType === 'mineralenHotspot') {
+          if (dataProps.region) {
+            html += `<br/><span class="text-xs text-gray-500">${dataProps.region}</span>`
+          }
+          if (dataProps.minerals) {
+            html += `<br/><span class="text-sm text-purple-700">${dataProps.minerals}</span>`
+          }
+          if (dataProps.geology) {
+            html += `<br/><span class="text-xs text-blue-600">${dataProps.geology}</span>`
+          }
+          if (dataProps.access) {
+            html += `<br/><span class="text-xs text-green-700">${dataProps.access}</span>`
+          }
+          if (dataProps.tips) {
+            html += `<br/><span class="text-xs text-amber-700 italic">${dataProps.tips}</span>`
+          }
+        }
+
+        // Goudrivieren (NL/BE/DE/FR)
+        if (dataProps.layerType === 'goudrivier') {
+          if (dataProps.river && dataProps.region) {
+            html += `<br/><span class="text-xs text-gray-500">${dataProps.river} - ${dataProps.region}</span>`
+          }
+          if (dataProps.goldType) {
+            html += `<br/><span class="text-sm text-yellow-600">${dataProps.goldType}</span>`
+          }
+          if (dataProps.origin) {
+            html += `<br/><span class="text-xs text-blue-600">Herkomst: ${dataProps.origin}</span>`
+          }
+          if (dataProps.legal) {
+            const isProhibited = dataProps.legal.includes('VERBODEN')
+            const colorClass = isProhibited ? 'text-red-600 font-semibold' : 'text-green-700'
+            html += `<br/><span class="text-xs ${colorClass}">${dataProps.legal}</span>`
+          }
+          if (dataProps.tips) {
+            html += `<br/><span class="text-xs text-amber-700 italic">${dataProps.tips}</span>`
+          }
+        }
+
+        // Hunebedden (megalithische grafmonumenten)
+        if (dataProps.layerType === 'hunebed') {
+          if (dataProps.id) {
+            html += `<br/><span class="text-xs text-gray-500">Code: ${dataProps.id}</span>`
+          }
+          if (dataProps.period) {
+            html += `<br/><span class="text-sm text-purple-700">${dataProps.period}</span>`
+          }
+          if (dataProps.description) {
+            html += `<br/><span class="text-sm text-gray-700">${dataProps.description}</span>`
+          }
+          if (dataProps.stones) {
+            html += `<br/><span class="text-sm text-amber-700">🪨 ${dataProps.stones}</span>`
+          }
+          if (dataProps.length) {
+            html += `<br/><span class="text-xs text-gray-600">Lengte: ${dataProps.length}</span>`
+          }
+          if (dataProps.width) {
+            html += `<br/><span class="text-xs text-gray-600">${dataProps.width}</span>`
+          }
+          if (dataProps.finds) {
+            html += `<br/><span class="text-sm text-green-700">🏺 Vondsten: ${dataProps.finds}</span>`
+          }
+          if (dataProps.notable) {
+            html += `<br/><span class="text-sm text-blue-700 font-medium">⭐ ${dataProps.notable}</span>`
+          }
+          if (dataProps.museum) {
+            html += `<br/><span class="text-sm text-indigo-600">🏛️ ${dataProps.museum}</span>`
+          }
+          if (dataProps.access) {
+            html += `<br/><span class="text-xs text-gray-500">📍 ${dataProps.access}</span>`
+          }
+          // Wikipedia link
+          if (dataProps.wikipedia) {
+            html += `<br/><a href="${dataProps.wikipedia}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">📖 Wikipedia →</a>`
+          }
+          // Google Maps navigation - get coordinates from feature geometry
+          const geom = feature.getGeometry()
+          if (geom) {
+            const coords = geom.getCoordinates()
+            const lonLat = toLonLat(coords)
+            const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lonLat[1]},${lonLat[0]}`
+            html += `<br/><a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs text-green-600 hover:underline">🧭 Navigeer hierheen →</a>`
           }
         }
 

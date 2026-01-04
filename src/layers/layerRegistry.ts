@@ -1,9 +1,13 @@
 import type { Layer } from 'ol/layer'
+import type { LayerTier, Region } from '../store/subscriptionStore'
 
 export interface LayerDefinition {
   name: string
   factory: () => Promise<Layer | null>
   immediateLoad: boolean  // true for WMS (tiles load on-demand), false for vector
+  // Subscription/monetization fields (optional - defaults to free/nl for backwards compatibility)
+  tier?: LayerTier        // 'free' | 'premium' | 'pro' - which subscription tier is required
+  regions?: Region[]      // ['nl' | 'be' | 'de' | 'fr'] - which regions this layer belongs to
 }
 
 // Layer registry - NL only version
@@ -11,6 +15,22 @@ export interface LayerDefinition {
 // Vector layers are lazy loaded to improve startup time
 
 export const layerRegistry: Record<string, LayerDefinition> = {
+  // ============================================
+  // BASE LAYERS - Created in MapContainer, but need tier info here
+  // ============================================
+  'TMK 1850': {
+    name: 'TMK 1850',
+    factory: async () => null,  // Created in MapContainer
+    immediateLoad: true,
+    tier: 'premium'
+  },
+  'Bonnebladen 1900': {
+    name: 'Bonnebladen 1900',
+    factory: async () => null,  // Created in MapContainer
+    immediateLoad: true,
+    tier: 'premium'
+  },
+
   // ============================================
   // IMMEDIATE LOAD - WMS/Tile layers
   // These are loaded at startup but tiles only fetch when visible
@@ -107,7 +127,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createTerpenLayerOL } = await import('./terpenOL')
       return createTerpenLayerOL()
     },
-    immediateLoad: true
+    immediateLoad: true,
+    tier: 'premium'
   },
 
   // RCE Verdedigingswerken (Linies en Stellingen)
@@ -211,7 +232,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAHN4ColorElevationLayerOL } = await import('./hillshadeLayers')
       return createAHN4ColorElevationLayerOL()
     },
-    immediateLoad: true
+    immediateLoad: true,
+    tier: 'premium'
   },
   'AHN4 Hillshade NL': {
     name: 'AHN4 Hillshade NL',
@@ -219,7 +241,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAHN4HillshadeLayerOL } = await import('./hillshadeLayers')
       return createAHN4HillshadeLayerOL()
     },
-    immediateLoad: true
+    immediateLoad: true,
+    tier: 'premium'
   },
   'AHN4 Multi-Hillshade NL': {
     name: 'AHN4 Multi-Hillshade NL',
@@ -227,7 +250,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAHN4MultiHillshadeLayerOL } = await import('./hillshadeLayers')
       return createAHN4MultiHillshadeLayerOL()
     },
-    immediateLoad: true
+    immediateLoad: true,
+    tier: 'premium'
   },
   'World Hillshade': {
     name: 'World Hillshade',
@@ -245,7 +269,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createGewaspercelenLayerOL } = await import('./pdokWMSLayers')
       return createGewaspercelenLayerOL()
     },
-    immediateLoad: true
+    immediateLoad: true,
+    tier: 'premium'
   },
   'Kadastrale Grenzen': {
     name: 'Kadastrale Grenzen',
@@ -356,7 +381,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKLayerOL } = await import('./amkOL')
       return createAMKLayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium'
   },
   'AMK Romeins': {
     name: 'AMK Romeins',
@@ -364,7 +390,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKRomeinsLayerOL } = await import('./amkOL')
       return createAMKRomeinsLayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium'
   },
   'AMK Steentijd': {
     name: 'AMK Steentijd',
@@ -372,7 +399,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKSteentijdLayerOL } = await import('./amkOL')
       return createAMKSteentijdLayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium'
   },
   'AMK Vroege ME': {
     name: 'AMK Vroege ME',
@@ -380,7 +408,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKVroegeMELayerOL } = await import('./amkOL')
       return createAMKVroegeMELayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium'
   },
   'AMK Late ME': {
     name: 'AMK Late ME',
@@ -388,7 +417,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKLateMELayerOL } = await import('./amkOL')
       return createAMKLateMELayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium'
   },
   'AMK Overig': {
     name: 'AMK Overig',
@@ -396,10 +426,11 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKOverigLayerOL } = await import('./amkOL')
       return createAMKOverigLayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium'
   },
-  'Romeinse wegen': {
-    name: 'Romeinse wegen',
+  'Romeinse wegen (regio)': {
+    name: 'Romeinse wegen (regio)',
     factory: async () => {
       const { createRomeinseWegenLayerOL } = await import('./romeinsOL')
       return createRomeinseWegenLayerOL()
@@ -412,7 +443,9 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createRomeinseWegenWereldLayerOL } = await import('./romeinsOL')
       return createRomeinseWegenWereldLayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium',
+    regions: ['nl', 'be', 'de', 'fr']  // Internationale laag
   },
   'Kastelen': {
     name: 'Kastelen',
@@ -447,7 +480,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createUIKAVArcheoPuntenLayerOL } = await import('./uikavArcheoPuntenOL')
       return createUIKAVArcheoPuntenLayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium'
   },
   'UIKAV Vlakken': {
     name: 'UIKAV Vlakken',
@@ -531,7 +565,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createFossielenLayerOL } = await import('./fossielenOL')
       return createFossielenLayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium'
   },
   'Fossielen België': {
     name: 'Fossielen België',
@@ -539,7 +574,9 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createFossielenBelgieLayerOL } = await import('./fossielenBelgieOL')
       return createFossielenBelgieLayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium',
+    regions: ['be']
   },
   'Fossielen Duitsland': {
     name: 'Fossielen Duitsland',
@@ -547,7 +584,9 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createFossielenDuitslandLayerOL } = await import('./fossielenDuitslandOL')
       return createFossielenDuitslandLayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium',
+    regions: ['de']
   },
   'Fossielen Frankrijk': {
     name: 'Fossielen Frankrijk',
@@ -555,7 +594,39 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createFossielenFrankrijkLayerOL } = await import('./fossielenFrankrijkOL')
       return createFossielenFrankrijkLayerOL()
     },
-    immediateLoad: false
+    immediateLoad: false,
+    tier: 'premium',
+    regions: ['fr']
+  },
+  'Fossiel Hotspots': {
+    name: 'Fossiel Hotspots',
+    factory: async () => {
+      const { createFossielHotspotsLayerOL } = await import('./fossielHotspotsOL')
+      return createFossielHotspotsLayerOL()
+    },
+    immediateLoad: false,
+    tier: 'premium',
+    regions: ['nl', 'be', 'de', 'fr']
+  },
+  'Mineralen Hotspots': {
+    name: 'Mineralen Hotspots',
+    factory: async () => {
+      const { createMineralenHotspotsLayerOL } = await import('./mineralenHotspotsOL')
+      return createMineralenHotspotsLayerOL()
+    },
+    immediateLoad: false,
+    tier: 'premium',
+    regions: ['be', 'de', 'fr']  // Internationale laag
+  },
+  'Goudrivieren': {
+    name: 'Goudrivieren',
+    factory: async () => {
+      const { createGoudrivierenLayerOL } = await import('./goudrivierenOL')
+      return createGoudrivierenLayerOL()
+    },
+    immediateLoad: false,
+    tier: 'premium',
+    regions: ['nl', 'be', 'de', 'fr']  // Internationale laag
   },
 
   // WWII Bunkers - from OpenStreetMap

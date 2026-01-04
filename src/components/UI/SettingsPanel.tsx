@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Bug } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Bug, Code } from 'lucide-react'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useUIStore, useSettingsStore, usePresetStore } from '../../store'
+import { useUIStore, useSettingsStore, usePresetStore, useSubscriptionStore } from '../../store'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
 import { useCustomLayerStore } from '../../store/customLayerStore'
 import { clearPasswordAuth } from '../Auth/PasswordGate'
@@ -18,6 +18,7 @@ export function SettingsPanel() {
   const { presets, createPreset, deletePreset, updatePreset } = usePresetStore()
   const vondsten = useLocalVondstenStore(state => state.vondsten)
   const customLayers = useCustomLayerStore(state => state.layers)
+  const { devMode, setDevMode, tier } = useSubscriptionStore()
   const [newPresetName, setNewPresetName] = useState('')
   const [showNewPresetInput, setShowNewPresetInput] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
@@ -312,6 +313,19 @@ export function SettingsPanel() {
                     </button>
                   )}
                 </div>
+              </Section>
+
+              {/* Development */}
+              <Section title="Development" icon={<Code size={16} />}>
+                <ToggleRow
+                  label="Dev Mode (alles ontgrendeld)"
+                  checked={devMode}
+                  onChange={setDevMode}
+                />
+                <p className="text-gray-500 mt-1" style={{ fontSize: '0.75em' }}>
+                  Huidige tier: <span className="font-medium text-blue-600">{tier}</span>
+                  {devMode && <span className="text-green-600"> (alle lagen ontgrendeld)</span>}
+                </p>
               </Section>
             </div>
 

@@ -48,7 +48,7 @@ const BUILT_IN_PRESETS: Preset[] = [
     // Percelen belangrijk voor nederzettingspatronen
     // Romeinse wegen en forten
     layers: [
-      'Romeinse wegen', 'Romeinse Forten', 'AMK Romeins', 'AMK Vroege ME',
+      'Romeinse wegen (regio)', 'Romeinse Forten', 'AMK Romeins', 'AMK Vroege ME',
       'Gewaspercelen', 'Kadastrale Grenzen'
     ],
     isBuiltIn: false
@@ -106,7 +106,7 @@ const ALL_OVERLAYS = [
   'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
   // Archeologie
   'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
-  'Romeinse wegen', 'Romeinse wegen (Wereld)', 'Kastelen', 'IKAW', 'Archeo Landschappen',
+  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Kastelen', 'IKAW', 'Archeo Landschappen',
   // Erfgoed
   'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Essen',
   // Militair

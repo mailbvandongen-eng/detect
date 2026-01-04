@@ -1,6 +1,7 @@
-import { Check, Loader2, AlertCircle } from 'lucide-react'
-import { useLayerStore } from '../../store'
+import { Check, Loader2, AlertCircle, Lock } from 'lucide-react'
+import { useLayerStore, useSubscriptionStore } from '../../store'
 import type { LoadingState } from '../../store/layerStore'
+import { layerRegistry } from '../../layers/layerRegistry'
 
 interface Props {
   name: string
@@ -12,16 +13,24 @@ export function LayerItem({ name, type }: Props) {
   const loadingState = useLayerStore(state => state.loadingState[name]) as LoadingState | undefined
   const toggleLayer = useLayerStore(state => state.toggleLayer)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
+  const isLayerUnlocked = useSubscriptionStore(state => state.isLayerUnlocked)
 
   const isLoading = loadingState === 'loading'
   const hasError = loadingState === 'error'
+
+  // Check subscription status for this layer
+  const layerDef = layerRegistry[name]
+  const tier = layerDef?.tier ?? 'free'
+  const regions = layerDef?.regions ?? ['nl']
+  const isUnlocked = isLayerUnlocked(name, tier, regions)
+  const isLocked = !isUnlocked
 
   const handleChange = (e: React.MouseEvent) => {
     // Stop event propagation to prevent panel close-on-click-outside from triggering
     e.stopPropagation()
 
-    // Disable during loading
-    if (isLoading) return
+    // Disable during loading or if layer is locked
+    if (isLoading || isLocked) return
 
     if (type === 'overlay') {
       toggleLayer(name)
@@ -39,29 +48,35 @@ export function LayerItem({ name, type }: Props) {
   return (
     <button
       onClick={handleChange}
-      disabled={isLoading}
+      disabled={isLoading || isLocked}
       className={`w-full flex items-center justify-between py-1 pl-3 pr-2 border-0 outline-none transition-colors text-left ${
-        isLoading
-          ? 'opacity-70 cursor-wait bg-transparent'
-          : isChecked
-            ? 'bg-blue-50 hover:bg-blue-100'
-            : 'bg-transparent hover:bg-blue-50'
+        isLocked
+          ? 'opacity-50 cursor-not-allowed bg-gray-50'
+          : isLoading
+            ? 'opacity-70 cursor-wait bg-transparent'
+            : isChecked
+              ? 'bg-blue-50 hover:bg-blue-100'
+              : 'bg-transparent hover:bg-blue-50'
       }`}
       style={{ fontSize: 'inherit' }}
+      title={isLocked ? 'Premium laag - upgrade om te ontgrendelen' : undefined}
     >
-      <span className={hasError ? 'text-red-500' : 'text-gray-600'}>
+      <span className={`flex items-center gap-1 ${hasError ? 'text-red-500' : isLocked ? 'text-gray-400' : 'text-gray-600'}`}>
         {name}
-        {hasError && <AlertCircle size={12} className="inline ml-1 text-red-500" />}
+        {hasError && <AlertCircle size={12} className="text-red-500" />}
+        {isLocked && <Lock size={12} className="text-amber-500" />}
       </span>
       <div
         className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-100 flex-shrink-0"
         style={{
-          backgroundColor: isLoading ? '#93c5fd' : isChecked ? '#3b82f6' : 'white',
-          border: isLoading ? '2px solid #93c5fd' : isChecked ? '2px solid #3b82f6' : '2px solid #60a5fa',
+          backgroundColor: isLocked ? '#e5e7eb' : isLoading ? '#93c5fd' : isChecked ? '#3b82f6' : 'white',
+          border: isLocked ? '2px solid #d1d5db' : isLoading ? '2px solid #93c5fd' : isChecked ? '2px solid #3b82f6' : '2px solid #60a5fa',
           color: 'white'
         }}
       >
-        {isLoading ? (
+        {isLocked ? (
+          <Lock size={10} strokeWidth={3} className="text-gray-400" />
+        ) : isLoading ? (
           <Loader2 size={10} strokeWidth={3} className="animate-spin" />
         ) : isChecked ? (
           <Check size={12} strokeWidth={3} />

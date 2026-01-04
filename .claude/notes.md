@@ -1,6 +1,175 @@
 # Detectorapp-NL - Sessienotities
 
-## Huidige versie: 2.10.2
+## Huidige versie: 2.15.0
+
+---
+
+## v2.15.0 - Popup verbeteringen & Backlog afwerking
+
+### Wijzigingen:
+
+1. **World Hillshade** - minZoom: 8 toegevoegd om "Map data not yet available" te voorkomen
+
+2. **WOII & Militair popup verbeteringen:**
+   - Bunkers: Type vertaling (Munitiebunker, Schuilbunker, etc.), operator, periode, adres, website
+   - Slagvelden: Historisch label, datum, Wikipedia link
+   - Verdedigingslinies: Uitleg per bekende linie (Hollandse Waterlinie, Grebbelinie, etc.)
+
+3. **FAMKE Steentijd popup:**
+   - Volledige naam: "Friese Archeologische Monumentenkaart Extra"
+   - Uitleg per adviestype (karterend, waarderend, quickscan, etc.)
+
+4. **IKAW popup:**
+   - Volledige naam: "Indicatieve Kaart Archeologische Waarden"
+   - Extra tips per trefkans categorie
+
+---
+
+## v2.14.0 - Thema reorganisatie & Hunebedden verrijking
+
+### Wijzigingen:
+
+1. **Hunebedden verrijkt** (`public/data/steentijd/hunebedden.geojson`)
+   - Alle 52 hunebedden met gedetailleerde info
+   - Nieuw: period, description, stones, length, width, finds, notable, access, wikipedia, museum
+   - D27 Borger gemarkeerd als GROOTSTE (22.5m, 47 stenen)
+   - `layerType: "hunebed"` voor popup handling
+
+2. **Popup voor hunebedden** (`src/components/Map/Popup.tsx`)
+   - Handler voor `layerType: "hunebed"`
+   - Toont alle nieuwe velden met iconen
+   - Wikipedia link + Google Maps navigatie
+
+3. **Thema reorganisatie** (`src/components/LayerControl/ThemesPanel.tsx`)
+   - Paleokaarten verplaatst naar "Steentijd & Prehistorie" als subgroep
+   - Sortering omgedraaid: oud → nieuw (9000 v.Chr. → 800 n.Chr.)
+   - "Provinciale Kaarten" hernoemd naar "Provinciale Thema's"
+   - UIKAV verplaatst naar "Archeologische lagen" als "Verwachtingen uiterwaarden"
+   - "Essen" verplaatst van Erfgoed naar "Terrein & Bodem"
+
+4. **Laagnaam gewijzigd**
+   - "Romeinse wegen" hernoemd naar "Romeinse wegen (regio)"
+   - Alle referenties bijgewerkt (layerRegistry, layerStore, presetStore, etc.)
+
+---
+
+## v2.13.1 - Subscription/Monetisatie Infrastructuur
+
+### Nieuwe features:
+1. **SubscriptionStore** (`src/store/subscriptionStore.ts`)
+   - Tier systeem: `free` | `premium` | `pro`
+   - Regio's: `nl` | `be` | `de` | `fr`
+   - DevMode flag (nu aan voor development)
+   - `isLayerUnlocked()` check per laag
+   - `canAccessPremiumFeatures()` helper
+
+2. **LayerRegistry uitgebreid** (`src/layers/layerRegistry.ts`)
+   - `tier?: LayerTier` veld toegevoegd aan interface
+   - `regions?: Region[]` veld toegevoegd aan interface
+   - Backwards compatible (defaultt naar 'free' en ['nl'])
+
+3. **Feature Gating in LayerItem** (`src/components/LayerControl/LayerItem.tsx`)
+   - Lock icoon (amber) voor premium lagen
+   - Disabled state met grijze styling
+   - Tooltip "Premium laag - upgrade om te ontgrendelen"
+   - Voorkomt toggle als laag gelocked is
+
+### Tier Toewijzingen (geïmplementeerd):
+
+**PREMIUM lagen (22):**
+- TMK 1850, Bonnebladen 1900 (historische kaarten)
+- Terpen
+- AMK Monumenten, AMK Romeins, AMK Steentijd, AMK Vroege ME, AMK Late ME, AMK Overig
+- Romeinse wegen (Wereld)
+- UIKAV Punten
+- AHN4 Hoogtekaart Kleur, AHN4 Hillshade NL, AHN4 Multi-Hillshade NL
+- Gewaspercelen
+- Fossielen Nederland, België, Duitsland, Frankrijk
+- Fossiel Hotspots, Mineralen Hotspots, Goudrivieren
+
+**FREE lagen (~44):**
+- Alle andere lagen (Erfgoed, WOII, Paleokaarten, Provinciale, Recreatie, etc.)
+
+---
+
+## 📋 BACKLOG - Verbeteringen per thema
+
+### 1. Steentijd & Prehistorie
+- [x] **Hunebedden** - Meer popup info (grootste bij Borger, vondsten, ouderdom) + Google Maps navigatie icoon ✅ v2.14.0
+- [ ] **Grafheuvels** - Per grafheuvel info opzoeken (locatie-based) + gestructureerde popup (1815 items - groot project)
+- [ ] **FAMKE Steentijd** - Legenda/betekenis kleuren en punten uitleggen in popup
+- [ ] **Terpen** - Naam, ouderdom, vondsten, archeologisch belang toevoegen
+- [x] **Paleokaarten** - Verplaatsen naar dit thema, sortering oud→jong ✅ v2.14.0
+
+### 2. Archeologische lagen
+- [x] **Romeinse wegen** - Hernoemen naar "Romeinse wegen (regio)" ✅ v2.14.0
+- [x] **UIKAV** - Verplaatsen naar dit thema, hernoemen naar "Verwachtingen uiterwaarden" ✅ v2.14.0
+- [ ] **Archeo Landschappen** - Controleren of info beschikbaar is, zo ja popup aanvullen, zo nee verwijderen
+- [ ] **IKAW** - Meer info toevoegen dan alleen hoog/laag verwachting
+- [ ] **Alle thema's** - Legenda + uitleg toevoegen aan InfoButton (zoals Geomorfologie/Bodem)
+
+### 3. Erfgoed & Monumenten
+- [ ] **Werelderfgoed** - Toevoegen aan transparency slider, checken overlap met Rijksmonumenten
+- [ ] **Religieus Erfgoed** - Links, openingstijden, geschiedenis toevoegen + ander icoon (kerk)
+- [ ] **Kastelen** - Geschiedenis toevoegen + icoon/kleur aanpassen (kasteel-passend)
+- [x] **Essen** - Verplaatsen naar thema "Terrein & Bodem" ✅ v2.14.0
+
+### 4. WOII & Militair
+- [ ] **WWII Bunkers/Kazematten** - Meer info toevoegen (type, bouwjaar, staat, toegankelijkheid)
+- [ ] **Militaire Objecten** - Info uitbreiden (te beperkt nu)
+- [ ] **Slagvelden** - Wikipedia/betrouwbare links toevoegen (Slag om Arnhem etc.)
+- [ ] **Verdedigingslinies** - Uitleg per linie (Hollandse Waterlinie, Grebbelinie, etc.)
+
+### 5. Hillshade & LiDAR
+- [ ] **World Hillshade** - Zoom limiet instellen om "Map data not yet available" te voorkomen
+- [ ] **Esri licentie** - Later uitzoeken voor commercieel gebruik
+
+### 6. Provinciale Thema's
+- [x] Hernoemen van "Provinciale Kaarten" naar "Provinciale Thema's" ✅ v2.14.0
+- [ ] Voorbereiden op uitbreiding andere provincies
+- [ ] Popup info aanvullen waar nodig (scheepswrakken, verdronken dorpen etc.)
+
+### 7. Fossielen, Mineralen & Goud
+- [ ] **Veel meer detail toevoegen** aan alle punten/locaties
+- [ ] Per locatie: welke fossielen/mineralen, periode, geologie, toegankelijkheid, tips
+- [ ] PBDB lagen: vertalen van wetenschappelijke namen, context toevoegen
+- [ ] Mogelijk meer locaties toevoegen
+
+---
+
+### Later te doen:
+- i18n setup
+- PWA setup
+- Betaalinfrastructuur (Stripe/Play Store)
+
+---
+
+## v2.13.0 - Goudrivieren laag
+
+### Nieuwe features:
+1. **Goudrivieren laag** (`src/layers/goudrivierenOL.ts`)
+   - 22 locaties: 3 NL, 2 BE, 8 DE, 9 FR
+   - Goud marker voor toegestaan, rood voor verboden (BE)
+   - Legal status in popup (toegestaan/verboden)
+
+---
+
+## v2.12.0 - Mineralen Hotspots laag
+
+### Nieuwe features:
+1. **Mineralen Hotspots laag** (`src/layers/mineralenHotspotsOL.ts`)
+   - 20 locaties: 8 FR, 4 BE, 8 DE
+   - Kleurcode per land (blauw=FR, geel=BE, rood=DE)
+   - Popup met mineralen, geologie, toegang, tips
+
+---
+
+## v2.11.2 - Fossiel Hotspots popup
+
+### Wijzigingen:
+1. **Popup handling** voor Fossiel Hotspots toegevoegd in Popup.tsx
+
+---
 
 ---
 

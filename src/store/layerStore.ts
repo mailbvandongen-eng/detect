@@ -51,7 +51,7 @@ export const useLayerStore = create<LayerState>()(
       'AMK Vroege ME': false,
       'AMK Late ME': false,
       'AMK Overig': false,
-      'Romeinse wegen': false,
+      'Romeinse wegen (regio)': false,
       'Romeinse wegen (Wereld)': false,
       'Kastelen': false,
       'IKAW': false,

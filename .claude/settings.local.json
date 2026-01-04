@@ -36,7 +36,16 @@
       "WebFetch(domain:huizenbalie.nl)",
       "WebFetch(domain:www.kadaster.nl)",
       "WebFetch(domain:www.oervondstchecker.nl)",
-      "WebFetch(domain:www.paleontica.org)"
+      "WebFetch(domain:www.paleontica.org)",
+      "WebFetch(domain:www.mineralenverzamelen.nl)",
+      "WebFetch(domain:www.mineralenwereld.nl)",
+      "WebFetch(domain:www.mineralienatlas.de)",
+      "WebFetch(domain:www.mindat.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.mindat.org)",
+      "WebFetch(domain:www.goldlineorpaillage.fr)",
+      "Bash(ls:*)",
+      "Bash(grep:*)"
     ]
   }
 }
