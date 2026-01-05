@@ -23,22 +23,25 @@ export function GoogleSignInButton() {
     return (
       <div className="space-y-2">
         {/* User info */}
-        <div className="flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg">
+        <div className="flex items-center gap-3 px-3 py-2.5 bg-green-50 rounded-lg">
           {user.photoURL ? (
             <img
               src={user.photoURL}
               alt={user.displayName || 'User'}
-              className="w-6 h-6 rounded-full"
+              className="w-10 h-10 rounded-full border-2 border-green-200"
+              referrerPolicy="no-referrer"
             />
           ) : (
-            <User size={16} className="text-green-600" />
+            <div className="w-10 h-10 rounded-full bg-green-200 flex items-center justify-center">
+              <User size={20} className="text-green-600" />
+            </div>
           )}
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium text-green-800 truncate">
               {user.displayName || user.email}
             </div>
             <div className="text-xs text-green-600 flex items-center gap-1">
-              <Cloud size={10} />
+              <Cloud size={12} />
               Cloud sync actief
             </div>
           </div>
@@ -47,7 +50,7 @@ export function GoogleSignInButton() {
         {/* Logout button */}
         <button
           onClick={logout}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white hover:bg-blue-50 rounded-lg transition-colors border-0 outline-none text-gray-600"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white hover:bg-red-50 rounded-lg transition-colors border-0 outline-none text-gray-600 hover:text-red-600"
         >
           <LogOut size={16} />
           <span className="text-sm">Uitloggen</span>

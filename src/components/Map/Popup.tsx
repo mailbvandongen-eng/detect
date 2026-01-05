@@ -2947,10 +2947,10 @@ export function Popup() {
             <div className="flex items-center gap-2 px-3 pb-2 border-b border-gray-100">
               {/* Navigation buttons (only if multiple) */}
               {hasMultiple && (
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-0.5 flex-shrink-0">
                   <button
                     onClick={goToPrevious}
-                    className="w-7 h-7 flex items-center justify-center text-blue-600 hover:bg-blue-50 rounded-full transition-colors border-0 outline-none"
+                    className="p-1 text-blue-500 hover:text-blue-600 transition-colors"
                     aria-label="Vorige laag"
                   >
                     <ChevronLeft size={18} />
@@ -2960,7 +2960,7 @@ export function Popup() {
                   </span>
                   <button
                     onClick={goToNext}
-                    className="w-7 h-7 flex items-center justify-center text-blue-600 hover:bg-blue-50 rounded-full transition-colors border-0 outline-none"
+                    className="p-1 text-blue-500 hover:text-blue-600 transition-colors"
                     aria-label="Volgende laag"
                   >
                     <ChevronRight size={18} />
@@ -2978,15 +2978,15 @@ export function Popup() {
                 <div className="relative">
                   <button
                     onClick={() => setShowLayerPicker(!showLayerPicker)}
-                    className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors flex-shrink-0 ${
+                    className={`p-1.5 transition-colors flex-shrink-0 ${
                       addedToLayer
-                        ? 'text-green-500 bg-green-50'
-                        : 'text-orange-500 hover:text-orange-700 hover:bg-orange-50'
+                        ? 'text-green-500'
+                        : 'text-orange-500 hover:text-orange-600'
                     }`}
                     title="Toevoegen aan mijn laag"
                     aria-label="Toevoegen aan mijn laag"
                   >
-                    {addedToLayer ? <Check size={16} /> : <Plus size={16} />}
+                    {addedToLayer ? <Check size={18} /> : <Plus size={18} />}
                   </button>
 
                   {/* Layer picker dropdown */}
@@ -3031,18 +3031,18 @@ export function Popup() {
                   href={mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-7 h-7 flex items-center justify-center text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-colors flex-shrink-0"
+                  className="p-1.5 text-blue-500 hover:text-blue-600 transition-colors flex-shrink-0"
                   title="Open in Google Maps"
                   aria-label="Open in Google Maps"
                 >
-                  <ExternalLink size={16} />
+                  <ExternalLink size={18} />
                 </a>
               )}
 
               {/* Close button */}
               <button
                 onClick={handleClose}
-                className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+                className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
                 aria-label="Sluiten"
               >
                 <X size={18} />

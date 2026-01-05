@@ -7,6 +7,7 @@ import { ThemesPanel } from './components/LayerControl/ThemesPanel'
 import { Popup } from './components/Map/Popup'
 import { LongPressMenu } from './components/Map/LongPressMenu'
 import { BuildLabel } from './components/UI/BuildLabel'
+import { CloudSyncIndicator } from './components/UI/CloudSyncIndicator'
 import { PresetButtons } from './components/UI/PresetButtons'
 import { InfoButton } from './components/UI/InfoButton'
 import { CompassButton } from './components/UI/CompassButton'
@@ -51,6 +52,7 @@ function App() {
         <LayerControlButton />
         <ThemesPanel />
         <OpacitySliders />
+        <CloudSyncIndicator />
         <BuildLabel />
         <PresetButtons />
         <AddVondstButton />
