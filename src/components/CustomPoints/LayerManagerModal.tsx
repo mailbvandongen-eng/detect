@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, Trash2, Download, Eye, EyeOff, ChevronDown, ChevronRight, Upload, Layers, Archive, ArchiveRestore, List } from 'lucide-react'
+import { X, Plus, Trash2, Download, Eye, EyeOff, ChevronDown, ChevronRight, Upload, Layers, Archive, ArchiveRestore, List, Pencil, Check } from 'lucide-react'
 import { useUIStore, useSettingsStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
 
@@ -183,6 +183,7 @@ export function LayerManagerModal() {
                       onExport={() => handleExport(layer.id)}
                       onDelete={() => handleDelete(layer.id)}
                       confirmDelete={confirmDelete === layer.id}
+                      onRename={(newName) => useCustomPointLayerStore.getState().updateLayer(layer.id, { name: newName })}
                     />
                   ))}
                 </div>
@@ -237,7 +238,8 @@ function LayerItem({
   onOpenDashboard,
   onExport,
   onDelete,
-  confirmDelete
+  confirmDelete,
+  onRename
 }: {
   layer: CustomPointLayer
   isExpanded: boolean
@@ -248,7 +250,46 @@ function LayerItem({
   onExport: () => void
   onDelete: () => void
   confirmDelete: boolean
+  onRename: (newName: string) => void
 }) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState(layer.name)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [isEditing])
+
+  const handleStartEdit = () => {
+    setEditName(layer.name)
+    setIsEditing(true)
+  }
+
+  const handleSaveEdit = () => {
+    const trimmed = editName.trim()
+    if (trimmed && trimmed !== layer.name) {
+      onRename(trimmed)
+    }
+    setIsEditing(false)
+  }
+
+  const handleCancelEdit = () => {
+    setEditName(layer.name)
+    setIsEditing(false)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveEdit()
+    } else if (e.key === 'Escape') {
+      handleCancelEdit()
+    }
+  }
+
   // Calculate stats
   const completedCount = layer.points.filter(p => p.status === 'completed').length
   const totalCount = layer.points.length
@@ -271,23 +312,55 @@ function LayerItem({
           style={{ backgroundColor: layer.color }}
         />
 
-        {/* Layer name and count - klikbaar voor dashboard */}
-        <button
-          onClick={onOpenDashboard}
-          className="flex-1 min-w-0 text-left border-0 outline-none bg-transparent hover:bg-orange-50 rounded px-2 py-1 -ml-2 transition-colors"
-          title="Bekijk dashboard"
-        >
-          <div className="font-medium text-gray-800 truncate hover:text-orange-600">{layer.name}</div>
-          <div className="text-xs text-gray-500">
-            {totalCount > 0 ? (
-              <span className={completedCount === totalCount ? 'text-green-600' : ''}>
-                {completedCount}/{totalCount} voltooid
-              </span>
-            ) : (
-              'Geen punten'
-            )}
+        {/* Layer name and count - editable or clickable */}
+        {isEditing ? (
+          <div className="flex-1 min-w-0 flex items-center gap-2">
+            <input
+              ref={inputRef}
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onBlur={handleSaveEdit}
+              className="flex-1 px-2 py-1 text-gray-800 font-medium bg-orange-50 rounded outline-none focus:ring-2 focus:ring-orange-400"
+            />
+            <button
+              onClick={handleSaveEdit}
+              className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors border-0 outline-none"
+              title="Opslaan"
+            >
+              <Check size={16} />
+            </button>
           </div>
-        </button>
+        ) : (
+          <button
+            onClick={onOpenDashboard}
+            className="flex-1 min-w-0 text-left border-0 outline-none bg-transparent hover:bg-orange-50 rounded px-2 py-1 -ml-2 transition-colors"
+            title="Bekijk dashboard"
+          >
+            <div className="font-medium text-gray-800 truncate hover:text-orange-600">{layer.name}</div>
+            <div className="text-xs text-gray-500">
+              {totalCount > 0 ? (
+                <span className={completedCount === totalCount ? 'text-green-600' : ''}>
+                  {completedCount}/{totalCount} voltooid
+                </span>
+              ) : (
+                'Geen punten'
+              )}
+            </div>
+          </button>
+        )}
+
+        {/* Edit name button */}
+        {!isEditing && (
+          <button
+            onClick={handleStartEdit}
+            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none"
+            title="Naam bewerken"
+          >
+            <Pencil size={16} />
+          </button>
+        )}
 
         {/* Dashboard button */}
         <button
