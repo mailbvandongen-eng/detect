@@ -88,7 +88,6 @@ export const useLayerStore = create<LayerState>()(
       'AHN4 Hillshade NL': false,
       'AHN4 Multi-Hillshade NL': false,
       'AHN 0.5m': false,
-      'World Hillshade': false,
       // Terrein
       'Veengebieden': false,
       'Geomorfologie': false,
@@ -130,7 +129,6 @@ export const useLayerStore = create<LayerState>()(
       'AHN4 Hillshade NL': 0.7,
       'AHN4 Multi-Hillshade NL': 0.7,
       'AHN 0.5m': 0.7,
-      'World Hillshade': 0.7,
       // Historische kaarten
       'TMK 1850': 0.8,
       'Bonnebladen 1900': 0.8,

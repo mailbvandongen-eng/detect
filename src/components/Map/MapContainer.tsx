@@ -48,13 +48,14 @@ export function MapContainer() {
       })
     })
 
-    // ESRI World Imagery - reliable free satellite imagery
+    // PDOK Luchtfoto RGB - 8cm resolutie, meest recente jaargang
+    // Gratis en commercieel toegestaan (CC-BY)
     const satelliteLayer = new TileLayer({
       properties: { title: 'Luchtfoto', type: 'base' },
       visible: false,
       source: new XYZ({
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        attributions: '© Esri, Maxar, Earthstar Geographics',
+        url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
+        attributions: '© Kadaster / PDOK Luchtfoto',
         maxZoom: 19
       })
     })

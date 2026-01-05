@@ -17,6 +17,7 @@ import { SettingsPanel } from './components/UI/SettingsPanel'
 import { AddVondstButton } from './components/Vondst/AddVondstButton'
 import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
 import { CustomLayerMarkers } from './components/CustomLayers'
+import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal } from './components/CustomPoints'
 import { PasswordGate } from './components/Auth/PasswordGate'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
@@ -39,6 +40,7 @@ function App() {
         <GpsMarker />
         <LocalVondstMarkers />
         <CustomLayerMarkers />
+        <CustomPointMarkers />
         <Popup />
         <LongPressMenu />
         <SearchBox />
@@ -53,6 +55,9 @@ function App() {
         <InfoButton />
         <CompassButton />
         <SettingsPanel />
+        <CreateLayerModal />
+        <AddPointModal />
+        <LayerManagerModal />
       </div>
     </PasswordGate>
   )

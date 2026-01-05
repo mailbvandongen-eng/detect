@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, MapPin, Plus, ExternalLink } from 'lucide-react'
+import { X, MapPin, Plus, ExternalLink, Layers, ChevronRight } from 'lucide-react'
 import { toLonLat } from 'ol/proj'
 import { useMapStore } from '../../store'
 import { useUIStore } from '../../store/uiStore'
+import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 
 interface LongPressLocation {
   pixel: [number, number]
@@ -13,10 +14,13 @@ interface LongPressLocation {
 export function LongPressMenu() {
   const map = useMapStore(state => state.map)
   const openVondstForm = useUIStore(state => state.openVondstForm)
+  const { openAddPointModal, openCreateLayerModal } = useUIStore()
+  const customLayers = useCustomPointLayerStore(state => state.layers)
 
   const [menuLocation, setMenuLocation] = useState<LongPressLocation | null>(null)
   const [visible, setVisible] = useState(false)
   const [canClose, setCanClose] = useState(false) // Prevent immediate close on finger lift
+  const [showLayerSubmenu, setShowLayerSubmenu] = useState(false)
 
   const longPressTimer = useRef<number | null>(null)
   const startPos = useRef<{ x: number; y: number } | null>(null)
@@ -236,12 +240,28 @@ export function LongPressMenu() {
     setVisible(false)
     setMenuLocation(null)
     setCanClose(false)
+    setShowLayerSubmenu(false)
   }
 
   const forceClose = () => {
     setVisible(false)
     setMenuLocation(null)
     setCanClose(false)
+    setShowLayerSubmenu(false)
+  }
+
+  const handleAddToLayer = (layerId: string) => {
+    if (!menuLocation) return
+
+    const [lng, lat] = menuLocation.coordinate
+    openAddPointModal(layerId, { lat, lng })
+
+    forceClose()
+  }
+
+  const handleCreateNewLayer = () => {
+    openCreateLayerModal()
+    forceClose()
   }
 
   const handleAddVondst = () => {
@@ -323,6 +343,64 @@ export function LongPressMenu() {
                 <Plus size={20} className="text-blue-500" />
                 <span className="font-medium">Vondst toevoegen</span>
               </button>
+
+              {/* Add to layer - with submenu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowLayerSubmenu(!showLayerSubmenu)}
+                  className="w-full px-4 py-3 flex items-center gap-3 transition-colors hover:bg-blue-50 text-gray-700 bg-white border-0 outline-none"
+                >
+                  <Layers size={20} className="text-purple-500" />
+                  <span className="font-medium flex-1 text-left">Voeg toe aan laag...</span>
+                  <ChevronRight size={16} className={`text-gray-400 transition-transform ${showLayerSubmenu ? 'rotate-90' : ''}`} />
+                </button>
+
+                {/* Layer submenu */}
+                <AnimatePresence>
+                  {showLayerSubmenu && (
+                    <motion.div
+                      className="bg-gray-50 border-t border-gray-100"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                    >
+                      {customLayers.length === 0 ? (
+                        <button
+                          onClick={handleCreateNewLayer}
+                          className="w-full px-4 py-2 pl-11 flex items-center gap-2 text-sm text-purple-600 hover:bg-purple-50 bg-transparent border-0 outline-none"
+                        >
+                          <Plus size={14} />
+                          <span>Maak eerst een laag aan</span>
+                        </button>
+                      ) : (
+                        <>
+                          {customLayers.map(layer => (
+                            <button
+                              key={layer.id}
+                              onClick={() => handleAddToLayer(layer.id)}
+                              className="w-full px-4 py-2 pl-11 flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100 bg-transparent border-0 outline-none"
+                            >
+                              <div
+                                className="w-3 h-3 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: layer.color }}
+                              />
+                              <span className="truncate">{layer.name}</span>
+                              <span className="text-xs text-gray-400 ml-auto">({layer.points.length})</span>
+                            </button>
+                          ))}
+                          <button
+                            onClick={handleCreateNewLayer}
+                            className="w-full px-4 py-2 pl-11 flex items-center gap-2 text-sm text-purple-600 hover:bg-purple-50 bg-transparent border-0 outline-none border-t border-gray-200"
+                          >
+                            <Plus size={14} />
+                            <span>Nieuwe laag...</span>
+                          </button>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {/* Open in Google Maps */}
               <button

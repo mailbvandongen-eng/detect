@@ -1,12 +1,14 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRef, useEffect } from 'react'
-import { X, Layers } from 'lucide-react'
+import { X, Layers, Settings, Eye, EyeOff } from 'lucide-react'
 import { useUIStore, useSettingsStore } from '../../store'
+import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
 
 export function ThemesPanel() {
-  const { themesPanelOpen, toggleThemesPanel } = useUIStore()
+  const { themesPanelOpen, toggleThemesPanel, openLayerManagerModal } = useUIStore()
+  const { layers: customLayers, toggleVisibility } = useCustomPointLayerStore()
   const panelRef = useRef<HTMLDivElement>(null)
 
   // Explicit selectors to ensure re-render on state change
@@ -85,6 +87,46 @@ export function ThemesPanel() {
               <LayerItem name="Mijn Vondsten" type="overlay" />
             </div>
 
+            {/* Mijn Lagen - custom point layers */}
+            {customLayers.length > 0 && (
+              <div className="mb-2 pb-1 border-b border-gray-100">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Mijn Lagen</span>
+                  <button
+                    onClick={() => {
+                      toggleThemesPanel()
+                      openLayerManagerModal()
+                    }}
+                    className="p-0.5 text-gray-400 hover:text-purple-500 transition-colors border-0 outline-none bg-transparent"
+                    title="Lagen beheren"
+                  >
+                    <Settings size={12} />
+                  </button>
+                </div>
+                {customLayers.map(layer => (
+                  <div
+                    key={layer.id}
+                    className="flex items-center gap-2 py-1 px-1 rounded hover:bg-gray-50"
+                  >
+                    <button
+                      onClick={() => toggleVisibility(layer.id)}
+                      className={`p-0.5 rounded transition-colors border-0 outline-none bg-transparent ${
+                        layer.visible ? 'text-blue-500' : 'text-gray-300'
+                      }`}
+                    >
+                      {layer.visible ? <Eye size={14} /> : <EyeOff size={14} />}
+                    </button>
+                    <div
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: layer.color }}
+                    />
+                    <span className="flex-1 text-sm truncate">{layer.name}</span>
+                    <span className="text-xs text-gray-400">({layer.points.length})</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Achtergronden */}
             <LayerGroup title="Achtergronden" defaultExpanded={true}>
               <LayerItem name="CartoDB (licht)" type="base" />
@@ -160,12 +202,11 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Hillshade & LiDAR Layers */}
-              <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false} layerNames={['AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m', 'World Hillshade']}>
+              <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false} layerNames={['AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m']}>
                 <LayerItem name="AHN4 Hoogtekaart Kleur" type="overlay" />
                 <LayerItem name="AHN4 Hillshade NL" type="overlay" />
                 <LayerItem name="AHN4 Multi-Hillshade NL" type="overlay" />
                 <LayerItem name="AHN 0.5m" type="overlay" />
-                <LayerItem name="World Hillshade" type="overlay" />
               </LayerGroup>
 
               {/* Terrain Layers */}
@@ -217,7 +258,8 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Recreation */}
-              <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Kringloopwinkels']}>
+              <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Wandelroutes', 'Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Kringloopwinkels']}>
+                <LayerItem name="Wandelroutes" type="overlay" />
                 <LayerItem name="Parken" type="overlay" />
                 <LayerItem name="Speeltuinen" type="overlay" />
                 <LayerItem name="Musea" type="overlay" />

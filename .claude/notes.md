@@ -1,6 +1,138 @@
 # Detectorapp-NL - Sessienotities
 
-## Huidige versie: 2.16.7
+## Huidige versie: 2.20.0
+
+---
+
+## v2.20.0 - Commercieel gebruik voorbereid
+
+### Esri lagen vervangen/verwijderd:
+- **Luchtfoto** → PDOK Luchtfoto RGB 8cm (gratis, CC-BY)
+- **World Hillshade** → Verwijderd (Esri commercieel)
+- **AHN Esri lagen** → Blijven (wachten op Esri antwoord)
+
+### Technisch:
+- MapContainer.tsx: PDOK WMTS i.p.v. Esri World Imagery
+- layerRegistry.ts: World Hillshade entry verwijderd
+- ThemesPanel, LayerStore, PresetStore: World Hillshade verwijderd
+
+---
+
+## v2.19.1 - Wandelroutes als lijn-routes op de kaart
+
+### Nieuwe laag: Wandelroutes (met GPX lijnen!)
+- **8 wandelroutes** getekend als lijnen op de kaart (7 NL + 1 BE)
+- **GPX bestanden** geladen en geparsed naar LineString geometrie
+- Bron: routezoeker.com GPX downloads
+- Groene lijnen voor NL, oranje voor BE
+- Startpunt markers met routenaam
+
+### Routes met lijn op kaart:
+- Sint-Pietersberg (10.8 km) - Maastricht, Limburg
+- Utrechtse Heuvelrug (15 km) - Driebergen-Zeist
+- Noord-Hollands Duinreservaat (15 km) - Castricum
+- Kennemerduinen (16 km) - Santpoort-Noord
+- Duinwandeling Zoutelande (5.8 km) - Zeeland
+- Duinen van Renesse (12.2 km) - Zeeland
+- Schiedam Jeneverstad (19 km) - Delft
+- Vloethemveld (8.7 km) - Zedelgem, België
+
+### Technisch:
+- GPX parsing met DOMParser
+- `<trkpt lat="" lon="">` coordinaten naar LineString
+- VectorLayer met zIndex 850
+- Witte outline voor contrast
+
+---
+
+## v2.19.0 - Wandelroutes laag (startpunten)
+
+### Popup verbeteringen (B1 stijl fix):
+- Alle emoji's verwijderd uit fossiel/mineralen/goud popups
+- Duidelijke secties: "Wat kan ik er vinden?", "Hoe kom ik er?"
+- Toegang/regels nu in gewone tekst (rood voor verboden)
+
+---
+
+## v2.18.0 - Fossielen, Mineralen & Goud uitbreiding
+
+### Nieuwe locaties toegevoegd:
+
+1. **Fossiel Hotspots** (10 → 43 locaties)
+   - Nieuwe NL locaties: Winterswijk, Maastricht, Kunrade, Noordzeestrand, IJsselmeerbodem
+   - Nieuwe BE locaties: Kesselt, Lanaye, Blegny, Raeren, Voeren
+   - Nieuwe DE locaties: Neandertal, Solnhofen, Eichstätt, Rüdersdorf, Rügen, Harzrand
+   - Nieuwe FR locaties: Calais, Wimereux, Boulogne, Charleville-Mézières
+
+2. **Mineralen Hotspots** (16 → 41 locaties)
+   - **7 nieuwe NL locaties:** Sint Pietersberg, ENCI-groeve, Kunrade, Winterswijk, Maas/Rijngrind, IJsselmeerbodem, Noordzeestrand
+   - Meer DE locaties: Siegerland, Sauerland, Harz, Vogelsberg, Kaiserstuhl
+   - Meer FR locaties: Auvergne vulkaangebied, Le Puy, Haute-Loire
+   - LayerRegistry geüpdatet: nu ook 'nl' regio
+
+3. **Goudrivieren** (21 → 44 locaties)
+   - Meer NL locaties: Rijn bij Lobith, Waal bij Nijmegen, Maas bij Maastricht/Venlo, IJssel bij Zutphen
+   - Meer DE locaties: Rhein bei Neuenburg, Grümpen, Isar, Salzach, Elz, Nagold
+   - Meer FR locaties: Gardon, Chassezac, Garonne, Orb, Giffre, Ain, Tech, Dordogne, Allier
+
+### Popup verbeteringen (B1-stijl):
+
+1. **PBDB Fossielen popup** - Verbeterd met Nederlandse vertalingen:
+   - Taxonomie uitleg: "Mollusca" → "weekdieren (schelpen, slakken)"
+   - Periode uitleg: "Krijt" → "145-66 miljoen jaar geleden"
+   - Gesteente vertaling: "limestone" → "kalksteen"
+   - Milieu vertaling: "marine" → "zee"
+   - Emoji iconen voor betere leesbaarheid
+
+2. **Fossiel Hotspots popup** - Verrijkt:
+   - Landvlag (🇳🇱🇧🇪🇩🇪🇫🇷) met landnaam
+   - Type locatie met icoon (⛏️ groeve, 🏖️ strand, etc.)
+   - Geologie veld toegevoegd (🪨)
+   - Toegang/regels met kleurcodering (✅ groen / 🚫 rood)
+   - Tips met 💡 icoon
+
+3. **Mineralen Hotspots popup** - Verrijkt:
+   - Landvlag met landnaam
+   - Mineralen met 💎 icoon
+   - Geologie, toegang en tips velden
+
+4. **Goudrivieren popup** - Verrijkt:
+   - Landvlag met landnaam
+   - Rivier met 🏞️ icoon
+   - Goudtype met ✨ icoon
+   - Herkomst met 🏔️ icoon
+
+### Kleurcodering per land:
+- 🇳🇱 Nederland: Oranje
+- 🇧🇪 België: Geel
+- 🇩🇪 Duitsland: Zwart/Rood
+- 🇫🇷 Frankrijk: Blauw
+
+---
+
+## v2.16.8 - Nieuwe iconen voor kaartlagen
+
+### Wijzigingen:
+
+1. **Nieuwe custom 24x24 SVG iconen toegevoegd aan iconStyles.ts:**
+   - `dolmen` (hunebedden): drie stenen met deksteen
+   - `church` (religieus erfgoed): kerk met toren
+   - `crossedSwords` (slagvelden): gekruiste zwaarden
+   - `ammonite` (fossielen): spiraalschelp
+   - `sharkTooth` (haaientanden): haaientand driehoek
+   - `crystal` (mineralen): kristalvorm
+
+2. **Iconen bijgewerkt in LAYER_STYLES:**
+   - Hunebedden: dolmen icoon (was: landmark)
+   - Fossielen: ammonite icoon (was: bone)
+   - Slagvelden: crossedSwords icoon + LAYER_STYLES (was: inline star SVG)
+
+3. **Nieuwe layer styles toegevoegd:**
+   - `church()` - paars voor religieus erfgoed
+   - `slagveld()` - rood voor slagvelden
+   - `ammonite()` - amber voor fossielen
+   - `sharkTooth()` - grijs voor haaientanden
+   - `mineral()` - paars voor mineralen
 
 ---
 
@@ -288,12 +420,19 @@ Bronnen
 - [ ] Popup info aanvullen waar nodig (scheepswrakken, verdronken dorpen etc.)
 
 ### 7. Fossielen, Mineralen & Goud
-- [ ] **Veel meer detail toevoegen** aan alle punten/locaties
-- [ ] Per locatie: welke fossielen/mineralen, periode, geologie, toegankelijkheid, tips
-- [ ] PBDB lagen: vertalen van wetenschappelijke namen, context toevoegen
-- [ ] Mogelijk meer locaties toevoegen
+- [x] **Veel meer detail toevoegen** aan alle punten/locaties ✅ v2.18.0
+- [x] Per locatie: welke fossielen/mineralen, periode, geologie, toegankelijkheid, tips ✅ v2.18.0
+- [x] PBDB lagen: vertalen van wetenschappelijke namen, context toevoegen ✅ v2.18.0
+- [x] Mogelijk meer locaties toevoegen (43 fossiel, 41 mineraal, 44 goud) ✅ v2.18.0
 
 ---
+
+### 8. Wandelroutes verbetering
+- [ ] **Wandelnet.nl integratie** - Bron: wandelnet.nl/wandelroute-zoeken
+  - Markers met clustering (zoals wandelnet.nl)
+  - Hover over marker → route lijn verschijnt
+  - Veel meer routes beschikbaar dan routezoeker.com
+  - Clustering tot bepaald zoomniveau
 
 ### Later te doen:
 - i18n setup
@@ -664,19 +803,16 @@ Update ALLE 4 plekken:
 | Itiner-E | CC BY 4.0 | OK (met attributie) |
 | Provinciale data | Open Data | OK |
 
-### ⚠️ MOET VERVANGEN WORDEN:
+### ✅ OPGELOST (v2.20.0):
 
-| Bron | Probleem | Oplossing |
-|------|----------|-----------|
-| **Esri World Imagery** | Commercieel, vereist subscription | Vervang door PDOK Luchtfoto |
-| **Esri World Hillshade** | Commercieel, vereist subscription | Verwijderen |
+| Bron | Probleem | Status |
+|------|----------|--------|
+| **Esri World Imagery** | Commercieel | ✅ Vervangen door PDOK Luchtfoto 8cm |
+| **Esri World Hillshade** | Commercieel global | ✅ Verwijderd |
 
-**Bestanden om aan te passen:**
-- `src/components/Map/MapContainer.tsx` regel 52-60: satelliteLayer → PDOK
-- `src/layers/hillshadeLayers.ts` regel 95-109: World Hillshade verwijderen
-- `src/layers/layerRegistry.ts`: World Hillshade entry verwijderen
+### ⏳ WACHTEN OP ESRI - ahn.arcgisonline.nl
 
-### ⚠️ PROBLEMATISCH - ahn.arcgisonline.nl
+**Status:** Email gestuurd naar Esri Nederland, wachten op antwoord.
 
 **Gebruikt voor:**
 - AHN4 Hoogtekaart Kleur (belangrijkste laag!)
@@ -684,28 +820,15 @@ Update ALLE 4 plekken:
 - AHN4 Multi-Hillshade
 - Perceel hoogtekaart
 
-**Onderzoek (28 dec 2024):**
+**Achtergrond:**
+- AHN DATA zelf is CC-0 (publiek domein) - vrij te gebruiken
+- Esri visualisatie-service (hillshade, color ramp) vereist mogelijk licentie
+- Deze lagen zijn premium-only, dus alleen voor betalende gebruikers
 
-| Aspect | Bevinding |
-|--------|-----------|
-| **AHN data zelf** | CC-0 (publiek domein) - vrij te gebruiken |
-| **Esri visualisatie-service** | Gebonden aan Esri voorwaarden |
-| **OSM Community** | "Geen bewijs van expliciete schriftelijke toestemming van Esri Nederland" |
-| **Esri Personal Use** | Expliciet NIET voor commercieel gebruik |
-
-**Bronnen:**
-- https://www.ahn.nl/open-data → "AHN is Open Data, gratis en zonder beperkingen"
-- https://community.openstreetmap.org/t/ahn-gebruiken-als-achtergrondlaag-voor-bewerken/73056
-- https://www.esri.nl/nl-nl/producten/arcgis-for-personal-use
-
-**Conclusie:** De AHN DATA is vrij, maar de Esri RENDERING SERVICE (hillshade, color ramp)
-vereist waarschijnlijk een Esri licentie voor commercieel gebruik.
-
-**Opties voor commercieel gebruik:**
-1. **Vraag schriftelijke toestemming** aan Esri Nederland (content@esri.nl)
-2. **Self-hosted tiles** - Genereer eigen hillshade van PDOK AHN data (arbeidsintensief)
-3. **Client-side WebGL** - Render hillshade in browser van PDOK DTM tiles
-4. **Alleen PDOK WMS** - Gebruik `service.pdok.nl/rws/ahn/wms` (grayscale, minder mooi)
+**Als Esri NEE zegt:**
+1. Self-hosted tiles genereren van PDOK AHN data
+2. Client-side WebGL hillshade rendering
+3. Alleen PDOK WMS grayscale gebruiken
 
 ### ✅ AL CORRECT - Map5.nl historische kaarten
 

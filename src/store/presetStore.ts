@@ -118,7 +118,7 @@ const ALL_OVERLAYS = [
   // UIKAV
   'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling',
   // Hoogtekaarten
-  'AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m', 'World Hillshade',
+  'AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m',
   // Terrein
   'Veengebieden', 'Geomorfologie', 'Bodemkaart',
   // Fossielen

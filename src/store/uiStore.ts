@@ -16,6 +16,13 @@ interface UIState {
   vondstFormLocation: { lat: number; lng: number } | null
   vondstDashboardOpen: boolean
 
+  // Custom point layer state
+  createLayerModalOpen: boolean
+  addPointModalOpen: boolean
+  addPointModalLayerId: string | null
+  addPointModalLocation: { lat: number; lng: number } | null
+  layerManagerModalOpen: boolean
+
   // Collapsed categories
   collapsedCategories: Set<string>
 
@@ -34,6 +41,14 @@ interface UIState {
   openVondstForm: (location?: { lat: number; lng: number }) => void
   closeVondstForm: () => void
   toggleVondstDashboard: () => void
+
+  // Custom point layer actions
+  openCreateLayerModal: () => void
+  closeCreateLayerModal: () => void
+  openAddPointModal: (layerId: string, location: { lat: number; lng: number }) => void
+  closeAddPointModal: () => void
+  openLayerManagerModal: () => void
+  closeLayerManagerModal: () => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -48,6 +63,11 @@ export const useUIStore = create<UIState>()(
     vondstFormOpen: false,
     vondstFormLocation: null,
     vondstDashboardOpen: false,
+    createLayerModalOpen: false,
+    addPointModalOpen: false,
+    addPointModalLayerId: null,
+    addPointModalLocation: null,
+    layerManagerModalOpen: false,
     collapsedCategories: new Set<string>(),
 
     closeAllPanels: () => {
@@ -196,6 +216,47 @@ export const useUIStore = create<UIState>()(
         state.presetsPanelOpen = false
         // Toggle dashboard
         state.vondstDashboardOpen = !wasOpen
+      })
+    },
+
+    // Custom point layer actions
+    openCreateLayerModal: () => {
+      set(state => {
+        state.createLayerModalOpen = true
+      })
+    },
+
+    closeCreateLayerModal: () => {
+      set(state => {
+        state.createLayerModalOpen = false
+      })
+    },
+
+    openAddPointModal: (layerId, location) => {
+      set(state => {
+        state.addPointModalOpen = true
+        state.addPointModalLayerId = layerId
+        state.addPointModalLocation = location
+      })
+    },
+
+    closeAddPointModal: () => {
+      set(state => {
+        state.addPointModalOpen = false
+        state.addPointModalLayerId = null
+        state.addPointModalLocation = null
+      })
+    },
+
+    openLayerManagerModal: () => {
+      set(state => {
+        state.layerManagerModalOpen = true
+      })
+    },
+
+    closeLayerManagerModal: () => {
+      set(state => {
+        state.layerManagerModalOpen = false
       })
     }
   }))

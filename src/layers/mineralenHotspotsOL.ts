@@ -5,9 +5,81 @@ import Point from 'ol/geom/Point'
 import { fromLonLat } from 'ol/proj'
 import { Style, Circle, Fill, Stroke, Text } from 'ol/style'
 
-// Mineralen hotspots - populaire zoeklocaties in FR/BE/DE
-// Bronnen: Mindat.org, Mineralienatlas.de, Geoforum.fr
+// Mineralen hotspots - populaire zoeklocaties in NL/FR/BE/DE
+// Bronnen: Mindat.org, Mineralienatlas.de, Geoforum.fr, NGV.nl
 const MINERAL_HOTSPOTS = [
+  // === NEDERLAND ===
+  {
+    name: 'Sint Pietersberg (Maastricht)',
+    coords: [5.6833, 50.8333],
+    country: 'NL',
+    region: 'Limburg',
+    minerals: 'Marcasiet, pyriet, calciet, vuursteen (silex), bariet',
+    geology: 'Maastrichtse kalksteen (Krijt), enige echte steengroeves in NL',
+    access: 'Excursies via Natuurhistorisch Museum Maastricht',
+    tips: 'Beste mineralenlocatie van Nederland! Combineer met fossielen.'
+  },
+  {
+    name: 'ENCI-groeve',
+    coords: [5.6667, 50.8500],
+    country: 'NL',
+    region: 'Limburg',
+    minerals: 'Calciet kristallen, marcasiet, pyriet in vuursteen',
+    geology: 'Maastrichtse kalksteen, nu natuurgebied',
+    access: 'Opengesteld als natuurgebied',
+    tips: 'Zoek in los materiaal op paden, niet hakken in wanden!'
+  },
+  {
+    name: 'Kunrade',
+    coords: [5.9333, 50.8833],
+    country: 'NL',
+    region: 'Limburg',
+    minerals: 'Marcasiet knollen, pyriet, limoniet',
+    geology: 'Carboon steenkoollagen en Krijt deklagen',
+    access: 'Oude mijngebied, haldes',
+    tips: 'Historisch mijnbouwgebied, zoek op haldes.'
+  },
+  {
+    name: 'Winterswijk steengroeve',
+    coords: [6.7167, 52.0000],
+    country: 'NL',
+    region: 'Gelderland',
+    minerals: 'Calciet, dolomiet, celestien, bariet',
+    geology: 'Muschelkalk (Trias), enige Trias ontsluiting in NL',
+    access: 'Museum en rondleidingen',
+    tips: 'Unieke locatie! Ook Trias fossielen (Nothosaurus).'
+  },
+  {
+    name: 'Maas- en Rijngrind',
+    coords: [5.9000, 51.8500],
+    country: 'NL',
+    region: 'Gelderland/Limburg',
+    minerals: 'Agaten, jaspis, kwarts, graniet, amfibool',
+    geology: 'Rivierafzettingen uit Ardennen/Rijn',
+    access: 'Grindgaten, rivieroevers',
+    tips: 'Zoek na hoog water in vers grind. Geduld nodig!'
+  },
+  {
+    name: 'IJsselmeerbodem',
+    coords: [5.3000, 52.5500],
+    country: 'NL',
+    region: 'Flevoland',
+    minerals: 'Barnsteen (amber), vuursteen, zwerfstenen uit Scandinavië',
+    geology: 'Pleistocene afzettingen onder zeebodem',
+    access: 'Stranden bij laag water',
+    tips: 'Barnsteen na storm, vooral in najaar.'
+  },
+  {
+    name: 'Noordzeestrand (Texel-Schiermonnikoog)',
+    coords: [4.8500, 53.1000],
+    country: 'NL',
+    region: 'Waddeneilanden',
+    minerals: 'Barnsteen, agaat, granaat in zand, vuursteen',
+    geology: 'Glaciale zwerfstenen en Noordzee-sedimenten',
+    access: 'Vrij toegankelijk',
+    tips: 'Barnsteen vooral na noordwesterstorm. Zoek bij vloedlijn.'
+  },
+
   // === FRANKRIJK ===
   {
     name: 'Mine de Pégut',
@@ -89,6 +161,36 @@ const MINERAL_HOTSPOTS = [
     access: 'Hooggebergte, ervaring vereist',
     tips: 'Kristalliers traditie, sommige sites beschermd'
   },
+  {
+    name: 'La Gardette (La Grave)',
+    coords: [6.3000, 45.0500],
+    country: 'FR',
+    region: 'Hautes-Alpes',
+    minerals: 'Bergkristal, chloriet inclusies, goud',
+    geology: 'Mesozoïsche schiefers met kwarts aders',
+    access: 'Berggebied, ervaring vereist',
+    tips: 'Beroemd om grote kristallen met goud inclusies'
+  },
+  {
+    name: 'Vosges (La Petite Raon)',
+    coords: [7.0833, 48.4167],
+    country: 'FR',
+    region: 'Vogezen',
+    minerals: 'Fluoriet, calciet, bariet, pyriet',
+    geology: 'Permische sedimenten en graniet',
+    access: 'Oude mijngebieden',
+    tips: 'Diverse oude mijnen in de regio, check toegang'
+  },
+  {
+    name: 'Sainte-Marie-aux-Mines',
+    coords: [7.1833, 48.2500],
+    country: 'FR',
+    region: 'Vogezen (Elzas)',
+    minerals: 'Zilver, kobalt, arseen mineralen, proustiet',
+    geology: 'Renaissance zilveraders in gneis',
+    access: 'Mineralienbeurs (juni), oude mijnen met gids',
+    tips: 'Grootste mineralienbeurs van Europa! Mijnbezoeken mogelijk.'
+  },
 
   // === BELGIE ===
   {
@@ -130,6 +232,26 @@ const MINERAL_HOTSPOTS = [
     geology: 'Pegmatiet gangen in Ardens massief',
     access: 'Verspreid in regio',
     tips: 'Zeldzaam in België, zoek in verweerde pegmatieten'
+  },
+  {
+    name: 'Blégny-Mine',
+    coords: [5.7333, 50.6833],
+    country: 'BE',
+    region: 'Luik',
+    minerals: 'Pyriet, marcasiet, sideriet, steenkool',
+    geology: 'Carboon steenkoollagen - UNESCO',
+    access: 'Mijnmuseum met ondergrondse rondleiding',
+    tips: 'UNESCO-erfgoed, haldes soms toegankelijk'
+  },
+  {
+    name: 'Rochefort grottengebied',
+    coords: [5.2167, 50.1500],
+    country: 'BE',
+    region: 'Ardennen',
+    minerals: 'Calciet druipstenen, aragoniet',
+    geology: 'Devonische kalksteen karstgebied',
+    access: 'Grotten bezoekbaar, mineralen beschermd',
+    tips: 'Diverse grotten (Han, Rochefort), alleen kijken'
   },
 
   // === DUITSLAND ===
@@ -202,6 +324,66 @@ const MINERAL_HOTSPOTS = [
     geology: 'Hercynische ertsaders - UNESCO mijnbouw erfgoed',
     access: 'Schaubergwerke open, haldes deels toegankelijk',
     tips: 'Rammelsberg (UNESCO), Clausthal-Zellerfeld mijnen'
+  },
+  {
+    name: 'Erzgebirge (Freiberg)',
+    coords: [13.3500, 50.9167],
+    country: 'DE',
+    region: 'Sachsen',
+    minerals: 'Zilver, fluoriet, bariet, pyriet, arseen mineralen',
+    geology: 'Hercynische zilveraders - UNESCO mijnbouw erfgoed',
+    access: 'Terra Mineralia museum, diverse schaubergwerke',
+    tips: 'Historische zilverstad! Terra Mineralia is wereldklasse.'
+  },
+  {
+    name: 'Schneeberg',
+    coords: [12.6333, 50.5833],
+    country: 'DE',
+    region: 'Sachsen (Erzgebirge)',
+    minerals: 'Kobalt, nikkel, bismut, zilver, uraniet (historisch)',
+    geology: 'Vijf-elementen aders in gneis',
+    access: 'Schaubergwerke, haldes',
+    tips: 'Type-locatie voor vele mineralen. Historisch mijnbouwcentrum.'
+  },
+  {
+    name: 'Sauerland (Meggen)',
+    coords: [7.9500, 51.2000],
+    country: 'DE',
+    region: 'Nordrhein-Westfalen',
+    minerals: 'Sfaleriet, bariet, pyriet, bournoniet',
+    geology: 'Sedimentaire zink-loodaders',
+    access: 'Besucherbergwerk Meggen',
+    tips: 'Grote oude mijn, bezoekerscentrum met mineralen.'
+  },
+  {
+    name: 'Siegerland',
+    coords: [8.0000, 50.8833],
+    country: 'DE',
+    region: 'Nordrhein-Westfalen',
+    minerals: 'Sideriet, magnetiet, hematiet, pyriet',
+    geology: 'Devonische ijzererts formaties',
+    access: 'Diverse schaubergwerke',
+    tips: 'Historisch ijzererts gebied sinds Romeinse tijd.'
+  },
+  {
+    name: 'Oberwolfach',
+    coords: [8.2167, 48.3167],
+    country: 'DE',
+    region: 'Schwarzwald',
+    minerals: 'Fluoriet, bariet, zilver, proustiet',
+    geology: 'Hydrothermale aders in gneis',
+    access: 'Museum MiMa, haldes',
+    tips: 'Beroemd om fluoriet en zilver. MiMa museum bezoeken!'
+  },
+  {
+    name: 'Hagendorf',
+    coords: [12.4667, 49.6500],
+    country: 'DE',
+    region: 'Beieren (Oberpfalz)',
+    minerals: 'Fosfaat mineralen (100+ soorten!), kwarts',
+    geology: 'Grote pegmatiet met fosfaat nodules',
+    access: 'Oude groeve, deels toegankelijk',
+    tips: 'Belangrijkste fosfaat mineralen locatie van Europa!'
   }
 ]
 
@@ -212,9 +394,10 @@ function createHotspotStyle(feature: Feature) {
 
   // Kleur per land
   const colors: Record<string, { fill: string; stroke: string }> = {
+    'NL': { fill: 'rgba(255, 102, 0, 0.85)', stroke: '#CC5500' },    // Oranje
     'FR': { fill: 'rgba(0, 85, 164, 0.8)', stroke: '#002654' },      // Frans blauw
-    'BE': { fill: 'rgba(255, 205, 0, 0.8)', stroke: '#000000' },     // Belgisch geel
-    'DE': { fill: 'rgba(221, 0, 0, 0.8)', stroke: '#000000' }        // Duits rood
+    'BE': { fill: 'rgba(255, 205, 0, 0.8)', stroke: '#B8860B' },     // Belgisch geel
+    'DE': { fill: 'rgba(221, 0, 0, 0.8)', stroke: '#8B0000' }        // Duits rood
   }
 
   const color = colors[country] || { fill: 'rgba(128, 0, 128, 0.8)', stroke: '#4B0082' }
@@ -266,6 +449,6 @@ export async function createMineralenHotspotsLayerOL() {
     style: createHotspotStyle
   })
 
-  console.log(`✓ Mineralen Hotspots loaded (${features.length} locations: FR/BE/DE)`)
+  console.log(`✓ Mineralen Hotspots loaded (${features.length} locations: NL/BE/DE/FR)`)
   return layer
 }

@@ -104,7 +104,6 @@ export function LayerControlPanel() {
                 <LayerItem name="AHN4 Multi-Hillshade NL" type="overlay" />
                 <LayerItem name="AHN4 Helling NL" type="overlay" />
                 <LayerItem name="AHN 0.5m" type="overlay" />
-                <LayerItem name="World Hillshade" type="overlay" />
               </LayerGroup>
 
               {/* Terrain Layers */}

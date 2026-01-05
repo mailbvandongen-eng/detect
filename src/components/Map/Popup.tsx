@@ -1669,6 +1669,26 @@ export function Popup() {
           continue
         }
 
+        // Custom Point (Mijn Lagen)
+        if (dataProps.layerType === 'customPoint' && dataProps.customPoint) {
+          const point = dataProps.customPoint
+          const layerName = dataProps.customLayerName || 'Mijn Laag'
+          let pointHtml = `<strong>${point.name}</strong>`
+          pointHtml += `<br/><span class="text-xs text-gray-500">${layerName}</span>`
+          if (point.category) {
+            pointHtml += `<br/><span class="text-sm text-gray-600"><strong>Categorie:</strong> ${point.category}</span>`
+          }
+          if (point.notes) {
+            pointHtml += `<br/><span class="text-sm text-gray-600 mt-1">${point.notes}</span>`
+          }
+          if (point.url) {
+            pointHtml += `<br/><a href="${point.url}" target="_blank" rel="noopener" class="text-blue-600 hover:underline text-sm">Meer info</a>`
+          }
+          pointHtml += `<br/><span class="text-xs text-gray-400">${new Date(point.createdAt).toLocaleDateString('nl-NL')}</span>`
+          collectedContents.push(pointHtml)
+          continue
+        }
+
         // Check if this is an AMK feature - use local data (no WMS needed)
         if (dataProps.kwaliteitswaarde && dataProps.kwaliteitswaarde.includes('archeologische waarde')) {
           const amkHtml = formatAMKPopup(dataProps)
@@ -2231,93 +2251,312 @@ export function Popup() {
           }
         }
 
-        // Fossielen (PBDB data)
+        // Fossielen (PBDB data) - B1 stijl
         if (dataProps.bron === 'Paleobiology Database') {
-          if (dataProps.taxonomie && dataProps.taxonomie !== 'Onbekend') {
-            html += `<br/><span class="text-xs text-amber-700">${dataProps.taxonomie}</span>`
+          // Helper functie voor Nederlandse taxonomie uitleg
+          const getTaxonomieUitleg = (taxonomie: string): string => {
+            const uitleg: Record<string, string> = {
+              'Mollusca': 'weekdieren zoals schelpen en slakken',
+              'Brachiopoda': 'armpotigen, schelp-achtige dieren',
+              'Echinodermata': 'stekelhuidigen zoals zee-egels en zeesterren',
+              'Chordata': 'gewervelde dieren',
+              'Arthropoda': 'geleedpotigen zoals kreeften en trilobieten',
+              'Cnidaria': 'neteldieren zoals koralen en kwallen',
+              'Bryozoa': 'mosdiertjes',
+              'Foraminifera': 'eencellige schelpdieren',
+              'Plantae': 'planten',
+              'Crinoidea': 'zeelelies',
+              'Gastropoda': 'slakken',
+              'Bivalvia': 'tweekleppigen zoals mossels en oesters',
+              'Cephalopoda': 'koppotigen zoals inktvissen en ammonieten',
+              'Trilobita': 'trilobieten, uitgestorven kreeftachtigen',
+              'Mammalia': 'zoogdieren',
+              'Reptilia': 'reptielen',
+              'Pisces': 'vissen',
+              'Amphibia': 'amfibieën'
+            }
+            for (const [term, uitlegTekst] of Object.entries(uitleg)) {
+              if (taxonomie.toLowerCase().includes(term.toLowerCase())) {
+                return uitlegTekst
+              }
+            }
+            return ''
           }
-          if (dataProps.periode && dataProps.periode !== 'Onbekend') {
-            html += `<br/><span class="text-sm text-purple-700">${dataProps.periode}</span>`
+
+          // Helper voor periode uitleg
+          const getPeriodeUitleg = (periode: string): string => {
+            const periodeInfo: Record<string, string> = {
+              'Cambrium': '541-485 miljoen jaar geleden',
+              'Ordovicium': '485-444 miljoen jaar geleden',
+              'Siluur': '444-419 miljoen jaar geleden',
+              'Devoon': '419-359 miljoen jaar geleden',
+              'Carboon': '359-299 miljoen jaar geleden',
+              'Perm': '299-252 miljoen jaar geleden',
+              'Trias': '252-201 miljoen jaar geleden',
+              'Jura': '201-145 miljoen jaar geleden',
+              'Krijt': '145-66 miljoen jaar geleden',
+              'Paleogeen': '66-23 miljoen jaar geleden',
+              'Neogeen': '23-2,6 miljoen jaar geleden',
+              'Kwartair': '2,6 miljoen jaar - nu',
+              'Pleistoceen': '2,6 miljoen - 11.700 jaar geleden',
+              'Holoceen': '11.700 jaar geleden - nu'
+            }
+            for (const [term, info] of Object.entries(periodeInfo)) {
+              if (periode.toLowerCase().includes(term.toLowerCase())) {
+                return info
+              }
+            }
+            return ''
           }
-          if (dataProps.ouderdom && dataProps.ouderdom !== 'Onbekend') {
-            html += `<br/><span class="text-xs text-gray-600">Ouderdom: ${dataProps.ouderdom}</span>`
+
+          // Helper voor gesteente vertaling
+          const vertaalGesteente = (gesteente: string): string => {
+            const vertalingen: Record<string, string> = {
+              'limestone': 'kalksteen', 'sandstone': 'zandsteen', 'shale': 'schalie',
+              'clay': 'klei', 'sand': 'zand', 'gravel': 'grind', 'marl': 'mergel',
+              'chalk': 'krijt', 'mudstone': 'moddersteen', 'siltstone': 'siltsteen'
+            }
+            let result = gesteente
+            for (const [eng, nl] of Object.entries(vertalingen)) {
+              result = result.replace(new RegExp(eng, 'gi'), nl)
+            }
+            return result
           }
-          if (dataProps.aantal_fossielen) {
-            html += `<br/><span class="text-xs text-green-700">Aantal fossielen: ${dataProps.aantal_fossielen}</span>`
+
+          // Helper voor milieu vertaling
+          const vertaalMilieu = (milieu: string): string => {
+            const vertalingen: Record<string, string> = {
+              'marine': 'zee', 'coastal': 'kust', 'terrestrial': 'land',
+              'fluvial': 'rivier', 'lacustrine': 'meer', 'reef': 'rif',
+              'deltaic': 'delta', 'shallow': 'ondiep water', 'deep': 'diep water'
+            }
+            let result = milieu
+            for (const [eng, nl] of Object.entries(vertalingen)) {
+              result = result.replace(new RegExp(eng, 'gi'), nl)
+            }
+            return result
           }
-          if (dataProps.formatie) {
-            html += `<br/><span class="text-xs text-gray-500">Formatie: ${dataProps.formatie}</span>`
-          }
-          if (dataProps.lid) {
-            html += `<br/><span class="text-xs text-gray-500">Lid: ${dataProps.lid}</span>`
-          }
-          if (dataProps.gesteente) {
-            html += `<br/><span class="text-xs text-gray-500">Gesteente: ${dataProps.gesteente}</span>`
-          }
-          if (dataProps.milieu) {
-            html += `<br/><span class="text-xs text-blue-600">Milieu: ${dataProps.milieu}</span>`
-          }
+
+          // Vindplaats onder titel
           if (dataProps.vindplaats) {
-            html += `<br/><span class="text-xs text-gray-500 italic">${dataProps.vindplaats}</span>`
+            html += `<br/><span class="text-xs text-gray-600">${dataProps.vindplaats}</span>`
+          }
+
+          // Wat is hier gevonden?
+          html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat is hier gevonden?</span></div>`
+
+          if (dataProps.taxonomie && dataProps.taxonomie !== 'Onbekend') {
+            const uitleg = getTaxonomieUitleg(dataProps.taxonomie)
+            if (uitleg) {
+              html += `<div class="text-sm text-gray-700 mt-1">${uitleg}</div>`
+              html += `<div class="text-xs text-gray-500 italic">(${dataProps.taxonomie})</div>`
+            } else {
+              html += `<div class="text-sm text-gray-700 mt-1">${dataProps.taxonomie}</div>`
+            }
+          }
+
+          if (dataProps.aantal_fossielen) {
+            const aantal = parseInt(dataProps.aantal_fossielen)
+            const aantalTekst = aantal > 100 ? 'Veel fossielen gevonden op deze locatie.' :
+                               aantal > 10 ? 'Meerdere fossielen gevonden op deze locatie.' :
+                               `${dataProps.aantal_fossielen} fossiel${aantal > 1 ? 'en' : ''} gevonden op deze locatie.`
+            html += `<div class="text-sm text-gray-600 mt-1">${aantalTekst}</div>`
+          }
+
+          // Wanneer leefden deze dieren?
+          if (dataProps.periode && dataProps.periode !== 'Onbekend') {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wanneer leefden deze dieren?</span></div>`
+            const periodeUitleg = getPeriodeUitleg(dataProps.periode)
+            html += `<div class="text-sm text-gray-700 mt-1">${dataProps.periode}</div>`
+            if (periodeUitleg) {
+              html += `<div class="text-sm text-gray-600">${periodeUitleg}</div>`
+            }
+            if (dataProps.ouderdom && dataProps.ouderdom !== 'Onbekend') {
+              html += `<div class="text-sm text-gray-600">Ouderdom: ${dataProps.ouderdom}</div>`
+            }
+          }
+
+          // In wat voor gesteente?
+          if (dataProps.gesteente || dataProps.formatie || dataProps.milieu) {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">In wat voor gesteente?</span></div>`
+            if (dataProps.gesteente) {
+              html += `<div class="text-sm text-gray-700 mt-1">${vertaalGesteente(dataProps.gesteente)}</div>`
+            }
+            if (dataProps.formatie) {
+              html += `<div class="text-sm text-gray-600">Formatie: ${dataProps.formatie}</div>`
+              if (dataProps.lid) {
+                html += `<div class="text-sm text-gray-600 ml-3">Lid: ${dataProps.lid}</div>`
+              }
+            }
+            if (dataProps.milieu) {
+              html += `<div class="text-sm text-gray-600">Leefomgeving: ${vertaalMilieu(dataProps.milieu)}</div>`
+            }
           }
         }
 
-        // Fossiel Hotspots (populaire zoeklocaties)
+        // Fossiel Hotspots (populaire zoeklocaties) - B1 stijl
         if (dataProps.layerType === 'fossielHotspot') {
-          if (dataProps.type) {
-            html += `<br/><span class="text-xs text-amber-600 capitalize">${dataProps.type}</span>`
+          // Type en regio onder titel
+          const locationParts: string[] = []
+          if (dataProps.type) locationParts.push(dataProps.type)
+          if (dataProps.region) locationParts.push(dataProps.region)
+          if (dataProps.country) {
+            const countryNames: Record<string, string> = { 'NL': 'Nederland', 'BE': 'België', 'DE': 'Duitsland', 'FR': 'Frankrijk' }
+            locationParts.push(countryNames[dataProps.country] || dataProps.country)
           }
-          if (dataProps.finds) {
-            html += `<br/><span class="text-sm text-amber-800">${dataProps.finds}</span>`
+          if (locationParts.length > 0) {
+            html += `<br/><span class="text-xs text-gray-600">${locationParts.join(' · ')}</span>`
           }
-          if (dataProps.period) {
-            html += `<br/><span class="text-sm text-purple-700">${dataProps.period}</span>`
+
+          // Wat kan ik er vinden?
+          if (dataProps.finds || dataProps.period) {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat kan ik er vinden?</span></div>`
+            if (dataProps.finds) {
+              html += `<div class="text-sm text-gray-700 mt-1">${dataProps.finds}</div>`
+            }
+            if (dataProps.period) {
+              html += `<div class="text-sm text-gray-600 mt-1">Periode: ${dataProps.period}</div>`
+            }
+            if (dataProps.geology) {
+              html += `<div class="text-sm text-gray-600 mt-1">Geologie: ${dataProps.geology}</div>`
+            }
           }
-          if (dataProps.tips) {
-            html += `<br/><span class="text-xs text-green-700 italic">${dataProps.tips}</span>`
-          }
-          if (dataProps.region) {
-            html += `<br/><span class="text-xs text-gray-500">${dataProps.region}</span>`
+
+          // Hoe kom ik er?
+          if (dataProps.access || dataProps.tips) {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Hoe kom ik er?</span></div>`
+            if (dataProps.access) {
+              const isVerboden = dataProps.access.toLowerCase().includes('verboden') ||
+                                dataProps.access.toLowerCase().includes('niet toegankelijk')
+              const accessColor = isVerboden ? 'text-red-600' : 'text-gray-700'
+              html += `<div class="text-sm ${accessColor} mt-1">${dataProps.access}</div>`
+            }
+            if (dataProps.tips) {
+              html += `<div class="text-sm text-gray-600 mt-1 italic">Tip: ${dataProps.tips}</div>`
+            }
           }
         }
 
-        // Mineralen Hotspots (FR/BE/DE)
+        // Mineralen Hotspots (NL/FR/BE/DE) - B1 stijl
         if (dataProps.layerType === 'mineralenHotspot') {
-          if (dataProps.region) {
-            html += `<br/><span class="text-xs text-gray-500">${dataProps.region}</span>`
+          // Regio en land onder titel
+          const locationParts: string[] = []
+          if (dataProps.region) locationParts.push(dataProps.region)
+          if (dataProps.country) {
+            const countryNames: Record<string, string> = { 'NL': 'Nederland', 'BE': 'België', 'DE': 'Duitsland', 'FR': 'Frankrijk' }
+            locationParts.push(countryNames[dataProps.country] || dataProps.country)
           }
+          if (locationParts.length > 0) {
+            html += `<br/><span class="text-xs text-gray-600">${locationParts.join(' · ')}</span>`
+          }
+
+          // Wat kan ik er vinden?
           if (dataProps.minerals) {
-            html += `<br/><span class="text-sm text-purple-700">${dataProps.minerals}</span>`
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat kan ik er vinden?</span></div>`
+            html += `<div class="text-sm text-gray-700 mt-1">${dataProps.minerals}</div>`
+            if (dataProps.geology) {
+              html += `<div class="text-sm text-gray-600 mt-1">Geologie: ${dataProps.geology}</div>`
+            }
           }
-          if (dataProps.geology) {
-            html += `<br/><span class="text-xs text-blue-600">${dataProps.geology}</span>`
-          }
-          if (dataProps.access) {
-            html += `<br/><span class="text-xs text-green-700">${dataProps.access}</span>`
-          }
-          if (dataProps.tips) {
-            html += `<br/><span class="text-xs text-amber-700 italic">${dataProps.tips}</span>`
+
+          // Hoe kom ik er?
+          if (dataProps.access || dataProps.tips) {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Hoe kom ik er?</span></div>`
+            if (dataProps.access) {
+              const isVerboden = dataProps.access.toLowerCase().includes('verboden') ||
+                                dataProps.access.toLowerCase().includes('niet toegankelijk') ||
+                                dataProps.access.toLowerCase().includes('gesloten')
+              const accessColor = isVerboden ? 'text-red-600' : 'text-gray-700'
+              html += `<div class="text-sm ${accessColor} mt-1">${dataProps.access}</div>`
+            }
+            if (dataProps.tips) {
+              html += `<div class="text-sm text-gray-600 mt-1 italic">Tip: ${dataProps.tips}</div>`
+            }
           }
         }
 
-        // Goudrivieren (NL/BE/DE/FR)
+        // Goudrivieren (NL/BE/DE/FR) - B1 stijl
         if (dataProps.layerType === 'goudrivier') {
-          if (dataProps.river && dataProps.region) {
-            html += `<br/><span class="text-xs text-gray-500">${dataProps.river} - ${dataProps.region}</span>`
+          // Rivier, regio en land onder titel
+          const locationParts: string[] = []
+          if (dataProps.river) locationParts.push(dataProps.river)
+          if (dataProps.region) locationParts.push(dataProps.region)
+          if (dataProps.country) {
+            const countryNames: Record<string, string> = { 'NL': 'Nederland', 'BE': 'België', 'DE': 'Duitsland', 'FR': 'Frankrijk' }
+            locationParts.push(countryNames[dataProps.country] || dataProps.country)
           }
-          if (dataProps.goldType) {
-            html += `<br/><span class="text-sm text-yellow-600">${dataProps.goldType}</span>`
+          if (locationParts.length > 0) {
+            html += `<br/><span class="text-xs text-gray-600">${locationParts.join(' · ')}</span>`
           }
-          if (dataProps.origin) {
-            html += `<br/><span class="text-xs text-blue-600">Herkomst: ${dataProps.origin}</span>`
+
+          // Wat kan ik er vinden?
+          if (dataProps.goldType || dataProps.origin) {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat kan ik er vinden?</span></div>`
+            if (dataProps.goldType) {
+              html += `<div class="text-sm text-gray-700 mt-1">${dataProps.goldType}</div>`
+            }
+            if (dataProps.origin) {
+              html += `<div class="text-sm text-gray-600 mt-1">Herkomst: ${dataProps.origin}</div>`
+            }
           }
-          if (dataProps.legal) {
-            const isProhibited = dataProps.legal.includes('VERBODEN')
-            const colorClass = isProhibited ? 'text-red-600 font-semibold' : 'text-green-700'
-            html += `<br/><span class="text-xs ${colorClass}">${dataProps.legal}</span>`
+
+          // Mag ik hier zoeken?
+          if (dataProps.legal || dataProps.tips) {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Mag ik hier zoeken?</span></div>`
+            if (dataProps.legal) {
+              const isProhibited = dataProps.legal.includes('VERBODEN')
+              const colorClass = isProhibited ? 'text-red-600 font-semibold' : 'text-gray-700'
+              html += `<div class="text-sm ${colorClass} mt-1">${dataProps.legal}</div>`
+            }
+            if (dataProps.tips) {
+              html += `<div class="text-sm text-gray-600 mt-1 italic">Tip: ${dataProps.tips}</div>`
+            }
           }
-          if (dataProps.tips) {
-            html += `<br/><span class="text-xs text-amber-700 italic">${dataProps.tips}</span>`
+        }
+
+        // Wandelroutes - startpunten populaire wandelingen - B1 stijl
+        if (dataProps.layerType === 'wandelroute') {
+          // Regio en land onder titel
+          const locationParts: string[] = []
+          if (dataProps.region) locationParts.push(dataProps.region)
+          if (dataProps.country) {
+            const countryNames: Record<string, string> = { 'NL': 'Nederland', 'BE': 'België' }
+            locationParts.push(countryNames[dataProps.country] || dataProps.country)
+          }
+          if (locationParts.length > 0) {
+            html += `<br/><span class="text-xs text-gray-600">${locationParts.join(' · ')}</span>`
+          }
+
+          // Afstand en duur
+          if (dataProps.distance || dataProps.duration) {
+            const distanceText = dataProps.distance ? `${dataProps.distance} km` : ''
+            const durationText = dataProps.duration ? `${dataProps.duration}` : ''
+            const combined = [distanceText, durationText].filter(Boolean).join(' · ')
+            if (combined) {
+              html += `<br/><span class="text-sm text-green-700 font-medium">${combined}</span>`
+            }
+          }
+
+          // Wat ga je zien?
+          if (dataProps.description || dataProps.highlights) {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat ga je zien?</span></div>`
+            if (dataProps.description) {
+              html += `<div class="text-sm text-gray-700 mt-1">${dataProps.description}</div>`
+            }
+            if (dataProps.highlights) {
+              html += `<div class="text-sm text-gray-600 mt-1">Hoogtepunten: ${dataProps.highlights}</div>`
+            }
+          }
+
+          // Waar begin ik?
+          if (dataProps.startAddress) {
+            html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Waar begin ik?</span></div>`
+            html += `<div class="text-sm text-gray-700 mt-1">${dataProps.startAddress}</div>`
+          }
+
+          // Meer info link
+          if (dataProps.url) {
+            html += `<div class="mt-3"><a href="${dataProps.url}" target="_blank" class="text-sm text-blue-600 hover:underline">Bekijk route en download GPX</a></div>`
           }
         }
 

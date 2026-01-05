@@ -6,7 +6,7 @@ import { fromLonLat } from 'ol/proj'
 import { Style, Circle, Fill, Stroke, Text } from 'ol/style'
 
 // Goudrivieren - locaties waar goudwassen mogelijk is
-// Bronnen: goldwaschkarte.de, goldlineorpaillage.fr, pan4gold.nl
+// Bronnen: goldwaschkarte.de, goldlineorpaillage.fr, pan4gold.nl, orpaillage.fr
 const GOLD_RIVERS = [
   // === NEDERLAND ===
   {
@@ -34,15 +34,63 @@ const GOLD_RIVERS = [
     legal: 'Toegestaan'
   },
   {
-    name: 'Maas (diverse locaties)',
-    coords: [5.8500, 51.4500],
+    name: 'Rijn bij Lobith',
+    coords: [6.1167, 51.8667],
+    country: 'NL',
+    river: 'Rijn',
+    region: 'Gelderland',
+    goldType: 'Fijn stofgoud, flinters',
+    origin: 'Alpengoud (vers uit Duitsland)',
+    access: 'Grensgebied, uiterwaarden',
+    tips: 'Eerste Nederlandse plek waar Rijngoud binnenkomt!',
+    legal: 'Toegestaan'
+  },
+  {
+    name: 'Waal bij Nijmegen',
+    coords: [5.8500, 51.8500],
+    country: 'NL',
+    river: 'Waal',
+    region: 'Gelderland',
+    goldType: 'Fijn stofgoud',
+    origin: 'Alpengoud (Rijn-arm)',
+    access: 'Ooijpolder, rivierstranden',
+    tips: 'Waal = grootste Rijn-arm, dus veel sediment-aanvoer',
+    legal: 'Toegestaan'
+  },
+  {
+    name: 'Maas bij Maastricht',
+    coords: [5.6833, 50.8500],
     country: 'NL',
     river: 'Maas',
-    region: 'Noord-Brabant/Limburg',
+    region: 'Limburg',
     goldType: 'Zeer fijn stofgoud',
     origin: 'Ardennen/Vogezen',
     access: 'Uiterwaarden',
-    tips: 'Minder productief dan Rijn, maar goud is aanwezig',
+    tips: 'Minder productief dan Rijn, combineer met fossielen zoeken',
+    legal: 'Toegestaan'
+  },
+  {
+    name: 'Maas bij Venlo',
+    coords: [6.1667, 51.3667],
+    country: 'NL',
+    river: 'Maas',
+    region: 'Limburg',
+    goldType: 'Zeer fijn stofgoud',
+    origin: 'Ardennen',
+    access: 'Maasuiterwaarden',
+    tips: 'Grindgaten en strandjes langs de Maas',
+    legal: 'Toegestaan'
+  },
+  {
+    name: 'IJssel bij Zutphen',
+    coords: [6.2000, 52.1333],
+    country: 'NL',
+    river: 'IJssel',
+    region: 'Gelderland',
+    goldType: 'Fijn stofgoud (zeldzaam)',
+    origin: 'Alpengoud (via Rijn-arm)',
+    access: 'Uiterwaarden',
+    tips: 'IJssel is Rijn-arm, dus theoretisch goud aanwezig',
     legal: 'Toegestaan'
   },
 
@@ -71,6 +119,18 @@ const GOLD_RIVERS = [
     tips: 'Beroemd door Julius Jung expedities',
     legal: 'VERBODEN in België'
   },
+  {
+    name: 'Salm (historisch)',
+    coords: [5.9000, 50.3333],
+    country: 'BE',
+    river: 'Salm',
+    region: 'Ardennen (Vielsalm)',
+    goldType: 'Alluviaal goud',
+    origin: 'Stavelot Massief',
+    access: 'VERBODEN - alleen informatief',
+    tips: 'Historisch goudgebied, nu beschermd',
+    legal: 'VERBODEN in België'
+  },
 
   // === DUITSLAND ===
   {
@@ -96,6 +156,18 @@ const GOLD_RIVERS = [
     access: 'Teilweise erlaubt',
     tips: 'Historisch belangrijkste goudwasgebied van Duitsland',
     legal: 'Regelungen beachten'
+  },
+  {
+    name: 'Rhein bei Neuenburg',
+    coords: [7.5667, 47.8167],
+    country: 'DE',
+    river: 'Rhein',
+    region: 'Baden-Württemberg',
+    goldType: 'Rheingold, grove flitters',
+    origin: 'Alpen',
+    access: 'Erlaubt',
+    tips: 'Historische goudwasplaats, Goldwäscher-Museum in Neuenburg',
+    legal: 'Erlaubt'
   },
   {
     name: 'Mosel bei Bernkastel-Kues',
@@ -134,6 +206,18 @@ const GOLD_RIVERS = [
     legal: 'Erlaubt'
   },
   {
+    name: 'Grümpen (Thüringen)',
+    coords: [11.0500, 50.5500],
+    country: 'DE',
+    river: 'Grümpen',
+    region: 'Thüringen',
+    goldType: 'Nuggets tot 3 gram!',
+    origin: 'Thüringer Schiefergebirge',
+    access: 'Erlaubt',
+    tips: 'Kleine rivier, maar goede nuggets mogelijk',
+    legal: 'Erlaubt'
+  },
+  {
     name: 'Isar (Bayern)',
     coords: [11.5833, 48.1333],
     country: 'DE',
@@ -143,6 +227,18 @@ const GOLD_RIVERS = [
     origin: 'Alpen (Tirol)',
     access: 'Stadtnah möglich',
     tips: 'Zelfs in München te vinden! Beste spots bovenstrooms',
+    legal: 'Erlaubt'
+  },
+  {
+    name: 'Isar bei Bad Tölz',
+    coords: [11.5500, 47.7667],
+    country: 'DE',
+    river: 'Isar',
+    region: 'Bayern',
+    goldType: 'Alpengoud, grotere flitters',
+    origin: 'Alpen (vers)',
+    access: 'Erlaubt',
+    tips: 'Hoger in de Alpen = grovere goudkorrels',
     legal: 'Erlaubt'
   },
   {
@@ -158,6 +254,18 @@ const GOLD_RIVERS = [
     legal: 'Erlaubt'
   },
   {
+    name: 'Salzach (Bayern)',
+    coords: [12.9000, 47.8333],
+    country: 'DE',
+    river: 'Salzach',
+    region: 'Bayern (Burghausen)',
+    goldType: 'Alpengoud, fijne flitters',
+    origin: 'Salzburger Alpen',
+    access: 'Erlaubt',
+    tips: 'Minder bekend, rustiger dan Isar',
+    legal: 'Erlaubt'
+  },
+  {
     name: 'Kinzig (Schwarzwald)',
     coords: [8.0500, 48.2833],
     country: 'DE',
@@ -167,6 +275,30 @@ const GOLD_RIVERS = [
     origin: 'Lokale ertsaders',
     access: 'Erlaubt',
     tips: 'Combineer met bezoek aan Grube Clara!',
+    legal: 'Erlaubt'
+  },
+  {
+    name: 'Elz (Schwarzwald)',
+    coords: [7.8833, 48.1167],
+    country: 'DE',
+    river: 'Elz',
+    region: 'Schwarzwald',
+    goldType: 'Schwarzwaldgold',
+    origin: 'Lokale ertsen',
+    access: 'Erlaubt',
+    tips: 'Zij-rivier van de Rhein, goed voor beginners',
+    legal: 'Erlaubt'
+  },
+  {
+    name: 'Nagold (Schwarzwald)',
+    coords: [8.7167, 48.5500],
+    country: 'DE',
+    river: 'Nagold',
+    region: 'Baden-Württemberg',
+    goldType: 'Lokaal goud',
+    origin: 'Schwarzwald',
+    access: 'Erlaubt',
+    tips: 'Historische goudwinning in de regio',
     legal: 'Erlaubt'
   },
 
@@ -196,6 +328,18 @@ const GOLD_RIVERS = [
     legal: 'Seizoensgebonden'
   },
   {
+    name: 'Gardon de St-Jean',
+    coords: [3.8833, 44.1167],
+    country: 'FR',
+    river: 'Gardon',
+    region: 'Gard (Cévennes)',
+    goldType: 'Alluviaal goud',
+    origin: 'Cevennen',
+    access: 'Déclaration DDT',
+    tips: 'Alle Gardons zijn productief!',
+    legal: 'Seizoensgebonden'
+  },
+  {
     name: 'La Cèze',
     coords: [4.2167, 44.2000],
     country: 'FR',
@@ -206,6 +350,18 @@ const GOLD_RIVERS = [
     access: 'Déclaration vereist',
     tips: 'Mooie rivier, combineer met wandelen',
     legal: 'Check DDT Gard'
+  },
+  {
+    name: 'Le Chassezac',
+    coords: [4.1000, 44.4500],
+    country: 'FR',
+    river: 'Chassezac',
+    region: 'Ardèche',
+    goldType: 'Alluviaal goud',
+    origin: 'Cevennen',
+    access: 'Déclaration DDT',
+    tips: 'Minder bezocht dan Gard, goede alternatie',
+    legal: 'Seizoensgebonden'
   },
   {
     name: 'Le Salat',
@@ -232,6 +388,18 @@ const GOLD_RIVERS = [
     legal: 'Déclaration vereist'
   },
   {
+    name: 'La Garonne',
+    coords: [1.4500, 43.6000],
+    country: 'FR',
+    river: 'Garonne',
+    region: 'Haute-Garonne',
+    goldType: 'Pyrénées-goud',
+    origin: 'Pyrénées (via Ariège, Salat)',
+    access: 'Check DDT',
+    tips: 'Grote rivier met veel sediment, zoek zijarmen',
+    legal: 'Afhankelijk van locatie'
+  },
+  {
     name: 'Le Vicdessos',
     coords: [1.5000, 42.7667],
     country: 'FR',
@@ -256,6 +424,18 @@ const GOLD_RIVERS = [
     legal: 'Seizoensregels'
   },
   {
+    name: 'L\'Orb',
+    coords: [3.2500, 43.6167],
+    country: 'FR',
+    river: 'Orb',
+    region: 'Hérault',
+    goldType: 'Fijn alluviaal goud',
+    origin: 'Montagne Noire',
+    access: 'Déclaration DDT',
+    tips: 'Minder druk dan populaire locaties',
+    legal: 'Seizoensgebonden'
+  },
+  {
     name: 'L\'Arve',
     coords: [6.1167, 46.0833],
     country: 'FR',
@@ -266,6 +446,18 @@ const GOLD_RIVERS = [
     access: 'Déclaration vereist',
     tips: 'Grootste pépite van Frankrijk hier gevonden!',
     legal: 'Check DDT Haute-Savoie'
+  },
+  {
+    name: 'Le Giffre',
+    coords: [6.6333, 46.0833],
+    country: 'FR',
+    river: 'Giffre',
+    region: 'Haute-Savoie',
+    goldType: 'Alpengoud',
+    origin: 'Alpen',
+    access: 'Déclaration DDT',
+    tips: 'Zijrivier van Arve, minder bezocht',
+    legal: 'Check DDT 74'
   },
   {
     name: 'Le Rhône (amont)',
@@ -280,6 +472,18 @@ const GOLD_RIVERS = [
     legal: 'Afhankelijk van département'
   },
   {
+    name: 'L\'Ain',
+    coords: [5.3833, 46.0000],
+    country: 'FR',
+    river: 'Ain',
+    region: 'Ain',
+    goldType: 'Alpengoud',
+    origin: 'Jura/Alpen',
+    access: 'Déclaration DDT',
+    tips: 'Zijrivier van Rhône',
+    legal: 'Check DDT Ain'
+  },
+  {
     name: 'La Têt',
     coords: [2.8833, 42.6833],
     country: 'FR',
@@ -290,6 +494,42 @@ const GOLD_RIVERS = [
     access: 'Check DDT 66',
     tips: 'Mediterrane sfeer, warm klimaat',
     legal: 'Déclaration vereist'
+  },
+  {
+    name: 'Le Tech',
+    coords: [2.7667, 42.5167],
+    country: 'FR',
+    river: 'Tech',
+    region: 'Pyrénées-Orientales',
+    goldType: 'Pyrénées-goud',
+    origin: 'Pyrénées',
+    access: 'Check DDT 66',
+    tips: 'Zuidelijkste goudrivier van Frankrijk',
+    legal: 'Déclaration vereist'
+  },
+  {
+    name: 'La Dordogne',
+    coords: [1.5333, 45.0000],
+    country: 'FR',
+    river: 'Dordogne',
+    region: 'Corrèze/Dordogne',
+    goldType: 'Alluviaal goud',
+    origin: 'Massif Central',
+    access: 'Déclaration DDT',
+    tips: 'Historisch goudgebied, mooie omgeving',
+    legal: 'Afhankelijk van département'
+  },
+  {
+    name: 'L\'Allier',
+    coords: [3.0833, 46.5667],
+    country: 'FR',
+    river: 'Allier',
+    region: 'Auvergne',
+    goldType: 'Alluviaal goud',
+    origin: 'Massif Central',
+    access: 'Déclaration DDT',
+    tips: 'Grote rivier door vulkanisch gebied',
+    legal: 'Check DDT lokaal'
   }
 ]
 

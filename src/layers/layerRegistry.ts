@@ -253,14 +253,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: true,
     tier: 'premium'
   },
-  'World Hillshade': {
-    name: 'World Hillshade',
-    factory: async () => {
-      const { createWorldHillshadeLayerOL } = await import('./hillshadeLayers')
-      return createWorldHillshadeLayerOL()
-    },
-    immediateLoad: true
-  },
+  // World Hillshade VERWIJDERD - Esri commercieel, geen toestemming
 
   // Percelen - Kadaster & Landbouw
   'Gewaspercelen': {
@@ -624,7 +617,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: false,
     tier: 'premium',
-    regions: ['be', 'de', 'fr']  // Internationale laag
+    regions: ['nl', 'be', 'de', 'fr']  // Nu ook NL locaties
   },
   'Goudrivieren': {
     name: 'Goudrivieren',
@@ -635,6 +628,18 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: false,
     tier: 'premium',
     regions: ['nl', 'be', 'de', 'fr']  // Internationale laag
+  },
+
+  // Wandelroutes - startpunten populaire wandelroutes
+  'Wandelroutes': {
+    name: 'Wandelroutes',
+    factory: async () => {
+      const { createWandelroutesLayer } = await import('./wandelroutesOL')
+      return createWandelroutesLayer()
+    },
+    immediateLoad: false,
+    tier: 'free',
+    regions: ['nl', 'be']
   },
 
   // WWII Bunkers - from OpenStreetMap

@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd http://www.topografix.com/GPX/gpx_style/0/2 http://www.topografix.com/GPX/gpx_style/0/2/gpx_style.xsd" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpx_style="http://www.topografix.com/GPX/gpx_style/0/2" version="1.1">
+<metadata>
+    <name>t-beste-van-vloethemveld</name>
+</metadata>
+<wpt lat="51.147956" lon="3.125576">
+    <ele>14.6</ele>
+    <name>25</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.146501" lon="3.126507">
+    <ele>11.0</ele>
+    <name>13</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.146235" lon="3.123078">
+    <ele>12.4</ele>
+    <name>12</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.146101" lon="3.119854">
+    <ele>12.7</ele>
+    <name>11</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.146451" lon="3.11284">
+    <ele>14.9</ele>
+    <name>10</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.148758" lon="3.113822">
+    <ele>20.6</ele>
+    <name>9</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.151307" lon="3.109109">
+    <ele>20.0</ele>
+    <name>8</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.155075" lon="3.100295">
+    <ele>9.9</ele>
+    <name>7</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.156429" lon="3.094377">
+    <ele>11.8</ele>
+    <name>6</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.148152" lon="3.092295">
+    <ele>14.5</ele>
+    <name>5</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.143059" lon="3.096675">
+    <ele>22.8</ele>
+    <name>4</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.142271" lon="3.114286">
+    <ele>16.0</ele>
+    <name>3</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.143216" lon="3.117217">
+    <ele>10.5</ele>
+    <name>2</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.146101" lon="3.119854">
+    <ele>12.7</ele>
+    <name>11</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.14913" lon="3.120427">
+    <ele>13.1</ele>
+    <name>26</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.149343" lon="3.120364">
+    <ele>13.3</ele>
+    <name>27</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.14913" lon="3.120427">
+    <ele>13.1</ele>
+    <name>26</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<wpt lat="51.147956" lon="3.125576">
+    <ele>14.6</ele>
+    <name>25</name>
+    <desc>Brugse Ommeland</desc>
+    <sym> </sym>
+</wpt>
+<trk>
+    <name>T BESTE VAN VLOETHEMVELD</name>
+    <type>Cycling</type>
+    <trkseg>
+    <trkpt lat="51.147956" lon="3.125576">
+        <ele>14.6</ele>
+    </trkpt>
+    <trkpt lat="51.146501" lon="3.126507">
+        <ele>11.0</ele>
+    </trkpt>
+    <trkpt lat="51.14639" lon="3.123917">
+        <ele>11.9</ele>
+    </trkpt>
+    <trkpt lat="51.146235" lon="3.123078">
+        <ele>12.4</ele>
+    </trkpt>
+    <trkpt lat="51.146101" lon="3.119854">
+        <ele>12.7</ele>
+    </trkpt>
+    <trkpt lat="51.14598" lon="3.116239">
+        <ele>12.7</ele>
+    </trkpt>
+    <trkpt lat="51.146451" lon="3.11284">
+        <ele>14.9</ele>
+    </trkpt>
+    <trkpt lat="51.148758" lon="3.113822">
+        <ele>20.6</ele>
+    </trkpt>
+    <trkpt lat="51.15014" lon="3.109878">
+        <ele>16.3</ele>
+    </trkpt>
+    <trkpt lat="51.15054" lon="3.109842">
+        <ele>13.1</ele>
+    </trkpt>
+    <trkpt lat="51.151307" lon="3.109109">
+        <ele>20.0</ele>
+    </trkpt>
+    <trkpt lat="51.15166" lon="3.108591">
+        <ele>21.4</ele>
+    </trkpt>
+    <trkpt lat="51.15278" lon="3.108457">
+        <ele>22.8</ele>
+    </trkpt>
+    <trkpt lat="51.15284" lon="3.10839">
+        <ele>22.4</ele>
+    </trkpt>
+    <trkpt lat="51.1543" lon="3.100576">
+        <ele>15.5</ele>
+    </trkpt>
+    <trkpt lat="51.15439" lon="3.100457">
+        <ele>15.1</ele>
+    </trkpt>
+    <trkpt lat="51.155075" lon="3.100295">
+        <ele>9.9</ele>
+    </trkpt>
+    <trkpt lat="51.15492" lon="3.097735">
+        <ele>11.4</ele>
+    </trkpt>
+    <trkpt lat="51.15542" lon="3.094638">
+        <ele>14.7</ele>
+    </trkpt>
+    <trkpt lat="51.156429" lon="3.094377">
+        <ele>11.8</ele>
+    </trkpt>
+    <trkpt lat="51.15601" lon="3.093767">
+        <ele>11.8</ele>
+    </trkpt>
+    <trkpt lat="51.15581" lon="3.09286">
+        <ele>16.8</ele>
+    </trkpt>
+    <trkpt lat="51.15444" lon="3.089275">
+        <ele>16.6</ele>
+    </trkpt>
+    <trkpt lat="51.15317" lon="3.09177">
+        <ele>11.1</ele>
+    </trkpt>
+    <trkpt lat="51.1517" lon="3.091449">
+        <ele>12.6</ele>
+    </trkpt>
+    <trkpt lat="51.15159" lon="3.091322">
+        <ele>11.6</ele>
+    </trkpt>
+    <trkpt lat="51.15093" lon="3.092475">
+        <ele>14.2</ele>
+    </trkpt>
+    <trkpt lat="51.15054" lon="3.092312">
+        <ele>14.6</ele>
+    </trkpt>
+    <trkpt lat="51.15036" lon="3.092117">
+        <ele>13.5</ele>
+    </trkpt>
+    <trkpt lat="51.15021" lon="3.092361">
+        <ele>14.7</ele>
+    </trkpt>
+    <trkpt lat="51.14932" lon="3.092025">
+        <ele>13.9</ele>
+    </trkpt>
+    <trkpt lat="51.14832" lon="3.092683">
+        <ele>17.7</ele>
+    </trkpt>
+    <trkpt lat="51.148152" lon="3.092295">
+        <ele>14.5</ele>
+    </trkpt>
+    <trkpt lat="51.14595" lon="3.092034">
+        <ele>15.4</ele>
+    </trkpt>
+    <trkpt lat="51.14429" lon="3.091663">
+        <ele>14.7</ele>
+    </trkpt>
+    <trkpt lat="51.14414" lon="3.091692">
+        <ele>15.3</ele>
+    </trkpt>
+    <trkpt lat="51.14404" lon="3.091823">
+        <ele>16.2</ele>
+    </trkpt>
+    <trkpt lat="51.143059" lon="3.096675">
+        <ele>22.8</ele>
+    </trkpt>
+    <trkpt lat="51.14231" lon="3.095956">
+        <ele>17.6</ele>
+    </trkpt>
+    <trkpt lat="51.14111" lon="3.101298">
+        <ele>18.3</ele>
+    </trkpt>
+    <trkpt lat="51.13979" lon="3.10484">
+        <ele>22.2</ele>
+    </trkpt>
+    <trkpt lat="51.14089" lon="3.106771">
+        <ele>21.3</ele>
+    </trkpt>
+    <trkpt lat="51.14078" lon="3.107006">
+        <ele>21.0</ele>
+    </trkpt>
+    <trkpt lat="51.14079" lon="3.107222">
+        <ele>21.6</ele>
+    </trkpt>
+    <trkpt lat="51.14263" lon="3.109364">
+        <ele>26.4</ele>
+    </trkpt>
+    <trkpt lat="51.14104" lon="3.112825">
+        <ele>15.1</ele>
+    </trkpt>
+    <trkpt lat="51.142271" lon="3.114286">
+        <ele>16.0</ele>
+    </trkpt>
+    <trkpt lat="51.14201" lon="3.114912">
+        <ele>12.5</ele>
+    </trkpt>
+    <trkpt lat="51.143216" lon="3.117217">
+        <ele>10.5</ele>
+    </trkpt>
+    <trkpt lat="51.14369" lon="3.116157">
+        <ele>10.7</ele>
+    </trkpt>
+    <trkpt lat="51.146101" lon="3.119854">
+        <ele>12.7</ele>
+    </trkpt>
+    <trkpt lat="51.14661" lon="3.11864">
+        <ele>9.5</ele>
+    </trkpt>
+    <trkpt lat="51.14865" lon="3.120254">
+        <ele>12.4</ele>
+    </trkpt>
+    <trkpt lat="51.14913" lon="3.120427">
+        <ele>13.1</ele>
+    </trkpt>
+    <trkpt lat="51.149343" lon="3.120364">
+        <ele>13.3</ele>
+    </trkpt>
+    <trkpt lat="51.14913" lon="3.120427">
+        <ele>13.1</ele>
+    </trkpt>
+    <trkpt lat="51.1492" lon="3.121618">
+        <ele>13.0</ele>
+    </trkpt>
+    <trkpt lat="51.14902" lon="3.122449">
+        <ele>13.0</ele>
+    </trkpt>
+    <trkpt lat="51.14922" lon="3.12275">
+        <ele>13.9</ele>
+    </trkpt>
+    <trkpt lat="51.147956" lon="3.125576">
+        <ele>14.6</ele>
+    </trkpt>
+    </trkseg>
+</trk>
+</gpx>

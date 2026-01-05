@@ -10,7 +10,6 @@ const OPACITY_LAYERS = [
   { name: 'AHN4 Hillshade NL', color: 'blue', default: 0.7 },
   { name: 'AHN4 Multi-Hillshade NL', color: 'blue', default: 0.7 },
   { name: 'AHN 0.5m', color: 'blue', default: 0.7 },
-  { name: 'World Hillshade', color: 'blue', default: 0.7 },
   // Historische kaarten
   { name: 'TMK 1850', color: 'amber', default: 0.8 },
   { name: 'Bonnebladen 1900', color: 'amber', default: 0.8 },

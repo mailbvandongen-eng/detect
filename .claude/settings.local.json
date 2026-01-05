@@ -51,7 +51,8 @@
       "Bash(curl:*)",
       "WebFetch(domain:www.svgrepo.com)",
       "WebFetch(domain:game-icons.net)",
-      "WebFetch(domain:freesvg.org)"
+      "WebFetch(domain:freesvg.org)",
+      "WebFetch(domain:www.routezoeker.com)"
     ]
   }
 }
