@@ -75,8 +75,8 @@ export function CreateLayerModal() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
           >
-            {/* Header - met font slider */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            {/* Header - oranje voor eigen lagen */}
+            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
               <div className="flex items-center gap-2">
                 <Layers size={18} />
                 <span className="font-medium">Nieuwe laag</span>
@@ -116,7 +116,7 @@ export function CreateLayerModal() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="bijv. Vakantie Frankrijk 2026"
-                  className="w-full px-3 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white rounded-lg border-0 outline-none hover:bg-blue-50 transition-colors"
                   style={{ fontSize: '1em' }}
                   autoFocus
                 />
@@ -134,8 +134,8 @@ export function CreateLayerModal() {
                       onClick={() => handleToggleCategory(cat)}
                       className={`px-3 py-1 rounded-full transition-colors border-0 outline-none ${
                         selectedCategories.includes(cat)
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-white text-gray-600 hover:bg-blue-50'
                       }`}
                       style={{ fontSize: '0.9em' }}
                     >
@@ -158,7 +158,7 @@ export function CreateLayerModal() {
                         <button
                           key={cat}
                           onClick={() => handleRemoveCategory(cat)}
-                          className="flex items-center gap-1 px-3 py-1 rounded-full bg-purple-500 text-white hover:bg-purple-600 transition-colors border-0 outline-none"
+                          className="flex items-center gap-1 px-3 py-1 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors border-0 outline-none"
                           style={{ fontSize: '0.9em' }}
                         >
                           {cat}
@@ -180,14 +180,14 @@ export function CreateLayerModal() {
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
                     placeholder="bijv. Grot, Bron, ..."
-                    className="flex-1 px-3 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 bg-white rounded-lg border-0 outline-none hover:bg-blue-50 transition-colors"
                     style={{ fontSize: '1em' }}
                     onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
                   />
                   <button
                     onClick={handleAddCategory}
                     disabled={!newCategory.trim()}
-                    className="px-3 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors border-0 outline-none"
+                    className="px-3 py-2 bg-white hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors border-0 outline-none text-gray-600"
                   >
                     <Plus size={20} />
                   </button>
@@ -199,7 +199,7 @@ export function CreateLayerModal() {
             <div className="p-4 flex gap-3" style={{ fontSize: `${baseFontSize}px` }}>
               <button
                 onClick={handleClose}
-                className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none"
+                className="flex-1 px-4 py-2 bg-white hover:bg-blue-50 rounded-lg transition-colors border-0 outline-none text-gray-600"
                 style={{ fontSize: '1em' }}
               >
                 Annuleren
@@ -207,7 +207,7 @@ export function CreateLayerModal() {
               <button
                 onClick={handleSubmit}
                 disabled={!name.trim()}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors border-0 outline-none"
+                className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors border-0 outline-none"
                 style={{ fontSize: '1em' }}
               >
                 Aanmaken

@@ -22,6 +22,8 @@ interface UIState {
   addPointModalLayerId: string | null
   addPointModalLocation: { lat: number; lng: number } | null
   layerManagerModalOpen: boolean
+  layerDashboardOpen: boolean
+  layerDashboardLayerId: string | null
 
   // Collapsed categories
   collapsedCategories: Set<string>
@@ -49,6 +51,8 @@ interface UIState {
   closeAddPointModal: () => void
   openLayerManagerModal: () => void
   closeLayerManagerModal: () => void
+  openLayerDashboard: (layerId: string) => void
+  closeLayerDashboard: () => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -68,6 +72,8 @@ export const useUIStore = create<UIState>()(
     addPointModalLayerId: null,
     addPointModalLocation: null,
     layerManagerModalOpen: false,
+    layerDashboardOpen: false,
+    layerDashboardLayerId: null,
     collapsedCategories: new Set<string>(),
 
     closeAllPanels: () => {
@@ -257,6 +263,21 @@ export const useUIStore = create<UIState>()(
     closeLayerManagerModal: () => {
       set(state => {
         state.layerManagerModalOpen = false
+      })
+    },
+
+    openLayerDashboard: (layerId) => {
+      set(state => {
+        state.layerDashboardOpen = true
+        state.layerDashboardLayerId = layerId
+        state.layerManagerModalOpen = false // Close manager when opening dashboard
+      })
+    },
+
+    closeLayerDashboard: () => {
+      set(state => {
+        state.layerDashboardOpen = false
+        state.layerDashboardLayerId = null
       })
     }
   }))

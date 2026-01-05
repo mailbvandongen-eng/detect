@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, Trash2, Download, Eye, EyeOff, ChevronDown, ChevronRight, Upload, Layers } from 'lucide-react'
+import { X, Plus, Trash2, Download, Eye, EyeOff, ChevronDown, ChevronRight, Upload, Layers, Archive, ArchiveRestore, List } from 'lucide-react'
 import { useUIStore, useSettingsStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
 
 export function LayerManagerModal() {
-  const { layerManagerModalOpen, closeLayerManagerModal, openCreateLayerModal } = useUIStore()
-  const { layers, removeLayer, toggleVisibility, exportLayerAsGeoJSON, importLayerFromGeoJSON } = useCustomPointLayerStore()
+  const { layerManagerModalOpen, closeLayerManagerModal, openCreateLayerModal, openLayerDashboard } = useUIStore()
+  const { layers, removeLayer, toggleVisibility, toggleArchived, exportLayerAsGeoJSON, importLayerFromGeoJSON } = useCustomPointLayerStore()
   const settings = useSettingsStore()
 
   // Calculate font size based on fontScale setting
@@ -15,6 +15,12 @@ export function LayerManagerModal() {
   const [expandedLayerId, setExpandedLayerId] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
+  const [showArchived, setShowArchived] = useState(false)
+
+  // Filter layers by archive status
+  const activeLayers = layers.filter(l => !l.archived)
+  const archivedLayers = layers.filter(l => l.archived)
+  const displayedLayers = showArchived ? archivedLayers : activeLayers
 
   const handleDelete = (layerId: string) => {
     if (confirmDelete === layerId) {
@@ -56,7 +62,12 @@ export function LayerManagerModal() {
     setExpandedLayerId(null)
     setConfirmDelete(null)
     setImportError(null)
+    setShowArchived(false)
     closeLayerManagerModal()
+  }
+
+  const handleOpenDashboard = (layerId: string) => {
+    openLayerDashboard(layerId)
   }
 
   const handleNewLayer = () => {
@@ -84,8 +95,8 @@ export function LayerManagerModal() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
           >
-            {/* Header - met font slider */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+            {/* Header - oranje voor eigen lagen */}
+            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
               <div className="flex items-center gap-2">
                 <Layers size={18} />
                 <span className="font-medium">Mijn Lagen beheren</span>
@@ -113,29 +124,62 @@ export function LayerManagerModal() {
               </div>
             </div>
 
+            {/* Tabs: Actief / Gearchiveerd */}
+            <div className="flex border-b border-gray-100">
+              <button
+                onClick={() => setShowArchived(false)}
+                className={`flex-1 px-3 py-2 text-sm transition-colors border-0 outline-none ${
+                  !showArchived
+                    ? 'text-orange-600 border-b-2 border-orange-500 bg-orange-50/50'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Actief ({activeLayers.length})
+              </button>
+              <button
+                onClick={() => setShowArchived(true)}
+                className={`flex-1 px-3 py-2 text-sm transition-colors border-0 outline-none flex items-center justify-center gap-1 ${
+                  showArchived
+                    ? 'text-orange-600 border-b-2 border-orange-500 bg-orange-50/50'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Archive size={14} />
+                Archief ({archivedLayers.length})
+              </button>
+            </div>
+
             {/* Content - met font scaling */}
             <div className="flex-1 overflow-y-auto" style={{ fontSize: `${baseFontSize}px` }}>
-              {layers.length === 0 ? (
+              {displayedLayers.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
-                  <p className="mb-4" style={{ fontSize: '1em' }}>Je hebt nog geen eigen lagen.</p>
-                  <button
-                    onClick={handleNewLayer}
-                    className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors border-0 outline-none"
-                    style={{ fontSize: '1em' }}
-                  >
-                    <Plus size={16} className="inline mr-2" />
-                    Nieuwe laag aanmaken
-                  </button>
+                  {showArchived ? (
+                    <p style={{ fontSize: '1em' }}>Geen gearchiveerde lagen.</p>
+                  ) : (
+                    <>
+                      <p className="mb-4" style={{ fontSize: '1em' }}>Je hebt nog geen eigen lagen.</p>
+                      <button
+                        onClick={handleNewLayer}
+                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors border-0 outline-none"
+                        style={{ fontSize: '1em' }}
+                      >
+                        <Plus size={16} className="inline mr-2" />
+                        Nieuwe laag aanmaken
+                      </button>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className="divide-y divide-gray-100">
-                  {layers.map(layer => (
+                  {displayedLayers.map(layer => (
                     <LayerItem
                       key={layer.id}
                       layer={layer}
                       isExpanded={expandedLayerId === layer.id}
                       onToggleExpand={() => setExpandedLayerId(expandedLayerId === layer.id ? null : layer.id)}
                       onToggleVisibility={() => toggleVisibility(layer.id)}
+                      onToggleArchived={() => toggleArchived(layer.id)}
+                      onOpenDashboard={() => handleOpenDashboard(layer.id)}
                       onExport={() => handleExport(layer.id)}
                       onDelete={() => handleDelete(layer.id)}
                       confirmDelete={confirmDelete === layer.id}
@@ -155,7 +199,7 @@ export function LayerManagerModal() {
             {/* Footer - geen border-t */}
             <div className="p-4 flex gap-3" style={{ fontSize: `${baseFontSize}px` }}>
               {/* Import button */}
-              <label className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 border-0 outline-none">
+              <label className="flex-1 px-4 py-2 bg-white hover:bg-blue-50 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 border-0 outline-none text-gray-600">
                 <Upload size={16} />
                 <span style={{ fontSize: '1em' }}>Importeren</span>
                 <input
@@ -169,7 +213,7 @@ export function LayerManagerModal() {
               {/* New layer button */}
               <button
                 onClick={handleNewLayer}
-                className="flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors border-0 outline-none flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors border-0 outline-none flex items-center justify-center gap-2"
                 style={{ fontSize: '1em' }}
               >
                 <Plus size={16} />
@@ -189,6 +233,8 @@ function LayerItem({
   isExpanded,
   onToggleExpand,
   onToggleVisibility,
+  onToggleArchived,
+  onOpenDashboard,
   onExport,
   onDelete,
   confirmDelete
@@ -197,10 +243,16 @@ function LayerItem({
   isExpanded: boolean
   onToggleExpand: () => void
   onToggleVisibility: () => void
+  onToggleArchived: () => void
+  onOpenDashboard: () => void
   onExport: () => void
   onDelete: () => void
   confirmDelete: boolean
 }) {
+  // Calculate stats
+  const completedCount = layer.points.filter(p => p.status === 'completed').length
+  const totalCount = layer.points.length
+
   return (
     <div className="bg-white">
       {/* Layer header */}
@@ -219,21 +271,57 @@ function LayerItem({
           style={{ backgroundColor: layer.color }}
         />
 
-        {/* Layer name and count */}
-        <div className="flex-1 min-w-0">
-          <div className="font-medium text-gray-800 truncate">{layer.name}</div>
-          <div className="text-xs text-gray-500">{layer.points.length} punten</div>
-        </div>
-
-        {/* Visibility toggle */}
+        {/* Layer name and count - klikbaar voor dashboard */}
         <button
-          onClick={onToggleVisibility}
-          className={`p-2 rounded transition-colors border-0 outline-none ${
-            layer.visible ? 'text-blue-500 hover:bg-blue-50' : 'text-gray-400 hover:bg-gray-100'
-          }`}
-          title={layer.visible ? 'Verbergen' : 'Tonen'}
+          onClick={onOpenDashboard}
+          className="flex-1 min-w-0 text-left border-0 outline-none bg-transparent hover:bg-orange-50 rounded px-2 py-1 -ml-2 transition-colors"
+          title="Bekijk dashboard"
         >
-          {layer.visible ? <Eye size={18} /> : <EyeOff size={18} />}
+          <div className="font-medium text-gray-800 truncate hover:text-orange-600">{layer.name}</div>
+          <div className="text-xs text-gray-500">
+            {totalCount > 0 ? (
+              <span className={completedCount === totalCount ? 'text-green-600' : ''}>
+                {completedCount}/{totalCount} voltooid
+              </span>
+            ) : (
+              'Geen punten'
+            )}
+          </div>
+        </button>
+
+        {/* Dashboard button */}
+        <button
+          onClick={onOpenDashboard}
+          className="p-2 text-orange-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors border-0 outline-none"
+          title="Open dashboard"
+        >
+          <List size={18} />
+        </button>
+
+        {/* Visibility toggle - only for non-archived */}
+        {!layer.archived && (
+          <button
+            onClick={onToggleVisibility}
+            className={`p-2 rounded transition-colors border-0 outline-none ${
+              layer.visible ? 'text-blue-500 hover:bg-blue-50' : 'text-gray-400 hover:bg-gray-100'
+            }`}
+            title={layer.visible ? 'Verbergen' : 'Tonen'}
+          >
+            {layer.visible ? <Eye size={18} /> : <EyeOff size={18} />}
+          </button>
+        )}
+
+        {/* Archive/Unarchive */}
+        <button
+          onClick={onToggleArchived}
+          className={`p-2 rounded transition-colors border-0 outline-none ${
+            layer.archived
+              ? 'text-green-500 hover:text-green-600 hover:bg-green-50'
+              : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'
+          }`}
+          title={layer.archived ? 'Herstellen' : 'Archiveren'}
+        >
+          {layer.archived ? <ArchiveRestore size={18} /> : <Archive size={18} />}
         </button>
 
         {/* Export */}
@@ -270,24 +358,29 @@ function LayerItem({
           >
             <div className="px-4 pb-3 pl-12 space-y-2">
               {/* Categories */}
-              <div className="flex flex-wrap gap-1">
-                {layer.categories.map(cat => (
-                  <span
-                    key={cat}
-                    className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full"
-                  >
-                    {cat}
-                  </span>
-                ))}
-              </div>
+              {layer.categories.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {layer.categories.map(cat => (
+                    <span
+                      key={cat}
+                      className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full"
+                    >
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+              )}
 
-              {/* Points preview */}
+              {/* Points preview with status */}
               {layer.points.length > 0 && (
                 <div className="text-xs text-gray-500 space-y-1 max-h-32 overflow-y-auto">
                   {layer.points.slice(0, 5).map(point => (
                     <div key={point.id} className="flex items-center gap-2">
-                      <span className="font-medium">{point.name}</span>
-                      <span className="text-gray-400">({point.category})</span>
+                      <span className={`font-medium ${
+                        point.status === 'completed' ? 'text-green-600 line-through' :
+                        point.status === 'skipped' ? 'text-gray-400 line-through' :
+                        'text-gray-700'
+                      }`}>{point.name}</span>
                     </div>
                   ))}
                   {layer.points.length > 5 && (

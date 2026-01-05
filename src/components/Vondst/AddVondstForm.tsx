@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, Navigation, Crosshair, Link } from 'lucide-react'
-import { CustomSelect } from '../UI/CustomSelect'
+import { Navigation, Crosshair, Link } from 'lucide-react'
+import { CustomSelectWithFreeInput } from '../UI/CustomSelectWithFreeInput'
 import { toLonLat } from 'ol/proj'
 import { useVondstenStore } from '../../store/vondstenStore'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
@@ -9,7 +9,6 @@ import { useAuthStore } from '../../store/authStore'
 import { useGPSStore } from '../../store/gpsStore'
 import { useMapStore } from '../../store/mapStore'
 import { useSettingsStore } from '../../store/settingsStore'
-import type { VondstObjectType, VondstMaterial, VondstPeriod } from '../../types/vondst'
 
 interface Props {
   onClose: () => void
@@ -27,12 +26,11 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
   const vondstenLocalOnly = useSettingsStore(state => state.vondstenLocalOnly)
 
   const [notes, setNotes] = useState('')
-  const [objectType, setObjectType] = useState<VondstObjectType>('Munt')
-  const [material, setMaterial] = useState<VondstMaterial>('Brons')
-  const [period, setPeriod] = useState<VondstPeriod>('Romeins (12 v.Chr.-450 n.Chr.)')
+  const [objectType, setObjectType] = useState('')
+  const [material, setMaterial] = useState('')
+  const [period, setPeriod] = useState('')
   const [isPrivate, setIsPrivate] = useState(true)
   const [saving, setSaving] = useState(false)
-  // New fields v2.6.0
   const [photoUrl, setPhotoUrl] = useState('')
   const [weight, setWeight] = useState<number | undefined>(undefined)
   const [length, setLength] = useState<number | undefined>(undefined)
@@ -93,12 +91,23 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
     }
   }
 
+  // Check if objectType is valid (not empty or placeholder)
+  const isValidObjectType = objectType && objectType !== '-maak een keuze-'
+
+  // Get clean values (replace placeholder with empty)
+  const getCleanValue = (val: string) => (!val || val === '-maak een keuze-') ? '' : val
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     const location = getEffectiveLocation()
     if (!location) {
       alert('Geen locatie beschikbaar')
+      return
+    }
+
+    if (!isValidObjectType) {
+      alert('Kies een objecttype')
       return
     }
 
@@ -118,9 +127,9 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
             lng: location.lng
           },
           notes,
-          objectType,
-          material,
-          period,
+          objectType: getCleanValue(objectType) as any,
+          material: getCleanValue(material) as any,
+          period: getCleanValue(period) as any,
           photoUrl: photoUrl || undefined,
           weight,
           length
@@ -128,6 +137,9 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
         alert('Vondst lokaal opgeslagen! ✅')
       } else {
         // Save to Firebase (requires login)
+        const cleanObjectType = getCleanValue(objectType)
+        const cleanMaterial = getCleanValue(material)
+        const cleanPeriod = getCleanValue(period)
         await addCloudVondst({
           userId: user!.uid,
           location: {
@@ -138,10 +150,10 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
           timestamp: new Date().toISOString(),
           photos: [],
           notes,
-          objectType,
-          material,
-          period,
-          tags: [period.toLowerCase(), objectType.toLowerCase()],
+          objectType: cleanObjectType as any,
+          material: cleanMaterial as any,
+          period: cleanPeriod as any,
+          tags: [cleanPeriod.toLowerCase(), cleanObjectType.toLowerCase()].filter(Boolean),
           private: isPrivate
         })
         alert('Vondst opgeslagen in cloud! ✅')
@@ -200,43 +212,16 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
           <button onClick={onClose} className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none">&times;</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          {/* Location */}
+        <form onSubmit={handleSubmit} className="p-4 space-y-3">
+          {/* Location buttons */}
           <div>
             <label className="block text-sm text-gray-600 mb-1">Locatie</label>
-
-            {/* Location display */}
-            {effectiveLocation && (
-              <div className={`p-2 rounded text-sm flex items-center gap-2 ${
-                locationSource === 'gps'
-                  ? 'bg-green-50 text-green-800'
-                  : 'bg-orange-50 text-orange-800'
-              }`}>
-                {locationSource === 'gps' ? (
-                  <Navigation size={16} className="text-green-600" />
-                ) : (
-                  <MapPin size={16} className="text-orange-600" />
-                )}
-                <div className="flex-1">
-                  <div className="font-medium">
-                    {locationSource === 'gps' && 'GPS locatie'}
-                    {locationSource === 'map-center' && 'Kaart centrum'}
-                    {locationSource === 'map-pick' && 'Gekozen locatie'}
-                  </div>
-                  <div className="text-xs opacity-75">
-                    {effectiveLocation.lat.toFixed(6)}, {effectiveLocation.lng.toFixed(6)}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Location buttons */}
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2">
               {gpsPosition && locationSource !== 'gps' && (
                 <button
                   type="button"
                   onClick={handleUseGPS}
-                  className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors border-0 outline-none"
+                  className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-white text-green-700 rounded hover:bg-blue-50 transition-colors border-0 outline-none"
                 >
                   <Navigation size={14} />
                   <span>GPS gebruiken</span>
@@ -245,7 +230,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
               <button
                 type="button"
                 onClick={handlePickLocation}
-                className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs text-blue-700 rounded hover:bg-blue-100 transition-colors bg-blue-50 outline-none border-0"
+                className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs text-blue-700 rounded hover:bg-blue-50 transition-colors bg-white outline-none border-0"
               >
                 <Crosshair size={14} />
                 <span>Kies op kaart</span>
@@ -254,27 +239,31 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
           </div>
 
           {/* Object Type */}
-          <CustomSelect
-            label="Object type"
+          <CustomSelectWithFreeInput
+            label="Objecttype"
             value={objectType}
-            onChange={(v) => setObjectType(v as VondstObjectType)}
+            onChange={setObjectType}
             options={['Munt', 'Aardewerk', 'Gesp', 'Fibula', 'Ring', 'Speld', 'Sieraad', 'Gereedschap', 'Wapen', 'Anders']}
+            required
+            placeholder="Typ objecttype..."
           />
 
           {/* Material */}
-          <CustomSelect
+          <CustomSelectWithFreeInput
             label="Materiaal"
             value={material}
-            onChange={(v) => setMaterial(v as VondstMaterial)}
+            onChange={setMaterial}
             options={['Brons', 'IJzer', 'Zilver', 'Goud', 'Keramiek', 'Steen', 'Glas', 'Onbekend']}
+            placeholder="Typ materiaal..."
           />
 
           {/* Period */}
-          <CustomSelect
+          <CustomSelectWithFreeInput
             label="Periode"
             value={period}
-            onChange={(v) => setPeriod(v as VondstPeriod)}
+            onChange={setPeriod}
             options={['Romeins (12 v.Chr.-450 n.Chr.)', 'IJzertijd', 'Middeleeuws (450-1500)', 'Nieuwetijd (1500-1800)', 'Modern (1800+)', 'Onbekend']}
+            placeholder="Typ periode..."
           />
 
           {/* Weight & Length */}
@@ -285,11 +274,10 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
                 type="number"
                 value={weight ?? ''}
                 onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : undefined)}
-                className="w-full rounded px-3 py-1.5 bg-gray-50 outline-none text-sm text-gray-600 hover:bg-blue-50 transition-colors"
+                className="w-full rounded px-3 py-1.5 bg-white outline-none text-sm text-gray-600 hover:bg-blue-50 transition-colors"
                 style={{ border: 'none' }}
                 min="0"
                 step="0.1"
-                placeholder="12.5"
               />
             </div>
             <div className="flex-1">
@@ -298,11 +286,10 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
                 type="number"
                 value={length ?? ''}
                 onChange={(e) => setLength(e.target.value ? parseFloat(e.target.value) : undefined)}
-                className="w-full rounded px-3 py-1.5 bg-gray-50 outline-none text-sm text-gray-600 hover:bg-blue-50 transition-colors"
+                className="w-full rounded px-3 py-1.5 bg-white outline-none text-sm text-gray-600 hover:bg-blue-50 transition-colors"
                 style={{ border: 'none' }}
                 min="0"
                 step="0.1"
-                placeholder="25"
               />
             </div>
           </div>
@@ -317,9 +304,9 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
               type="url"
               value={photoUrl}
               onChange={(e) => setPhotoUrl(e.target.value)}
-              className="w-full rounded px-3 py-1.5 bg-gray-50 outline-none text-sm text-gray-600 hover:bg-blue-50 transition-colors"
+              className="w-full rounded px-3 py-1.5 bg-white outline-none text-sm text-gray-600 hover:bg-blue-50 transition-colors"
               style={{ border: 'none' }}
-              placeholder="https://photos.google.com/..."
+              placeholder="Bijvoorbeeld https://photos.google.com/..."
             />
           </div>
 
@@ -329,14 +316,14 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full rounded px-3 py-1.5 h-16 bg-gray-50 outline-none text-sm text-gray-600 hover:bg-blue-50 transition-colors resize-none"
+              className="w-full rounded px-3 py-1.5 h-16 bg-white outline-none text-sm text-gray-600 hover:bg-blue-50 transition-colors resize-none"
               style={{ border: 'none' }}
               placeholder="Beschrijving..."
             />
           </div>
 
           {/* Privacy notice */}
-          <p className="text-xs text-gray-500 bg-gray-50 rounded px-3 py-2">
+          <p className="text-xs text-gray-400">
             Vondsten worden lokaal opgeslagen op dit apparaat.
           </p>
 
@@ -345,14 +332,14 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-1.5 rounded hover:bg-blue-50 transition-colors bg-gray-100 outline-none text-sm text-gray-600"
+              className="flex-1 px-4 py-1.5 rounded hover:bg-blue-50 transition-colors bg-white outline-none text-sm text-gray-600"
               style={{ border: 'none' }}
             >
               Annuleren
             </button>
             <button
               type="submit"
-              disabled={saving || !effectiveLocation || pickingLocation}
+              disabled={saving || !effectiveLocation || pickingLocation || !isValidObjectType}
               className="flex-1 px-4 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 outline-none text-sm"
               style={{ border: 'none' }}
             >

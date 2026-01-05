@@ -17,7 +17,7 @@ import { SettingsPanel } from './components/UI/SettingsPanel'
 import { AddVondstButton } from './components/Vondst/AddVondstButton'
 import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
 import { CustomLayerMarkers } from './components/CustomLayers'
-import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal } from './components/CustomPoints'
+import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal, LayerDashboard } from './components/CustomPoints'
 import { PasswordGate } from './components/Auth/PasswordGate'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
@@ -58,6 +58,7 @@ function App() {
         <CreateLayerModal />
         <AddPointModal />
         <LayerManagerModal />
+        <LayerDashboard />
       </div>
     </PasswordGate>
   )

@@ -22,6 +22,8 @@ export const DEFAULT_CATEGORIES = [
   'Overig'
 ]
 
+export type PointStatus = 'todo' | 'completed' | 'skipped'
+
 export interface CustomPoint {
   id: string
   name: string
@@ -30,6 +32,10 @@ export interface CustomPoint {
   url?: string
   coordinates: [number, number] // [lon, lat] WGS84
   createdAt: string
+  // POI management fields
+  status: PointStatus
+  sourceLayer?: string   // e.g., "AMK Monumenten", "Bunkers"
+  sourceId?: string      // original feature ID from source layer
 }
 
 export interface CustomPointLayer {
@@ -39,6 +45,7 @@ export interface CustomPointLayer {
   categories: string[]
   points: CustomPoint[]
   visible: boolean
+  archived: boolean
   createdAt: string
 }
 
@@ -51,11 +58,13 @@ interface CustomPointLayerStore {
   removeLayer: (id: string) => void
   updateLayer: (id: string, updates: Partial<Omit<CustomPointLayer, 'id' | 'points' | 'createdAt'>>) => void
   toggleVisibility: (id: string) => void
+  toggleArchived: (id: string) => void
 
   // Point operations
-  addPoint: (layerId: string, point: Omit<CustomPoint, 'id' | 'createdAt'>) => void
+  addPoint: (layerId: string, point: Omit<CustomPoint, 'id' | 'createdAt' | 'status'> & { status?: PointStatus }) => void
   removePoint: (layerId: string, pointId: string) => void
   updatePoint: (layerId: string, pointId: string, updates: Partial<Omit<CustomPoint, 'id' | 'createdAt'>>) => void
+  setPointStatus: (layerId: string, pointId: string, status: PointStatus) => void
 
   // Category operations
   addCategory: (layerId: string, category: string) => void
@@ -67,6 +76,8 @@ interface CustomPointLayerStore {
 
   // Utility
   getLayer: (id: string) => CustomPointLayer | undefined
+  getActiveLayerCount: () => number
+  getArchivedLayerCount: () => number
   clearAll: () => void
 }
 
@@ -90,6 +101,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               categories: [...categories],
               points: [],
               visible: true,
+              archived: false,
               createdAt: new Date().toISOString()
             }
           ],
@@ -121,9 +133,18 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
         }))
       },
 
+      toggleArchived: (id) => {
+        set(state => ({
+          layers: state.layers.map(l =>
+            l.id === id ? { ...l, archived: !l.archived, visible: l.archived ? l.visible : false } : l
+          )
+        }))
+      },
+
       addPoint: (layerId, point) => {
         const newPoint: CustomPoint = {
           ...point,
+          status: point.status || 'todo',
           id: crypto.randomUUID(),
           createdAt: new Date().toISOString()
         }
@@ -155,6 +176,21 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
                   ...l,
                   points: l.points.map(p =>
                     p.id === pointId ? { ...p, ...updates } : p
+                  )
+                }
+              : l
+          )
+        }))
+      },
+
+      setPointStatus: (layerId, pointId, status) => {
+        set(state => ({
+          layers: state.layers.map(l =>
+            l.id === layerId
+              ? {
+                  ...l,
+                  points: l.points.map(p =>
+                    p.id === pointId ? { ...p, status } : p
                   )
                 }
               : l
@@ -207,6 +243,9 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               category: point.category,
               notes: point.notes,
               url: point.url,
+              status: point.status,
+              sourceLayer: point.sourceLayer,
+              sourceId: point.sourceId,
               createdAt: point.createdAt
             }
           }))
@@ -244,6 +283,9 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               category: f.properties?.category || 'Overig',
               notes: f.properties?.notes || '',
               url: f.properties?.url,
+              status: f.properties?.status || 'todo',
+              sourceLayer: f.properties?.sourceLayer,
+              sourceId: f.properties?.sourceId,
               coordinates: f.geometry.coordinates as [number, number],
               createdAt: f.properties?.createdAt || new Date().toISOString()
             }))
@@ -260,6 +302,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
                 categories,
                 points,
                 visible: true,
+                archived: false,
                 createdAt: new Date().toISOString()
               }
             ],
@@ -274,6 +317,14 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
 
       getLayer: (id) => {
         return get().layers.find(l => l.id === id)
+      },
+
+      getActiveLayerCount: () => {
+        return get().layers.filter(l => !l.archived).length
+      },
+
+      getArchivedLayerCount: () => {
+        return get().layers.filter(l => l.archived).length
       },
 
       clearAll: () => {

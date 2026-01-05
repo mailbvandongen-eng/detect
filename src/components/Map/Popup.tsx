@@ -4,10 +4,11 @@ import TileWMS from 'ol/source/TileWMS'
 import TileLayer from 'ol/layer/Tile'
 import { toLonLat } from 'ol/proj'
 import proj4 from 'proj4'
-import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2, Type, ExternalLink } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2, Type, ExternalLink, Plus, Check } from 'lucide-react'
 import { useMapStore } from '../../store'
 import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
 import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondstenStore'
+import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import type { MapBrowserEvent } from 'ol'
 
 // Register RD New projection
@@ -157,6 +158,7 @@ function getSoilExplanation(soilName: string, soilCode?: string): string[] {
 export function Popup() {
   const map = useMapStore(state => state.map)
   const removeVondst = useLocalVondstenStore(state => state.removeVondst)
+  const { layers: customLayers, addPoint: addPointToLayer } = useCustomPointLayerStore()
   const [allContents, setAllContents] = useState<string[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [visible, setVisible] = useState(false)
@@ -165,6 +167,9 @@ export function Popup() {
   const [loadingHeightMap, setLoadingHeightMap] = useState(false)
   const [currentVondstId, setCurrentVondstId] = useState<string | null>(null)
   const [mapsUrl, setMapsUrl] = useState<string | null>(null)
+  const [showLayerPicker, setShowLayerPicker] = useState(false)
+  const [addedToLayer, setAddedToLayer] = useState<string | null>(null)
+  const [popupCoordinate, setPopupCoordinate] = useState<number[] | null>(null)
   // Popup text scale: 100 = normal, 120 = 20% bigger, etc
   const [textScale, setTextScale] = useState(() => {
     const saved = localStorage.getItem('popupTextScale')
@@ -2874,8 +2879,11 @@ export function Popup() {
         console.log(`📌 KLIK OPGESLAGEN: [${evt.coordinate[0].toFixed(0)}, ${evt.coordinate[1].toFixed(0)}]`)
         setParcelCoordinate(evt.coordinate) // Store coordinate for height map
         setShowingHeightMap(false) // Reset height map state
+        setShowLayerPicker(false) // Reset layer picker
+        setAddedToLayer(null) // Reset added to layer confirmation
         // Generate Google Maps URL for navigation
         const lonLat = toLonLat(evt.coordinate)
+        setPopupCoordinate(lonLat) // Store lon/lat for adding to layer
         setMapsUrl(`https://www.google.com/maps/dir/?api=1&destination=${lonLat[1]},${lonLat[0]}`)
         setVisible(true)
       }
@@ -2964,6 +2972,58 @@ export function Popup() {
               <span className="flex-1 font-semibold text-gray-800 truncate" style={{ fontSize: '1em' }}>
                 {extractedTitle || 'Info'}
               </span>
+
+              {/* Add to layer button - oranje voor eigen lagen */}
+              {popupCoordinate && customLayers.filter(l => !l.archived).length > 0 && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowLayerPicker(!showLayerPicker)}
+                    className={`w-7 h-7 flex items-center justify-center rounded-full transition-colors flex-shrink-0 ${
+                      addedToLayer
+                        ? 'text-green-500 bg-green-50'
+                        : 'text-orange-500 hover:text-orange-700 hover:bg-orange-50'
+                    }`}
+                    title="Toevoegen aan mijn laag"
+                    aria-label="Toevoegen aan mijn laag"
+                  >
+                    {addedToLayer ? <Check size={16} /> : <Plus size={16} />}
+                  </button>
+
+                  {/* Layer picker dropdown */}
+                  {showLayerPicker && (
+                    <div className="absolute right-0 top-8 z-50 bg-white rounded-lg shadow-lg border border-gray-100 py-1 min-w-[180px]">
+                      <div className="px-3 py-1.5 text-xs text-gray-400 font-medium">Toevoegen aan:</div>
+                      {customLayers.filter(l => !l.archived).map(layer => (
+                        <button
+                          key={layer.id}
+                          onClick={() => {
+                            // Add point to layer
+                            addPointToLayer(layer.id, {
+                              name: extractedTitle || 'Punt',
+                              category: 'Overig',
+                              notes: '',
+                              url: undefined,
+                              coordinates: [popupCoordinate[0], popupCoordinate[1]],
+                              sourceLayer: extractedTitle,
+                            })
+                            setShowLayerPicker(false)
+                            setAddedToLayer(layer.name)
+                            // Auto-hide confirmation after 2 seconds
+                            setTimeout(() => setAddedToLayer(null), 2000)
+                          }}
+                          className="w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-orange-50 flex items-center gap-2"
+                        >
+                          <div
+                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: layer.color }}
+                          />
+                          <span className="truncate">{layer.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Open in Google Maps button */}
               {mapsUrl && (

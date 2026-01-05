@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, MapPin } from 'lucide-react'
 import { useUIStore, useSettingsStore } from '../../store'
@@ -6,11 +6,10 @@ import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 
 export function AddPointModal() {
   const { addPointModalOpen, addPointModalLayerId, addPointModalLocation, closeAddPointModal } = useUIStore()
-  const { layers, addPoint, getLayer } = useCustomPointLayerStore()
+  const { addPoint, getLayer } = useCustomPointLayerStore()
   const settings = useSettingsStore()
 
   const [name, setName] = useState('')
-  const [category, setCategory] = useState('')
   const [notes, setNotes] = useState('')
   const [url, setUrl] = useState('')
 
@@ -19,19 +18,12 @@ export function AddPointModal() {
   // Calculate font size based on fontScale setting
   const baseFontSize = 14 * settings.fontScale / 100
 
-  // Set default category when layer changes
-  useEffect(() => {
-    if (layer && layer.categories.length > 0 && !category) {
-      setCategory(layer.categories[0])
-    }
-  }, [layer])
-
   const handleSubmit = () => {
     if (!name.trim() || !addPointModalLayerId || !addPointModalLocation) return
 
     addPoint(addPointModalLayerId, {
       name: name.trim(),
-      category: category || 'Overig',
+      category: 'Overig',
       notes: notes.trim(),
       url: url.trim() || undefined,
       coordinates: [addPointModalLocation.lng, addPointModalLocation.lat]
@@ -39,7 +31,6 @@ export function AddPointModal() {
 
     // Reset form
     setName('')
-    setCategory('')
     setNotes('')
     setUrl('')
     closeAddPointModal()
@@ -47,7 +38,6 @@ export function AddPointModal() {
 
   const handleClose = () => {
     setName('')
-    setCategory('')
     setNotes('')
     setUrl('')
     closeAddPointModal()
@@ -75,8 +65,8 @@ export function AddPointModal() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
           >
-            {/* Header - met font slider zoals Instellingen */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            {/* Header - oranje voor eigen lagen */}
+            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
               <div className="flex items-center gap-2">
                 <MapPin size={18} />
                 <span className="font-medium">Punt toevoegen</span>
@@ -104,8 +94,8 @@ export function AddPointModal() {
               </div>
             </div>
 
-            {/* Layer info - geen border */}
-            <div className="px-4 py-2 bg-gray-50">
+            {/* Layer info */}
+            <div className="px-4 py-1.5">
               <div className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full"
@@ -116,7 +106,7 @@ export function AddPointModal() {
             </div>
 
             {/* Content - met font scaling */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ fontSize: `${baseFontSize}px` }}>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ fontSize: `${baseFontSize}px` }}>
               {/* Point name */}
               <div>
                 <label className="block font-medium text-gray-700 mb-1" style={{ fontSize: '0.9em' }}>
@@ -126,28 +116,10 @@ export function AddPointModal() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="bijv. Grube Clara"
-                  className="w-full px-3 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-1.5 bg-white rounded-lg border-0 outline-none hover:bg-blue-50 transition-colors"
                   style={{ fontSize: '1em' }}
                   autoFocus
                 />
-              </div>
-
-              {/* Category */}
-              <div>
-                <label className="block font-medium text-gray-700 mb-1" style={{ fontSize: '0.9em' }}>
-                  Categorie
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ fontSize: '1em' }}
-                >
-                  {layer.categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
               </div>
 
               {/* Notes */}
@@ -159,8 +131,8 @@ export function AddPointModal() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Beschrijving, tips, opmerkingen..."
-                  rows={3}
-                  className="w-full px-3 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  rows={2}
+                  className="w-full px-3 py-1.5 bg-white rounded-lg border-0 outline-none hover:bg-blue-50 transition-colors resize-none"
                   style={{ fontSize: '1em' }}
                 />
               </div>
@@ -168,31 +140,24 @@ export function AddPointModal() {
               {/* URL */}
               <div>
                 <label className="block font-medium text-gray-700 mb-1" style={{ fontSize: '0.9em' }}>
-                  Link (optioneel)
+                  Link
                 </label>
                 <input
                   type="url"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full px-3 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-1.5 bg-white rounded-lg border-0 outline-none hover:bg-blue-50 transition-colors"
                   style={{ fontSize: '1em' }}
                 />
               </div>
-
-              {/* Location info */}
-              {addPointModalLocation && (
-                <div className="text-gray-400" style={{ fontSize: '0.75em' }}>
-                  Locatie: {addPointModalLocation.lat.toFixed(5)}, {addPointModalLocation.lng.toFixed(5)}
-                </div>
-              )}
             </div>
 
-            {/* Footer - geen border-t */}
-            <div className="p-4 flex gap-3" style={{ fontSize: `${baseFontSize}px` }}>
+            {/* Footer */}
+            <div className="p-3 flex gap-3" style={{ fontSize: `${baseFontSize}px` }}>
               <button
                 onClick={handleClose}
-                className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none"
+                className="flex-1 px-4 py-1.5 bg-white hover:bg-blue-50 rounded-lg transition-colors border-0 outline-none text-gray-600"
                 style={{ fontSize: '1em' }}
               >
                 Annuleren
@@ -200,7 +165,7 @@ export function AddPointModal() {
               <button
                 onClick={handleSubmit}
                 disabled={!name.trim()}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors border-0 outline-none"
+                className="flex-1 px-4 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors border-0 outline-none"
                 style={{ fontSize: '1em' }}
               >
                 Toevoegen
