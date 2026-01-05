@@ -184,6 +184,7 @@ export function LayerManagerModal() {
                       onDelete={() => handleDelete(layer.id)}
                       confirmDelete={confirmDelete === layer.id}
                       onRename={(newName) => useCustomPointLayerStore.getState().updateLayer(layer.id, { name: newName })}
+                      onChangeColor={(color) => useCustomPointLayerStore.getState().updateLayer(layer.id, { color })}
                     />
                   ))}
                 </div>
@@ -228,6 +229,18 @@ export function LayerManagerModal() {
   )
 }
 
+// Available colors for layers
+const LAYER_COLORS = [
+  '#ef4444', // red
+  '#f97316', // orange
+  '#eab308', // yellow
+  '#22c55e', // green
+  '#06b6d4', // cyan
+  '#3b82f6', // blue
+  '#8b5cf6', // violet
+  '#ec4899', // pink
+]
+
 // Layer item component
 function LayerItem({
   layer,
@@ -239,7 +252,8 @@ function LayerItem({
   onExport,
   onDelete,
   confirmDelete,
-  onRename
+  onRename,
+  onChangeColor
 }: {
   layer: CustomPointLayer
   isExpanded: boolean
@@ -251,9 +265,11 @@ function LayerItem({
   onDelete: () => void
   confirmDelete: boolean
   onRename: (newName: string) => void
+  onChangeColor: (color: string) => void
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState(layer.name)
+  const [showColorPicker, setShowColorPicker] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Focus input when editing starts
@@ -306,11 +322,33 @@ function LayerItem({
           {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         </button>
 
-        {/* Color dot */}
-        <div
-          className="w-4 h-4 rounded-full flex-shrink-0"
-          style={{ backgroundColor: layer.color }}
-        />
+        {/* Color dot - clickable */}
+        <div className="relative">
+          <button
+            onClick={() => setShowColorPicker(!showColorPicker)}
+            className="w-5 h-5 rounded-full flex-shrink-0 border-2 border-white shadow-sm hover:scale-110 transition-transform cursor-pointer"
+            style={{ backgroundColor: layer.color }}
+            title="Kleur wijzigen"
+          />
+          {/* Color picker dropdown */}
+          {showColorPicker && (
+            <div className="absolute top-7 left-0 z-50 bg-white rounded-lg shadow-lg p-2 flex flex-wrap gap-1 w-24">
+              {LAYER_COLORS.map(color => (
+                <button
+                  key={color}
+                  onClick={() => {
+                    onChangeColor(color)
+                    setShowColorPicker(false)
+                  }}
+                  className={`w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform ${
+                    color === layer.color ? 'border-gray-800' : 'border-white'
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Layer name and count - editable or clickable */}
         {isEditing ? (

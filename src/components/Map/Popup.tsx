@@ -4,7 +4,7 @@ import TileWMS from 'ol/source/TileWMS'
 import TileLayer from 'ol/layer/Tile'
 import { toLonLat } from 'ol/proj'
 import proj4 from 'proj4'
-import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2, Type, ExternalLink, Plus, Check } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2, Type, ExternalLink, Plus, Check, Pencil } from 'lucide-react'
 import { useMapStore } from '../../store'
 import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
 import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondstenStore'
@@ -158,6 +158,8 @@ function getSoilExplanation(soilName: string, soilCode?: string): string[] {
 export function Popup() {
   const map = useMapStore(state => state.map)
   const removeVondst = useLocalVondstenStore(state => state.removeVondst)
+  const updateVondst = useLocalVondstenStore(state => state.updateVondst)
+  const vondsten = useLocalVondstenStore(state => state.vondsten)
   const { layers: customLayers, addPoint: addPointToLayer } = useCustomPointLayerStore()
   const [allContents, setAllContents] = useState<string[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -166,6 +168,7 @@ export function Popup() {
   const [showingHeightMap, setShowingHeightMap] = useState(false)
   const [loadingHeightMap, setLoadingHeightMap] = useState(false)
   const [currentVondstId, setCurrentVondstId] = useState<string | null>(null)
+  const [editingVondst, setEditingVondst] = useState<LocalVondst | null>(null)
   const [mapsUrl, setMapsUrl] = useState<string | null>(null)
   const [showLayerPicker, setShowLayerPicker] = useState(false)
   const [addedToLayer, setAddedToLayer] = useState<string | null>(null)
@@ -3119,20 +3122,95 @@ export function Popup() {
               <span className="text-gray-400 w-8 text-right" style={{ fontSize: '0.857em' }}>{textScale}%</span>
             </div>
 
-            {/* Delete button for vondsten */}
-            {isVondst && currentVondstId && (
-              <div className="px-4 pb-4">
+            {/* Edit/Delete buttons for vondsten */}
+            {isVondst && currentVondstId && !editingVondst && (
+              <div className="px-4 pb-4 flex gap-2">
+                <button
+                  onClick={() => {
+                    const vondst = vondsten.find(v => v.id === currentVondstId)
+                    if (vondst) setEditingVondst(vondst)
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors border-0 outline-none"
+                >
+                  <Pencil size={16} />
+                  <span>Bewerken</span>
+                </button>
                 <button
                   onClick={() => {
                     removeVondst(currentVondstId)
                     setVisible(false)
                     setCurrentVondstId(null)
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors border-0 outline-none"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors border-0 outline-none"
                 >
                   <Trash2 size={16} />
-                  <span>Vondst verwijderen</span>
+                  <span>Verwijderen</span>
                 </button>
+              </div>
+            )}
+
+            {/* Inline edit form for vondsten */}
+            {editingVondst && (
+              <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3">
+                <div className="text-sm font-medium text-blue-600">Vondst bewerken</div>
+                <div>
+                  <label className="text-xs text-gray-500">Objecttype</label>
+                  <input
+                    type="text"
+                    value={editingVondst.objectType}
+                    onChange={(e) => setEditingVondst({ ...editingVondst, objectType: e.target.value })}
+                    className="w-full px-2 py-1 text-sm bg-gray-50 rounded border-0 outline-none focus:bg-blue-50"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500">Materiaal</label>
+                  <input
+                    type="text"
+                    value={editingVondst.material}
+                    onChange={(e) => setEditingVondst({ ...editingVondst, material: e.target.value })}
+                    className="w-full px-2 py-1 text-sm bg-gray-50 rounded border-0 outline-none focus:bg-blue-50"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500">Periode</label>
+                  <input
+                    type="text"
+                    value={editingVondst.period}
+                    onChange={(e) => setEditingVondst({ ...editingVondst, period: e.target.value })}
+                    className="w-full px-2 py-1 text-sm bg-gray-50 rounded border-0 outline-none focus:bg-blue-50"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500">Notities</label>
+                  <textarea
+                    value={editingVondst.notes}
+                    onChange={(e) => setEditingVondst({ ...editingVondst, notes: e.target.value })}
+                    className="w-full px-2 py-1 text-sm bg-gray-50 rounded border-0 outline-none focus:bg-blue-50 resize-none h-16"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setEditingVondst(null)}
+                    className="flex-1 px-3 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none text-sm"
+                  >
+                    Annuleren
+                  </button>
+                  <button
+                    onClick={() => {
+                      updateVondst(editingVondst.id, {
+                        objectType: editingVondst.objectType,
+                        material: editingVondst.material,
+                        period: editingVondst.period,
+                        notes: editingVondst.notes
+                      })
+                      setEditingVondst(null)
+                      setVisible(false)
+                    }}
+                    className="flex-1 px-3 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors border-0 outline-none text-sm"
+                  >
+                    Opslaan
+                  </button>
+                </div>
               </div>
             )}
 

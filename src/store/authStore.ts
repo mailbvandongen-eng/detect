@@ -8,6 +8,7 @@ import {
   type User
 } from 'firebase/auth'
 import { auth } from '../lib/firebase'
+import { useSettingsStore } from './settingsStore'
 
 interface AuthState {
   user: User | null
@@ -88,6 +89,11 @@ export const useAuthStore = create<AuthState>()(
           state.user = user
           state.loading = false
         })
+
+        // Auto-switch to cloud storage when logged in with Google
+        if (user) {
+          useSettingsStore.getState().setVondstenLocalOnly(false)
+        }
       })
     }
   }))

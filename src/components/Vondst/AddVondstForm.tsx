@@ -341,12 +341,14 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
           </div>
 
           {/* Storage info */}
-          <div className="bg-gray-50 rounded px-3 py-2">
-            <p className="text-xs text-gray-500">
+          <div className={`rounded px-3 py-2 ${vondstenLocalOnly ? 'bg-gray-50' : 'bg-green-50'}`}>
+            <p className={`text-xs ${vondstenLocalOnly ? 'text-gray-500' : 'text-green-700'}`}>
               {vondstenLocalOnly ? (
                 <>💾 Vondsten worden <strong>lokaal</strong> opgeslagen op dit apparaat.</>
+              ) : user ? (
+                <>☁️ Opslaan naar cloud ({user.displayName || user.email})</>
               ) : (
-                <>☁️ Vondsten worden in de <strong>cloud</strong> opgeslagen (vereist inloggen).</>
+                <>☁️ Cloud opslag geselecteerd - log in om op te slaan</>
               )}
             </p>
           </div>
