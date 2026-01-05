@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 // Firebase config - replace with your actual config
 const firebaseConfig = {
@@ -27,3 +27,62 @@ enableIndexedDbPersistence(db).catch((err) => {
     console.warn('Offline persistence not available in this browser')
   }
 })
+
+// ============================================
+// Photo Storage Helpers
+// ============================================
+
+/**
+ * Upload a photo thumbnail to Firebase Storage
+ * Path: users/{userId}/layers/{layerId}/points/{pointId}/{photoId}.jpg
+ */
+export async function uploadPhotoThumbnail(
+  userId: string,
+  layerId: string,
+  pointId: string,
+  photoId: string,
+  imageBlob: Blob
+): Promise<string> {
+  const path = `users/${userId}/layers/${layerId}/points/${pointId}/${photoId}.jpg`
+  const ref = storageRef(storage, path)
+  await uploadBytes(ref, imageBlob, { contentType: 'image/jpeg' })
+  return getDownloadURL(ref)
+}
+
+/**
+ * Delete a photo from Firebase Storage
+ */
+export async function deletePhotoFromStorage(
+  userId: string,
+  layerId: string,
+  pointId: string,
+  photoId: string
+): Promise<void> {
+  const path = `users/${userId}/layers/${layerId}/points/${pointId}/${photoId}.jpg`
+  const ref = storageRef(storage, path)
+  try {
+    await deleteObject(ref)
+  } catch (error: any) {
+    // Ignore if file doesn't exist
+    if (error.code !== 'storage/object-not-found') {
+      throw error
+    }
+  }
+}
+
+/**
+ * Convert base64 data URL to Blob
+ */
+export function base64ToBlob(base64: string): Blob {
+  const parts = base64.split(';base64,')
+  const contentType = parts[0].split(':')[1]
+  const raw = window.atob(parts[1])
+  const rawLength = raw.length
+  const uInt8Array = new Uint8Array(rawLength)
+
+  for (let i = 0; i < rawLength; ++i) {
+    uInt8Array[i] = raw.charCodeAt(i)
+  }
+
+  return new Blob([uInt8Array], { type: contentType })
+}

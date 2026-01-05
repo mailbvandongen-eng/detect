@@ -201,6 +201,22 @@ export function LayerDashboard() {
                           </button>
                         </div>
 
+                        {/* Photo thumbnail */}
+                        {point.photos && point.photos.length > 0 && (
+                          <div className="relative flex-shrink-0">
+                            <img
+                              src={point.photos[0].thumbnailUrl || point.photos[0].thumbnailBase64}
+                              alt="Foto"
+                              className="w-12 h-12 object-cover rounded border border-gray-200"
+                            />
+                            {point.photos.length > 1 && (
+                              <span className="absolute -bottom-1 -right-1 bg-orange-500 text-white text-[9px] px-1 rounded-full">
+                                +{point.photos.length - 1}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
                         {/* Point info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">

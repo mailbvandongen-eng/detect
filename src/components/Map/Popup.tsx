@@ -1683,6 +1683,20 @@ export function Popup() {
           if (point.category) {
             pointHtml += `<br/><span class="text-sm text-gray-600"><strong>Categorie:</strong> ${point.category}</span>`
           }
+          // Photos display
+          if (point.photos && point.photos.length > 0) {
+            pointHtml += `<div class="flex flex-wrap gap-1 my-2">`
+            for (const photo of point.photos.slice(0, 3)) {
+              const src = photo.thumbnailUrl || photo.thumbnailBase64
+              if (src) {
+                pointHtml += `<img src="${src}" alt="Foto" class="w-16 h-16 object-cover rounded border border-gray-200" />`
+              }
+            }
+            if (point.photos.length > 3) {
+              pointHtml += `<span class="text-xs text-gray-400 self-end">+${point.photos.length - 3} meer</span>`
+            }
+            pointHtml += `</div>`
+          }
           if (point.notes) {
             pointHtml += `<br/><span class="text-sm text-gray-600 mt-1">${point.notes}</span>`
           }

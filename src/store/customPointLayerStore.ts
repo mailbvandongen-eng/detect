@@ -24,6 +24,15 @@ export const DEFAULT_CATEGORIES = [
 
 export type PointStatus = 'todo' | 'completed' | 'skipped'
 
+// Photo data for custom points
+export interface PhotoData {
+  id: string
+  thumbnailUrl?: string      // Firebase Storage URL (when uploaded)
+  thumbnailBase64?: string   // Local base64 fallback (offline/before upload)
+  createdAt: string
+  pendingUpload?: boolean    // True when offline, needs sync
+}
+
 export interface CustomPoint {
   id: string
   name: string
@@ -36,6 +45,8 @@ export interface CustomPoint {
   status: PointStatus
   sourceLayer?: string   // e.g., "AMK Monumenten", "Bunkers"
   sourceId?: string      // original feature ID from source layer
+  // Photo support
+  photos?: PhotoData[]
 }
 
 export interface CustomPointLayer {
@@ -69,6 +80,11 @@ interface CustomPointLayerStore {
   // Category operations
   addCategory: (layerId: string, category: string) => void
   removeCategory: (layerId: string, category: string) => void
+
+  // Photo operations
+  addPhotoToPoint: (layerId: string, pointId: string, photo: PhotoData) => void
+  removePhotoFromPoint: (layerId: string, pointId: string, photoId: string) => void
+  updatePhotoInPoint: (layerId: string, pointId: string, photoId: string, updates: Partial<PhotoData>) => void
 
   // Export/Import
   exportLayerAsGeoJSON: (id: string) => void
@@ -218,6 +234,62 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
         }))
       },
 
+      addPhotoToPoint: (layerId, pointId, photo) => {
+        set(state => ({
+          layers: state.layers.map(l =>
+            l.id === layerId
+              ? {
+                  ...l,
+                  points: l.points.map(p =>
+                    p.id === pointId
+                      ? { ...p, photos: [...(p.photos || []), photo] }
+                      : p
+                  )
+                }
+              : l
+          )
+        }))
+      },
+
+      removePhotoFromPoint: (layerId, pointId, photoId) => {
+        set(state => ({
+          layers: state.layers.map(l =>
+            l.id === layerId
+              ? {
+                  ...l,
+                  points: l.points.map(p =>
+                    p.id === pointId
+                      ? { ...p, photos: (p.photos || []).filter(ph => ph.id !== photoId) }
+                      : p
+                  )
+                }
+              : l
+          )
+        }))
+      },
+
+      updatePhotoInPoint: (layerId, pointId, photoId, updates) => {
+        set(state => ({
+          layers: state.layers.map(l =>
+            l.id === layerId
+              ? {
+                  ...l,
+                  points: l.points.map(p =>
+                    p.id === pointId
+                      ? {
+                          ...p,
+                          photos: (p.photos || []).map(ph =>
+                            ph.id === photoId ? { ...ph, ...updates } : ph
+                          )
+                        }
+                      : p
+                  )
+                }
+              : l
+          )
+        }))
+      },
+
       exportLayerAsGeoJSON: (id) => {
         const layer = get().layers.find(l => l.id === id)
         if (!layer) return
@@ -246,6 +318,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               status: point.status,
               sourceLayer: point.sourceLayer,
               sourceId: point.sourceId,
+              photos: point.photos,
               createdAt: point.createdAt
             }
           }))
@@ -286,6 +359,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               status: f.properties?.status || 'todo',
               sourceLayer: f.properties?.sourceLayer,
               sourceId: f.properties?.sourceId,
+              photos: f.properties?.photos,
               coordinates: f.geometry.coordinates as [number, number],
               createdAt: f.properties?.createdAt || new Date().toISOString()
             }))

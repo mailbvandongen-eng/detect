@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, MapPin } from 'lucide-react'
 import { useUIStore, useSettingsStore } from '../../store'
-import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
+import { useCustomPointLayerStore, type PhotoData } from '../../store/customPointLayerStore'
+import { PhotoCapture } from './PhotoCapture'
 
 export function AddPointModal() {
   const { addPointModalOpen, addPointModalLayerId, addPointModalLocation, closeAddPointModal } = useUIStore()
@@ -12,6 +13,7 @@ export function AddPointModal() {
   const [name, setName] = useState('')
   const [notes, setNotes] = useState('')
   const [url, setUrl] = useState('')
+  const [photos, setPhotos] = useState<PhotoData[]>([])
 
   const layer = addPointModalLayerId ? getLayer(addPointModalLayerId) : null
 
@@ -26,13 +28,15 @@ export function AddPointModal() {
       category: 'Overig',
       notes: notes.trim(),
       url: url.trim() || undefined,
-      coordinates: [addPointModalLocation.lng, addPointModalLocation.lat]
+      coordinates: [addPointModalLocation.lng, addPointModalLocation.lat],
+      photos: photos.length > 0 ? photos : undefined
     })
 
     // Reset form
     setName('')
     setNotes('')
     setUrl('')
+    setPhotos([])
     closeAddPointModal()
   }
 
@@ -40,6 +44,7 @@ export function AddPointModal() {
     setName('')
     setNotes('')
     setUrl('')
+    setPhotos([])
     closeAddPointModal()
   }
 
@@ -121,6 +126,13 @@ export function AddPointModal() {
                   autoFocus
                 />
               </div>
+
+              {/* Photos */}
+              <PhotoCapture
+                photos={photos}
+                onAddPhoto={(photo) => setPhotos([...photos, photo])}
+                onRemovePhoto={(photoId) => setPhotos(photos.filter(p => p.id !== photoId))}
+              />
 
               {/* Notes */}
               <div>
