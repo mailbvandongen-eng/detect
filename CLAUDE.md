@@ -11,12 +11,14 @@
 ## EERSTE ACTIE BIJ NIEUWE SESSIE
 **Lees ALTIJD eerst `.claude/notes.md` voor lopende taken, plannen en context uit vorige sessies!**
 
-## 🚨 VERSIE BUMPEN BIJ NIEUWE FEATURES/FIXES
-**ALTIJD bij nieuwe functionaliteit of bugfixes:**
-1. `npm version patch` (of minor/major)
-2. Update `VERSION` in `src/main.tsx`
-3. Console toont: `🚀 DetectorApp vX.X.X`
-4. Gebruiker kan zo zien dat nieuwe code geladen is!
+## 🚨 VERSIE BUMPEN - ALTIJD ALLE 4 PLEKKEN!
+**Bij ELKE wijziging, update ALLE 4 plekken:**
+1. `npm version patch` (of minor/major) → `package.json`
+2. `src/main.tsx` → `const VERSION = 'X.X.X'`
+3. `src/components/UI/BuildLabel.tsx` → `v2.X.X` (linksboven op scherm)
+4. `src/components/UI/InfoButton.tsx` → `DetectorApp NL vX.X.X` (in info modal)
+
+**Check met:** `grep -rn "2\.[0-9]" package.json src/main.tsx src/components/UI/BuildLabel.tsx src/components/UI/InfoButton.tsx`
 
 ## Belangrijke Regels
 - **ALTIJD pushen naar GitHub na elke wijziging + versie bump**
