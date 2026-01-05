@@ -164,7 +164,7 @@ export function SearchBox() {
   if (!isExpanded) {
     return (
       <motion.button
-        className="fixed right-[104px] z-[800] w-11 h-11 flex items-center justify-center bg-white/90 hover:bg-white rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        className="fixed right-14 z-[800] w-11 h-11 flex items-center justify-center bg-white/90 hover:bg-white rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         style={safeTopStyle}
         onClick={() => setIsExpanded(true)}
         whileHover={{ scale: 1.05 }}

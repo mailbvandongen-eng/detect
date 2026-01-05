@@ -1,4 +1,4 @@
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Settings, Grid3X3, Save, LucideIcon } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore } from '../../store'
 
@@ -86,7 +86,7 @@ const BASE_LAYERS = [
 export function PresetButtons() {
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
   const stopTracking = useGPSStore(state => state.stopTracking)
-  const { presetsPanelOpen, togglePresetsPanel, toggleSettingsPanel, closeAllPanels } = useUIStore()
+  const { presetsPanelOpen, togglePresetsPanel, closeAllPanels } = useUIStore()
   const { presets, applyPreset, updatePreset } = usePresetStore()
   const visible = useLayerStore(state => state.visible)
 
@@ -132,36 +132,34 @@ export function PresetButtons() {
 
   return (
     <>
-      {/* Settings button - same height as GPS button on right */}
-      <button
-        onClick={toggleSettingsPanel}
-        className="fixed bottom-2 left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
-        title="Instellingen"
-      >
-        <Settings size={22} className="text-gray-600" />
-      </button>
+      {/* Horizontal button row - next to LayerControlButton */}
+      <div className="fixed bottom-2 left-[60px] z-[800] flex gap-1">
+        {/* Presets button */}
+        <motion.button
+          onClick={togglePresetsPanel}
+          className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          title="Presets"
+        >
+          {presetsPanelOpen ? (
+            <ChevronUp size={20} className="text-blue-600" />
+          ) : (
+            <Layers size={20} className="text-blue-600" />
+          )}
+        </motion.button>
 
-      {/* Reset button - same height as Kaartlagen button on right */}
-      <button
-        onClick={resetAll}
-        className="fixed bottom-[60px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
-        title="Reset - CartoDB, alle lagen uit, GPS uit"
-      >
-        <RotateCcw size={22} className="text-gray-600" />
-      </button>
-
-      {/* Presets button - above reset */}
-      <button
-        onClick={togglePresetsPanel}
-        className="fixed bottom-[112px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
-        title="Presets"
-      >
-        {presetsPanelOpen ? (
-          <ChevronUp size={22} className="text-blue-600" />
-        ) : (
-          <Layers size={22} className="text-blue-600" />
-        )}
-      </button>
+        {/* Reset button */}
+        <motion.button
+          onClick={resetAll}
+          className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          title="Reset - CartoDB, alle lagen uit, GPS uit"
+        >
+          <RotateCcw size={20} className="text-gray-600" />
+        </motion.button>
+      </div>
 
       {/* Expanded: preset options */}
       <AnimatePresence>
@@ -180,7 +178,7 @@ export function PresetButtons() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="fixed bottom-[112px] left-[56px] bg-white/95 rounded-xl shadow-lg overflow-hidden w-[220px] backdrop-blur-sm z-[801]"
+              className="fixed bottom-[60px] left-[60px] bg-white/95 rounded-xl shadow-lg overflow-hidden w-[220px] backdrop-blur-sm z-[801]"
             >
               {/* Header with title and font size slider inline */}
               <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white">

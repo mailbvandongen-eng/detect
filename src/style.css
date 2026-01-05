@@ -307,21 +307,21 @@ html, body {
    ============================================================ */
 .ol-scale-line {
   position: absolute !important;
-  bottom: 10px !important;
+  bottom: 60px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   right: auto !important;
   top: auto !important;
   background: transparent !important;
   padding: 0 !important;
-  z-index: 100 !important;
+  z-index: 500 !important;
   pointer-events: none !important;
 }
 
 /* Mobile-specific adjustments */
 @media (max-width: 768px) {
   .ol-scale-line {
-    bottom: 8px !important;
+    bottom: 56px !important;
   }
 }
 
