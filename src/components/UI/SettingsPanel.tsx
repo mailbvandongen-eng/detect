@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useUIStore, useSettingsStore, usePresetStore, useSubscriptionStore } from '../../store'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
 import { useCustomLayerStore } from '../../store/customLayerStore'
+import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import { clearPasswordAuth } from '../Auth/PasswordGate'
 import { VondstenDashboard } from '../Vondst/VondstenDashboard'
 import { ImportLayerModal, CustomLayerItem } from '../CustomLayers'
@@ -14,17 +15,20 @@ import { GoogleSignInButton } from '../Auth/GoogleSignInButton'
 import type { DefaultBackground } from '../../store/settingsStore'
 
 export function SettingsPanel() {
-  const { settingsPanelOpen, toggleSettingsPanel, vondstDashboardOpen, toggleVondstDashboard } = useUIStore()
+  const { settingsPanelOpen, toggleSettingsPanel, vondstDashboardOpen, toggleVondstDashboard, openLayerManagerModal } = useUIStore()
   const settings = useSettingsStore()
   const { presets, createPreset, deletePreset, updatePreset } = usePresetStore()
   const vondsten = useLocalVondstenStore(state => state.vondsten)
   const customLayers = useCustomLayerStore(state => state.layers)
+  const { layers: customPointLayers, updateLayer: updateCustomPointLayer } = useCustomPointLayerStore()
   const { devMode, setDevMode, tier } = useSubscriptionStore()
   const [newPresetName, setNewPresetName] = useState('')
   const [showNewPresetInput, setShowNewPresetInput] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
   const [renamingPresetId, setRenamingPresetId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
+  const [renamingLayerId, setRenamingLayerId] = useState<string | null>(null)
+  const [renameLayerValue, setRenameLayerValue] = useState('')
 
   // Calculate font size based on fontScale setting
   const baseFontSize = 14 * settings.fontScale / 100
@@ -180,6 +184,77 @@ export function SettingsPanel() {
                   <span>Dashboard ({vondsten.length} vondsten)</span>
                 </button>
                 <ExportButton />
+              </Section>
+
+              {/* Mijn Lagen (CustomPointLayers) */}
+              <Section title="Mijn Lagen" icon={<Layers size={16} />}>
+                <div className="space-y-1">
+                  {customPointLayers.filter(l => !l.archived).length === 0 ? (
+                    <p className="text-gray-500 py-1" style={{ fontSize: '0.75em' }}>
+                      Nog geen eigen lagen aangemaakt.
+                    </p>
+                  ) : (
+                    customPointLayers.filter(l => !l.archived).map(layer => (
+                      <div key={layer.id} className="flex items-center gap-2 py-1.5 px-2 hover:bg-gray-50 rounded">
+                        <div
+                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: layer.color }}
+                        />
+                        {renamingLayerId === layer.id ? (
+                          <input
+                            type="text"
+                            value={renameLayerValue}
+                            onChange={(e) => setRenameLayerValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                if (renameLayerValue.trim()) {
+                                  updateCustomPointLayer(layer.id, { name: renameLayerValue.trim() })
+                                }
+                                setRenamingLayerId(null)
+                              } else if (e.key === 'Escape') {
+                                setRenamingLayerId(null)
+                              }
+                            }}
+                            onBlur={() => {
+                              if (renameLayerValue.trim()) {
+                                updateCustomPointLayer(layer.id, { name: renameLayerValue.trim() })
+                              }
+                              setRenamingLayerId(null)
+                            }}
+                            autoFocus
+                            className="flex-1 px-1.5 py-0.5 text-sm bg-orange-50 rounded outline-none focus:ring-1 focus:ring-orange-400"
+                          />
+                        ) : (
+                          <>
+                            <span className="flex-1 text-sm text-gray-700 truncate">{layer.name}</span>
+                            <span className="text-xs text-gray-400">{layer.points.length} punten</span>
+                            <button
+                              onClick={() => {
+                                setRenamingLayerId(layer.id)
+                                setRenameLayerValue(layer.name)
+                              }}
+                              className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none bg-transparent"
+                              title="Naam bewerken"
+                            >
+                              <Pencil size={12} />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    ))
+                  )}
+                  <button
+                    onClick={() => {
+                      openLayerManagerModal()
+                      toggleSettingsPanel()
+                    }}
+                    className="flex items-center gap-2 mt-2 px-2 py-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors border-0 outline-none w-full"
+                    style={{ fontSize: '0.9em' }}
+                  >
+                    <Settings size={14} />
+                    <span>Lagen beheren</span>
+                  </button>
+                </div>
               </Section>
 
               {/* Eigen Lagen */}

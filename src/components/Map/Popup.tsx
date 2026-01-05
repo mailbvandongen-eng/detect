@@ -2950,7 +2950,7 @@ export function Popup() {
                 <div className="flex items-center gap-0.5 flex-shrink-0">
                   <button
                     onClick={goToPrevious}
-                    className="p-1 text-blue-500 hover:text-blue-600 transition-colors"
+                    className="p-1 text-blue-500 hover:text-blue-600 transition-colors border-0 outline-none bg-transparent"
                     aria-label="Vorige laag"
                   >
                     <ChevronLeft size={18} />
@@ -2960,7 +2960,7 @@ export function Popup() {
                   </span>
                   <button
                     onClick={goToNext}
-                    className="p-1 text-blue-500 hover:text-blue-600 transition-colors"
+                    className="p-1 text-blue-500 hover:text-blue-600 transition-colors border-0 outline-none bg-transparent"
                     aria-label="Volgende laag"
                   >
                     <ChevronRight size={18} />
@@ -2978,7 +2978,7 @@ export function Popup() {
                 <div className="relative">
                   <button
                     onClick={() => setShowLayerPicker(!showLayerPicker)}
-                    className={`p-1.5 transition-colors flex-shrink-0 ${
+                    className={`p-1.5 transition-colors flex-shrink-0 border-0 outline-none bg-transparent ${
                       addedToLayer
                         ? 'text-green-500'
                         : 'text-orange-500 hover:text-orange-600'
@@ -3042,7 +3042,7 @@ export function Popup() {
               {/* Close button */}
               <button
                 onClick={handleClose}
-                className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 border-0 outline-none bg-transparent"
                 aria-label="Sluiten"
               >
                 <X size={18} />
