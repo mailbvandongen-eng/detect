@@ -48,7 +48,7 @@ export function PhotoCapture({ photos, onAddPhoto, onRemovePhoto, disabled }: Ph
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block font-medium text-gray-700" style={{ fontSize: '0.9em' }}>
         Foto's ({photos.length}/{MAX_PHOTOS})
       </label>
 
@@ -74,7 +74,7 @@ export function PhotoCapture({ photos, onAddPhoto, onRemovePhoto, disabled }: Ph
               </button>
             )}
             {photo.pendingUpload && (
-              <div className="absolute bottom-0 left-0 right-0 bg-orange-500/80 text-white text-[9px] text-center py-0.5">
+              <div className="absolute bottom-0 left-0 right-0 bg-orange-500/80 text-white text-center py-0.5" style={{ fontSize: '0.6em' }}>
                 Wacht...
               </div>
             )}
@@ -92,7 +92,7 @@ export function PhotoCapture({ photos, onAddPhoto, onRemovePhoto, disabled }: Ph
               title="Maak foto"
             >
               <Camera size={20} className="text-gray-400" />
-              <span className="text-[9px] text-gray-400">Camera</span>
+              <span className="text-gray-400" style={{ fontSize: '0.6em' }}>Camera</span>
             </button>
 
             {/* Gallery button */}
@@ -103,7 +103,7 @@ export function PhotoCapture({ photos, onAddPhoto, onRemovePhoto, disabled }: Ph
               title="Kies foto"
             >
               <ImagePlus size={20} className="text-gray-400" />
-              <span className="text-[9px] text-gray-400">Gallerij</span>
+              <span className="text-gray-400" style={{ fontSize: '0.6em' }}>Gallerij</span>
             </button>
           </>
         )}
