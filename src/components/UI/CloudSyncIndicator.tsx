@@ -34,9 +34,12 @@ export function CloudSyncIndicator() {
   // Position: top right, LEFT of info button (info is at right-2, w-11)
   // So this should be at right-14 (2 + 11 + 1 gap)
 
+  // Safe top position for mobile browsers (accounts for notch/status bar)
+  const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
+
   if (loading) {
     return (
-      <div className="fixed top-2 right-14 z-[800]">
+      <div className="fixed right-14 z-[800]" style={safeTopStyle}>
         <div className="w-11 h-11 flex items-center justify-center opacity-50">
           <GoogleLogo />
         </div>
@@ -45,7 +48,7 @@ export function CloudSyncIndicator() {
   }
 
   return (
-    <div className="fixed top-2 right-14 z-[800]">
+    <div className="fixed right-14 z-[800]" style={safeTopStyle}>
       <button
         onClick={() => setShowMenu(!showMenu)}
         className="w-11 h-11 flex items-center justify-center border-0 outline-none bg-transparent transition-opacity hover:opacity-80"

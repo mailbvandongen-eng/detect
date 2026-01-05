@@ -18,12 +18,16 @@ export function InfoButton() {
     { id: 'handleiding', label: 'Handleiding', icon: <BookOpen size={14} /> }
   ]
 
+  // Safe top position for mobile browsers (accounts for notch/status bar)
+  const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
+
   return (
     <>
       {/* Info Button - top right corner */}
       <button
         onClick={toggleInfoPanel}
-        className="fixed top-2 right-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        className="fixed right-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        style={safeTopStyle}
         title="Info & Help"
       >
         <Info size={22} className="text-gray-600" />
