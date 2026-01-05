@@ -1,6 +1,6 @@
 # Detectorapp-NL - Sessienotities
 
-## Huidige versie: 2.22.0
+## Huidige versie: 2.22.4
 
 ---
 
@@ -16,6 +16,41 @@ Bij elke code wijziging **ALTIJD** deze 4 plekken updaten:
 | 4 | `src/components/UI/InfoButton.tsx` | `DetectorApp NL v{X.X.X}` |
 
 **Test na bump:** `npm run build` moet slagen!
+
+---
+
+## ⚠️ UI STYLING REGELS - STRICT VOLGEN! ⚠️
+
+### Icon Buttons (ONZICHTBAAR - alleen icoon)
+Gebruik voor popup iconen, toolbar iconen, etc. die GEEN zichtbare achtergrond moeten hebben:
+```tsx
+className="p-1.5 border-0 outline-none bg-transparent text-{color}-500 hover:text-{color}-600 transition-colors"
+```
+
+**NOOIT toevoegen aan icon buttons:**
+- `bg-white` of `bg-white/80`
+- `shadow-*`
+- `rounded-*` met achtergrond
+- `backdrop-blur-*`
+
+### Zichtbare Knoppen (met achtergrond)
+Alleen voor hoofdknoppen zoals GPS, Info, Zoom buttons:
+```tsx
+className="bg-white/80 hover:bg-white/90 rounded-xl shadow-sm backdrop-blur-sm"
+```
+
+### Voorbeeld: Popup Header Iconen
+```tsx
+// GOED - subtiel, alleen icoon
+<button className="p-1.5 border-0 outline-none bg-transparent text-orange-500 hover:text-orange-600">
+  <Plus size={18} />
+</button>
+
+// FOUT - vierkant met rand
+<button className="w-7 h-7 bg-white/80 rounded-lg shadow-sm">
+  <Plus size={18} />
+</button>
+```
 
 ---
 
