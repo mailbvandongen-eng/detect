@@ -566,6 +566,30 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: false
   },
+  'Openbare Toiletten': {
+    name: 'Openbare Toiletten',
+    factory: async () => {
+      const { createToilettenLayerOL } = await import('./toilettenOL')
+      return createToilettenLayerOL()
+    },
+    immediateLoad: false
+  },
+  'Ruiterpaden': {
+    name: 'Ruiterpaden',
+    factory: async () => {
+      const { createRuiterpadenLayerOL } = await import('./ruiterpadenOL')
+      return createRuiterpadenLayerOL()
+    },
+    immediateLoad: false
+  },
+  'Natuurparkeren': {
+    name: 'Natuurparkeren',
+    factory: async () => {
+      const { createNatuurParkeerLayerOL } = await import('./natuurParkeerOL')
+      return createNatuurParkeerLayerOL()
+    },
+    immediateLoad: false
+  },
 
   // Fossil layers - PBDB data
   'Fossielen Nederland': {
