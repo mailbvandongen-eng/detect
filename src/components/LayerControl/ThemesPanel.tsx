@@ -285,13 +285,19 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Recreation */}
-              <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Wandelroutes', 'Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Kringloopwinkels']}>
+              <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Wandelroutes', 'Ruiterpaden', 'Laarzenpaden', 'Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Strandopgangen', 'Kringloopwinkels', 'Winkelcentra', 'Openbare Toiletten', 'Natuurparkeren']}>
                 <LayerItem name="Wandelroutes" type="overlay" />
+                <LayerItem name="Ruiterpaden" type="overlay" />
+                <LayerItem name="Laarzenpaden" type="overlay" />
                 <LayerItem name="Parken" type="overlay" />
                 <LayerItem name="Speeltuinen" type="overlay" />
                 <LayerItem name="Musea" type="overlay" />
                 <LayerItem name="Strandjes" type="overlay" />
+                <LayerItem name="Strandopgangen" type="overlay" />
                 <LayerItem name="Kringloopwinkels" type="overlay" />
+                <LayerItem name="Winkelcentra" type="overlay" />
+                <LayerItem name="Openbare Toiletten" type="overlay" />
+                <LayerItem name="Natuurparkeren" type="overlay" />
               </LayerGroup>
             </div>
           </div>

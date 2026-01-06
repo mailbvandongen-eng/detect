@@ -590,6 +590,30 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: false
   },
+  'Strandopgangen': {
+    name: 'Strandopgangen',
+    factory: async () => {
+      const { createStrandopgangenLayerOL } = await import('./strandopgangenOL')
+      return createStrandopgangenLayerOL()
+    },
+    immediateLoad: false
+  },
+  'Winkelcentra': {
+    name: 'Winkelcentra',
+    factory: async () => {
+      const { createWinkelcentraLayerOL } = await import('./winkelcentraOL')
+      return createWinkelcentraLayerOL()
+    },
+    immediateLoad: false
+  },
+  'Laarzenpaden': {
+    name: 'Laarzenpaden',
+    factory: async () => {
+      const { createLaarzenpadenLayerOL } = await import('./laarzenpadenOL')
+      return createLaarzenpadenLayerOL()
+    },
+    immediateLoad: false
+  },
 
   // Fossil layers - PBDB data
   'Fossielen Nederland': {

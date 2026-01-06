@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Bug, Code, User, Sliders, Route, Volume2, Car } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Bug, Code, User, Sliders, Route, Volume2, Car, Footprints } from 'lucide-react'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
@@ -474,6 +474,18 @@ export function SettingsPanel() {
                     />
                     <p className="text-gray-500 mt-1" style={{ fontSize: '0.75em' }}>
                       Sla op waar je auto staat en navigeer er later naar terug.
+                    </p>
+                  </Section>
+
+                  {/* Stappenteller */}
+                  <Section title="Stappenteller" icon={<Footprints size={16} />}>
+                    <ToggleRow
+                      label="Stappenteller tonen"
+                      checked={settings.showStepCounter}
+                      onChange={settings.setShowStepCounter}
+                    />
+                    <p className="text-gray-500 mt-1" style={{ fontSize: '0.75em' }}>
+                      Tel je stappen tijdens het detecteren. Werkt het beste op mobiel.
                     </p>
                   </Section>
                 </>

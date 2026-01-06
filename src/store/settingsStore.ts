@@ -35,6 +35,9 @@ interface SettingsState {
   // Voice feedback
   voiceFeedbackEnabled: boolean  // Speak aloud when adding vondsten
 
+  // Stappenteller
+  showStepCounter: boolean  // Show/hide the step counter
+
   // Actions
   setDefaultBackground: (bg: DefaultBackground) => void
   setShowScaleBar: (value: boolean) => void
@@ -51,6 +54,7 @@ interface SettingsState {
   setPresetPanelFontScale: (value: number) => void
   setMenuFontScale: (value: number) => void
   setVoiceFeedbackEnabled: (value: boolean) => void
+  setShowStepCounter: (value: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -72,6 +76,7 @@ export const useSettingsStore = create<SettingsState>()(
       presetPanelFontScale: 100, // Default 100%
       menuFontScale: 100,       // Default 100%
       voiceFeedbackEnabled: false, // Off by default
+      showStepCounter: false, // Hidden by default, can enable in settings
 
       // Actions
       setDefaultBackground: (defaultBackground) => set({ defaultBackground }),
@@ -88,7 +93,8 @@ export const useSettingsStore = create<SettingsState>()(
       setLayerPanelFontScale: (layerPanelFontScale) => set({ layerPanelFontScale }),
       setPresetPanelFontScale: (presetPanelFontScale) => set({ presetPanelFontScale }),
       setMenuFontScale: (menuFontScale) => set({ menuFontScale }),
-      setVoiceFeedbackEnabled: (voiceFeedbackEnabled) => set({ voiceFeedbackEnabled })
+      setVoiceFeedbackEnabled: (voiceFeedbackEnabled) => set({ voiceFeedbackEnabled }),
+      setShowStepCounter: (showStepCounter) => set({ showStepCounter })
     }),
     {
       name: 'detectorapp-settings',

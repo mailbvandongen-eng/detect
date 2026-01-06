@@ -18,6 +18,7 @@ import { AddVondstForm } from './components/Vondst/AddVondstForm'
 import { AddVondstButton } from './components/Vondst/AddVondstButton'
 import { RouteRecordButton, RouteRecordingLayer, SavedRoutesLayer, CoverageHeatmapLayer, GridOverlayLayer, RouteDashboard } from './components/Route'
 import { ParkingButton, ParkingMarker } from './components/Parking'
+import { StepCounter } from './components/StepCounter'
 import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
 import { CustomLayerMarkers } from './components/CustomLayers'
 import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal, LayerDashboard } from './components/CustomPoints'
@@ -66,6 +67,7 @@ function App() {
         <GpsButton />
         <ParkingButton />
         <ParkingMarker />
+        <StepCounter />
         <AddVondstButton />
         <RouteRecordButton />
         <ZoomButtons />
