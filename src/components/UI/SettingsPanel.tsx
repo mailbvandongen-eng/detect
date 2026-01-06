@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Bug, Code, User, Sliders, Route, Volume2, Car, Footprints } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Bug, Code, User, Sliders, Route, Volume2, Car, Footprints, Type } from 'lucide-react'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
@@ -98,22 +98,26 @@ export function SettingsPanel() {
                 <span className="font-medium text-white">Instellingen</span>
               </div>
               <div className="flex items-center gap-2">
-                {/* Font size slider in header */}
-                <span className="text-[10px] text-blue-200">T</span>
-                <input
-                  type="range"
-                  min="80"
-                  max="150"
-                  step="10"
-                  value={settings.fontScale}
-                  onInput={(e) => {
-                    settings.setFontScale(parseInt((e.target as HTMLInputElement).value))
-                  }}
-                  onChange={(e) => settings.setFontScale(parseInt(e.target.value))}
-                  className="w-20 opacity-70 hover:opacity-100 transition-opacity"
-                  title={`Tekstgrootte: ${settings.fontScale}%`}
-                />
-                <span className="text-xs text-blue-200">T</span>
+                {/* Font size slider in header - only if boomer mode enabled */}
+                {settings.showFontSliders && (
+                  <>
+                    <span className="text-[10px] text-blue-200">T</span>
+                    <input
+                      type="range"
+                      min="80"
+                      max="150"
+                      step="10"
+                      value={settings.fontScale}
+                      onInput={(e) => {
+                        settings.setFontScale(parseInt((e.target as HTMLInputElement).value))
+                      }}
+                      onChange={(e) => settings.setFontScale(parseInt(e.target.value))}
+                      className="w-20 opacity-70 hover:opacity-100 transition-opacity"
+                      title={`Tekstgrootte: ${settings.fontScale}%`}
+                    />
+                    <span className="text-xs text-blue-200">T</span>
+                  </>
+                )}
                 <button
                   onClick={toggleSettingsPanel}
                   className="p-1 rounded bg-blue-400/50 hover:bg-blue-400 transition-colors border-0 outline-none ml-1"
@@ -486,6 +490,18 @@ export function SettingsPanel() {
                     />
                     <p className="text-gray-500 mt-1" style={{ fontSize: '0.75em' }}>
                       Tel je stappen tijdens het detecteren. Werkt het beste op mobiel.
+                    </p>
+                  </Section>
+
+                  {/* Tekstgrootte (Boomer mode) */}
+                  <Section title="Tekstgrootte" icon={<Type size={16} />}>
+                    <ToggleRow
+                      label="Tekstgrootte schuifjes tonen"
+                      checked={settings.showFontSliders}
+                      onChange={settings.setShowFontSliders}
+                    />
+                    <p className="text-gray-500 mt-1" style={{ fontSize: '0.75em' }}>
+                      Toon schuifjes in menu's om de tekstgrootte aan te passen.
                     </p>
                   </Section>
                 </>

@@ -38,6 +38,9 @@ interface SettingsState {
   // Stappenteller
   showStepCounter: boolean  // Show/hide the step counter
 
+  // Weergave opties
+  showFontSliders: boolean  // Show/hide font size sliders (boomer mode)
+
   // Actions
   setDefaultBackground: (bg: DefaultBackground) => void
   setShowScaleBar: (value: boolean) => void
@@ -55,6 +58,7 @@ interface SettingsState {
   setMenuFontScale: (value: number) => void
   setVoiceFeedbackEnabled: (value: boolean) => void
   setShowStepCounter: (value: boolean) => void
+  setShowFontSliders: (value: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -77,6 +81,7 @@ export const useSettingsStore = create<SettingsState>()(
       menuFontScale: 100,       // Default 100%
       voiceFeedbackEnabled: false, // Off by default
       showStepCounter: false, // Hidden by default, can enable in settings
+      showFontSliders: false, // Hidden by default (boomer mode off)
 
       // Actions
       setDefaultBackground: (defaultBackground) => set({ defaultBackground }),
@@ -94,7 +99,8 @@ export const useSettingsStore = create<SettingsState>()(
       setPresetPanelFontScale: (presetPanelFontScale) => set({ presetPanelFontScale }),
       setMenuFontScale: (menuFontScale) => set({ menuFontScale }),
       setVoiceFeedbackEnabled: (voiceFeedbackEnabled) => set({ voiceFeedbackEnabled }),
-      setShowStepCounter: (showStepCounter) => set({ showStepCounter })
+      setShowStepCounter: (showStepCounter) => set({ showStepCounter }),
+      setShowFontSliders: (showFontSliders) => set({ showFontSliders })
     }),
     {
       name: 'detectorapp-settings',

@@ -2222,15 +2222,15 @@ export function Popup() {
           const typeInfo = dataProps.castle_type ? castleTypes[dataProps.castle_type] : null
           const typeLabel = typeInfo?.label || 'Kasteel'
 
-          // Type onder naam
-          html += `<br/><span class="text-sm text-purple-600">${typeLabel}</span>`
+          // Type onder naam - met proper spacing
+          html += `<div class="text-sm text-purple-600 mt-1">${typeLabel}</div>`
 
           if (dataProps.start_date) {
-            html += `<br/><span class="text-sm text-gray-500">Bouwjaar: ${dataProps.start_date}</span>`
+            html += `<div class="text-sm text-gray-500">Bouwjaar: ${dataProps.start_date}</div>`
           }
 
           if (dataProps.heritage) {
-            html += `<br/><span class="text-sm text-amber-600">Rijksmonument</span>`
+            html += `<div class="text-sm text-amber-600">Rijksmonument</div>`
           }
 
           // Wat zie je hier
@@ -2290,7 +2290,7 @@ export function Popup() {
             typeVondsten = 'Militaire voorwerpen, kogels, gespen, uniformonderdelen'
           }
 
-          html += `<br/><span class="text-sm text-gray-600">${typeLabel}</span>`
+          html += `<div class="text-sm text-gray-600 mt-1">${typeLabel}</div>`
 
           // Wat zie je hier
           html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat zie je hier?</span></div>`

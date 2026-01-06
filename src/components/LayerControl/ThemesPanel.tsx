@@ -17,6 +17,7 @@ export function ThemesPanel() {
   // Explicit selectors to ensure re-render on state change
   const layerPanelFontScale = useSettingsStore(state => state.layerPanelFontScale)
   const setLayerPanelFontScale = useSettingsStore(state => state.setLayerPanelFontScale)
+  const showFontSliders = useSettingsStore(state => state.showFontSliders)
 
   // Calculate font size based on panel-specific fontScale
   const baseFontSize = 13 * layerPanelFontScale / 100
@@ -60,22 +61,26 @@ export function ThemesPanel() {
                 <span className="font-medium text-white">Kaartlagen</span>
               </div>
               <div className="flex items-center gap-2">
-                {/* Font size slider */}
-                <span className="text-[10px] text-blue-200">T</span>
-                <input
-                  type="range"
-                  min="80"
-                  max="130"
-                  step="10"
-                  value={layerPanelFontScale}
-                  onInput={(e) => {
-                    setLayerPanelFontScale(parseInt((e.target as HTMLInputElement).value))
-                  }}
-                  onChange={(e) => setLayerPanelFontScale(parseInt(e.target.value))}
-                  className="w-20 opacity-70 hover:opacity-100 transition-opacity"
-                  title={`Tekstgrootte: ${layerPanelFontScale}%`}
-                />
-                <span className="text-xs text-blue-200">T</span>
+                {/* Font size slider - only if boomer mode enabled */}
+                {showFontSliders && (
+                  <>
+                    <span className="text-[10px] text-blue-200">T</span>
+                    <input
+                      type="range"
+                      min="80"
+                      max="130"
+                      step="10"
+                      value={layerPanelFontScale}
+                      onInput={(e) => {
+                        setLayerPanelFontScale(parseInt((e.target as HTMLInputElement).value))
+                      }}
+                      onChange={(e) => setLayerPanelFontScale(parseInt(e.target.value))}
+                      className="w-20 opacity-70 hover:opacity-100 transition-opacity"
+                      title={`Tekstgrootte: ${layerPanelFontScale}%`}
+                    />
+                    <span className="text-xs text-blue-200">T</span>
+                  </>
+                )}
                 <button
                   onClick={toggleThemesPanel}
                   className="p-0.5 rounded border-0 outline-none bg-blue-400/50 hover:bg-blue-400 transition-colors ml-1"

@@ -39,6 +39,7 @@ export function HamburgerMenu() {
   // Settings for font scale
   const menuFontScale = useSettingsStore(state => state.menuFontScale)
   const setMenuFontScale = useSettingsStore(state => state.setMenuFontScale)
+  const showFontSliders = useSettingsStore(state => state.showFontSliders)
 
   // Safe top position for mobile browsers (accounts for notch/status bar)
   const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
@@ -117,21 +118,23 @@ export function HamburgerMenu() {
               {/* Header with title and font size slider - blue bg, white text */}
               <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-blue-500">
                 <span className="font-medium text-white" style={{ fontSize: `${baseFontSize}px` }}>Menu</span>
-                <div className="flex items-center gap-1">
-                  <span className="text-[9px] text-blue-200">T</span>
-                  <input
-                    type="range"
-                    min="80"
-                    max="130"
-                    step="10"
-                    value={menuFontScale}
-                    onInput={(e) => setMenuFontScale(parseInt((e.target as HTMLInputElement).value))}
-                    onChange={(e) => setMenuFontScale(parseInt(e.target.value))}
-                    className="w-16 opacity-70 hover:opacity-100 transition-opacity"
-                    title={`Tekstgrootte: ${menuFontScale}%`}
-                  />
-                  <span className="text-[11px] text-blue-200">T</span>
-                </div>
+                {showFontSliders && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-[9px] text-blue-200">T</span>
+                    <input
+                      type="range"
+                      min="80"
+                      max="130"
+                      step="10"
+                      value={menuFontScale}
+                      onInput={(e) => setMenuFontScale(parseInt((e.target as HTMLInputElement).value))}
+                      onChange={(e) => setMenuFontScale(parseInt(e.target.value))}
+                      className="w-16 opacity-70 hover:opacity-100 transition-opacity"
+                      title={`Tekstgrootte: ${menuFontScale}%`}
+                    />
+                    <span className="text-[11px] text-blue-200">T</span>
+                  </div>
+                )}
               </div>
 
               {/* Google Login / Profile Section - NO border when logged out */}

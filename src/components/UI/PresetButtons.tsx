@@ -104,6 +104,7 @@ export function PresetButtons() {
   // Explicit selectors to ensure re-render on state change
   const presetPanelFontScale = useSettingsStore(state => state.presetPanelFontScale)
   const setPresetPanelFontScale = useSettingsStore(state => state.setPresetPanelFontScale)
+  const showFontSliders = useSettingsStore(state => state.showFontSliders)
 
   // Calculate font size based on panel-specific fontScale
   const baseFontSize = 12 * presetPanelFontScale / 100
@@ -225,24 +226,26 @@ export function PresetButtons() {
               {/* Header with title and font size slider - blue bg, white text */}
               <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-blue-500" style={{ fontSize: `${baseFontSize}px` }}>
                 <span className="font-medium text-white">Presets</span>
-                {/* Font size slider */}
-                <div className="flex items-center gap-1">
-                  <span className="text-[9px] text-blue-200">T</span>
-                  <input
-                    type="range"
-                    min="80"
-                    max="130"
-                    step="10"
-                    value={presetPanelFontScale}
-                    onInput={(e) => {
-                      setPresetPanelFontScale(parseInt((e.target as HTMLInputElement).value))
-                    }}
-                    onChange={(e) => setPresetPanelFontScale(parseInt(e.target.value))}
-                    className="w-16 opacity-70 hover:opacity-100 transition-opacity"
-                    title={`Tekstgrootte: ${presetPanelFontScale}%`}
-                  />
-                  <span className="text-[11px] text-blue-200">T</span>
-                </div>
+                {/* Font size slider - only if boomer mode enabled */}
+                {showFontSliders && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-[9px] text-blue-200">T</span>
+                    <input
+                      type="range"
+                      min="80"
+                      max="130"
+                      step="10"
+                      value={presetPanelFontScale}
+                      onInput={(e) => {
+                        setPresetPanelFontScale(parseInt((e.target as HTMLInputElement).value))
+                      }}
+                      onChange={(e) => setPresetPanelFontScale(parseInt(e.target.value))}
+                      className="w-16 opacity-70 hover:opacity-100 transition-opacity"
+                      title={`Tekstgrootte: ${presetPanelFontScale}%`}
+                    />
+                    <span className="text-[11px] text-blue-200">T</span>
+                  </div>
+                )}
               </div>
               <div className="p-2 max-h-[300px] overflow-y-auto">
                 {presets.map(preset => {

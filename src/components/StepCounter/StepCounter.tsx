@@ -85,7 +85,7 @@ export function StepCounter() {
 
   return (
     <motion.div
-      className="fixed bottom-[120px] right-2 z-[800]"
+      className="fixed bottom-[180px] right-2 z-[800]"
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
     >
