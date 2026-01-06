@@ -22,6 +22,7 @@ interface AuthState {
   setError: (error: string | null) => void
   setAccessToken: (token: string | null) => void
   signInWithGoogle: () => Promise<void>
+  connectGoogleFit: () => Promise<boolean>
   logout: () => Promise<void>
   initAuth: () => void
 }
@@ -63,15 +64,8 @@ export const useAuthStore = create<AuthState>()(
       set(state => { state.loading = true; state.error = null })
       try {
         const provider = new GoogleAuthProvider()
-        // Add Google Fit scope for step count access
-        provider.addScope('https://www.googleapis.com/auth/fitness.activity.read')
-        const result = await signInWithPopup(auth, provider)
-        // Get the access token for Google Fit API calls
-        const credential = GoogleAuthProvider.credentialFromResult(result)
-        if (credential?.accessToken) {
-          set(state => { state.accessToken = credential.accessToken || null })
-          console.log('🏃 Google Fit toegang verkregen')
-        }
+        // Basic login - no sensitive scopes
+        await signInWithPopup(auth, provider)
         // User will be set by onAuthStateChanged
       } catch (error: any) {
         console.error('Google sign-in error:', error)
@@ -79,6 +73,36 @@ export const useAuthStore = create<AuthState>()(
           state.error = error.message
           state.loading = false
         })
+      }
+    },
+
+    // Separate function to connect Google Fit (requires additional permission)
+    connectGoogleFit: async () => {
+      set(state => { state.loading = true; state.error = null })
+      try {
+        const provider = new GoogleAuthProvider()
+        // Add Google Fit scope - this will show the "unverified app" warning
+        provider.addScope('https://www.googleapis.com/auth/fitness.activity.read')
+        const result = await signInWithPopup(auth, provider)
+        // Get the access token for Google Fit API calls
+        const credential = GoogleAuthProvider.credentialFromResult(result)
+        if (credential?.accessToken) {
+          set(state => {
+            state.accessToken = credential.accessToken || null
+            state.loading = false
+          })
+          console.log('🏃 Google Fit gekoppeld')
+          return true
+        }
+        set(state => { state.loading = false })
+        return false
+      } catch (error: any) {
+        console.error('Google Fit connect error:', error)
+        set(state => {
+          state.error = error.message
+          state.loading = false
+        })
+        return false
       }
     },
 

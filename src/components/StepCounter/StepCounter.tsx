@@ -4,7 +4,7 @@ import { Footprints, Play, Pause, RotateCcw, ChevronUp, ChevronDown, RefreshCw }
 import { useStepCounterStore, detectStep, requestMotionPermission } from '../../store/stepCounterStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useAuthStore } from '../../store/authStore'
-import { getTodaySteps, hasGoogleFitAccess } from '../../services/googleFitService'
+import { getTodaySteps } from '../../services/googleFitService'
 
 // Google Fit icon
 function GoogleFitIcon({ size = 16, className = '' }: { size?: number; className?: string }) {
@@ -30,12 +30,14 @@ export function StepCounter() {
   const showStepCounter = useSettingsStore(state => state.showStepCounter)
   const accessToken = useAuthStore(state => state.accessToken)
   const user = useAuthStore(state => state.user)
+  const connectGoogleFit = useAuthStore(state => state.connectGoogleFit)
 
   const [isExpanded, setIsExpanded] = useState(false)
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null)
   const [googleFitSteps, setGoogleFitSteps] = useState<number | null>(null)
   const [googleFitLoading, setGoogleFitLoading] = useState(false)
   const [googleFitError, setGoogleFitError] = useState<string | null>(null)
+  const [connectingFit, setConnectingFit] = useState(false)
 
   // Format distance nicely
   const formatDistance = (meters: number) => {
@@ -78,12 +80,28 @@ export function StepCounter() {
     }
   }, [accessToken])
 
-  // Fetch Google Fit steps on mount and when expanded
+  // Fetch Google Fit steps on mount and when expanded (only if connected)
   useEffect(() => {
-    if (isExpanded && accessToken && googleFitSteps === null) {
+    if (isExpanded && accessToken && googleFitSteps === null && !googleFitError) {
       fetchGoogleFitSteps()
     }
-  }, [isExpanded, accessToken, googleFitSteps, fetchGoogleFitSteps])
+  }, [isExpanded, accessToken, googleFitSteps, googleFitError, fetchGoogleFitSteps])
+
+  // Handle connecting Google Fit
+  const handleConnectGoogleFit = async () => {
+    setConnectingFit(true)
+    setGoogleFitError(null)
+    try {
+      const success = await connectGoogleFit()
+      if (success) {
+        // Will trigger fetchGoogleFitSteps via useEffect
+      }
+    } catch (error) {
+      setGoogleFitError('Koppelen mislukt')
+    } finally {
+      setConnectingFit(false)
+    }
+  }
 
   // Handle device motion events
   const handleMotion = useCallback((event: DeviceMotionEvent) => {
@@ -211,27 +229,36 @@ export function StepCounter() {
                     <span className="text-gray-500">Google Fit:</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {googleFitLoading ? (
+                    {!accessToken ? (
+                      // Not connected - show connect button
+                      <button
+                        onClick={handleConnectGoogleFit}
+                        disabled={connectingFit}
+                        className="text-xs text-blue-500 hover:underline disabled:opacity-50"
+                      >
+                        {connectingFit ? 'Koppelen...' : 'Koppelen'}
+                      </button>
+                    ) : googleFitLoading ? (
                       <RefreshCw size={12} className="animate-spin text-blue-500" />
                     ) : googleFitError ? (
                       <span className="text-xs text-red-400">{googleFitError}</span>
                     ) : googleFitSteps !== null ? (
-                      <span className="font-medium text-blue-600">{googleFitSteps.toLocaleString()}</span>
+                      <>
+                        <span className="font-medium text-blue-600">{googleFitSteps.toLocaleString()}</span>
+                        <button
+                          onClick={fetchGoogleFitSteps}
+                          className="p-0.5 hover:bg-gray-100 rounded"
+                          title="Vernieuwen"
+                        >
+                          <RefreshCw size={10} className="text-gray-400" />
+                        </button>
+                      </>
                     ) : (
                       <button
                         onClick={fetchGoogleFitSteps}
                         className="text-xs text-blue-500 hover:underline"
                       >
                         Ophalen
-                      </button>
-                    )}
-                    {googleFitSteps !== null && !googleFitLoading && (
-                      <button
-                        onClick={fetchGoogleFitSteps}
-                        className="p-0.5 hover:bg-gray-100 rounded"
-                        title="Vernieuwen"
-                      >
-                        <RefreshCw size={10} className="text-gray-400" />
                       </button>
                     )}
                   </div>
