@@ -242,6 +242,86 @@ Ouders die met kinderen op ontdekking gaan. De app maakt geschiedenis tastbaar e
 
 ---
 
+## 🎨 POPUP STYLING STANDAARD - AMK ALS REFERENTIE!
+
+### Referentie: AMK Monumenten popup (Popup.tsx:293-312)
+
+**Dit is DE standaard voor alle popups. Nooit afwijken!**
+
+### 1. Titel/Header (bold, donkere kleur)
+```html
+<strong class="text-{color}-800">Titel</strong>
+```
+- Altijd `text-{color}-800` (donkere tint)
+- Kleur past bij thema (purple voor archeologie, amber voor steentijd, red voor militair, etc.)
+
+### 2. Naam/Subtitle (bold, geen kleur)
+```html
+<br/><span class="text-sm font-semibold">Naam</span>
+```
+- `text-sm` = kleine tekst
+- `font-semibold` = dikgedrukt
+- Geen kleurclass = standaard grijs
+
+### 3. Type/Categorie label (gekleurde label)
+```html
+<br/><span class="text-sm text-{color}-700">Type label</span>
+```
+- `text-sm` = kleine tekst (NOOIT text-xs voor type labels!)
+- `text-{color}-700` = medium tint (NOOIT -600!)
+- Voorbeelden: `text-purple-700`, `text-amber-700`, `text-green-700`
+
+### 4. Extra metadata (subtiel)
+```html
+<br/><span class="text-xs text-gray-500">Extra info</span>
+```
+- `text-xs` = extra kleine tekst
+- `text-gray-500` = lichtgrijs
+- Voor: jaartallen, locaties, technische codes
+
+### 5. Beschrijving (blok met margin)
+```html
+<br/><span class="text-xs text-gray-600 mt-1 block">Beschrijving</span>
+```
+- `text-xs text-gray-600` = klein, donkergrijs
+- `mt-1 block` = kleine marge boven, blok-element
+- `italic` voor labels/tags
+
+### 6. Sectie header
+```html
+<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Sectie titel</span></div>
+```
+- `mt-3` = grotere marge boven
+- `text-sm font-semibold text-gray-800` = kleine dikke tekst, bijna zwart
+
+### 7. Sectie content
+```html
+<div class="text-sm text-gray-700 mt-1">Sectie inhoud</div>
+```
+- `text-sm text-gray-700` = klein, donkergrijs
+- `mt-1` = kleine marge boven
+
+### 8. Links
+```html
+<a href="..." target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Link tekst</a>
+```
+- `text-blue-600 hover:underline` = blauwe link met onderstreping bij hover
+- Altijd `target="_blank" rel="noopener noreferrer"` voor externe links
+
+---
+
+### ❌ VEELGEMAAKTE FOUTEN - NOOIT DOEN!
+
+| Fout | Correct |
+|------|---------|
+| `<div class="text-sm text-purple-600 mt-1">` | `<br/><span class="text-sm text-purple-700">` |
+| `<br/><span class="text-xs text-green-600">` | `<br/><span class="text-sm text-green-700">` |
+| `<strong>${name}</strong>` (geen kleur) | `<strong class="text-{color}-800">${name}</strong>` |
+| `text-{color}-600` voor type labels | `text-{color}-700` |
+| `text-xs` voor type labels | `text-sm` |
+
+---
+
 ## 📝 POPUP KWALITEITSSTANDAARD - KRITISCH!
 
 ### Wat NIET mag:

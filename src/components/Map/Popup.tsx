@@ -2087,20 +2087,20 @@ export function Popup() {
                            dataProps.leisure === 'park' ? 'Park' :
                            dataProps.leisure === 'swimming_area' ? 'Zwemplek' : null
           if (typeLabel) {
-            html += `<br/><span class="text-xs text-green-600">${typeLabel}</span>`
+            html += `<br/><span class="text-sm text-green-700">${typeLabel}</span>`
           }
         }
         // Musea (OSM data) - only show type if we have a real name
         if ((dataProps.tourism === 'museum' || dataProps.museum) && dataProps.name) {
-          html += `<br/><span class="text-xs text-purple-600">Museum</span>`
+          html += `<br/><span class="text-sm text-purple-700">Museum</span>`
         }
         // Strandjes/Zwemplekken (OSM data) - only show type if we have a real name
         if ((dataProps.leisure === 'swimming_area' || dataProps.sport === 'swimming') && dataProps.name) {
-          html += `<br/><span class="text-xs text-cyan-600">Zwemplek</span>`
+          html += `<br/><span class="text-sm text-cyan-700">Zwemplek</span>`
         }
         // Kringloopwinkels (OSM data)
         if (dataProps.osm_id && dataProps.address !== undefined) {
-          html += `<br/><span class="text-xs text-lime-600">Kringloopwinkel</span>`
+          html += `<br/><span class="text-sm text-lime-700">Kringloopwinkel</span>`
           if (dataProps.address) {
             html += `<br/><span class="text-xs text-gray-500">${dataProps.address}</span>`
           }
@@ -2222,15 +2222,15 @@ export function Popup() {
           const typeInfo = dataProps.castle_type ? castleTypes[dataProps.castle_type] : null
           const typeLabel = typeInfo?.label || 'Kasteel'
 
-          // Type onder naam - met proper spacing
-          html += `<div class="text-sm text-purple-600 mt-1">${typeLabel}</div>`
+          // Type onder naam - met proper spacing (AMK standaard: text-sm text-{color}-700)
+          html += `<br/><span class="text-sm text-purple-700">${typeLabel}</span>`
 
           if (dataProps.start_date) {
-            html += `<div class="text-sm text-gray-500">Bouwjaar: ${dataProps.start_date}</div>`
+            html += `<br/><span class="text-xs text-gray-500">Bouwjaar: ${dataProps.start_date}</span>`
           }
 
           if (dataProps.heritage) {
-            html += `<div class="text-sm text-amber-600">Rijksmonument</div>`
+            html += `<br/><span class="text-sm text-amber-700">Rijksmonument</span>`
           }
 
           // Wat zie je hier
@@ -2290,7 +2290,7 @@ export function Popup() {
             typeVondsten = 'Militaire voorwerpen, kogels, gespen, uniformonderdelen'
           }
 
-          html += `<div class="text-sm text-gray-600 mt-1">${typeLabel}</div>`
+          html += `<br/><span class="text-sm text-amber-700">${typeLabel}</span>`
 
           // Wat zie je hier
           html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat zie je hier?</span></div>`
