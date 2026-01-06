@@ -9,6 +9,7 @@ import { useMapStore } from '../../store'
 import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
 import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondstenStore'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
+import { ROMEINSE_FORTEN_INFO, GENERIEK_FORT_INFO, FORT_TYPE_LABELS } from '../../data/romeinseFortenInfo'
 import type { MapBrowserEvent } from 'ol'
 
 // Register RD New projection
@@ -481,6 +482,7 @@ export function Popup() {
         }
 
         // Archeo Onderzoeken (RCE) - archaeological research locations
+        // Nu met ondersteuning voor meerdere overlappende onderzoeken
         if (title === 'Archeo Onderzoeken') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -488,60 +490,93 @@ export function Popup() {
             const buffer = 100
             const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
 
-            const url = `https://data.geo.cultureelerfgoed.nl/openbaar/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=archeologische_onderzoeksmeldingen_openbaar_rd&QUERY_LAYERS=archeologische_onderzoeksmeldingen_openbaar_rd&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+            // Request more features with FEATURE_COUNT parameter
+            const url = `https://data.geo.cultureelerfgoed.nl/openbaar/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=archeologische_onderzoeksmeldingen_openbaar_rd&QUERY_LAYERS=archeologische_onderzoeksmeldingen_openbaar_rd&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}&FEATURE_COUNT=20`
 
             const response = await fetch(url)
             const data = await response.json()
 
             if (data.features && data.features.length > 0) {
-              const props = data.features[0].properties
-              let html = `<strong class="text-blue-800">Archeologisch Onderzoek</strong>`
+              // Process EACH feature as a separate popup
+              for (const feature of data.features) {
+                const props = feature.properties
+                let html = `<strong class="text-blue-800">Archeologisch Onderzoek</strong>`
 
-              // Research type with explanation
-              const onderzoekType = props.type_onderzoek || ''
-              if (onderzoekType) {
-                html += `<br/><span class="text-sm font-semibold text-blue-700">${onderzoekType}</span>`
-              }
-              if (props.onderzoeksmeldingnummer) {
-                html += `<br/><span class="text-xs text-gray-500">Melding: ${props.onderzoeksmeldingnummer}</span>`
-              }
-              if (props.uitvoerder) {
-                html += `<br/><span class="text-sm text-gray-700">Uitvoerder: ${props.uitvoerder}</span>`
-              }
-              if (props.startdatum || props.einddatum) {
-                const periode = [props.startdatum, props.einddatum].filter(Boolean).join(' - ')
-                html += `<br/><span class="text-xs text-gray-600">Periode: ${periode}</span>`
-              }
-              if (props.gemeente) {
-                html += `<br/><span class="text-xs text-gray-500">${props.gemeente}</span>`
-              }
+                // Research type with explanation
+                const onderzoekType = props.type_onderzoek || ''
+                if (onderzoekType) {
+                  html += `<br/><span class="text-sm font-semibold text-blue-700">${onderzoekType}</span>`
+                }
 
-              // Wat betekent dit?
-              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat betekent dit?</span></div>`
-              if (onderzoekType.toLowerCase().includes('opgraving')) {
-                html += `<div class="text-sm text-gray-700 mt-1">Hier is een archeologische opgraving gedaan. Professionele archeologen hebben vondsten en sporen gedocumenteerd en geborgen.</div>`
-              } else if (onderzoekType.toLowerCase().includes('bureauonderzoek')) {
-                html += `<div class="text-sm text-gray-700 mt-1">Een bureauonderzoek naar de archeologische verwachting op basis van historische bronnen en kaarten.</div>`
-              } else if (onderzoekType.toLowerCase().includes('booronderzoek')) {
-                html += `<div class="text-sm text-gray-700 mt-1">Met boringen is onderzocht wat er in de grond zit. Vaak de eerste stap om te bepalen of er verder onderzoek nodig is.</div>`
-              } else if (onderzoekType.toLowerCase().includes('proefsleuven')) {
-                html += `<div class="text-sm text-gray-700 mt-1">Proefsleuven zijn gegraven om te kijken of er archeologische sporen in de grond zitten.</div>`
-              } else {
-                html += `<div class="text-sm text-gray-700 mt-1">Op deze locatie is archeologisch onderzoek uitgevoerd. De resultaten zijn opgeslagen in het landelijke archief.</div>`
+                // Project naam als beschikbaar
+                const projectNaam = props.projectnaam || props.project_naam || props.naam || ''
+                if (projectNaam) {
+                  html += `<br/><span class="text-sm text-gray-800">${projectNaam}</span>`
+                }
+
+                if (props.onderzoeksmeldingnummer) {
+                  html += `<br/><span class="text-xs text-gray-500 font-mono">OM: ${props.onderzoeksmeldingnummer}</span>`
+                }
+                if (props.uitvoerder) {
+                  html += `<br/><span class="text-sm text-gray-700">Uitvoerder: ${props.uitvoerder}</span>`
+                }
+                if (props.startdatum || props.einddatum) {
+                  const periode = [props.startdatum, props.einddatum].filter(Boolean).join(' - ')
+                  html += `<br/><span class="text-xs text-gray-600">Periode: ${periode}</span>`
+                }
+                if (props.gemeente) {
+                  html += `<br/><span class="text-xs text-gray-500">${props.gemeente}</span>`
+                }
+
+                // Periodes/dateringen gevonden
+                const periodes: string[] = []
+                if (props.periode_paleolithicum) periodes.push('Paleolithicum')
+                if (props.periode_mesolithicum) periodes.push('Mesolithicum')
+                if (props.periode_neolithicum) periodes.push('Neolithicum')
+                if (props.periode_bronstijd) periodes.push('Bronstijd')
+                if (props.periode_ijzertijd) periodes.push('IJzertijd')
+                if (props.periode_romeins) periodes.push('Romeins')
+                if (props.periode_middeleeuwen) periodes.push('Middeleeuwen')
+                if (props.periode_nieuwe_tijd) periodes.push('Nieuwe tijd')
+                if (periodes.length > 0) {
+                  html += `<br/><span class="text-sm text-purple-700">Datering: ${periodes.join(', ')}</span>`
+                }
+
+                // Wat betekent dit?
+                html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat betekent dit?</span></div>`
+                if (onderzoekType.toLowerCase().includes('opgraving')) {
+                  html += `<div class="text-sm text-gray-700 mt-1">Hier is een archeologische opgraving gedaan. Professionele archeologen hebben vondsten en sporen gedocumenteerd en geborgen.</div>`
+                } else if (onderzoekType.toLowerCase().includes('bureauonderzoek')) {
+                  html += `<div class="text-sm text-gray-700 mt-1">Een bureauonderzoek naar de archeologische verwachting op basis van historische bronnen en kaarten.</div>`
+                } else if (onderzoekType.toLowerCase().includes('booronderzoek')) {
+                  html += `<div class="text-sm text-gray-700 mt-1">Met boringen is onderzocht wat er in de grond zit. Vaak de eerste stap om te bepalen of er verder onderzoek nodig is.</div>`
+                } else if (onderzoekType.toLowerCase().includes('proefsleuven')) {
+                  html += `<div class="text-sm text-gray-700 mt-1">Proefsleuven zijn gegraven om te kijken of er archeologische sporen in de grond zitten.</div>`
+                } else if (onderzoekType.toLowerCase().includes('begeleiding')) {
+                  html += `<div class="text-sm text-gray-700 mt-1">Archeologische begeleiding bij graafwerk. Een archeoloog was aanwezig om te controleren of er vondsten naar boven kwamen.</div>`
+                } else if (onderzoekType.toLowerCase().includes('inventariserend')) {
+                  html += `<div class="text-sm text-gray-700 mt-1">Verkennend onderzoek om te bepalen of er archeologische resten in de grond kunnen zitten.</div>`
+                } else {
+                  html += `<div class="text-sm text-gray-700 mt-1">Op deze locatie is archeologisch onderzoek uitgevoerd. De resultaten zijn opgeslagen in het landelijke archief.</div>`
+                }
+
+                // Interesse voor detectoristen
+                html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Interessant voor detectie?</span></div>`
+                html += `<div class="text-sm text-gray-700 mt-1 italic">Onderzoekslocaties kunnen interessant zijn: archeologen vinden vaak niet alles. Maar check altijd eerst of je daar mag zoeken.</div>`
+
+                // Meer weten - met directe link naar het rapport
+                html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Rapport opzoeken</span></div>`
+                if (props.onderzoeksmeldingnummer) {
+                  // Direct link naar EASY archief met onderzoeksmeldingnummer
+                  const omNummer = props.onderzoeksmeldingnummer
+                  html += `<div class="text-sm text-gray-700 mt-1"><a href="https://easy.dans.knaw.nl/ui/datasets?q=${encodeURIComponent(omNummer)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek rapport in DANS-EASY</a></div>`
+                  html += `<div class="text-sm text-gray-700 mt-1"><a href="https://archis.cultureelerfgoed.nl/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek in ARCHIS</a></div>`
+                }
+                // Bibliotheek voor Archeologie link
+                html += `<div class="text-sm text-gray-700 mt-1"><a href="https://bibliotheek.cultureelerfgoed.nl/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Bibliotheek voor Archeologie</a></div>`
+
+                results.push(html)
               }
-
-              // Interesse voor detectoristen
-              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Interessant voor detectie?</span></div>`
-              html += `<div class="text-sm text-gray-700 mt-1 italic">Onderzoekslocaties kunnen interessant zijn: archeologen vinden vaak niet alles. Maar check altijd eerst of je daar mag zoeken.</div>`
-
-              // Meer weten
-              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Meer weten?</span></div>`
-              if (props.onderzoeksmeldingnummer) {
-                html += `<div class="text-sm text-gray-700 mt-1"><a href="https://archis.cultureelerfgoed.nl/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek in ARCHIS</a> <span class="text-gray-400">(melding ${props.onderzoeksmeldingnummer})</span></div>`
-              }
-              html += `<div class="text-sm text-gray-700 mt-1"><a href="https://nl.wikipedia.org/wiki/Archeologisch_onderzoek" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Wikipedia: Archeologisch onderzoek</a></div>`
-
-              results.push(html)
             }
           } catch (error) {
             console.warn('Archeo Onderzoeken WMS query failed:', error)
@@ -1750,6 +1785,55 @@ export function Popup() {
           continue
         }
 
+        // Geïmporteerde lagen (GeoJSON/KML/GPX) - nette popup met alle properties
+        if (dataProps.layerType === 'importedLayer') {
+          const layerName = dataProps.layerName || 'Geïmporteerde laag'
+          const layerColor = dataProps.layerColor || '#8b5cf6'
+
+          // Skip the system properties, show user data
+          const skipProps = ['layerType', 'layerId', 'layerName', 'layerColor', 'featureIndex', 'geometry']
+
+          // Find a good name for the feature
+          const featureName = dataProps.name || dataProps.Name || dataProps.naam || dataProps.title ||
+                             dataProps.NAAM || dataProps.NAME || dataProps.label || dataProps.description || 'Feature'
+
+          let html = `<strong style="color: ${layerColor}">${featureName}</strong>`
+          html += `<br/><span class="text-xs text-gray-500">${layerName}</span>`
+
+          // Show all other properties
+          const userProps = Object.entries(dataProps).filter(([key]) => !skipProps.includes(key) && key !== 'name' && key !== 'Name')
+
+          if (userProps.length > 0) {
+            html += `<div class="mt-2 space-y-1">`
+            for (const [key, value] of userProps) {
+              if (value !== null && value !== undefined && value !== '') {
+                // Format the key nicely
+                const formattedKey = key
+                  .replace(/_/g, ' ')
+                  .replace(/([a-z])([A-Z])/g, '$1 $2')
+                  .replace(/^./, str => str.toUpperCase())
+
+                // Format the value
+                let formattedValue = String(value)
+                if (formattedValue.length > 200) {
+                  formattedValue = formattedValue.substring(0, 200) + '...'
+                }
+
+                // Check if it's a URL
+                if (formattedValue.startsWith('http://') || formattedValue.startsWith('https://')) {
+                  html += `<div class="text-sm"><span class="text-gray-500">${formattedKey}:</span> <a href="${formattedValue}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">Link</a></div>`
+                } else {
+                  html += `<div class="text-sm"><span class="text-gray-500">${formattedKey}:</span> <span class="text-gray-700">${formattedValue}</span></div>`
+                }
+              }
+            }
+            html += `</div>`
+          }
+
+          collectedContents.push(html)
+          continue
+        }
+
         // Check if this is an AMK feature - use local data (no WMS needed)
         if (dataProps.kwaliteitswaarde && dataProps.kwaliteitswaarde.includes('archeologische waarde')) {
           const amkHtml = formatAMKPopup(dataProps)
@@ -1757,8 +1841,81 @@ export function Popup() {
           continue
         }
 
+        // Romeinse Forten (GeoJSON) - uitgebreide popup met historische context
+        if (dataProps.layerType === 'romeinsFort' || dataProps.layerType === 'romeinsFortLijn') {
+          const fortNaam = dataProps.Name || dataProps.name || ''
+          const beschrijving = dataProps.description || ''
+
+          // Zoek specifieke info voor dit fort
+          const fortInfo = ROMEINSE_FORTEN_INFO[fortNaam] || null
+
+          // Bepaal of er specifieke info is of dat we generieke info moeten gebruiken
+          const info = fortInfo || GENERIEK_FORT_INFO
+
+          // Header
+          let fortHtml = `<strong class="text-red-800">${fortInfo ? info.naam : fortNaam || 'Romeins Fort'}</strong>`
+
+          // Latijnse naam als beschikbaar
+          if (fortInfo?.latinNaam && fortInfo.latinNaam !== info.naam) {
+            fortHtml += `<br/><span class="text-sm text-red-600 italic">${fortInfo.latinNaam}</span>`
+          }
+
+          // Type en periode
+          fortHtml += `<br/><span class="text-sm text-gray-600">${FORT_TYPE_LABELS[info.type] || info.type}</span>`
+          fortHtml += `<br/><span class="text-xs text-gray-500">${info.periode}</span>`
+
+          // Als het een lijn (fortomtrek) is, toon speciale tekst
+          if (dataProps.layerType === 'romeinsFortLijn') {
+            fortHtml += `<br/><span class="text-xs text-red-700 mt-1">📍 Gereconstrueerde fortomtrek</span>`
+          }
+
+          // Beschrijving sectie
+          fortHtml += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Over dit fort</span></div>`
+          fortHtml += `<div class="text-sm text-gray-700 mt-1">${info.beschrijving}</div>`
+
+          // Wat was hier
+          fortHtml += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat was hier?</span></div>`
+          fortHtml += `<div class="text-sm text-gray-700 mt-1">${info.watWasHier}</div>`
+
+          // Wat is er nu nog te zien
+          fortHtml += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat is er nu nog te zien?</span></div>`
+          fortHtml += `<div class="text-sm text-gray-700 mt-1">${info.watTeZien}</div>`
+
+          // Verwachte vondsten
+          fortHtml += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat kun je hier vinden?</span></div>`
+          fortHtml += `<div class="text-sm text-gray-700 mt-1">${info.verwachteVondsten}</div>`
+
+          // Betekenis
+          fortHtml += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Historische betekenis</span></div>`
+          fortHtml += `<div class="text-sm text-gray-700 mt-1">${info.betekenis}</div>`
+
+          // Bronnen
+          if (fortInfo?.bronnen && fortInfo.bronnen.length > 0) {
+            fortHtml += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Bronnen</span></div>`
+            fortHtml += `<div class="text-sm text-gray-700 mt-1">`
+            fortInfo.bronnen.forEach(bron => {
+              // Extract domain name for display
+              const domain = bron.replace(/^https?:\/\//, '').split('/')[0]
+              fortHtml += `<a href="${bron}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline block">${domain}</a>`
+            })
+            fortHtml += `</div>`
+          } else {
+            // Generieke Wikipedia link
+            fortHtml += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Meer weten?</span></div>`
+            fortHtml += `<div class="text-sm text-gray-700 mt-1"><a href="https://nl.wikipedia.org/wiki/Limes_(Romeinse_Rijk)" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Wikipedia: Romeinse Limes</a></div>`
+          }
+
+          // Originele beschrijving uit GeoJSON als extra info (alleen als geen specifieke info)
+          if (!fortInfo && beschrijving) {
+            fortHtml += `<div class="mt-3"><span class="text-xs text-gray-500 italic">${beschrijving}</span></div>`
+          }
+
+          collectedContents.push(fortHtml)
+          continue
+        }
+
         // Try to find a title/name - with better fallbacks for OSM data
-        let name = dataProps.name || dataProps.naam || dataProps.title ||
+        let name = dataProps.name || dataProps.Name || dataProps.naam || dataProps.title ||
                    dataProps.NAAM || dataProps.NAME || dataProps.label ||
                    dataProps.route_name || dataProps.road_name
 

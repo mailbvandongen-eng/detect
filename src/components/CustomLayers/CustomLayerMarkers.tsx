@@ -159,8 +159,13 @@ export function CustomLayerMarkers() {
 
         const feature = new Feature({
           geometry,
-          properties: geoJsonFeature.properties,
+          // Copy all original properties for popup display
+          ...geoJsonFeature.properties,
+          // Add layer identification for popup handling
+          layerType: 'importedLayer',
           layerId: layer.id,
+          layerName: layer.name,
+          layerColor: layer.color,
           featureIndex: index
         })
 

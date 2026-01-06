@@ -1,0 +1,608 @@
+{
+  "type": "FeatureCollection",
+  "name": "romeinse_forten",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Berg - Tomveld",
+        "description": "Villa, mogelijk militair gebruikt"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.501812,
+          50.784054
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Berg - Trappenberg",
+        "description": "Vroeg Romeins kamp, later villa of boerderij."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.484722,
+          50.787586
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Blariacum",
+        "description": "Mogelijk locatie van het castellum van Blariacum."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.160036,
+          51.371403
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Fortificatie Bodegraven",
+        "description": "Op deze plek bevond zich waarschijnlijk een Romeinse wachtpost."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.745169,
+          52.083538
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Lugdunum",
+        "description": "Castellum Lugdunum Batavorum"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.395193,
+          52.211674
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Wachttoren Bunnik",
+        "description": "Wachttoren Bunnik, locatie niet precies"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.213551,
+          52.06041
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Carvium",
+        "description": "Castellum Carvium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.089258,
+          51.869232
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castra Hunnerberg",
+        "description": "Castra Hunnerberg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.886784,
+          51.840843
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Caestert",
+        "description": "Belgian fortress, perhaps the site of Ambiorix victory"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.688186,
+          50.805473
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Ceuclum",
+        "description": "Hier was ter controle van de brug over de maas een militaire versterking."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.882674,
+          51.729595
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Driel?",
+        "description": "Castellum Driel?"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.826745,
+          51.960854
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Duiven - Loowaard",
+        "description": "Castellum Duiven / Loowaard"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.987549,
+          51.917725
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Grinnes",
+        "description": "Rossum was mogelijk in de Romeinse tijd Grinnes."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.349698,
+          51.80162
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Wachttoren Heumen",
+        "description": "Wachttoren Heumen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.869855,
+          51.792454
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Op de Hoge Woerd",
+        "description": "Castellum op de Hoge Woerd"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.041287,
+          52.086704
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Huissen?",
+        "description": "Castellum Huissen?"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.939591,
+          51.935791
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Kessel-Lith",
+        "description": "Castellum uit laat-Romeinse tijd"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.401722,
+          51.810295
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Carvo",
+        "description": "Mogelijk een versterking nabij Kesteren"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.560155,
+          51.935467
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Kops Plateau",
+        "description": "Castellum Kops Plateau"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.893597,
+          51.837185
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Maastricht",
+        "description": "Laat-Romeinse versterking centrum Maastricht"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.693764,
+          50.848305
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Mannaricium",
+        "description": "Doorgaans wordt hier Castellum Mannaricium vermoed."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.419564,
+          51.962254
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Meinerswijk",
+        "description": "Castellum Meinerswijk"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.87454,
+          51.972652
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Vlootbasis Naaldwijk",
+        "description": "Mogelijke locatie vlootbasis Naaldwijk"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.206465,
+          51.982403
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Minifort Ockenburg",
+        "description": "Minifort Ockenburg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.20999,
+          52.056477
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Oostvoorne",
+        "description": "Roman castle at the estuary of the rivers Waal and Meuse, destroyed by the sea."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.114638,
+          51.93095
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Randwijk",
+        "description": "Castellum Randwijk, bestaan en locatie onzeker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.710444,
+          51.954422
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Roompot",
+        "description": "Limes fort"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.727332,
+          51.588932
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Versterking Scheveningseweg",
+        "description": "In deze omgeving wordt een minifort zoals bij Ockenburg vermoed."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.279518,
+          52.099098
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Tongeren - Sacramentstraat",
+        "description": "Vroeg Romeins kamp, later boerderij"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.466871,
+          50.785419
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Traiectum",
+        "description": "Castellum Traiectum"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.1223,
+          52.090984
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Castellum Praetorium Agrippinae",
+        "description": "Castellum Praetorium Agrippinae"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.433091,
+          52.180328
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Valkenburg-Marktveld, mini-castellum",
+        "description": "Mini-castellum met wachttoren"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.436957,
+          52.174446
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Nijmegen, Valkhof",
+        "description": "Laat-antiek fort"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.869751,
+          51.848343
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Fectio",
+        "description": "Fectio, castellum uit 4 of 5 n.Chr."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.161857,
+          52.057743
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Stenen wachttoren Vleuterweide",
+        "description": "Stenen wachtoren uit ongeveer 150 n.Chr."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.005077,
+          52.091503
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Wachttoren a",
+        "description": "Wachttoren"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.997162,
+          52.090801
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Wachttoren b",
+        "description": "Wachttoren"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.023706,
+          52.08046
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Wachttoren c",
+        "description": "Wachttoren"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.05119,
+          52.094559
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Levefanum",
+        "description": "Vermoedde versterking Wijk bij Duurstede"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          5.361414,
+          51.96759
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Laurum",
+        "description": "Castellum Laurium"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.883954,
+          52.085808
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Nigrum Pullum",
+        "description": "Minifort Nigrum Pullum"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.715951,
+          52.105114
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Zwammerdam-Rijksstraatweg",
+        "description": "Mogelijke militaire nederzetting"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.73571,
+          52.095951
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Kastell Aachen",
+        "description": "Laat-Romeins Kastell Aachen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          6.083866,
+          50.77644
+        ]
+      }
+    }
+  ]
+}

@@ -53,7 +53,8 @@
       "WebFetch(domain:game-icons.net)",
       "WebFetch(domain:freesvg.org)",
       "WebFetch(domain:www.routezoeker.com)",
-      "WebFetch(domain:data.geo.cultureelerfgoed.nl)"
+      "WebFetch(domain:data.geo.cultureelerfgoed.nl)",
+      "Bash(copy:*)"
     ]
   }
 }

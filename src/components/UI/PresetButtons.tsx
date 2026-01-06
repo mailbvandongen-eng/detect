@@ -50,7 +50,7 @@ const ALL_OVERLAYS = [
   'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
   // Archeologie
   'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
-  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Kastelen', 'IKAW', 'Archeo Landschappen',
+  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen', 'Kastelen', 'IKAW', 'Archeo Landschappen',
   // Erfgoed
   'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Essen', 'Ruïnes',
   // Militair
@@ -73,7 +73,7 @@ const ALL_OVERLAYS = [
   // Percelen
   'Gewaspercelen', 'Kadastrale Grenzen',
   // Provinciale Waardenkaarten - Zuid-Holland
-  'Scheepswrakken', 'Woonheuvels ZH', 'Romeinse Forten', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen',
+  'Scheepswrakken', 'Woonheuvels ZH', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen',
   // Provinciale Waardenkaarten - Gelderland
   'Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken',
   // Provinciale Waardenkaarten - Zeeland

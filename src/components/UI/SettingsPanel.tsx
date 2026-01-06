@@ -277,25 +277,24 @@ export function SettingsPanel() {
                     </div>
                   </Section>
 
-                  {/* Eigen Lagen */}
-                  <Section title="Eigen Lagen" icon={<Upload size={16} />}>
+                  {/* Lagen importeren */}
+                  <Section title="Lagen importeren" icon={<Upload size={16} />}>
                     <div className="space-y-1">
-                      {customLayers.length === 0 ? (
-                        <p className="text-gray-500 py-1" style={{ fontSize: '0.75em' }}>
-                          Nog geen eigen lagen geïmporteerd.
-                        </p>
-                      ) : (
-                        customLayers.map(layer => (
-                          <CustomLayerItem key={layer.id} layer={layer} />
-                        ))
+                      {customLayers.length > 0 && (
+                        <>
+                          {customLayers.map(layer => (
+                            <CustomLayerItem key={layer.id} layer={layer} />
+                          ))}
+                          <div className="border-t border-gray-100 my-2" />
+                        </>
                       )}
                       <button
                         onClick={() => setImportModalOpen(true)}
-                        className="flex items-center gap-2 mt-2 px-2 py-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors border-0 outline-none w-full"
+                        className="flex items-center gap-2 px-2 py-1.5 text-cyan-600 hover:bg-cyan-50 rounded transition-colors border-0 outline-none w-full"
                         style={{ fontSize: '0.9em' }}
                       >
                         <Plus size={14} />
-                        <span>Laag importeren</span>
+                        <span>Nieuwe laag importeren</span>
                       </button>
                       <p className="text-gray-400 mt-1" style={{ fontSize: '0.7em' }}>
                         GeoJSON, KML (Google My Maps), GPX

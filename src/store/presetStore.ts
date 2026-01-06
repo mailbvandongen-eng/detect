@@ -48,14 +48,14 @@ const BUILT_IN_PRESETS: Preset[] = [
     // Percelen belangrijk voor nederzettingspatronen
     // Romeinse wegen en forten
     layers: [
-      'Romeinse wegen (regio)', 'Romeinse Forten', 'AMK Romeins', 'AMK Vroege ME',
+      'Romeinse wegen (regio)', 'Romeinse Forten', 'Romeinse Forten Lijnen', 'AMK Romeins', 'AMK Vroege ME',
       'Gewaspercelen', 'Kadastrale Grenzen'
     ],
     isBuiltIn: false
   },
   {
     id: 'midlaat-nieuwetijd',
-    name: 'Mid laat',
+    name: 'Mid laat - Nieuwe tijd',
     icon: 'Grid',
     // Historische structuren en erfgoed
     layers: [
@@ -106,7 +106,7 @@ const ALL_OVERLAYS = [
   'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
   // Archeologie
   'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
-  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Kastelen', 'IKAW', 'Archeo Landschappen',
+  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen', 'Kastelen', 'IKAW', 'Archeo Landschappen',
   // Erfgoed
   'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Essen',
   // Militair
@@ -128,7 +128,7 @@ const ALL_OVERLAYS = [
   // Percelen
   'Gewaspercelen', 'Kadastrale Grenzen',
   // Provinciale Waardenkaarten - Zuid-Holland
-  'Scheepswrakken', 'Woonheuvels ZH', 'Romeinse Forten', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen',
+  'Scheepswrakken', 'Woonheuvels ZH', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen',
   // Provinciale Waardenkaarten - Gelderland
   'Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken',
   // Provinciale Waardenkaarten - Zeeland
@@ -206,10 +206,10 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 8,
+      version: 9,
       migrate: (persistedState: unknown, version: number) => {
-        // v2.27.1: Presets hernoemd (Romeins - Mid vroeg, Mid laat)
-        if (version < 8) {
+        // v2.27.2: Romeinse Forten GeoJSON + preset hernoemd naar "Mid laat - Nieuwe tijd"
+        if (version < 9) {
           // Force reset all presets to new defaults
           return {
             presets: [...BUILT_IN_PRESETS]

@@ -1,14 +1,17 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRef, useEffect } from 'react'
-import { X, Layers, Check } from 'lucide-react'
+import { X, Layers, Check, Upload } from 'lucide-react'
 import { useUIStore, useSettingsStore } from '../../store'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
+import { useCustomLayerStore } from '../../store/customLayerStore'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
+import { CustomLayerItem } from '../CustomLayers/CustomLayerItem'
 
 export function ThemesPanel() {
-  const { themesPanelOpen, toggleThemesPanel } = useUIStore()
+  const { themesPanelOpen, toggleThemesPanel, toggleSettingsPanel } = useUIStore()
   const { layers: customLayers, toggleVisibility } = useCustomPointLayerStore()
+  const importedLayers = useCustomLayerStore(state => state.layers)
   const panelRef = useRef<HTMLDivElement>(null)
 
   // Explicit selectors to ensure re-render on state change
@@ -116,6 +119,25 @@ export function ThemesPanel() {
               </div>
             )}
 
+            {/* Geïmporteerde lagen - section with teal/cyan header */}
+            {importedLayers.length > 0 && (
+              <div className="mb-2 pb-1 border-b border-gray-100">
+                <div className="flex items-center gap-1 py-0.5 px-1 mb-1">
+                  <Upload size={12} className="text-cyan-600" />
+                  <span className="text-cyan-600 font-medium" style={{ fontSize: '0.9em' }}>Geïmporteerde lagen</span>
+                </div>
+                {importedLayers.map(layer => (
+                  <CustomLayerItem key={layer.id} layer={layer} compact />
+                ))}
+                <button
+                  onClick={() => { toggleThemesPanel(); toggleSettingsPanel() }}
+                  className="w-full text-left py-1 pl-3 text-xs text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50 transition-colors"
+                >
+                  + Laag importeren...
+                </button>
+              </div>
+            )}
+
             {/* Basislaag - vaste sectie zonder pijltje */}
             <div className="mb-2">
               <div className="flex items-center gap-1 py-1 px-1 mb-1">
@@ -154,7 +176,7 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Archaeological Layers */}
-              <LayerGroup title="Archeologische lagen" defaultExpanded={false} layerNames={['AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig', 'Archeo Onderzoeken', 'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'IKAW', 'Archeo Landschappen', 'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling']}>
+              <LayerGroup title="Archeologische lagen" defaultExpanded={false} layerNames={['AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig', 'Archeo Onderzoeken', 'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen', 'IKAW', 'Archeo Landschappen', 'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling']}>
                 <LayerItem name="AMK Monumenten" type="overlay" />
                 {/* AMK per periode */}
                 <LayerGroup title="AMK per periode" defaultExpanded={false} layerNames={['AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig']}>
@@ -165,8 +187,17 @@ export function ThemesPanel() {
                   <LayerItem name="AMK Overig" type="overlay" />
                 </LayerGroup>
                 <LayerItem name="Archeo Onderzoeken" type="overlay" />
-                <LayerItem name="Romeinse wegen (regio)" type="overlay" />
-                <LayerItem name="Romeinse wegen (Wereld)" type="overlay" />
+                {/* Romeinse tijd - wegen en forten */}
+                <LayerGroup title="Romeinse tijd" defaultExpanded={false} layerNames={['Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen']}>
+                  <LayerGroup title="Romeinse wegen" defaultExpanded={false} layerNames={['Romeinse wegen (regio)', 'Romeinse wegen (Wereld)']}>
+                    <LayerItem name="Romeinse wegen (regio)" type="overlay" />
+                    <LayerItem name="Romeinse wegen (Wereld)" type="overlay" />
+                  </LayerGroup>
+                  <LayerGroup title="Romeinse forten" defaultExpanded={false} layerNames={['Romeinse Forten', 'Romeinse Forten Lijnen']}>
+                    <LayerItem name="Romeinse Forten" type="overlay" />
+                    <LayerItem name="Romeinse Forten Lijnen" type="overlay" />
+                  </LayerGroup>
+                </LayerGroup>
                 <LayerItem name="IKAW" type="overlay" />
                 <LayerItem name="Archeo Landschappen" type="overlay" />
                 {/* Uiterwaarden verwachtingen */}
@@ -221,12 +252,11 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Provinciale Thema's */}
-              <LayerGroup title="Provinciale Thema's" defaultExpanded={false} layerNames={['Scheepswrakken', 'Woonheuvels ZH', 'Romeinse Forten', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen', 'Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken', 'Verdronken Dorpen']}>
+              <LayerGroup title="Provinciale Thema's" defaultExpanded={false} layerNames={['Scheepswrakken', 'Woonheuvels ZH', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen', 'Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken', 'Verdronken Dorpen']}>
                 {/* Zuid-Holland */}
-                <LayerGroup title="Zuid-Holland" defaultExpanded={false} layerNames={['Scheepswrakken', 'Woonheuvels ZH', 'Romeinse Forten', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen']}>
+                <LayerGroup title="Zuid-Holland" defaultExpanded={false} layerNames={['Scheepswrakken', 'Woonheuvels ZH', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen']}>
                   <LayerItem name="Scheepswrakken" type="overlay" />
                   <LayerItem name="Woonheuvels ZH" type="overlay" />
-                  <LayerItem name="Romeinse Forten" type="overlay" />
                   <LayerItem name="Windmolens" type="overlay" />
                   <LayerItem name="Erfgoedlijnen" type="overlay" />
                   <LayerItem name="Oude Kernen" type="overlay" />

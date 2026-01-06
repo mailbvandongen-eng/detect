@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
-import { useLayerStore } from '../../store'
+import { useLayerStore, useSubscriptionStore } from '../../store'
+import { layerRegistry } from '../../layers/layerRegistry'
 
 interface Props {
   title: string
@@ -14,20 +15,33 @@ export function LayerGroup({ title, children, defaultExpanded = true, layerNames
   const [expanded, setExpanded] = useState(defaultExpanded)
   const visible = useLayerStore(state => state.visible)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
+  const isLayerUnlocked = useSubscriptionStore(state => state.isLayerUnlocked)
 
-  // Count active layers in this group
-  const activeCount = layerNames?.filter(name => visible[name]).length || 0
-  const totalCount = layerNames?.length || 0
+  // Helper to check if a layer is unlocked (free or user has subscription)
+  const isUnlocked = (name: string) => {
+    const layerDef = layerRegistry[name]
+    const tier = layerDef?.tier ?? 'free'
+    const regions = layerDef?.regions ?? ['nl']
+    return isLayerUnlocked(name, tier, regions)
+  }
+
+  // Filter to only unlocked layers for counting and toggling
+  const unlockedLayers = layerNames?.filter(name => isUnlocked(name)) || []
+
+  // Count active layers in this group (only unlocked ones)
+  const activeCount = unlockedLayers.filter(name => visible[name]).length
+  const totalCount = unlockedLayers.length
   const allActive = totalCount > 0 && activeCount === totalCount
   const someActive = activeCount > 0 && activeCount < totalCount
 
-  // Toggle all layers in this group
+  // Toggle all UNLOCKED layers in this group (skip premium/locked layers)
   const toggleAllLayers = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!layerNames) return
+    if (!layerNames || unlockedLayers.length === 0) return
 
     const newState = !allActive
-    layerNames.forEach(name => {
+    // Only toggle unlocked layers
+    unlockedLayers.forEach(name => {
       setLayerVisibility(name, newState)
     })
   }
