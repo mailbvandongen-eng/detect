@@ -148,6 +148,13 @@ export const useLayerStore = create<LayerState>()(
       'Archeo Landschappen': 0.5,
       'Essen': 0.6,
       'Terpen': 0.7,
+      // AMK Monumenten - alle perioden
+      'AMK Monumenten': 0.45,
+      'AMK Romeins': 0.6,
+      'AMK Steentijd': 0.6,
+      'AMK Vroege ME': 0.6,
+      'AMK Late ME': 0.6,
+      'AMK Overig': 0.6,
       // Paleokaarten
       'Paleokaart 9000 v.Chr.': 0.7,
       'Paleokaart 5500 v.Chr.': 0.7,

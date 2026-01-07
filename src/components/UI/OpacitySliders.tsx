@@ -22,6 +22,13 @@ const OPACITY_LAYERS = [
   { name: 'Archeo Landschappen', color: 'green', default: 0.5 },
   { name: 'Terpen', color: 'orange', default: 0.7 },
   { name: 'Essen', color: 'amber', default: 0.6 },
+  // AMK Monumenten - alle perioden
+  { name: 'AMK Monumenten', color: 'purple', default: 0.45 },
+  { name: 'AMK Romeins', color: 'red', default: 0.6 },
+  { name: 'AMK Steentijd', color: 'amber', default: 0.6 },
+  { name: 'AMK Vroege ME', color: 'green', default: 0.6 },
+  { name: 'AMK Late ME', color: 'blue', default: 0.6 },
+  { name: 'AMK Overig', color: 'purple', default: 0.6 },
   // Paleokaarten
   { name: 'Paleokaart 9000 v.Chr.', color: 'indigo', default: 0.7 },
   { name: 'Paleokaart 5500 v.Chr.', color: 'indigo', default: 0.7 },
