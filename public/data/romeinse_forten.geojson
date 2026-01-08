@@ -641,8 +641,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          4.5017,
-          52.1512
+          4.4975,
+          52.1583
         ]
       }
     },
@@ -650,13 +650,13 @@
       "type": "Feature",
       "properties": {
         "Name": "Corbulo",
-        "description": "Castellum bij Voorburg, nabij Kanaal van Corbulo (Fossa Corbulonis) en Forum Hadriani."
+        "description": "Forum Hadriani bij Voorburg (Park Arentsburgh). Noordelijkste Romeinse stad van Europa."
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          4.3644,
-          52.0718
+          4.3558,
+          52.0685
         ]
       }
     }
