@@ -196,6 +196,8 @@ export function Popup() {
     const saved = localStorage.getItem('popupTextScale')
     return saved ? parseInt(saved) : 100
   })
+  // Popup height: 'half' (50vh) or 'full' (90vh)
+  const [popupHeight, setPopupHeight] = useState<'half' | 'full'>('half')
 
   // Save text scale to localStorage
   const handleTextScaleChange = (value: number) => {
@@ -3157,6 +3159,7 @@ export function Popup() {
 
   const handleClose = () => {
     setVisible(false)
+    setPopupHeight('half') // Reset to half height for next popup
     // Clear height map when closing popup
     if (map && showingHeightMap) {
       clearParcelHighlight(map)
@@ -3165,9 +3168,23 @@ export function Popup() {
   }
 
   const handleDragEnd = (_: any, info: PanInfo) => {
-    // Close if dragged down more than 100px
-    if (info.offset.y > 100) {
-      handleClose()
+    const velocity = info.velocity.y
+    const offset = info.offset.y
+
+    if (popupHeight === 'half') {
+      // In half mode: swipe up → full, swipe down → close
+      if (offset < -50 || velocity < -500) {
+        // Swipe up → expand to full
+        setPopupHeight('full')
+      } else if (offset > 100 || velocity > 500) {
+        // Swipe down → close
+        handleClose()
+      }
+    } else {
+      // In full mode: swipe down → back to half
+      if (offset > 50 || velocity > 300) {
+        setPopupHeight('half')
+      }
     }
   }
 
@@ -3186,19 +3203,22 @@ export function Popup() {
 
           {/* Bottom Sheet */}
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-[1501] bg-white rounded-t-2xl shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 z-[1501] bg-white rounded-t-2xl shadow-2xl overflow-hidden flex flex-col"
             style={{ fontSize: `${14 * textScale / 100}px` }}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
+            initial={{ height: '50vh' }}
+            animate={{ height: popupHeight === 'full' ? '90vh' : '50vh' }}
+            exit={{ height: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             drag="y"
-            dragConstraints={{ top: 0 }}
-            dragElastic={0.2}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.3}
             onDragEnd={handleDragEnd}
           >
-            {/* Drag handle */}
-            <div className="flex justify-center pt-2 pb-1">
+            {/* Drag handle - clickable to toggle height */}
+            <div
+              className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing"
+              onClick={() => setPopupHeight(popupHeight === 'half' ? 'full' : 'half')}
+            >
               <div className="w-10 h-1 bg-gray-300 rounded-full" />
             </div>
 
@@ -3416,13 +3436,13 @@ export function Popup() {
 
             {/* Content - scrollable, without title */}
             <div
-              className="px-4 py-3 max-h-[45vh] overflow-y-auto select-text"
+              className={`px-4 py-3 overflow-y-auto select-text flex-1 ${popupHeight === 'full' ? 'max-h-[75vh]' : 'max-h-[35vh]'}`}
               style={{ userSelect: 'text', WebkitUserSelect: 'text' }}
               dangerouslySetInnerHTML={{ __html: contentWithoutTitle }}
             />
 
             {/* Font size slider */}
-            <div className="px-4 py-2 border-t border-gray-100 flex items-center gap-2">
+            <div className="px-4 py-2 border-t border-gray-100 flex items-center gap-2 flex-shrink-0">
               <Type size={14} className="text-gray-400 flex-shrink-0" />
               <input
                 type="range"
@@ -3437,7 +3457,7 @@ export function Popup() {
 
             {/* Edit/Delete buttons for vondsten */}
             {isVondst && currentVondstId && !editingVondst && (
-              <div className="px-4 pb-4 flex gap-2">
+              <div className="px-4 pb-4 flex gap-2 flex-shrink-0">
                 <button
                   onClick={() => {
                     const vondst = vondsten.find(v => v.id === currentVondstId)
@@ -3464,7 +3484,7 @@ export function Popup() {
 
             {/* Inline edit form for vondsten */}
             {editingVondst && (
-              <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3">
+              <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3 flex-shrink-0 overflow-y-auto max-h-[40vh]">
                 <div className="text-sm font-medium text-blue-600">Vondst bewerken</div>
                 <div>
                   <label className="text-xs text-gray-500">Objecttype</label>
