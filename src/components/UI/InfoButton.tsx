@@ -163,17 +163,70 @@ function InfoTab() {
         <h3 className="font-semibold text-gray-800 mb-2">Privacy & Opslag</h3>
         <div className="text-gray-600 space-y-2">
           <p>
-            <strong>Locatiegegevens:</strong> Alleen voor navigatie, niet opgeslagen of gedeeld.
+            <strong>Volledig anoniem mogelijk:</strong> Je kunt deze app gebruiken zonder enige registratie of login. Al je data blijft dan 100% op je eigen apparaat.
           </p>
           <p>
-            <strong>Geen tracking:</strong> Geen analytics, cookies of gebruiksstatistieken.
+            <strong>Geen tracking:</strong> Deze app verzamelt geen analytics, cookies, gebruiksstatistieken of persoonlijke gegevens. Er is geen server die je gedrag registreert.
           </p>
           <p>
-            <strong>Lokale opslag:</strong> Standaard blijft alle data op je apparaat.
+            <strong>Locatiegegevens:</strong> Je GPS-positie wordt alleen gebruikt om je locatie op de kaart te tonen. Deze wordt niet opgeslagen of gedeeld met derden.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h3 className="font-semibold text-gray-800 mb-2">Google Login - Wat betekent het?</h3>
+        <div className="text-gray-600 space-y-2">
+          <p className="font-medium text-green-700">
+            ✓ Google login is volledig optioneel
           </p>
           <p>
-            <strong>Google sync (optioneel):</strong> Met Google login worden lagen en vondsten veilig gesynchroniseerd. Alleen jij hebt toegang.
+            <strong>Wat wordt gesynchroniseerd:</strong>
           </p>
+          <ul className="list-disc list-inside ml-2 text-xs space-y-1">
+            <li>Je eigen aangemaakte lagen (Mijn Lagen)</li>
+            <li>Je vondsten registraties</li>
+            <li>Je preset-instellingen</li>
+          </ul>
+          <p>
+            <strong>Wat NIET wordt gedeeld:</strong>
+          </p>
+          <ul className="list-disc list-inside ml-2 text-xs space-y-1">
+            <li>Je GPS-locatie wordt niet opgeslagen in de cloud</li>
+            <li>Je zoekgeschiedenis wordt niet bewaard</li>
+            <li>Welke kaartlagen je bekijkt wordt niet geregistreerd</li>
+            <li>Niemand anders kan je data zien - alleen jij</li>
+          </ul>
+          <p>
+            <strong>Waarom inloggen?</strong> Alleen voor synchronisatie tussen apparaten (telefoon/tablet/PC) en als backup voor je vondsten.
+          </p>
+          <p className="text-xs text-gray-500 italic">
+            Tip: Gebruik de app gerust zonder login als je privacy belangrijker vindt dan synchronisatie. Alle functies werken ook offline.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h3 className="font-semibold text-gray-800 mb-2">Zonder login (anoniem)</h3>
+        <div className="text-gray-600 space-y-2">
+          <p className="font-medium text-blue-700">
+            ✓ 95% van de functies werkt zonder login
+          </p>
+          <p><strong>Beschikbaar zonder login:</strong></p>
+          <ul className="list-disc list-inside ml-2 text-xs space-y-1">
+            <li>Alle 70+ kaartlagen bekijken</li>
+            <li>GPS tracking en navigatie</li>
+            <li>Vondsten registreren (lokaal opgeslagen)</li>
+            <li>Eigen lagen aanmaken (lokaal opgeslagen)</li>
+            <li>Export naar Excel/CSV/GeoJSON/GPX/KML</li>
+            <li>Lagen importeren</li>
+            <li>Alle presets en instellingen</li>
+          </ul>
+          <p><strong>Alleen met login:</strong></p>
+          <ul className="list-disc list-inside ml-2 text-xs space-y-1">
+            <li>Synchronisatie tussen apparaten</li>
+            <li>Cloud backup van je vondsten</li>
+          </ul>
         </div>
       </section>
     </>
