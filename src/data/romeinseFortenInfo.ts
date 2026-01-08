@@ -32,13 +32,17 @@ export const ROMEINSE_FORTEN_INFO: Record<string, RomeinsFortInfo> = {
     naam: 'Traiectum',
     latinNaam: 'Traiectum',
     type: 'castellum',
-    periode: 'ca. 47 - 270 n.Chr.',
-    beschrijving: 'Romeins castellum op de plek van het huidige Utrecht. De naam betekent "oversteekplaats" - hier stak de belangrijke noord-zuidroute de Rijn over via een brug of veerpont. Klein fort voor enkele honderden soldaten. De Domkerk staat deels op Romeinse fundamenten. Onder het Domplein zijn bij opgravingen resten gevonden. Bij de brug werden ritueel munten geofferd aan de rivier. Later groeide Traiectum uit tot de middeleeuwse bisschopsstad Utrecht. Vondsten: Centraal Museum Utrecht.',
-    watWasHier: 'Klein castellum dat de rivieroversteek bewaakte. Brug of veerpont over de Rijn. Belangrijke noord-zuidroute.',
-    watTeZien: 'Domkerk staat op Romeinse fundamenten. Centraal Museum toont vondsten. Onder Domplein zijn resten gevonden.',
-    verwachteVondsten: 'Munten (veel geofferd bij de brug), sieraden, aardewerk, bouwmateriaal, bronzen voorwerpen.',
-    betekenis: 'Belangrijk knooppunt waar landweg de rivier kruiste. Oorsprong van de stad Utrecht.',
-    bronnen: ['https://www.livius.org/articles/place/traiectum-utrecht/']
+    periode: 'ca. 42 - 275 n.Chr.',
+    beschrijving: 'Romeins castellum onder het huidige Domplein in Utrecht. De naam betekent "doorwaadbare plaats" - hier splitsten Rijn en Vecht. Het fort (124x152m in laatste fase) bood plaats aan ca. 500 soldaten. Vijf bouwfases: eerst hout, na 200 n.Chr. steen met tufsteen uit de Eifel. Cohors II Hispanorum peditata (Spaanse infanterie) was hier uniek gelegerd 88-275 n.Chr. - hun dakpanstempels zijn nergens anders aan de Limes gevonden! Het fort werd verwoest tijdens de Bataafse Opstand (69 n.Chr.). DOMunder onder het Domplein toont de opgegraven resten. UNESCO Werelderfgoed sinds 2021.',
+    watWasHier: 'Castellum (500 soldaten) bij riviersplitsing. Cohors II Hispanorum gelegerd.',
+    watTeZien: 'DOMunder onder het Domplein: opgravingen te bezoeken. Principia en poorten blootgelegd.',
+    verwachteVondsten: 'Dakpannen met stempels, munten, aardewerk, tufsteen bouwmateriaal, militaria.',
+    betekenis: 'UNESCO Werelderfgoed. Oorsprong van de stad Utrecht.',
+    bronnen: [
+      'https://www.livius.org/articles/place/traiectum-utrecht/',
+      'https://www.utrechtaltijd.nl/verhalen/castellum-traiectum-een-romeinse-legerbasis-in-het-hart-van-de-domstad/',
+      'https://www.romeinen.nl/locatie-overzicht/3447271878/domunder-castellum-traiectum'
+    ]
   },
   'Laurum': {
     naam: 'Laurum',
@@ -56,25 +60,33 @@ export const ROMEINSE_FORTEN_INFO: Record<string, RomeinsFortInfo> = {
     naam: 'Praetorium Agrippinae',
     latinNaam: 'Praetorium Agrippinae',
     type: 'castellum',
-    periode: 'ca. 40 - 270 n.Chr.',
-    beschrijving: 'Romeins castellum in Valkenburg (Zuid-Holland), vernoemd naar keizerin Agrippina, moeder van Nero. Een van de best onderzochte forten aan de Nederlandse Limes door uitgebreide opgravingen sinds 1941. Het fort werd minstens 6 keer herbouwd na overstromingen en branden. Garnizoen van hulptroepen (auxilia), geen legionairs. Werkplaatsen, opslagruimtes en een haven aan de Rijn. Inscripties gevonden die eenheden noemen. Veel informatie over dagelijks soldatenleven. Te bezoeken: Archeologisch Steunpunt Valkenburg.',
-    watWasHier: 'Middelgroot castellum met hulptroepen. Minstens 6x herbouwd. Werkplaatsen, opslag en haven.',
-    watTeZien: 'Archeologisch Steunpunt Valkenburg. Delen opgegraven en beschermd.',
-    verwachteVondsten: 'Militaire uitrusting, importaardewerk uit Rijnland en Gallië, munten, inscripties, bouwmateriaal.',
-    betekenis: 'Best onderzochte fort aan de Rijn. Veel informatie over dagelijks soldatenleven.',
-    bronnen: ['https://www.livius.org/articles/place/praetorium-agrippinae-valkenburg/']
+    periode: 'ca. 40 - 275 n.Chr.',
+    beschrijving: 'Een van de best opgegraven Romeinse locaties van Nederland. Het castellum werd gesticht in de winter van 39/40 n.Chr. door keizer Caligula, vernoemd naar zijn moeder Vipsania Agrippina. Een opgegraven wijnvat bevatte wijn van de persoonlijke wijngaarden van de keizer! Er zijn 7 bouwfasen gevonden, 6 van hout en de laatste van steen - uniek compleet inzicht in Romeinse bouwtechnieken. Cohors III Gallorum equitata was hier gelegerd. Bij opgravingen (1941-1953) zijn door het grondwater veel organische vondsten bewaard: voedselresten, leer, touw. De vicus buiten het fort strekte zich 1 km uit met 700+ graven. Op het Castellumplein zijn de contouren in brons gemarkeerd.',
+    watWasHier: 'Castellum met 7 bouwfasen. Vicus (1 km) met 700+ graven. Detachement Cohors III Gallorum.',
+    watTeZien: 'Castellumplein met bronzen markeringen. Torenmuseum Valkenburg. Gereconstrueerde poort.',
+    verwachteVondsten: 'Militaria, organisch materiaal (voedsel, leer, touw), aardewerk, munten, inscripties.',
+    betekenis: 'Best gedocumenteerde Romeinse fort van Nederland. UNESCO Werelderfgoed.',
+    bronnen: [
+      'https://www.livius.org/articles/place/praetorium-agrippinae-valkenburg-zh/',
+      'https://www.geschiedenisvanzuidholland.nl/zien-en-doen/locaties/praetorium-agrippinae-in-valkenburg/',
+      'https://oudvalkenburgzh.nl/torenmuseum-5/'
+    ]
   },
   'Castra Hunnerberg': {
     naam: 'Castra Hunnerberg',
     latinNaam: 'Castra',
     type: 'legerkamp',
-    periode: 'ca. 19 v.Chr. - 70 n.Chr.',
-    beschrijving: 'Enorm Romeins legerkamp op de Hunnerberg bij Nijmegen - 42 hectare, een van de grootste ten noorden van de Alpen. Hier waren tijdelijk twee complete legioenen gestationeerd (Legio X Gemina en anderen): circa 10.000 soldaten. Uitvalsbasis voor veldtochten naar Germanië onder Augustus en Tiberius. De wallen zijn nog zichtbaar in het landschap. Vondsten van hoge kwaliteit: legioensinsignes, wapens, munten van Augustus. Later vervangen door het permanente castellum op de Hunerberg. Museum Het Valkhof toont de rijke vondsten.',
-    watWasHier: 'Reusachtig legerkamp voor 2 legioenen (10.000 soldaten). Uitvalsbasis voor Germaanse oorlogen.',
-    watTeZien: 'Wallen zichtbaar in landschap op Hunnerberg. Museum Het Valkhof met vele vondsten.',
-    verwachteVondsten: 'Hoogwaardige militaria, legioenstempels, munten van Augustus/Tiberius, wapens, helmen.',
-    betekenis: 'Belangrijkste vroeg-Romeinse legerbasis in Nederland. Startpunt Germaanse veldtochten.',
-    bronnen: ['https://www.livius.org/articles/place/noviomagus-nijmegen-hunnerberg/']
+    periode: 'ca. 16 v.Chr. - 104 n.Chr.',
+    beschrijving: 'Enorm Romeins legerkamp op de Hunnerberg bij Nijmegen - 42 hectare (80 voetbalvelden), ruimte voor 12.000 man. De enige plek in Nederland waar echte legioenen (geen hulptroepen) verbleven! Na de Bataafse Opstand (69 n.Chr.) vestigde Legio X Gemina Pia Fidelis zich hier - opgericht door Julius Caesar en het bekendste legioen van Nederland. De afkorting LXG is talloze keren gevonden op dakpannen en tegels. Bij opgravingen zijn ruim 1000 fragmenten militaire uitrusting en paardentuig gevonden. In 104 n.Chr. vertrok het legioen naar de Balkan - een ramp voor de economie. UNESCO Werelderfgoed sinds 2021, omschreven als "bakermat van de Nederduitse Limes".',
+    watWasHier: 'Legerkamp voor 12.000 man. Legio X Gemina (71-104 n.Chr.), opgericht door Julius Caesar.',
+    watTeZien: 'Museum Het Valkhof. Museum Kam in de Hunnerberg. Grafvelden in Nijmegen-Oost.',
+    verwachteVondsten: 'Legioenstempels LXG, militaria, paardentuig, dakpannen, munten, grafstenen.',
+    betekenis: 'UNESCO Werelderfgoed. Bakermat van de Limes. Enige legioenskamp in Nederland.',
+    bronnen: [
+      'https://www.livius.org/articles/place/noviomagus-nijmegen-hunnerberg/',
+      'https://www.welkominnijmegen.nl/pages/geschiedenis/de-romeinen-in-nijmegen/de-legerkampen.php',
+      'https://mijngelderland.nl/inhoud/specials/archeokroniek/romeinse-militaire-uitrusting-en-paardentuig-van-de-hunerberg-te-nijmegen'
+    ]
   },
   'Castellum Kops Plateau': {
     naam: 'Kops Plateau',
@@ -113,16 +125,19 @@ export const ROMEINSE_FORTEN_INFO: Record<string, RomeinsFortInfo> = {
     bronnen: ['https://www.hogewoerd.nl']
   },
   'Lugdunum': {
-    naam: 'Lugdunum Batavorum',
-    latinNaam: 'Lugdunum Batavorum',
-    type: 'castellum',
+    naam: 'Lugdunum',
+    latinNaam: 'Lugdunum',
+    type: 'vlootbasis',
     periode: 'ca. 40 - 270 n.Chr.',
-    beschrijving: 'Romeins castellum bij Katwijk aan de Noordzeekust - het westelijkste fort van de gehele Limes. Hier mondde de Rijn uit in zee. Het fort bewaakte de riviermonding en was startpunt voor zeereizen naar Britannia. Er stond ook een vuurtoren (pharos). Helaas is het fort door kustafslag in zee verdwenen. Na stormen spoelen soms vondsten aan op het strand van Katwijk. Munten, aardewerk en militaria. Het Rijksmuseum van Oudheden in Leiden toont vondsten. De Brittenburg, lang zichtbaar bij laag water, was waarschijnlijk deel van dit complex.',
-    watWasHier: 'Castellum bij Rijnmonding met vuurtoren. Startpunt zeereizen naar Britannia.',
-    watTeZien: 'Fort verdwenen in zee. Rijksmuseum van Oudheden Leiden toont vondsten.',
-    verwachteVondsten: 'Na stormen: munten, aardewerk, militaria op strand Katwijk.',
-    betekenis: 'Westelijk eindpunt Limes. Verbinding met Britannia.',
-    bronnen: ['https://www.livius.org/articles/place/lugdunum-batavorum-katwijk/']
+    beschrijving: 'Romeinse vlootbasis en versterkte graanopslagplaats bij de monding van de Rijn, het westelijkste punt van de gehele Limes. Hier stond mogelijk een enorme vuurtoren (ca. 60m hoog) naar model van de Pharos van Ostia - vissers noemden deze "Kalla\'s toren" (Caligula). Door de vele dakpannen van de Romeinse vloot wordt aangenomen dat dit een vlootbasis was. Het fort is door kustafslag in zee verdwenen. Bij stormen in 1520, 1552 en 1562 waren de ruïnes van de "Brittenburg" zichtbaar op het strand; de laatst gedateerde vondst was 270 n.Chr. Het Rijksmuseum van Oudheden in Leiden toont vondsten. De beroemde kaart van Ortelius toont hoe het eruit zag.',
+    watWasHier: 'Vlootbasis met vuurtoren bij Rijnmonding. Graanopslag voor Britannia.',
+    watTeZien: 'Fort verdwenen in zee. RMO Leiden toont vondsten en kaart van Ortelius.',
+    verwachteVondsten: 'Na stormen: munten, aardewerk, militaria. Fort zelf onbereikbaar in Noordzee.',
+    betekenis: 'Westelijk eindpunt van de Limes. Verbinding met Britannia.',
+    bronnen: [
+      'https://www.livius.org/articles/place/lugdunum-katwijk/',
+      'https://nl.wikipedia.org/wiki/Lugdunum_(Katwijk)'
+    ]
   },
   'Vlootbasis Naaldwijk': {
     naam: 'Vlootbasis Naaldwijk',
@@ -254,25 +269,33 @@ export const ROMEINSE_FORTEN_INFO: Record<string, RomeinsFortInfo> = {
     naam: 'Matilo',
     latinNaam: 'Matilo',
     type: 'castellum',
-    periode: 'ca. 40 - 270 n.Chr.',
-    beschrijving: 'Romeins castellum bij Leiden-Roomburg aan de Oude Rijn. Garnizoen van hulptroepen (auxilia). Het fort had de standaard rechthoekige plattegrond met poorten aan vier zijden. Buiten de muren lag een vicus met handelaren, ambachtslieden en soldatenfamilies. Bij opgravingen zijn grafvelden gevonden met crematies en bijgiften. De locatie Roomburg ("Romeinse burcht") verwijst naar de Romeinse oorsprong. Rijksmuseum van Oudheden in Leiden toont vondsten. Matilo is onderdeel van de UNESCO Werelderfgoed Limes.',
-    watWasHier: 'Standaard castellum met vicus en grafvelden. Hulptroepen gestationeerd.',
-    watTeZien: 'Locatie Roomburg. Rijksmuseum van Oudheden Leiden.',
+    periode: 'ca. 70 - 260 n.Chr.',
+    beschrijving: 'Romeins castellum bij Leiden-Roomburg, gebouwd na de Bataafse Opstand (69-70 n.Chr.) op een strategische plek aan de monding van het Kanaal van Corbulo. Het gigantische fort (80x120m) bood plaats aan ca. 500 soldaten en is een van de best bewaarde castella in Nederland. De archeologische resten liggen grotendeels intact onder Archeologisch Park Matilo. In het park staan 6 replica-wachttorens en een aarden wal die de omtrek van het fort visualiseert. Het fort werd tussen 240-260 n.Chr. opgeheven. De locatie Roomburg ("Romeinse burcht") verwijst naar de oorsprong. UNESCO Werelderfgoed sinds 2021.',
+    watWasHier: 'Groot castellum (500 soldaten) bij monding Kanaal van Corbulo. Vicus buiten de muren.',
+    watTeZien: 'Archeologisch Park Matilo met 6 wachttoren-replica\'s en aarden wal. Rijksmuseum van Oudheden.',
     verwachteVondsten: 'Militaria, grafgiften, crematie-urnen, aardewerk, munten, fibulae.',
-    betekenis: 'UNESCO Werelderfgoed. Plaatsnaam Roomburg verwijst naar fort.',
-    bronnen: []
+    betekenis: 'UNESCO Werelderfgoed. Een van de best bewaarde castella van Nederland.',
+    bronnen: [
+      'https://parkmatilo.nl/het-verhaal-van-matilo/',
+      'https://www.limeswerelderfgoed.nl/locaties/2016475046/archeologisch-park-matilo',
+      'https://www.romeinen.nl/locatie-overzicht/2016475046/archeologisch-park-matilo'
+    ]
   },
   'Corbulo': {
-    naam: 'Corbulo',
-    latinNaam: 'Fossa Corbulonis',
-    type: 'castellum',
-    periode: 'ca. 40 - 270 n.Chr.',
-    beschrijving: 'Romeins castellum bij Voorburg, nabij het Kanaal van Corbulo (Fossa Corbulonis). Dit kanaal verbond de Rijn met de Maas en werd rond 47 n.Chr. gegraven door generaal Corbulo om troepen sneller te kunnen verplaatsen. Het fort bewaakte dit strategische kanaal. In de buurt lag ook Forum Hadriani, de enige Romeinse stad in Nederland met stadsrechten. Vondsten wijzen op zowel militaire als civiele activiteit. Museon in Den Haag toont de geschiedenis. Het kanaal is nog steeds traceerbaar in het landschap als de Vliet.',
-    watWasHier: 'Fort bij Kanaal van Corbulo. Nabij Forum Hadriani (Romeinse stad).',
-    watTeZien: 'Kanaal traceerbaar als Vliet. Museon Den Haag.',
-    verwachteVondsten: 'Militaria, civiel aardewerk, munten, bouwmateriaal van stad.',
-    betekenis: 'Bewaakte strategisch kanaal. Nabij enige Romeinse stad in Nederland.',
-    bronnen: []
+    naam: 'Forum Hadriani',
+    latinNaam: 'Forum Hadriani (Municipium Aelium Cananefatium)',
+    type: 'versterking',
+    periode: 'ca. 70 - 270 n.Chr.',
+    beschrijving: 'Forum Hadriani bij Voorburg was de noordelijkste Romeinse stad van het Europese continent en de enige stad met stadsrechten in Nederland. Gesticht rond 70 n.Chr. aan het Kanaal van Corbulo (34 km, verbinding Rijn-Maas). Keizer Hadrianus verleende in 121 n.Chr. marktrechten en gaf de stad zijn naam. Rond 150 n.Chr. kreeg het stadsrechten (Municipium). De stad had ca. 1000 inwoners, een stadsmuur met dubbele gracht, stenen gebouwen en tempels. Park Arentsburgh markeert de locatie. UNESCO Werelderfgoed sinds 2021. De eerste wetenschappelijke opgravingen (1827-1833) waren door Caspar Reuvens, de eerste hoogleraar archeologie ter wereld.',
+    watWasHier: 'Enige Romeinse stad met stadsrechten in Nederland. Ca. 1000 inwoners.',
+    watTeZien: 'Park Arentsburgh in Voorburg. Kanaal traceerbaar als de Vliet.',
+    verwachteVondsten: 'Stedelijke vondsten: bouwmateriaal, aardewerk, munten, inscripties, religieuze voorwerpen.',
+    betekenis: 'UNESCO Werelderfgoed. Noordelijkste Romeinse stad van Europa.',
+    bronnen: [
+      'https://www.awlv.nl/forum-hadriani/de-stad-forum-hadriani/',
+      'https://www.romeinen.nl/weten/nederland-in-de-romeinse-tijd/zuid-holland/regio-voorburg',
+      'https://kennis.cultureelerfgoed.nl/index.php/Monumenten/508083'
+    ]
   },
   'Berg - Tomveld': {
     naam: 'Berg-Tomveld',
@@ -455,15 +478,19 @@ export const ROMEINSE_FORTEN_INFO: Record<string, RomeinsFortInfo> = {
     bronnen: []
   },
   'Tongeren - Sacramentstraat': {
-    naam: 'Tongeren-Sacramentstraat',
+    naam: 'Atuatuca Tungrorum',
+    latinNaam: 'Atuatuca Tungrorum / Municipium Tungrorum',
     type: 'legerkamp',
-    periode: '1e eeuw v.Chr. - 1e eeuw n.Chr.',
-    beschrijving: 'Vroeg-Romeins legerkamp in Tongeren (België), de oudste stad van België. Later omgebouwd tot boerderij. Tongeren (Atuatuca Tungrorum) was de civitas-hoofdstad van de Tungri. Het kamp dateert uit de veroveringsperiode. Julius Caesar noemt Atuatuca als winterkamp. Na pacificatie werd de militaire functie niet meer nodig en ontstond een civiele stad. Tongeren heeft een uitstekend Gallo-Romeins Museum met vondsten van vele opgravingen in de stad.',
-    watWasHier: 'Vroeg legerkamp, later boerderij. Oudste stad België.',
-    watTeZien: 'Gallo-Romeins Museum Tongeren met vele vondsten.',
-    verwachteVondsten: 'Vroege militaria, later civiel materiaal, bouwresten.',
-    betekenis: 'Oorsprong van Tongeren als oudste Belgische stad.',
-    bronnen: ['https://www.galloromeinsmuseum.be']
+    periode: 'ca. 10 v.Chr. - 400 n.Chr.',
+    beschrijving: 'Oudste stad van België, gesticht ca. 10 v.Chr. Hoofdstad van de Civitas Tungrorum - met 150 hectare de grootste civitas van Noordwest-Europa! Strategisch gelegen op de weg Boulogne-Bavay-Keulen. Onder keizer Trajanus (2e eeuw) ommuurd met meer dan 4,5 km muren en tot 3 grachten - waarvan nog 1,5 km staat! Een 1e-eeuwse buste van Julius Caesar is een topstuk. Het Gallo-Romeins Museum (Europees Museum van het Jaar 2011) toont een schat aan vondsten: beelden, steles, sieraden, architectuurelementen. Ook de Romeinse muren, het tempelcomplex, het aquaduct van Beukenberg en tumuli zijn te bezoeken.',
+    watWasHier: 'Civitas-hoofdstad Tungri (150 ha). 4,5 km stadsmuur. Politiek en religieus centrum.',
+    watTeZien: 'Gallo-Romeins Museum. Romeinse muren (1,5 km). Tempelcomplex. Aquaduct Beukenberg. Tumuli.',
+    verwachteVondsten: 'Stadsaardewerk, bouwmateriaal, munten, inscripties, religieuze objecten.',
+    betekenis: 'Oudste stad van België. Grootste civitas van Noordwest-Europa.',
+    bronnen: [
+      'https://www.galloromeinsmuseum.be',
+      'https://www.canonvanvlaanderen.be/en/events/tongeren-a-roman-town/'
+    ]
   },
   'Valkenburg-Marktveld, mini-castellum': {
     naam: 'Marktveld Valkenburg',
@@ -521,16 +548,20 @@ export const ROMEINSE_FORTEN_INFO: Record<string, RomeinsFortInfo> = {
     bronnen: []
   },
   'Kastell Aachen': {
-    naam: 'Kastell Aachen',
+    naam: 'Aquae Granni',
     latinNaam: 'Aquae Granni',
     type: 'versterking',
-    periode: '3e - 4e eeuw n.Chr.',
-    beschrijving: 'Laat-Romeinse versterking in Aken (Duits: Aachen), bekend om de hete bronnen (Aquae Granni). De Romeinen waarderen de thermale bronnen voor bad- en geneeskundige doeleinden. In de late keizertijd werd een fort gebouwd voor verdediging tegen Germaanse invallen. Karel de Grote koos later deze locatie voor zijn paleis vanwege de historische betekenis en de bronnen. De Dom van Aken staat deels op Romeinse fundamenten. Centre Charlemagne toont de geschiedenis.',
-    watWasHier: 'Laat-Romeins fort bij thermale bronnen. Later Karolingisch paleis.',
-    watTeZien: 'Dom van Aken op Romeinse fundamenten. Centre Charlemagne.',
-    verwachteVondsten: 'Laat-Romeinse munten, militaria, badhuisresten.',
-    betekenis: 'Continuïteit van Romeinse tijd tot Karel de Grote.',
-    bronnen: []
+    periode: '1e - 4e eeuw n.Chr.',
+    beschrijving: 'Romeinse kuuroord bij de hete bronnen (tot 75°C!) gewijd aan Apollo en de Keltische geneesheer Grannos - "aan de wateren van Grannos". In de 1e eeuw uitgebouwd tot kurort voor de legioenen van Neder-Germanië. Onder keizer Trajanus bouwden legioenen uit Xanten een aquaduct en thermen onder de huidige Dom. De Münsterthermen hadden de indeling van een valetudinarium (Romeins hospitaal). Karel de Grote bouwde hier zijn Pfalz (793-813) en maakte Aken tot keizerlijke residentie - bewust als "vernieuwer van het Romeinse Rijk". De Dom (UNESCO 1978, eerste in Duitsland!) staat op Romeinse fundamenten. Karel stierf hier in 814.',
+    watWasHier: 'Kurort voor legioenen. Thermen. Later keizerlijke Pfalz van Karel de Grote.',
+    watTeZien: 'Dom (UNESCO). Centre Charlemagne. Thermen onder de stad.',
+    verwachteVondsten: 'Badhuisresten, inscripties, munten, Romeins en Karolingisch bouwmateriaal.',
+    betekenis: 'Ononderbroken bewoning van Romeinse tijd tot Karel de Grote. Eerste UNESCO-site Duitsland.',
+    bronnen: [
+      'https://centre-charlemagne.eu/zeitreise/?lang=en',
+      'http://www.aquaegranni.de/',
+      'https://de.wikipedia.org/wiki/Aquae_Granni'
+    ]
   },
   'Hazerswoude': {
     naam: 'Hazerswoude-Rijndijk',

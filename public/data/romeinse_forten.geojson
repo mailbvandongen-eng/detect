@@ -631,6 +631,34 @@
           52.1268
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Matilo",
+        "description": "Castellum bij Leiden-Roomburg. UNESCO Werelderfgoed. Park Matilo toont de locatie."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.5017,
+          52.1512
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Corbulo",
+        "description": "Castellum bij Voorburg, nabij Kanaal van Corbulo (Fossa Corbulonis) en Forum Hadriani."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.3644,
+          52.0718
+        ]
+      }
     }
   ]
 }
