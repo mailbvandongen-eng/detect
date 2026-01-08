@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, MapPin, Plus, ExternalLink, Layers, ChevronRight, Check, Camera, Settings2, Crosshair } from 'lucide-react'
+import { X, MapPin, Plus, ExternalLink, Layers, ChevronRight, Check, Camera, Settings2, Crosshair, PersonStanding } from 'lucide-react'
 import { toLonLat } from 'ol/proj'
 import { useMapStore } from '../../store'
 import { useUIStore } from '../../store/uiStore'
@@ -301,6 +301,17 @@ export function LongPressMenu() {
     setCanClose(false)
   }
 
+  const handleOpenStreetView = () => {
+    if (!menuLocation) return
+
+    const [lng, lat] = menuLocation.coordinate
+    // Google Street View URL - opens Street View at this location
+    const url = `https://www.google.com/maps?layer=c&cbll=${lat},${lng}`
+    window.open(url, '_blank')
+
+    forceClose()
+  }
+
   // Take photo with location metadata
   const handleTakePhoto = () => {
     if (!menuLocation) return
@@ -476,6 +487,15 @@ export function LongPressMenu() {
               >
                 <ExternalLink size={20} className="text-blue-600" />
                 <span className="font-medium">Open in Google Maps</span>
+              </button>
+
+              {/* Open Street View */}
+              <button
+                onClick={handleOpenStreetView}
+                className="w-full px-4 py-3 flex items-center gap-3 transition-colors hover:bg-yellow-50 text-gray-700 bg-white border-0 outline-none"
+              >
+                <PersonStanding size={20} className="text-yellow-600" />
+                <span className="font-medium">Street View</span>
               </button>
             </div>
 
