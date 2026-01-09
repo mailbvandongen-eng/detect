@@ -631,6 +631,34 @@
           52.1268
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Matilo",
+        "description": "Castellum bij Leiden-Roomburg. UNESCO Werelderfgoed. Park Matilo toont de locatie."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.4975,
+          52.1583
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "Corbulo",
+        "description": "Forum Hadriani bij Voorburg (Park Arentsburgh). Noordelijkste Romeinse stad van Europa."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.3525,
+          52.0695
+        ]
+      }
     }
   ]
 }
