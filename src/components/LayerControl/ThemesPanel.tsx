@@ -182,26 +182,27 @@ export function ThemesPanel() {
                 <span className="text-blue-600 font-medium" style={{ fontSize: '0.95em' }}>Thema's</span>
               </div>
               {/* Steentijd (Stone Age) */}
-              <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false} layerNames={['Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen', 'Paleokaart 9000 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 1500 v.Chr.', 'Paleokaart 500 v.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 800 n.Chr.']}>
+              <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false} layerNames={['Hunebedden', 'Grafheuvels', 'Terpen']}>
                 <LayerItem name="Hunebedden" type="overlay" />
-                <LayerItem name="FAMKE Steentijd" type="overlay" />
                 <LayerItem name="Grafheuvels" type="overlay" />
                 <LayerItem name="Terpen" type="overlay" />
-                {/* Paleogeografische kaarten - oud naar nieuw */}
-                <LayerGroup title="Paleokaarten" defaultExpanded={false} layerNames={['Paleokaart 9000 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 1500 v.Chr.', 'Paleokaart 500 v.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 800 n.Chr.']}>
-                  <LayerItem name="Paleokaart 9000 v.Chr." type="overlay" />
-                  <LayerItem name="Paleokaart 5500 v.Chr." type="overlay" />
-                  <LayerItem name="Paleokaart 2750 v.Chr." type="overlay" />
-                  <LayerItem name="Paleokaart 1500 v.Chr." type="overlay" />
-                  <LayerItem name="Paleokaart 500 v.Chr." type="overlay" />
-                  <LayerItem name="Paleokaart 100 n.Chr." type="overlay" />
-                  <LayerItem name="Paleokaart 800 n.Chr." type="overlay" />
-                </LayerGroup>
+              </LayerGroup>
+
+              {/* Paleogeografische kaarten - eigen groep */}
+              <LayerGroup title="Paleokaarten" defaultExpanded={false} layerNames={['Paleokaart 9000 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 1500 v.Chr.', 'Paleokaart 500 v.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 800 n.Chr.']}>
+                <LayerItem name="Paleokaart 9000 v.Chr." type="overlay" />
+                <LayerItem name="Paleokaart 5500 v.Chr." type="overlay" />
+                <LayerItem name="Paleokaart 2750 v.Chr." type="overlay" />
+                <LayerItem name="Paleokaart 1500 v.Chr." type="overlay" />
+                <LayerItem name="Paleokaart 500 v.Chr." type="overlay" />
+                <LayerItem name="Paleokaart 100 n.Chr." type="overlay" />
+                <LayerItem name="Paleokaart 800 n.Chr." type="overlay" />
               </LayerGroup>
 
               {/* Archaeological Layers */}
-              <LayerGroup title="Archeologische lagen" defaultExpanded={false} layerNames={['Archeo Landschappen', 'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig', 'Archeo Onderzoeken', 'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen']}>
-                <LayerItem name="Archeo Landschappen" type="overlay" />
+              <LayerGroup title="Archeologische lagen" defaultExpanded={false} layerNames={['FAMKE Steentijd', 'FAMKE IJzertijd', 'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig', 'Archeo Onderzoeken', 'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen']}>
+                <LayerItem name="FAMKE Steentijd" type="overlay" />
+                <LayerItem name="FAMKE IJzertijd" type="overlay" />
                 <LayerItem name="AMK Monumenten" type="overlay" />
                 {/* AMK per periode */}
                 <LayerGroup title="AMK per periode" defaultExpanded={false} layerNames={['AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig']}>

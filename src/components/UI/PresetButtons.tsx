@@ -47,10 +47,10 @@ const ALL_OVERLAYS = [
   // Base layer overlays
   'Labels Overlay', 'TMK 1850', 'Bonnebladen 1900',
   // Steentijd
-  'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
+  'Hunebedden', 'FAMKE Steentijd', 'FAMKE IJzertijd', 'Grafheuvels', 'Terpen',
   // Archeologie
   'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
-  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen', 'Kastelen', 'IKAW', 'Archeo Landschappen', 'Archeo Onderzoeken',
+  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen', 'Kastelen', 'IKAW', 'Archeo Onderzoeken',
   // Erfgoed
   'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Essen', 'Ruïnes',
   // Militair

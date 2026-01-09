@@ -58,7 +58,9 @@
       "Bash(dir \"C:\\VSCode\\Temp\")",
       "WebFetch(domain:journals.plos.org)",
       "WebFetch(domain:doi.org)",
-      "WebFetch(domain:zenodo.org)"
+      "WebFetch(domain:zenodo.org)",
+      "WebFetch(domain:fryslan.maps.arcgis.com)",
+      "WebFetch(domain:geoportaal.fryslan.nl)"
     ]
   }
 }

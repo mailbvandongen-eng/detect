@@ -77,11 +77,11 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: true
   },
-  'Archeo Landschappen': {
-    name: 'Archeo Landschappen',
+  'FAMKE IJzertijd': {
+    name: 'FAMKE IJzertijd',
     factory: async () => {
-      const { createArcheoLandschappenLayerOL } = await import('./pdokWMSLayers')
-      return createArcheoLandschappenLayerOL()
+      const { createFAMKEIJzertijdLayerOL } = await import('./pdokWMSLayers')
+      return createFAMKEIJzertijdLayerOL()
     },
     immediateLoad: true
   },

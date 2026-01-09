@@ -430,72 +430,104 @@ export function Popup() {
           continue
         }
 
-        // FAMKE Steentijd (Friese Archeologische Monumentenkaart Extra) - B1 stijl
+        // FAMKE Steentijd-Bronstijd (Friese Archeologische Monumentenkaart Extra) - ArcGIS REST
         if (title === 'FAMKE Steentijd') {
           try {
             const lonLat = toLonLat(coordinate)
             const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
-            const buffer = 100
-            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
 
-            const url = `https://geoportaal.fryslan.nl/arcgis/services/Themas/cultuurhistorie/MapServer/WMSServer?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=FAMKE_Advies_steentijd-bronstijd3339&QUERY_LAYERS=FAMKE_Advies_steentijd-bronstijd3339&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+            // ArcGIS REST query - Layer 2 = steentijd-bronstijd
+            const url = `https://geoportaal.fryslan.nl/arcgis/rest/services/Themas/cultuurhistorie/MapServer/2/query?` +
+              `geometry=${rd[0]},${rd[1]}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects` +
+              `&outFields=BESCHR,BESCHRTOELICHTING,BESCHRLINK&returnGeometry=false&f=json`
 
             const response = await fetch(url)
             const data = await response.json()
 
             if (data.features && data.features.length > 0) {
-              const props = data.features[0].properties
+              const attrs = data.features[0].attributes
               let html = `<strong class="text-amber-800">FAMKE Steentijd-Bronstijd</strong>`
-              html += `<br/><span class="text-sm text-gray-500">Friese verwachtingskaart voor oude vondsten</span>`
+              html += `<br/><span class="text-sm text-gray-500">Friese verwachtingskaart</span>`
 
-              const advies = props.advies || props.Advies || ''
-              if (advies) {
-                // Wat zie je hier sectie
-                html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat betekent dit?</span></div>`
-                html += `<div class="text-sm text-amber-700 mt-1">${advies}</div>`
-
-                // Uitleg per adviestype in B1 taal
-                const adviesLower = advies.toLowerCase()
-                let uitleg = ''
-                let kleur = 'text-gray-600'
-                let vondstKans = ''
-
-                if (adviesLower.includes('karterend')) {
-                  uitleg = 'Op deze plek verwachten archeologen vondsten uit de steentijd of bronstijd. Bij graafwerk moet er eerst onderzoek komen.'
-                  vondstKans = 'Goede kans op oude vondsten (vuursteen, bijlen, aardewerk)'
-                  kleur = 'text-amber-600'
-                } else if (adviesLower.includes('waarderend')) {
-                  uitleg = 'Hier zijn mogelijk belangrijke vindplaatsen. Proefsleuven zijn nodig om te kijken wat er precies zit.'
-                  vondstKans = 'Mogelijk interessante vondsten uit de prehistorie'
-                  kleur = 'text-orange-600'
-                } else if (adviesLower.includes('geen')) {
-                  uitleg = 'De kans op prehistorische vondsten is hier klein. De grond is waarschijnlijk te jong of te veel verstoord.'
-                  vondstKans = 'Weinig kans op steentijd-vondsten'
-                  kleur = 'text-green-600'
-                } else if (adviesLower.includes('quickscan')) {
-                  uitleg = 'Hier is eerst bureau-onderzoek nodig. Er kunnen vondsten zitten, maar dat is nog niet zeker.'
-                  vondstKans = 'Onbekend, nader onderzoek nodig'
-                  kleur = 'text-blue-600'
-                }
-
-                if (uitleg) {
-                  html += `<div class="text-sm ${kleur} mt-1">${uitleg}</div>`
-                }
-
-                // Wat kun je hier vinden
-                if (vondstKans) {
-                  html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat kun je hier vinden?</span></div>`
-                  html += `<div class="text-sm text-gray-700 mt-1">${vondstKans}</div>`
-                }
-
-                // Wat is FAMKE uitleg
-                html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat is FAMKE?</span></div>`
-                html += `<div class="text-sm text-gray-700 mt-1">FAMKE is de Friese Archeologische Monumentenkaart Extra. Deze kaart toont waar in Friesland vondsten uit de steentijd en bronstijd te verwachten zijn.</div>`
+              // BESCHR - korte beschrijving
+              const beschr = attrs.BESCHR || ''
+              if (beschr) {
+                html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Advies</span></div>`
+                html += `<div class="text-sm text-amber-700 mt-1 font-medium">${beschr}</div>`
               }
+
+              // BESCHRTOELICHTING - uitgebreide toelichting
+              const toelichting = attrs.BESCHRTOELICHTING || ''
+              if (toelichting) {
+                html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Toelichting</span></div>`
+                html += `<div class="text-sm text-gray-700 mt-1">${toelichting}</div>`
+              }
+
+              // BESCHRLINK - link naar meer info
+              const link = attrs.BESCHRLINK || ''
+              if (link) {
+                html += `<div class="mt-3"><a href="${link}" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:underline">Meer informatie</a></div>`
+              }
+
+              // Wat is FAMKE
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat is FAMKE?</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">FAMKE is de Friese Archeologische Monumentenkaart Extra. Deze kaart toont waar in Friesland vondsten uit de steentijd en bronstijd te verwachten zijn.</div>`
+
               results.push(html)
             }
           } catch (error) {
-            console.warn('FAMKE WMS query failed:', error)
+            console.warn('FAMKE Steentijd query failed:', error)
+          }
+          continue
+        }
+
+        // FAMKE IJzertijd-Middeleeuwen (Friese Archeologische Monumentenkaart Extra) - ArcGIS REST
+        if (title === 'FAMKE IJzertijd') {
+          try {
+            const lonLat = toLonLat(coordinate)
+            const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
+
+            // ArcGIS REST query - Layer 1 = ijzertijd-middeleeuwen
+            const url = `https://geoportaal.fryslan.nl/arcgis/rest/services/Themas/cultuurhistorie/MapServer/1/query?` +
+              `geometry=${rd[0]},${rd[1]}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects` +
+              `&outFields=BESCHR,BESCHRTOELICHTING,BESCHRLINK&returnGeometry=false&f=json`
+
+            const response = await fetch(url)
+            const data = await response.json()
+
+            if (data.features && data.features.length > 0) {
+              const attrs = data.features[0].attributes
+              let html = `<strong class="text-orange-800">FAMKE IJzertijd-Middeleeuwen</strong>`
+              html += `<br/><span class="text-sm text-gray-500">Friese verwachtingskaart</span>`
+
+              // BESCHR - korte beschrijving
+              const beschr = attrs.BESCHR || ''
+              if (beschr) {
+                html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Advies</span></div>`
+                html += `<div class="text-sm text-orange-700 mt-1 font-medium">${beschr}</div>`
+              }
+
+              // BESCHRTOELICHTING - uitgebreide toelichting
+              const toelichting = attrs.BESCHRTOELICHTING || ''
+              if (toelichting) {
+                html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Toelichting</span></div>`
+                html += `<div class="text-sm text-gray-700 mt-1">${toelichting}</div>`
+              }
+
+              // BESCHRLINK - link naar meer info
+              const link = attrs.BESCHRLINK || ''
+              if (link) {
+                html += `<div class="mt-3"><a href="${link}" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:underline">Meer informatie</a></div>`
+              }
+
+              // Wat is FAMKE
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat is FAMKE?</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">FAMKE is de Friese Archeologische Monumentenkaart Extra. Deze kaart toont waar in Friesland vondsten uit de ijzertijd tot en met de middeleeuwen te verwachten zijn.</div>`
+
+              results.push(html)
+            }
+          } catch (error) {
+            console.warn('FAMKE IJzertijd query failed:', error)
           }
           continue
         }
@@ -959,28 +991,27 @@ export function Popup() {
           continue
         }
 
-        // Terpen (Friesland) - B1 stijl
+        // Terpen (Friesland) - ArcGIS REST API
         if (title === 'Terpen') {
           try {
             const lonLat = toLonLat(coordinate)
             const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
-            const buffer = 100
-            const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
 
-            const url = `https://geoportaal.fryslan.nl/arcgis/services/Themas/cultuurhistorie/MapServer/WMSServer?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=terpen3335&QUERY_LAYERS=terpen3335&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+            // ArcGIS REST query - Layer 66 = Terpen in PGR2 MapServer
+            const url = `https://geoportaal.fryslan.nl/arcgis/rest/services/ProvinciaalGeoRegister/PGR2/MapServer/66/query?` +
+              `geometry=${rd[0]},${rd[1]}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects` +
+              `&outFields=SOORT&returnGeometry=false&f=json`
 
             const response = await fetch(url)
             const data = await response.json()
 
             if (data.features && data.features.length > 0) {
-              const props = data.features[0].properties
-              const naam = props.naam || props.NAAM || props.Naam || 'Terp'
-              const plaats = props.plaats || props.PLAATS || props.Plaats || ''
+              const attrs = data.features[0].attributes
+              const soort = attrs.SOORT || 'Terp'
 
-              let html = `<strong class="text-orange-800">${naam}</strong>`
-              if (plaats) {
-                html += `<br/><span class="text-sm text-gray-500">${plaats}</span>`
-              }
+              let html = `<strong class="text-orange-800">Terp</strong>`
+              html += `<br/><span class="text-sm text-orange-600 font-medium">${soort}</span>`
+              html += `<br/><span class="text-sm text-gray-500">Friese woonheuvel</span>`
 
               // Wat zie je hier
               html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat zie je hier?</span></div>`
@@ -1007,7 +1038,7 @@ export function Popup() {
               results.push(html)
             }
           } catch (error) {
-            console.warn('Terpen WMS query failed:', error)
+            console.warn('Terpen query failed:', error)
           }
           continue
         }

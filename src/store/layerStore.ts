@@ -42,6 +42,7 @@ export const useLayerStore = create<LayerState>()(
       // Steentijd
       'Hunebedden': false,
       'FAMKE Steentijd': false,
+      'FAMKE IJzertijd': false,
       'Grafheuvels': false,
       'Terpen': false,
       // Archeologische lagen
@@ -56,7 +57,6 @@ export const useLayerStore = create<LayerState>()(
       'Romeinse wegen (Wereld)': false,
       'Kastelen': false,
       'IKAW': false,
-      'Archeo Landschappen': false,
       'Essen': false,
       // Erfgoed & Monumenten
       'Rijksmonumenten': false,
@@ -144,7 +144,8 @@ export const useLayerStore = create<LayerState>()(
       'Veengebieden': 0.6,
       // Archeologie
       'IKAW': 0.5,
-      'Archeo Landschappen': 0.5,
+      'FAMKE Steentijd': 0.6,
+      'FAMKE IJzertijd': 0.6,
       'Essen': 0.6,
       'Terpen': 0.7,
       // AMK Monumenten - alle perioden

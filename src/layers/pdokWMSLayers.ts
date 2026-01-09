@@ -80,15 +80,50 @@ export function createIKAWLayerOL() {
 }
 
 // FAMKE - Friese Archeologische Monumentenkaart Extra: Steentijd-Bronstijd advies
+// Nieuwe service via Themas/cultuurhistorie - Layer 2
 export function createFAMKESteentijdLayerOL() {
   const layer = new TileLayer({
-    properties: { title: 'FAMKE Steentijd', type: 'wms' },
+    properties: {
+      title: 'FAMKE Steentijd',
+      type: 'wms',
+      queryable: true,
+      queryUrl: 'https://geoportaal.fryslan.nl/arcgis/rest/services/Themas/cultuurhistorie/MapServer/2/query',
+      queryType: 'arcgis-rest'
+    },
     visible: false,
     opacity: 0.6,
     source: new TileWMS({
       url: 'https://geoportaal.fryslan.nl/arcgis/services/Themas/cultuurhistorie/MapServer/WMSServer',
       params: {
-        'LAYERS': 'FAMKE_Advies_steentijd-bronstijd3339',
+        'LAYERS': '2',  // Layer ID 2 = FAMKE Advies steentijd-bronstijd
+        'STYLES': '',
+        'TILED': true,
+        'FORMAT': 'image/png'
+      },
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  return layer
+}
+
+// FAMKE - Friese Archeologische Monumentenkaart Extra: IJzertijd-Middeleeuwen advies
+// Nieuwe service via Themas/cultuurhistorie - Layer 1
+export function createFAMKEIJzertijdLayerOL() {
+  const layer = new TileLayer({
+    properties: {
+      title: 'FAMKE IJzertijd',
+      type: 'wms',
+      queryable: true,
+      queryUrl: 'https://geoportaal.fryslan.nl/arcgis/rest/services/Themas/cultuurhistorie/MapServer/1/query',
+      queryType: 'arcgis-rest'
+    },
+    visible: false,
+    opacity: 0.6,
+    source: new TileWMS({
+      url: 'https://geoportaal.fryslan.nl/arcgis/services/Themas/cultuurhistorie/MapServer/WMSServer',
+      params: {
+        'LAYERS': '1',  // Layer ID 1 = FAMKE Advies ijzertijd-middeleeuwen
         'STYLES': '',
         'TILED': true,
         'FORMAT': 'image/png'
@@ -111,29 +146,6 @@ export function createEssenLayerOL() {
       url: 'https://services.rce.geovoorziening.nl/landschapsatlas/wms',
       params: {
         'LAYERS': 'essen',
-        'STYLES': '',
-        'TILED': true,
-        'FORMAT': 'image/png'
-      },
-      serverType: 'geoserver',
-      crossOrigin: 'anonymous'
-    })
-  })
-
-  return layer
-}
-
-// Archeologische Landschappenkaart van Nederland (RCE)
-// 26 landschappen met zones - zeer relevant voor steentijdarcheologie
-export function createArcheoLandschappenLayerOL() {
-  const layer = new TileLayer({
-    properties: { title: 'Archeo Landschappen', type: 'wms' },
-    visible: false,
-    opacity: 0.5,
-    source: new TileWMS({
-      url: 'https://services.rce.geovoorziening.nl/landschappenkaart/wms',
-      params: {
-        'LAYERS': 'landschappenkaart_nl',
         'STYLES': '',
         'TILED': true,
         'FORMAT': 'image/png'
