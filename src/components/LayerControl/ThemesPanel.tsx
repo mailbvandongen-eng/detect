@@ -1,12 +1,28 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRef, useEffect } from 'react'
-import { X, Layers, Check, Upload } from 'lucide-react'
+import { X, Layers, Check, Upload, ExternalLink, Globe, ChevronDown, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
 import { useUIStore, useSettingsStore } from '../../store'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import { useCustomLayerStore } from '../../store/customLayerStore'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
 import { CustomLayerItem } from '../CustomLayers/CustomLayerItem'
+
+// Speciale archeologische 3D projecten - externe links
+const SPECIAL_PROJECTS = [
+  { name: 'Rapa Nui - Moai Productie', url: 'https://arcg.is/qu59O1', desc: 'Paaseiland steengroeve in 3D' },
+  { name: 'Digital Giza - Piramides', url: 'http://giza.fas.harvard.edu/giza3d/', desc: 'Harvard 3D reconstructie' },
+  { name: 'Stonehenge 360°', url: 'https://www.english-heritage.org.uk/visit/places/stonehenge/history-and-stories/stonehenge360/', desc: 'English Heritage virtuele tour' },
+  { name: 'Pompeii 3D Explorer', url: 'https://www.cyark.org/projects/pompeii/3D-Explorer', desc: 'CyArk LiDAR scans' },
+  { name: 'Virtual Angkor Wat', url: 'https://www.virtualangkor.com/', desc: '3D reconstructie 1300 n.Chr.' },
+  { name: 'Petra Virtuele Tour', url: 'https://www.zamaniproject.org/site-jordan-petra.html', desc: 'Zamani Project 3D' },
+]
+
+const HERITAGE_PLATFORMS = [
+  { name: 'CyArk (200+ sites)', url: 'https://www.cyark.org/projects/', desc: 'Wereldwijd erfgoed archief' },
+  { name: 'Google Open Heritage', url: 'https://artsandculture.google.com/project/openheritage', desc: '26+ UNESCO sites in 3D' },
+]
 
 export function ThemesPanel() {
   const { themesPanelOpen, toggleThemesPanel, toggleSettingsPanel } = useUIStore()
@@ -21,6 +37,9 @@ export function ThemesPanel() {
 
   // Calculate font size based on panel-specific fontScale
   const baseFontSize = 13 * layerPanelFontScale / 100
+
+  // State for special projects section
+  const [specialProjectsOpen, setSpecialProjectsOpen] = useState(false)
 
   // Close on click outside
   useEffect(() => {
@@ -303,6 +322,66 @@ export function ThemesPanel() {
                 <LayerItem name="Winkelcentra" type="overlay" />
                 <LayerItem name="Natuurparkeren" type="overlay" />
               </LayerGroup>
+
+              {/* Speciale Projecten - externe 3D archeologische sites */}
+              <div className="mb-2">
+                <button
+                  onClick={() => setSpecialProjectsOpen(!specialProjectsOpen)}
+                  className="w-full flex items-center gap-1 py-1 px-1 hover:bg-purple-50 rounded transition-colors border-0 outline-none bg-transparent"
+                >
+                  {specialProjectsOpen ? (
+                    <ChevronDown size={14} className="text-purple-500" />
+                  ) : (
+                    <ChevronRight size={14} className="text-purple-500" />
+                  )}
+                  <Globe size={12} className="text-purple-500" />
+                  <span className="text-purple-600 font-medium" style={{ fontSize: '0.95em' }}>Speciale Projecten</span>
+                  <ExternalLink size={10} className="text-purple-400 ml-auto" />
+                </button>
+
+                {specialProjectsOpen && (
+                  <div className="mt-1">
+                    {/* Individuele sites */}
+                    {SPECIAL_PROJECTS.map((project) => (
+                      <a
+                        key={project.name}
+                        href={project.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center justify-between py-1.5 pl-6 pr-2 hover:bg-purple-50 rounded transition-colors text-left"
+                        style={{ fontSize: 'inherit' }}
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-gray-700">{project.name}</span>
+                          <span className="text-gray-400" style={{ fontSize: '0.8em' }}>{project.desc}</span>
+                        </div>
+                        <ExternalLink size={12} className="text-purple-400 flex-shrink-0 ml-2" />
+                      </a>
+                    ))}
+
+                    {/* Divider */}
+                    <div className="border-t border-gray-200 my-1.5 mx-2" />
+
+                    {/* Platforms */}
+                    {HERITAGE_PLATFORMS.map((platform) => (
+                      <a
+                        key={platform.name}
+                        href={platform.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center justify-between py-1.5 pl-6 pr-2 hover:bg-purple-50 rounded transition-colors text-left"
+                        style={{ fontSize: 'inherit' }}
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-gray-700 font-medium">{platform.name}</span>
+                          <span className="text-gray-400" style={{ fontSize: '0.8em' }}>{platform.desc}</span>
+                        </div>
+                        <ExternalLink size={12} className="text-purple-400 flex-shrink-0 ml-2" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </motion.div>
