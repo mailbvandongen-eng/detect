@@ -5,8 +5,8 @@ import { LineString } from 'ol/geom'
 import { fromLonLat } from 'ol/proj'
 import { Style, Stroke } from 'ol/style'
 
-// Cache for localStorage - v2 forces refresh after query fix
-const CACHE_KEY = 'laarzenpaden_cache_v2'
+// Cache for localStorage - v3 forces refresh after query fix
+const CACHE_KEY = 'laarzenpaden_cache_v3'
 const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 interface LaarzenpadCache {
@@ -43,19 +43,18 @@ async function fetchLaarzenpaden(): Promise<LaarzenpadFeature[]> {
   }
 
   // Fetch trails that are typically muddy/wet - "laarzenpaden"
-  // Beperkte query om timeout te voorkomen
+  // Zoek naar onverharde wandelpaden in natuurgebieden
   const query = `
-    [out:json][timeout:90];
+    [out:json][timeout:120];
     area["ISO3166-1"="NL"]->.nl;
     (
-      // Expliciet modderige paden
-      way["highway"~"path|track"]["surface"="mud"](area.nl);
-      // Paden met zeer slechte begaanbaarheid
-      way["highway"~"path|track"]["smoothness"~"very_bad|horrible|very_horrible|impassable"](area.nl);
-      // Klompenpaden en laarzenpaden (expliciet getagd)
-      way["name"~"[Kk]lompen|[Ll]aarzen",i](area.nl);
-      // Paden in wetlands
-      way["highway"="path"]["wetland"](area.nl);
+      // Klompenpaden op naam
+      way["name"~"klompen|Klompen"](area.nl);
+      // Paden met modder of slechte begaanbaarheid
+      way["surface"="mud"](area.nl);
+      way["smoothness"~"horrible|very_horrible|impassable"](area.nl);
+      // Onverharde wandelpaden (beperkt tot path, niet track)
+      way["highway"="path"]["surface"~"ground|earth|dirt"](area.nl);
     );
     out geom;
   `
@@ -102,7 +101,7 @@ async function fetchLaarzenpaden(): Promise<LaarzenpadFeature[]> {
     return features
 
   } catch (error) {
-    console.warn('⚠ Failed to fetch laarzenpaden from Overpass:', error)
+    console.error('❌ Laarzenpaden fetch failed:', error)
 
     // Try stale cache
     try {
@@ -113,7 +112,7 @@ async function fetchLaarzenpaden(): Promise<LaarzenpadFeature[]> {
         return data
       }
     } catch {
-      // No cache
+      console.warn('⚠ No laarzenpaden cache available')
     }
 
     return []
@@ -162,11 +161,13 @@ export async function createLaarzenpadenLayerOL() {
 
   // Lazy load data when layer becomes visible
   layer.on('change:visible', async () => {
+    console.log('Laarzenpaden visibility changed:', layer.getVisible(), 'loaded:', dataLoaded, 'loading:', isLoading)
     if (layer.getVisible() && !dataLoaded && !isLoading) {
       isLoading = true
-      console.log('🔄 Laarzenpaden: laden...')
+      console.log('🔄 Laarzenpaden: laden van Overpass API...')
 
       const laarzenpadData = await fetchLaarzenpaden()
+      console.log('Laarzenpaden data received:', laarzenpadData.length, 'items')
 
       const features = laarzenpadData.map(item => {
         const coords = item.coords.map(c => fromLonLat(c))
