@@ -70,7 +70,7 @@ const ALL_OVERLAYS = [
   'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
   // Recreatie
   'Wandelroutes', 'Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Kringloopwinkels',
-  'Ruiterpaden', 'Laarzenpaden', 'Natuurparkeren', 'Winkelcentra', 'Strandopgangen', 'Openbare Toiletten',
+  'Ruiterpaden', 'Laarzenpaden', 'Natuurparkeren', 'Winkelcentra', 'Strandopgangen',
   // Percelen
   'Gewaspercelen', 'Kadastrale Grenzen',
   // Provinciale Waardenkaarten - Zuid-Holland

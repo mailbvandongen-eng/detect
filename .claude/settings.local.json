@@ -54,7 +54,11 @@
       "WebFetch(domain:freesvg.org)",
       "WebFetch(domain:www.routezoeker.com)",
       "WebFetch(domain:data.geo.cultureelerfgoed.nl)",
-      "Bash(copy:*)"
+      "Bash(copy:*)",
+      "Bash(dir \"C:\\VSCode\\Temp\")",
+      "WebFetch(domain:journals.plos.org)",
+      "WebFetch(domain:doi.org)",
+      "WebFetch(domain:zenodo.org)"
     ]
   }
 }

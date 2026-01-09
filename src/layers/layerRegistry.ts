@@ -566,14 +566,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: false
   },
-  'Openbare Toiletten': {
-    name: 'Openbare Toiletten',
-    factory: async () => {
-      const { createToilettenLayerOL } = await import('./toilettenOL')
-      return createToilettenLayerOL()
-    },
-    immediateLoad: false
-  },
   'Ruiterpaden': {
     name: 'Ruiterpaden',
     factory: async () => {
