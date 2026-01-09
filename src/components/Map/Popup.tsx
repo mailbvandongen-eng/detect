@@ -583,16 +583,25 @@ export function Popup() {
                 html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Interessant voor detectie?</span></div>`
                 html += `<div class="text-sm text-gray-700 mt-1 italic">Onderzoekslocaties kunnen interessant zijn: archeologen vinden vaak niet alles. Maar check altijd eerst of je daar mag zoeken.</div>`
 
-                // Meer weten - met directe link naar het rapport
+                // Meer weten - met directe links naar het rapport
                 html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Rapport opzoeken</span></div>`
-                if (props.onderzoeksmeldingnummer) {
-                  // Direct link naar EASY archief met onderzoeksmeldingnummer
-                  const omNummer = props.onderzoeksmeldingnummer
-                  html += `<div class="text-sm text-gray-700 mt-1"><a href="https://easy.dans.knaw.nl/ui/datasets?q=${encodeURIComponent(omNummer)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek rapport in DANS-EASY</a></div>`
-                  html += `<div class="text-sm text-gray-700 mt-1"><a href="https://archis.cultureelerfgoed.nl/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek in ARCHIS</a></div>`
+
+                // Zoekterm voor rapporten: gebruik projectnaam of gemeente
+                const zoekterm = projectNaam || props.gemeente || ''
+
+                if (zoekterm) {
+                  // Directe zoeklink naar DANS Data Station Archaeology (opvolger van EASY)
+                  html += `<div class="text-sm text-gray-700 mt-1"><a href="https://archaeology.datastations.nl/dataverse/root?q=${encodeURIComponent(zoekterm)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek "${zoekterm.substring(0, 30)}${zoekterm.length > 30 ? '...' : ''}" in DANS Archaeology</a></div>`
+
+                  // Google Scholar zoeklink voor rapporten
+                  html += `<div class="text-sm text-gray-700 mt-1"><a href="https://scholar.google.nl/scholar?q=${encodeURIComponent(zoekterm + ' archeologisch rapport')}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek in Google Scholar</a></div>`
                 }
-                // Bibliotheek voor Archeologie link
-                html += `<div class="text-sm text-gray-700 mt-1"><a href="https://bibliotheek.cultureelerfgoed.nl/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Bibliotheek voor Archeologie</a></div>`
+
+                if (props.onderzoeksmeldingnummer) {
+                  // ARCHIS zoekfunctie
+                  const omNummer = props.onderzoeksmeldingnummer
+                  html += `<div class="text-sm text-gray-700 mt-1"><a href="https://archis.cultureelerfgoed.nl/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek OM ${omNummer} in ARCHIS</a> <span class="text-xs text-gray-400">(account nodig)</span></div>`
+                }
 
                 results.push(html)
               }

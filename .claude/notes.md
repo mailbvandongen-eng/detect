@@ -18,6 +18,37 @@ Bij elke code wijziging **ALTIJD** deze 3 plekken updaten:
 
 ---
 
+## ⚠️ NIEUWE LAGEN TOEVOEGEN - ALTIJD RESET UPDATEN! ⚠️
+
+**Bij ELKE nieuwe laag die je toevoegt, MOET je deze ook toevoegen aan de reset functie!**
+
+| # | Bestand | Array | Wat toevoegen |
+|---|---------|-------|---------------|
+| 1 | `src/store/layerStore.ts` | `visible` | Nieuwe laag met `false` |
+| 2 | `src/components/UI/PresetButtons.tsx` | `ALL_OVERLAYS` | Laagnaam als string |
+
+**Waarom?** De reset knop (links onder) zet alle lagen uit. Als een nieuwe laag NIET in `ALL_OVERLAYS` staat, blijft deze AAN na reset!
+
+### Voorbeeld:
+```typescript
+// In layerStore.ts:
+visible: {
+  ...
+  'Mijn Nieuwe Laag': false,
+}
+
+// In PresetButtons.tsx ALL_OVERLAYS:
+const ALL_OVERLAYS = [
+  ...
+  'Mijn Nieuwe Laag',
+]
+```
+
+**Lagen die eerder vergeten waren (nu gefixt v2.30.23):**
+- Ruiterpaden, Laarzenpaden, Natuurparkeren, Winkelcentra, Strandopgangen, Openbare Toiletten, Archeo Onderzoeken
+
+---
+
 ## ⚠️ UI STYLING REGELS - STRICT VOLGEN! ⚠️
 
 ### Icon Buttons (ONZICHTBAAR - alleen icoon)
