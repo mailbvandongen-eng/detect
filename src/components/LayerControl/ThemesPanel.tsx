@@ -348,6 +348,7 @@ export function ThemesPanel() {
                         href={project.url}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
                         className="w-full flex items-center justify-between py-1.5 pl-6 pr-2 hover:bg-purple-50 rounded transition-colors text-left"
                         style={{ fontSize: 'inherit' }}
                       >
@@ -369,6 +370,7 @@ export function ThemesPanel() {
                         href={platform.url}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
                         className="w-full flex items-center justify-between py-1.5 pl-6 pr-2 hover:bg-purple-50 rounded transition-colors text-left"
                         style={{ fontSize: 'inherit' }}
                       >

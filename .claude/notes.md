@@ -49,6 +49,24 @@ const ALL_OVERLAYS = [
 
 ---
 
+## ⚠️ CLICK EVENTS IN PANELS - ALTIJD STOPPROPAGATION! ⚠️
+
+**KRITIEK:** Bij ELKE klikbare item (link, button) in een panel dat sluit bij "click outside":
+```tsx
+onClick={(e) => e.stopPropagation()}
+```
+
+**Waarom?** Panels zoals ThemesPanel sluiten bij click outside. Zonder stopPropagation bubbelt de click naar de document listener en sluit het panel!
+
+**Waar dit geldt:**
+- Externe links (`<a>` tags) in ThemesPanel
+- Buttons binnen collapsible secties
+- Elke interactieve element in een panel met "click outside" gedrag
+
+**Dit is AL TIEN KEER GEZEGD - NIET MEER VERGETEN!**
+
+---
+
 ## ⚠️ UI STYLING REGELS - STRICT VOLGEN! ⚠️
 
 ### Icon Buttons (ONZICHTBAAR - alleen icoon)
