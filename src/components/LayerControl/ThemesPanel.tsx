@@ -326,7 +326,7 @@ export function ThemesPanel() {
               {/* Speciale Projecten - externe 3D archeologische sites */}
               <div className="mb-2">
                 <button
-                  onClick={() => setSpecialProjectsOpen(!specialProjectsOpen)}
+                  onClick={(e) => { e.stopPropagation(); setSpecialProjectsOpen(!specialProjectsOpen) }}
                   className="w-full flex items-center gap-1 py-1 px-1 hover:bg-purple-50 rounded transition-colors border-0 outline-none bg-transparent"
                 >
                   {specialProjectsOpen ? (
@@ -340,7 +340,7 @@ export function ThemesPanel() {
                 </button>
 
                 {specialProjectsOpen && (
-                  <div className="mt-1">
+                  <div className="mt-1" onClick={(e) => e.stopPropagation()}>
                     {/* Individuele sites */}
                     {SPECIAL_PROJECTS.map((project) => (
                       <a
