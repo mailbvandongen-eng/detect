@@ -1018,49 +1018,107 @@ export function Popup() {
           continue
         }
 
-        // Terpen (Friesland) - ArcGIS REST API
+        // Terpen (Friesland) - ArcGIS REST API + RCE cross-reference
         if (title === 'Terpen') {
           try {
             const lonLat = toLonLat(coordinate)
             const rd = proj4('EPSG:4326', 'EPSG:28992', lonLat)
 
             // ArcGIS REST query - Layer 66 = Terpen in PGR2 MapServer
-            const url = `https://geoportaal.fryslan.nl/arcgis/rest/services/ProvinciaalGeoRegister/PGR2/MapServer/66/query?` +
+            const terpUrl = `https://geoportaal.fryslan.nl/arcgis/rest/services/ProvinciaalGeoRegister/PGR2/MapServer/66/query?` +
               `geometry=${rd[0]},${rd[1]}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects` +
-              `&outFields=SOORT&returnGeometry=false&f=json`
+              `&outFields=SOORT,SHAPE_Area&returnGeometry=false&f=json`
 
-            const response = await fetch(url)
-            const data = await response.json()
+            const terpResponse = await fetch(terpUrl)
+            const terpData = await terpResponse.json()
 
-            if (data.features && data.features.length > 0) {
-              const attrs = data.features[0].attributes
+            if (terpData.features && terpData.features.length > 0) {
+              const attrs = terpData.features[0].attributes
               const soort = attrs.SOORT || 'Terp'
+              const oppervlak = attrs.SHAPE_Area ? Math.round(attrs.SHAPE_Area) : null
 
-              let html = `<strong class="text-orange-800">Terp</strong>`
-              html += `<br/><span class="text-sm text-orange-600 font-medium">${soort}</span>`
-              html += `<br/><span class="text-sm text-gray-500">Friese woonheuvel</span>`
+              // Cross-reference met RCE Rijksmonumenten voor naam
+              let monumentNaam = ''
+              let monumentNummer = ''
+              let isRijksmonument = false
+              try {
+                const buffer = 100
+                const bbox = `${rd[0]-buffer},${rd[1]-buffer},${rd[0]+buffer},${rd[1]+buffer}`
+                const rceUrl = `https://service.pdok.nl/rce/ps-ch/wms/v1_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=PS.ProtectedSite&QUERY_LAYERS=PS.ProtectedSite&STYLES=&INFO_FORMAT=application/json&I=50&J=50&WIDTH=100&HEIGHT=100&CRS=EPSG:28992&BBOX=${bbox}`
+                const rceResponse = await fetch(rceUrl)
+                const rceData = await rceResponse.json()
+                if (rceData.features && rceData.features.length > 0) {
+                  const rceProps = rceData.features[0].properties
+                  monumentNaam = rceProps.siteName || rceProps.naam || ''
+                  monumentNummer = rceProps.inspireId || rceProps.monumentnummer || ''
+                  isRijksmonument = true
+                }
+              } catch {
+                // RCE query failed, continue without
+              }
 
-              // Wat zie je hier
-              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat zie je hier?</span></div>`
-              html += `<div class="text-sm text-gray-700 mt-1">Een terp is een kunstmatige heuvel. Mensen bouwden deze heuvels om droog te wonen in het vlakke, natte land. Terpen zijn vaak meer dan 2000 jaar oud.</div>`
+              // Header met naam indien beschikbaar
+              let html = ''
+              if (monumentNaam) {
+                html = `<strong class="text-orange-800">${monumentNaam}</strong>`
+                html += `<br/><span class="text-sm text-orange-600 font-medium">${soort}</span>`
+              } else {
+                html = `<strong class="text-orange-800">${soort}</strong>`
+              }
+              html += `<br/><span class="text-sm text-gray-600">Friese terp (woonheuvel)</span>`
 
-              // Wat kun je hier vinden
-              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat kun je hier vinden?</span></div>`
-              html += `<div class="text-sm text-gray-700 mt-1">Op en rond terpen worden vaak vondsten gedaan:</div>`
-              html += `<ul class="list-disc list-inside text-sm text-gray-700 mt-1 space-y-0.5">`
-              html += `<li>Middeleeuws aardewerk en botten</li>`
-              html += `<li>Munten uit verschillende periodes</li>`
-              html += `<li>Metalen voorwerpen (gespen, fibulae, sieraden)</li>`
-              html += `<li>Soms Romeinse of zelfs prehistorische vondsten</li>`
-              html += `</ul>`
+              // Info afhankelijk van soort
+              const soortInfo: Record<string, { uitleg: string; periode: string }> = {
+                'terp': { uitleg: 'Een kunstmatige woonheuvel waar mensen woonden om droge voeten te houden.', periode: 'IJzertijd tot Middeleeuwen' },
+                'afgegraven terp': { uitleg: 'Deze terp is deels of geheel afgegraven voor de vruchtbare grond (terpaarde).', periode: 'Oorspronkelijk IJzertijd-Middeleeuwen' },
+                'terprestant': { uitleg: 'Hier lag ooit een terp, waarvan nu alleen nog resten over zijn.', periode: 'IJzertijd tot Middeleeuwen' },
+                'deels afgegraven terp': { uitleg: 'Een deel van deze terp is afgegraven, een deel is nog intact.', periode: 'IJzertijd tot Middeleeuwen' },
+                'verhoogd kerkhof': { uitleg: 'Een verhoogd kerkhof, vaak op een oude terplocatie gebouwd.', periode: 'Middeleeuwen' },
+                'kerkterp': { uitleg: 'Een terp met daarop een kerk, vaak het centrum van een terpdorp.', periode: 'IJzertijd tot heden' }
+              }
 
-              // Waarom zijn terpen interessant
-              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Waarom zijn terpen interessant?</span></div>`
-              html += `<div class="text-sm text-gray-700 mt-1">Terpen waren vaak dorpskernen waar mensen eeuwenlang woonden. Door de ophoging bleven veel voorwerpen goed bewaard. Let op: sommige terpen zijn beschermd monument!</div>`
+              const info = soortInfo[soort.toLowerCase()] || { uitleg: 'Een kunstmatige woonheuvel uit de tijd dat dit gebied vaak overstroomde.', periode: 'IJzertijd tot Middeleeuwen' }
 
-              // Bezoeken
-              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Bezoeken</span></div>`
-              html += `<div class="text-sm text-gray-700 mt-1">Veel terpen zijn nog zichtbaar in het landschap. Vraag altijd toestemming aan de grondeigenaar voordat je gaat detecteren.</div>`
+              // B1 uitleg
+              html += `<div class="mt-2 text-sm text-gray-700">${info.uitleg}</div>`
+              html += `<br/><span class="text-sm text-gray-600">Periode: ${info.periode}</span>`
+
+              // Oppervlak indien beschikbaar
+              if (oppervlak && oppervlak > 100) {
+                const ha = (oppervlak / 10000).toFixed(1)
+                html += `<br/><span class="text-sm text-gray-500">Oppervlak: ${ha} hectare</span>`
+              }
+
+              // Rijksmonument badge
+              if (isRijksmonument) {
+                html += `<div class="mt-2 p-2 bg-orange-100 rounded text-xs text-orange-800">`
+                html += `<strong>⚠️ Rijksmonument</strong> - Deze terp is wettelijk beschermd. Detecteren is niet toegestaan zonder vergunning.`
+                if (monumentNummer) {
+                  html += `<br/>Monumentnummer: ${monumentNummer}`
+                }
+                html += `</div>`
+              }
+
+              // Detectietip
+              html += `<div class="mt-2 p-2 bg-amber-50 rounded text-xs text-amber-800">`
+              html += `<strong>Detectietip:</strong> `
+              if (soort.toLowerCase().includes('afgegraven')) {
+                html += `Afgegraven terpen zijn interessant! Bij het afgraven kwam materiaal aan de oppervlakte. Zoek op akkers rond de oude terplocatie.`
+              } else {
+                html += `Terpen zijn rijk aan vondsten: aardewerk, munten, fibulae, botten, gereedschap. De grond is vaak donker en vruchtbaar door eeuwenlange bewoning.`
+              }
+              html += `</div>`
+
+              // Links
+              html += `<div class="mt-3 space-y-1">`
+              html += `<a href="https://www.terpenonderzoek.nl/" target="_blank" class="block text-blue-600 hover:underline text-sm">Terpenonderzoek.nl - Wetenschappelijk onderzoek</a>`
+              html += `<a href="https://www.friesmuseum.nl/collectie/archeologie/" target="_blank" class="block text-blue-600 hover:underline text-sm">Fries Museum - Terpvondsten</a>`
+              html += `<a href="https://nl.wikipedia.org/wiki/Terp" target="_blank" class="block text-blue-600 hover:underline text-sm">Wikipedia - Terpen</a>`
+              if (monumentNaam) {
+                const searchTerm = encodeURIComponent(monumentNaam + ' terp friesland')
+                html += `<a href="https://www.google.com/search?q=${searchTerm}" target="_blank" class="block text-blue-600 hover:underline text-sm">Zoek meer over ${monumentNaam}</a>`
+              }
+              html += `</div>`
 
               results.push(html)
             }
