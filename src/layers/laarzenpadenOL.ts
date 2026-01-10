@@ -156,7 +156,8 @@ export async function createLaarzenpadenLayerOL() {
     properties: { title: 'Laarzenpaden', type: 'overlay' },
     visible: false,
     style: (feature, resolution) => getLaarzenpadStyle(resolution),
-    zIndex: 14 // Below point markers, similar to ruiterpaden
+    zIndex: 14, // Below point markers, similar to ruiterpaden
+    maxResolution: 40 // Alleen tonen vanaf ~5km hoogte (zoom 13+)
   })
 
   // Lazy load data when layer becomes visible

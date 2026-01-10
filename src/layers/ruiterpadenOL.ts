@@ -147,7 +147,8 @@ export async function createRuiterpadenLayerOL() {
     properties: { title: 'Ruiterpaden', type: 'overlay' },
     visible: false,
     style: (feature, resolution) => getRuiterpadStyle(resolution),
-    zIndex: 15 // Below point markers
+    zIndex: 15, // Below point markers
+    maxResolution: 40 // Alleen tonen vanaf ~5km hoogte (zoom 13+)
   })
 
   // Lazy load data when layer becomes visible

@@ -104,9 +104,6 @@ export const useLayerStore = create<LayerState>()(
       'Musea': false,
       'Strandjes': false,
       'Ruiterpaden': false,
-      'Natuurparkeren': false,
-      'Strandopgangen': false,
-      'Winkelcentra': false,
       'Laarzenpaden': false,
       // Percelen (Kadaster & Landbouw)
       'Gewaspercelen': false,

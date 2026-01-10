@@ -574,30 +574,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: false
   },
-  'Natuurparkeren': {
-    name: 'Natuurparkeren',
-    factory: async () => {
-      const { createNatuurParkeerLayerOL } = await import('./natuurParkeerOL')
-      return createNatuurParkeerLayerOL()
-    },
-    immediateLoad: false
-  },
-  'Strandopgangen': {
-    name: 'Strandopgangen',
-    factory: async () => {
-      const { createStrandopgangenLayerOL } = await import('./strandopgangenOL')
-      return createStrandopgangenLayerOL()
-    },
-    immediateLoad: false
-  },
-  'Winkelcentra': {
-    name: 'Winkelcentra',
-    factory: async () => {
-      const { createWinkelcentraLayerOL } = await import('./winkelcentraOL')
-      return createWinkelcentraLayerOL()
-    },
-    immediateLoad: false
-  },
   'Laarzenpaden': {
     name: 'Laarzenpaden',
     factory: async () => {

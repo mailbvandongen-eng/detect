@@ -551,32 +551,51 @@ export function Popup() {
               // Process EACH feature as a separate popup
               for (const feature of data.features) {
                 const props = feature.properties
-                let html = `<strong class="text-blue-800">Archeologisch Onderzoek</strong>`
 
-                // Research type with explanation
+                // Verzamel alle bruikbare info
                 const onderzoekType = props.type_onderzoek || ''
+                const rawNaam = props.projectnaam || props.project_naam || props.naam || ''
+                // Filter ongeldige namen (-, leeg, alleen cijfers)
+                const projectNaam = (rawNaam && rawNaam !== '-' && rawNaam.trim() !== '' && !/^\d+$/.test(rawNaam.trim())) ? rawNaam : ''
+                const gemeente = props.gemeente || ''
+                const uitvoerder = props.uitvoerder || ''
+                const omNummer = props.onderzoeksmeldingnummer || ''
+                const adres = props.adres || props.straat || ''
+
+                // Maak een duidelijke kop
+                let kopTekst = 'Archeologisch Onderzoek'
+                if (projectNaam) {
+                  kopTekst = projectNaam
+                } else if (gemeente && adres) {
+                  kopTekst = `${gemeente} - ${adres}`
+                } else if (gemeente) {
+                  kopTekst = `Onderzoek ${gemeente}`
+                }
+
+                let html = `<strong class="text-blue-800">${kopTekst}</strong>`
+
+                // Research type
                 if (onderzoekType) {
                   html += `<br/><span class="text-sm font-semibold text-blue-700">${onderzoekType}</span>`
                 }
 
-                // Project naam als beschikbaar
-                const projectNaam = props.projectnaam || props.project_naam || props.naam || ''
-                if (projectNaam) {
-                  html += `<br/><span class="text-sm text-gray-800">${projectNaam}</span>`
+                // Locatie info (alleen als niet al in kop)
+                if (gemeente && !kopTekst.includes(gemeente)) {
+                  html += `<br/><span class="text-sm text-gray-700">${gemeente}</span>`
+                }
+                if (adres && !kopTekst.includes(adres)) {
+                  html += `<br/><span class="text-sm text-gray-600">${adres}</span>`
                 }
 
-                if (props.onderzoeksmeldingnummer) {
-                  html += `<br/><span class="text-xs text-gray-500 font-mono">OM: ${props.onderzoeksmeldingnummer}</span>`
+                if (omNummer) {
+                  html += `<br/><span class="text-xs text-gray-500 font-mono">OM: ${omNummer}</span>`
                 }
-                if (props.uitvoerder) {
-                  html += `<br/><span class="text-sm text-gray-700">Uitvoerder: ${props.uitvoerder}</span>`
+                if (uitvoerder) {
+                  html += `<br/><span class="text-sm text-gray-700">Uitvoerder: ${uitvoerder}</span>`
                 }
                 if (props.startdatum || props.einddatum) {
                   const periode = [props.startdatum, props.einddatum].filter(Boolean).join(' - ')
                   html += `<br/><span class="text-xs text-gray-600">Periode: ${periode}</span>`
-                }
-                if (props.gemeente) {
-                  html += `<br/><span class="text-xs text-gray-500">${props.gemeente}</span>`
                 }
 
                 // Periodes/dateringen gevonden
@@ -605,7 +624,7 @@ export function Popup() {
                   html += `<div class="text-sm text-gray-700 mt-1">Proefsleuven zijn gegraven om te kijken of er archeologische sporen in de grond zitten.</div>`
                 } else if (onderzoekType.toLowerCase().includes('begeleiding')) {
                   html += `<div class="text-sm text-gray-700 mt-1">Archeologische begeleiding bij graafwerk. Een archeoloog was aanwezig om te controleren of er vondsten naar boven kwamen.</div>`
-                } else if (onderzoekType.toLowerCase().includes('inventariserend')) {
+                } else if (onderzoekType.toLowerCase().includes('inventariserend') || onderzoekType.toLowerCase().includes('karterend')) {
                   html += `<div class="text-sm text-gray-700 mt-1">Verkennend onderzoek om te bepalen of er archeologische resten in de grond kunnen zitten.</div>`
                 } else {
                   html += `<div class="text-sm text-gray-700 mt-1">Op deze locatie is archeologisch onderzoek uitgevoerd. De resultaten zijn opgeslagen in het landelijke archief.</div>`
@@ -618,20 +637,28 @@ export function Popup() {
                 // Meer weten - met directe links naar het rapport
                 html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Rapport opzoeken</span></div>`
 
-                // Zoekterm voor rapporten: gebruik projectnaam of gemeente
-                const zoekterm = projectNaam || props.gemeente || ''
+                // Bouw slimme zoekterm: projectnaam > uitvoerder+gemeente > gemeente
+                let zoekterm = ''
+                if (projectNaam) {
+                  zoekterm = projectNaam
+                } else if (uitvoerder && gemeente) {
+                  // Combineer uitvoerder met gemeente voor betere hits
+                  zoekterm = `${uitvoerder} ${gemeente}`
+                } else if (gemeente) {
+                  zoekterm = gemeente
+                }
 
                 if (zoekterm) {
-                  // Directe zoeklink naar DANS Data Station Archaeology (opvolger van EASY)
-                  html += `<div class="text-sm text-gray-700 mt-1"><a href="https://archaeology.datastations.nl/dataverse/root?q=${encodeURIComponent(zoekterm)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek "${zoekterm.substring(0, 30)}${zoekterm.length > 30 ? '...' : ''}" in DANS Archaeology</a></div>`
+                  // Directe zoeklink naar DANS Data Station Archaeology
+                  const displayTerm = zoekterm.length > 35 ? zoekterm.substring(0, 35) + '...' : zoekterm
+                  html += `<div class="text-sm text-gray-700 mt-1"><a href="https://archaeology.datastations.nl/dataverse/root?q=${encodeURIComponent(zoekterm)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek "${displayTerm}" in DANS</a></div>`
 
-                  // Google Scholar zoeklink voor rapporten
+                  // Google Scholar zoeklink
                   html += `<div class="text-sm text-gray-700 mt-1"><a href="https://scholar.google.nl/scholar?q=${encodeURIComponent(zoekterm + ' archeologisch rapport')}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek in Google Scholar</a></div>`
                 }
 
-                if (props.onderzoeksmeldingnummer) {
+                if (omNummer) {
                   // ARCHIS zoekfunctie
-                  const omNummer = props.onderzoeksmeldingnummer
                   html += `<div class="text-sm text-gray-700 mt-1"><a href="https://archis.cultureelerfgoed.nl/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Zoek OM ${omNummer} in ARCHIS</a> <span class="text-xs text-gray-400">(account nodig)</span></div>`
                 }
 
@@ -1262,7 +1289,7 @@ export function Popup() {
 
         // === PROVINCIALE WAARDENKAARTEN ===
 
-        // Zuid-Holland: Scheepswrakken
+        // Zuid-Holland: Scheepswrakken - uitgebreide B1 info
         if (title === 'Scheepswrakken') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -1277,20 +1304,33 @@ export function Popup() {
 
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
-              let html = `<strong class="text-cyan-800">Scheepswrak</strong>`
+              const wrakNaam = props.naam || props.NAAM || 'Scheepswrak'
+              let html = `<strong class="text-cyan-800">${wrakNaam}</strong>`
+              html += `<br/><span class="text-sm text-gray-800">Historisch scheepswrak in Zuid-Holland</span>`
 
-              if (props.naam || props.NAAM) {
-                html += `<br/><span class="text-sm font-semibold text-cyan-700">${props.naam || props.NAAM}</span>`
-              }
+              // B1 uitleg
+              html += `<div class="mt-2 text-sm text-gray-700">`
+              html += `Op deze plek ligt een oud scheepswrak. Dit is een schip dat lang geleden is gezonken. `
+              html += `In de bodem kunnen nog resten van het schip en de lading liggen.`
+              html += `</div>`
+
               if (props.type || props.TYPE) {
-                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
+                html += `<br/><span class="text-sm text-cyan-700">Type: ${props.type || props.TYPE}</span>`
               }
               if (props.datering || props.DATERING) {
-                html += `<br/><span class="text-xs text-gray-500">Datering: ${props.datering || props.DATERING}</span>`
+                html += `<br/><span class="text-sm text-gray-600">Periode: ${props.datering || props.DATERING}</span>`
               }
               if (props.bron || props.BRON) {
-                html += `<br/><span class="text-xs text-gray-400">${props.bron || props.BRON}</span>`
+                html += `<br/><span class="text-xs text-gray-500">Bron: ${props.bron || props.BRON}</span>`
               }
+
+              // Detectietip
+              html += `<div class="mt-2 p-2 bg-cyan-50 rounded text-xs text-cyan-800">`
+              html += `<strong>Detectietip:</strong> Bij scheepswrakken kun je bijzondere vondsten doen zoals scheepsonderdelen, munten, gereedschap en lading. Let op: vaak is een vergunning nodig.`
+              html += `</div>`
+
+              // Link naar erfgoed
+              html += `<div class="mt-2"><a href="https://www.zuid-holland.nl/onderwerpen/cultuur-erfgoed/" target="_blank" class="text-blue-600 hover:underline text-sm">Meer over erfgoed Zuid-Holland</a></div>`
 
               results.push(html)
             }
@@ -1300,7 +1340,7 @@ export function Popup() {
           continue
         }
 
-        // Zuid-Holland: Woonheuvels
+        // Zuid-Holland: Woonheuvels - uitgebreide B1 info
         if (title === 'Woonheuvels ZH') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -1315,14 +1355,27 @@ export function Popup() {
 
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
-              let html = `<strong class="text-orange-800">Woonheuvel</strong>`
+              const heuvelNaam = props.naam || props.NAAM || 'Woonheuvel'
+              let html = `<strong class="text-orange-800">${heuvelNaam}</strong>`
+              html += `<br/><span class="text-sm text-gray-800">Historische woonheuvel (terp)</span>`
 
-              if (props.naam || props.NAAM) {
-                html += `<br/><span class="text-sm font-semibold text-orange-700">${props.naam || props.NAAM}</span>`
-              }
+              // B1 uitleg
+              html += `<div class="mt-2 text-sm text-gray-700">`
+              html += `Een woonheuvel is een door mensen opgeworpen heuvel. Mensen woonden hierop om droge voeten te houden bij hoog water. `
+              html += `Deze heuvels werden steeds hoger gemaakt. Je vindt ze vooral in laaggelegen gebieden.`
+              html += `</div>`
+
               if (props.type || props.TYPE) {
-                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
+                html += `<br/><span class="text-sm text-orange-700">Type: ${props.type || props.TYPE}</span>`
               }
+
+              // Detectietip
+              html += `<div class="mt-2 p-2 bg-orange-50 rounded text-xs text-orange-800">`
+              html += `<strong>Detectietip:</strong> Woonheuvels zijn rijk aan vondsten! Denk aan aardewerk, munten, sieraden en huisraad uit de middeleeuwen. De grond bevat vaak veel materiaal.`
+              html += `</div>`
+
+              // Link naar erfgoed
+              html += `<div class="mt-2"><a href="https://www.zuid-holland.nl/onderwerpen/cultuur-erfgoed/" target="_blank" class="text-blue-600 hover:underline text-sm">Meer over erfgoed Zuid-Holland</a></div>`
 
               results.push(html)
             }
@@ -1332,7 +1385,7 @@ export function Popup() {
           continue
         }
 
-        // Zuid-Holland: Romeinse Forten
+        // Zuid-Holland: Romeinse Forten - uitgebreide B1 info
         if (title === 'Romeinse Forten') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -1347,17 +1400,30 @@ export function Popup() {
 
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
-              let html = `<strong class="text-red-800">Romeins Fort</strong>`
+              const fortNaam = props.naam || props.NAAM || 'Romeins Fort'
+              let html = `<strong class="text-red-800">${fortNaam}</strong>`
+              html += `<br/><span class="text-sm text-gray-800">Romeins militair fort (castellum)</span>`
 
-              if (props.naam || props.NAAM) {
-                html += `<br/><span class="text-sm font-semibold text-red-700">${props.naam || props.NAAM}</span>`
-              }
+              // B1 uitleg
+              html += `<div class="mt-2 text-sm text-gray-700">`
+              html += `Dit was een Romeins legerfort. De Romeinen bouwden deze forten langs de Rijn, de grens van hun rijk. `
+              html += `Soldaten woonden hier en bewaakten de grens. Deze forten zijn ongeveer 2000 jaar oud.`
+              html += `</div>`
+
               if (props.type || props.TYPE) {
-                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
+                html += `<br/><span class="text-sm text-red-700">Type: ${props.type || props.TYPE}</span>`
               }
               if (props.periode || props.PERIODE) {
-                html += `<br/><span class="text-xs text-gray-500">${props.periode || props.PERIODE}</span>`
+                html += `<br/><span class="text-sm text-gray-600">Periode: ${props.periode || props.PERIODE}</span>`
               }
+
+              // Detectietip
+              html += `<div class="mt-2 p-2 bg-red-50 rounded text-xs text-red-800">`
+              html += `<strong>Detectietip:</strong> Romeinse forten zijn toplocaties! Je kunt hier Romeinse munten, fibulae (mantelspelden), militaire uitrusting en aardewerk vinden. Vaak beschermd, check de regels!`
+              html += `</div>`
+
+              // Link naar Limes
+              html += `<div class="mt-2"><a href="https://www.limesworld.nl/" target="_blank" class="text-blue-600 hover:underline text-sm">Meer over de Romeinse Limes</a></div>`
 
               results.push(html)
             }
@@ -1367,7 +1433,7 @@ export function Popup() {
           continue
         }
 
-        // Zuid-Holland: Windmolens
+        // Zuid-Holland: Windmolens - uitgebreide B1 info
         if (title === 'Windmolens') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -1382,17 +1448,31 @@ export function Popup() {
 
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
-              let html = `<strong class="text-amber-800">Windmolen</strong>`
+              const molenNaam = props.naam || props.NAAM || 'Windmolen'
+              let html = `<strong class="text-amber-800">${molenNaam}</strong>`
+              html += `<br/><span class="text-sm text-gray-800">Historische windmolen</span>`
 
-              if (props.naam || props.NAAM) {
-                html += `<br/><span class="text-sm font-semibold text-amber-700">${props.naam || props.NAAM}</span>`
-              }
+              // B1 uitleg
+              html += `<div class="mt-2 text-sm text-gray-700">`
+              html += `Windmolens gebruikten de kracht van de wind. Ze maalden graan tot meel of pompten water weg uit polders. `
+              html += `Nederland heeft veel molens omdat we laaggelegen land droog moesten houden.`
+              html += `</div>`
+
               if (props.type || props.TYPE || props.functie || props.FUNCTIE) {
-                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE || props.functie || props.FUNCTIE}</span>`
+                const functie = props.functie || props.FUNCTIE || props.type || props.TYPE
+                html += `<br/><span class="text-sm text-amber-700">Functie: ${functie}</span>`
               }
               if (props.bouwjaar || props.BOUWJAAR) {
-                html += `<br/><span class="text-xs text-gray-500">Bouwjaar: ${props.bouwjaar || props.BOUWJAAR}</span>`
+                html += `<br/><span class="text-sm text-gray-600">Bouwjaar: ${props.bouwjaar || props.BOUWJAAR}</span>`
               }
+
+              // Detectietip
+              html += `<div class="mt-2 p-2 bg-amber-50 rounded text-xs text-amber-800">`
+              html += `<strong>Detectietip:</strong> Bij molens vind je vaak voorwerpen van de molenaar en bezoekers: munten, knopen, gereedschap. Ook de grond rond verdwenen molens kan interessant zijn.`
+              html += `</div>`
+
+              // Link naar molens
+              html += `<div class="mt-2"><a href="https://www.molendatabase.nl/" target="_blank" class="text-blue-600 hover:underline text-sm">Meer over Nederlandse molens</a></div>`
 
               results.push(html)
             }
@@ -1402,7 +1482,7 @@ export function Popup() {
           continue
         }
 
-        // Zuid-Holland: Erfgoedlijnen
+        // Zuid-Holland: Erfgoedlijnen - uitgebreide B1 info
         if (title === 'Erfgoedlijnen') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -1417,17 +1497,30 @@ export function Popup() {
 
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
-              let html = `<strong class="text-purple-800">Erfgoedlijn</strong>`
+              const lijnNaam = props.naam || props.NAAM || props.erfgoedlijn || 'Erfgoedlijn'
+              let html = `<strong class="text-purple-800">${lijnNaam}</strong>`
+              html += `<br/><span class="text-sm text-gray-800">Historische lijn in het landschap</span>`
 
-              if (props.naam || props.NAAM || props.erfgoedlijn) {
-                html += `<br/><span class="text-sm font-semibold text-purple-700">${props.naam || props.NAAM || props.erfgoedlijn}</span>`
-              }
+              // B1 uitleg
+              html += `<div class="mt-2 text-sm text-gray-700">`
+              html += `Een erfgoedlijn is een route of lijn met veel geschiedenis. Dit kunnen oude dijken, wegen, kanalen of verdedigingslinies zijn. `
+              html += `Langs deze lijnen vind je vaak bijzondere plekken.`
+              html += `</div>`
+
               if (props.type || props.TYPE) {
-                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
+                html += `<br/><span class="text-sm text-purple-700">Type: ${props.type || props.TYPE}</span>`
               }
               if (props.omschrijving || props.OMSCHRIJVING) {
-                html += `<br/><span class="text-xs text-gray-500">${props.omschrijving || props.OMSCHRIJVING}</span>`
+                html += `<br/><span class="text-sm text-gray-600">${props.omschrijving || props.OMSCHRIJVING}</span>`
               }
+
+              // Detectietip
+              html += `<div class="mt-2 p-2 bg-purple-50 rounded text-xs text-purple-800">`
+              html += `<strong>Detectietip:</strong> Erfgoedlijnen volgen oude routes waar mensen langskwamen. Denk aan munten, knopen, gespen en andere verloren voorwerpen. Dijken en wegen zijn vaak interessant.`
+              html += `</div>`
+
+              // Link naar erfgoedlijnen
+              html += `<div class="mt-2"><a href="https://www.erfgoedlijnen.nl/" target="_blank" class="text-blue-600 hover:underline text-sm">Meer over Erfgoedlijnen</a></div>`
 
               results.push(html)
             }
@@ -1437,7 +1530,7 @@ export function Popup() {
           continue
         }
 
-        // Zuid-Holland: Oude Kernen
+        // Zuid-Holland: Oude Kernen - uitgebreide B1 info
         if (title === 'Oude Kernen') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -1452,17 +1545,30 @@ export function Popup() {
 
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
-              let html = `<strong class="text-stone-800">Historische Kern</strong>`
+              const kernNaam = props.naam || props.NAAM || 'Historische Kern'
+              let html = `<strong class="text-stone-800">${kernNaam}</strong>`
+              html += `<br/><span class="text-sm text-gray-800">Oude dorps- of stadskern</span>`
 
-              if (props.naam || props.NAAM) {
-                html += `<br/><span class="text-sm font-semibold text-stone-700">${props.naam || props.NAAM}</span>`
-              }
+              // B1 uitleg
+              html += `<div class="mt-2 text-sm text-gray-700">`
+              html += `Dit is het oude centrum van een dorp of stad. Hier woonden en werkten mensen al honderden jaren geleden. `
+              html += `De grond bevat vaak veel sporen van het verleden.`
+              html += `</div>`
+
               if (props.type || props.TYPE) {
-                html += `<br/><span class="text-sm text-gray-700">${props.type || props.TYPE}</span>`
+                html += `<br/><span class="text-sm text-stone-700">Type: ${props.type || props.TYPE}</span>`
               }
               if (props.periode || props.PERIODE) {
-                html += `<br/><span class="text-xs text-gray-500">${props.periode || props.PERIODE}</span>`
+                html += `<br/><span class="text-sm text-gray-600">Periode: ${props.periode || props.PERIODE}</span>`
               }
+
+              // Detectietip
+              html += `<div class="mt-2 p-2 bg-stone-100 rounded text-xs text-stone-800">`
+              html += `<strong>Detectietip:</strong> Oude kernen zijn rijk aan vondsten! Munten, knopen, sieraden, gereedschap en huisraad. Let op: detecteren is vaak niet toegestaan in beschermde kernen.`
+              html += `</div>`
+
+              // Link naar erfgoed
+              html += `<div class="mt-2"><a href="https://www.zuid-holland.nl/onderwerpen/cultuur-erfgoed/" target="_blank" class="text-blue-600 hover:underline text-sm">Meer over erfgoed Zuid-Holland</a></div>`
 
               results.push(html)
             }
@@ -1472,7 +1578,7 @@ export function Popup() {
           continue
         }
 
-        // Gelderland: Relictenkaart Punten
+        // Gelderland: Relictenkaart Punten - uitgebreide B1 info
         if (title === 'Relictenkaart Punten') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -1488,27 +1594,44 @@ export function Popup() {
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
 
-              // Decode type codes to readable names
-              const typeMap: Record<string, string> = {
-                'KV': 'Kasteel/Vesting', 'K': 'Kapel', 'KE': 'Kerkhof',
-                'B': 'Buitenhuis', 'OB': 'Oud Bebouwingsrelict', 'OV': 'Oude Verkaveling',
-                'NR': 'Nijverheidsrelict', 'GH': 'Grafheuvel', 'BP': 'Begraafplaats',
-                'HH': 'Havezate', 'RM': 'Rosmolen', 'WM': 'Windmolen',
-                'PM': 'Poldermolen', 'EK': 'Eendenkooi', 'SH': 'Scholtenhoeve'
+              // Uitgebreide type codes met B1 uitleg
+              const typeInfo: Record<string, { naam: string, uitleg: string }> = {
+                'KV': { naam: 'Kasteel of Vesting', uitleg: 'Een versterkt gebouw uit de middeleeuwen. Vaak zijn er nog resten in de grond.' },
+                'K': { naam: 'Kapel', uitleg: 'Een klein kerkgebouw. Rond kapellen worden vaak religieuze voorwerpen gevonden.' },
+                'KE': { naam: 'Kerkhof', uitleg: 'Historische begraafplaats. Respecteer deze plek en vraag altijd toestemming.' },
+                'B': { naam: 'Buitenhuis', uitleg: 'Een landhuis van welgestelde families. Vaak met tuinen en bijgebouwen.' },
+                'OB': { naam: 'Oud Bebouwingsrelict', uitleg: 'Resten van oude bebouwing. Hier stonden ooit huizen of boerderijen.' },
+                'OV': { naam: 'Oude Verkaveling', uitleg: 'Historisch patroon van akkers en weilanden uit vroeger tijden.' },
+                'NR': { naam: 'Nijverheidsrelict', uitleg: 'Plek waar vroeger ambacht of industrie was, zoals smederijen of molens.' },
+                'GH': { naam: 'Grafheuvel', uitleg: 'Prehistorische begraafplaats. Beschermd monument - niet detecteren!' },
+                'BP': { naam: 'Begraafplaats', uitleg: 'Historische begraafplaats. Respecteer deze plek.' },
+                'HH': { naam: 'Havezate', uitleg: 'Adellijk huis met landerijen. Interessant voor middeleeuwse vondsten.' },
+                'RM': { naam: 'Rosmolen', uitleg: 'Molen aangedreven door paarden. Zeldzaam cultuurhistorisch object.' },
+                'WM': { naam: 'Windmolen', uitleg: 'Historische windmolen. Vaak zijn funderingen nog zichtbaar.' },
+                'PM': { naam: 'Poldermolen', uitleg: 'Molen voor waterbeheer. Belangrijk voor de waterhuishouding.' },
+                'EK': { naam: 'Eendenkooi', uitleg: 'Plek om wilde eenden te vangen. Bijzonder cultuurlandschap.' },
+                'SH': { naam: 'Scholtenhoeve', uitleg: 'Boerderij van een welgestelde boer. Vaak eeuwenoud.' },
+                'SL': { naam: 'Slot', uitleg: 'Versterkt kasteel of adellijke woning.' },
+                'MO': { naam: 'Motte', uitleg: 'Vroegmiddeleeuwse kasteelberg. Zeer interessant voor detectie.' },
+                'BR': { naam: 'Borg', uitleg: 'Versterkte adellijke woning, typisch voor het noorden.' }
               }
 
               const typeCode = props.type?.replace(/[0-9]/g, '') || ''
-              const typeName = typeMap[typeCode] || props.type || 'Cultuurhistorisch object'
+              const info = typeInfo[typeCode] || { naam: props.type || 'Cultuurhistorisch object', uitleg: 'Een historisch relict in het Gelderse landschap.' }
 
-              let html = `<strong class="text-emerald-800">Relict</strong>`
-              html += `<br/><span class="text-sm font-semibold text-emerald-700">${typeName}</span>`
+              let html = `<strong class="text-emerald-800">${info.naam}</strong>`
+              html += `<br/><span class="text-sm text-gray-800">Gelders cultuurhistorisch relict</span>`
 
-              if (props.type && typeCode !== props.type) {
-                html += `<br/><span class="text-xs text-gray-500">Code: ${props.type}</span>`
-              }
               if (props.streek) {
-                html += `<br/><span class="text-xs text-gray-400">Streek: ${props.streek}</span>`
+                html += `<br/><span class="text-sm text-gray-600">Streek: ${props.streek}</span>`
               }
+
+              // B1 uitleg
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat is dit?</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">${info.uitleg}</div>`
+
+              // Link naar Gelderland erfgoed
+              html += `<div class="mt-3"><a href="https://www.gelderland.nl/erfgoed" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline text-sm">Meer over Gelders erfgoed</a></div>`
 
               results.push(html)
             }
@@ -1518,7 +1641,7 @@ export function Popup() {
           continue
         }
 
-        // Gelderland: Relictenkaart Lijnen
+        // Gelderland: Relictenkaart Lijnen - uitgebreide B1 info
         if (title === 'Relictenkaart Lijnen') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -1534,17 +1657,30 @@ export function Popup() {
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
 
-              // Decode klasse to readable names
-              const klasseMap: Record<number, string> = {
-                1: 'Sprengenbeek', 2: 'Oude waterloop', 3: 'Doorgaande weg',
-                4: 'Hessenweg', 5: 'Oude weg', 6: 'Historische grens',
-                7: 'Trekpad', 8: 'Jaagpad'
+              // Uitgebreide klasse info met B1 uitleg
+              const klasseInfo: Record<number, { naam: string, uitleg: string }> = {
+                1: { naam: 'Sprengenbeek', uitleg: 'Kunstmatig aangelegde beek voor waterkracht. Vaak bij papiermolens.' },
+                2: { naam: 'Oude waterloop', uitleg: 'Historische beek of rivier. Langs waterlopen vind je vaak oude bewoningssporen.' },
+                3: { naam: 'Doorgaande weg', uitleg: 'Eeuwenoude handelsroute. Langs deze wegen gingen reizigers en handelaren.' },
+                4: { naam: 'Hessenweg', uitleg: 'Historische handelsweg naar Duitsland. Gebruikt door marskramers en kooplieden.' },
+                5: { naam: 'Oude weg', uitleg: 'Historische route door het landschap. Vaak al eeuwen in gebruik.' },
+                6: { naam: 'Historische grens', uitleg: 'Oude eigendoms- of gebiedsgrens. Soms gemarkeerd met grenspalen.' },
+                7: { naam: 'Trekpad', uitleg: 'Pad langs een kanaal waar paarden schepen trokken.' },
+                8: { naam: 'Jaagpad', uitleg: 'Pad langs water voor scheepvaart met paardentractie.' }
               }
 
-              const klasseName = klasseMap[props.klasse] || `Historisch lijnrelict (${props.klasse})`
+              const info = klasseInfo[props.klasse] || { naam: `Historisch lijnrelict`, uitleg: 'Een lijnvormig historisch element in het landschap.' }
 
-              let html = `<strong class="text-teal-800">Lijnrelict</strong>`
-              html += `<br/><span class="text-sm font-semibold text-teal-700">${klasseName}</span>`
+              let html = `<strong class="text-teal-800">${info.naam}</strong>`
+              html += `<br/><span class="text-sm text-gray-800">Gelders lijnrelict</span>`
+
+              // B1 uitleg
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat is dit?</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">${info.uitleg}</div>`
+
+              // Tip voor detectie
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Tip</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">Langs oude wegen en waterlopen worden vaak vondsten gedaan. Mensen verloren er munten en voorwerpen.</div>`
 
               results.push(html)
             }
@@ -1554,7 +1690,7 @@ export function Popup() {
           continue
         }
 
-        // Gelderland: Relictenkaart Vlakken
+        // Gelderland: Relictenkaart Vlakken - uitgebreide B1 info
         if (title === 'Relictenkaart Vlakken') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -1570,23 +1706,33 @@ export function Popup() {
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
 
-              // Decode klasse to readable names
-              const klasseMap: Record<number, string> = {
-                1: 'Onveranderd agrarisch (voor 1850)', 2: 'Jonge heideontginning (1850-1950)',
-                3: 'Open essencomplex', 4: 'Kampenlandschap', 5: 'Heiderelict (1850)',
-                6: 'Bosrelict (1850)', 7: 'Stuifzandrelict', 8: 'Oud bouwland',
-                9: 'Historisch grasland', 10: 'Beekdal'
+              // Uitgebreide klasse info met B1 uitleg
+              const klasseInfo: Record<number, { naam: string, uitleg: string }> = {
+                1: { naam: 'Oud agrarisch land', uitleg: 'Gebied dat al voor 1850 als landbouwgrond werd gebruikt. Rijk aan geschiedenis.' },
+                2: { naam: 'Jonge heideontginning', uitleg: 'Heide die tussen 1850 en 1950 is ontgonnen voor landbouw.' },
+                3: { naam: 'Open essencomplex', uitleg: 'Historische akkers op hoge grond. Vaak eeuwenoud en rijk aan vondsten.' },
+                4: { naam: 'Kampenlandschap', uitleg: 'Landschap met kleine akkers omringd door houtwallen. Typisch voor Oost-Nederland.' },
+                5: { naam: 'Heiderelict', uitleg: 'Restant van het vroegere uitgestrekte heidelandschap. Vaak prehistorische vondsten.' },
+                6: { naam: 'Oud bosrelict', uitleg: 'Bos dat al in 1850 bestond. Oude bossen bevatten vaak cultuurhistorische resten.' },
+                7: { naam: 'Stuifzandrelict', uitleg: 'Overblijfsel van actief stuifzand. Vaak bij grafheuvels en prehistorische sites.' },
+                8: { naam: 'Oud bouwland', uitleg: 'Historische akkergrond. Boeren hebben hier eeuwenlang gewerkt.' },
+                9: { naam: 'Historisch grasland', uitleg: 'Oud weiland of hooiland. Vaak bij boerderijen en dorpen.' },
+                10: { naam: 'Beekdal', uitleg: 'Laagte langs een beek. Mensen woonden graag bij water.' }
               }
 
-              const klasseName = klasseMap[props.klasse] || `Historisch landschap (${props.klasse})`
+              const info = klasseInfo[props.klasse] || { naam: `Historisch landschap`, uitleg: 'Een waardevol cultuurlandschap in Gelderland.' }
 
-              let html = `<strong class="text-lime-800">Landschapsrelict</strong>`
-              html += `<br/><span class="text-sm font-semibold text-lime-700">${klasseName}</span>`
+              let html = `<strong class="text-lime-800">${info.naam}</strong>`
+              html += `<br/><span class="text-sm text-gray-800">Gelders landschapsrelict</span>`
 
               if (props.st_area_shape_) {
                 const ha = (props.st_area_shape_ / 10000).toFixed(1)
-                html += `<br/><span class="text-xs text-gray-500">${ha} ha</span>`
+                html += `<br/><span class="text-sm text-gray-600">${ha} hectare</span>`
               }
+
+              // B1 uitleg
+              html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Wat is dit?</span></div>`
+              html += `<div class="text-sm text-gray-700 mt-1">${info.uitleg}</div>`
 
               results.push(html)
             }
@@ -1596,7 +1742,7 @@ export function Popup() {
           continue
         }
 
-        // Zeeland: Verdronken Dorpen
+        // Zeeland: Verdronken Dorpen - uitgebreide B1 info
         if (title === 'Verdronken Dorpen') {
           try {
             const lonLat = toLonLat(coordinate)
@@ -1611,20 +1757,33 @@ export function Popup() {
 
             if (data.features && data.features.length > 0) {
               const props = data.features[0].properties
-              let html = `<strong class="text-blue-800">Verdronken Dorp</strong>`
+              const dorpNaam = props.naam || props.NAAM || 'Verdronken dorp'
+              let html = `<strong class="text-blue-800">${dorpNaam}</strong>`
+              html += `<br/><span class="text-sm text-gray-800">Verdronken dorp in Zeeland</span>`
 
-              if (props.naam || props.NAAM) {
-                html += `<br/><span class="text-sm font-semibold text-blue-700">${props.naam || props.NAAM}</span>`
-              }
+              // B1 uitleg
+              html += `<div class="mt-2 text-sm text-gray-700">`
+              html += `Dit dorp is lang geleden door de zee verzwolgen. Bij stormvloeden brak de zeedijk door en liep het land onder water. `
+              html += `De mensen vluchtten, maar hun huizen en bezittingen bleven achter. In de bodem liggen nog resten van dit dorp.`
+              html += `</div>`
+
               if (props.verdronken || props.VERDRONKEN || props.jaar || props.JAAR) {
-                html += `<br/><span class="text-xs text-gray-600">Verdronken: ${props.verdronken || props.VERDRONKEN || props.jaar || props.JAAR}</span>`
+                html += `<br/><span class="text-sm text-blue-700">Verdronken in: ${props.verdronken || props.VERDRONKEN || props.jaar || props.JAAR}</span>`
               }
               if (props.gemeente || props.GEMEENTE) {
-                html += `<br/><span class="text-xs text-gray-500">${props.gemeente || props.GEMEENTE}</span>`
+                html += `<br/><span class="text-sm text-gray-600">Gemeente: ${props.gemeente || props.GEMEENTE}</span>`
               }
               if (props.bron || props.BRON) {
-                html += `<br/><span class="text-xs text-gray-400">${props.bron || props.BRON}</span>`
+                html += `<br/><span class="text-xs text-gray-500">Bron: ${props.bron || props.BRON}</span>`
               }
+
+              // Detectietip
+              html += `<div class="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-800">`
+              html += `<strong>Detectietip:</strong> Verdronken dorpen bevatten veel vondsten! Aardewerk, munten, sieraden, gereedschap en huisraad. Bij laag water komen soms stukken vrij. Let op getijden en veiligheid!`
+              html += `</div>`
+
+              // Link naar Zeeuws erfgoed
+              html += `<div class="mt-2"><a href="https://www.verdronkengeschiedenis.nl/" target="_blank" class="text-blue-600 hover:underline text-sm">Meer over verdronken dorpen</a></div>`
 
               results.push(html)
             }
@@ -2083,22 +2242,163 @@ export function Popup() {
           html += `<br/><span class="text-sm text-gray-700">${dataProps.Beschrijvi}</span>`
         }
 
-        // Speeltuinen/Parken (OSM data) - only show type if we have a real name
-        if (dataProps.leisure && dataProps.name) {
-          const typeLabel = dataProps.leisure === 'playground' ? 'Speeltuin' :
-                           dataProps.leisure === 'park' ? 'Park' :
-                           dataProps.leisure === 'swimming_area' ? 'Zwemplek' : null
-          if (typeLabel) {
-            html += `<br/><span class="text-sm text-green-700">${typeLabel}</span>`
+        // Parken (OSM data) - uitgebreide info met groene kop
+        if (dataProps.leisure === 'park') {
+          const parkNaam = dataProps.name || 'Park'
+          html = `<strong class="text-green-800">${parkNaam}</strong>`
+          html += `<br/><span class="text-sm text-gray-800">Park</span>`
+
+          // Beschrijving
+          if (dataProps.description) {
+            html += `<div class="mt-2 text-sm text-gray-700">${dataProps.description}</div>`
+          }
+
+          // Oppervlakte als beschikbaar
+          if (dataProps.area) {
+            html += `<br/><span class="text-sm text-gray-600">Oppervlakte: ${dataProps.area}</span>`
+          }
+
+          // Voorzieningen
+          const voorzieningen: string[] = []
+          if (dataProps.dog === 'yes') voorzieningen.push('Honden toegestaan')
+          if (dataProps.lit === 'yes') voorzieningen.push('Verlicht')
+          if (dataProps.bench === 'yes') voorzieningen.push('Bankjes')
+          if (voorzieningen.length > 0) {
+            html += `<br/><span class="text-sm text-gray-600">${voorzieningen.join(' • ')}</span>`
+          }
+
+          // Beheerder
+          if (dataProps.operator) {
+            html += `<br/><span class="text-xs text-gray-500">Beheer: ${dataProps.operator}</span>`
+          }
+
+          // Tip voor detectoristen
+          html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Tip voor detectie</span></div>`
+          html += `<div class="text-sm text-gray-700">Parken zijn populair bij detectoristen. Mensen verliezen hier munten en sieraden. Vraag eerst toestemming aan de gemeente of beheerder.</div>`
+
+          // Website link
+          if (dataProps.website) {
+            const domain = dataProps.website.replace(/^https?:\/\//, '').split('/')[0]
+            html += `<div class="mt-2"><a href="${dataProps.website}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline text-sm">${domain}</a></div>`
           }
         }
-        // Musea (OSM data) - only show type if we have a real name
-        if ((dataProps.tourism === 'museum' || dataProps.museum) && dataProps.name) {
-          html += `<br/><span class="text-sm text-purple-700">Museum</span>`
+        // Speeltuinen (OSM data) - aparte behandeling
+        else if (dataProps.leisure === 'playground') {
+          const speeltuinNaam = dataProps.name || 'Speeltuin'
+          html = `<strong class="text-orange-800">${speeltuinNaam}</strong>`
+          html += `<br/><span class="text-sm text-gray-800">Speeltuin</span>`
+
+          if (dataProps.description) {
+            html += `<div class="mt-2 text-sm text-gray-700">${dataProps.description}</div>`
+          }
         }
-        // Strandjes/Zwemplekken (OSM data) - only show type if we have a real name
-        if ((dataProps.leisure === 'swimming_area' || dataProps.sport === 'swimming') && dataProps.name) {
-          html += `<br/><span class="text-sm text-cyan-700">Zwemplek</span>`
+        // Musea (OSM data) - uitgebreide info met paarse kop
+        if ((dataProps.tourism === 'museum' || dataProps.museum)) {
+          // Vervang standaard zwarte kop door paarse kop
+          const museumNaam = dataProps.name || 'Museum'
+          html = `<strong class="text-purple-800">${museumNaam}</strong>`
+          html += `<br/><span class="text-sm text-gray-800">Museum</span>`
+
+          // Museum type als beschikbaar
+          const museumType = dataProps.museum || dataProps['museum:type'] || ''
+          if (museumType && museumType !== 'yes') {
+            const typeMap: Record<string, string> = {
+              'art': 'Kunstmuseum',
+              'history': 'Geschiedenismuseum',
+              'archaeology': 'Archeologisch museum',
+              'science': 'Wetenschapsmuseum',
+              'technology': 'Techniekmuseum',
+              'nature': 'Natuurmuseum',
+              'open_air': 'Openluchtmuseum',
+              'local': 'Streekmuseum',
+              'military': 'Militair museum',
+              'railway': 'Spoorwegmuseum',
+              'maritime': 'Maritiem museum',
+              'children': 'Kindermuseum'
+            }
+            const typeLabel = typeMap[museumType.toLowerCase()] || museumType
+            html += `<br/><span class="text-sm text-gray-700">${typeLabel}</span>`
+          }
+
+          // Beschrijving als beschikbaar
+          if (dataProps.description) {
+            html += `<div class="mt-2 text-sm text-gray-700">${dataProps.description}</div>`
+          }
+
+          // Openingstijden
+          if (dataProps.opening_hours) {
+            html += `<div class="mt-2"><span class="text-sm font-semibold text-gray-800">Openingstijden:</span></div>`
+            html += `<div class="text-sm text-gray-700">${dataProps.opening_hours}</div>`
+          }
+
+          // Toegangsprijs
+          if (dataProps.fee) {
+            const feeText = dataProps.fee === 'yes' ? 'Toegangsprijs' : dataProps.fee === 'no' ? 'Gratis toegang' : dataProps.fee
+            html += `<br/><span class="text-sm text-gray-600">${feeText}</span>`
+          }
+
+          // Adres
+          if (dataProps['addr:street'] || dataProps['addr:housenumber']) {
+            const adres = [dataProps['addr:street'], dataProps['addr:housenumber']].filter(Boolean).join(' ')
+            if (adres) html += `<br/><span class="text-xs text-gray-500">${adres}</span>`
+          }
+          if (dataProps['addr:city']) {
+            html += `<br/><span class="text-xs text-gray-500">${dataProps['addr:postcode'] || ''} ${dataProps['addr:city']}</span>`
+          }
+
+          // Website link
+          if (dataProps.website || dataProps.url) {
+            const url = dataProps.website || dataProps.url
+            const domain = url.replace(/^https?:\/\//, '').split('/')[0]
+            html += `<div class="mt-2"><a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline text-sm">Bezoek ${domain}</a></div>`
+          }
+
+          // Wikipedia link
+          if (dataProps.wikipedia) {
+            const wikiLang = dataProps.wikipedia.split(':')[0] || 'nl'
+            const wikiTitle = dataProps.wikipedia.split(':')[1] || dataProps.wikipedia
+            html += `<div class="text-sm"><a href="https://${wikiLang}.wikipedia.org/wiki/${encodeURIComponent(wikiTitle)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Wikipedia</a></div>`
+          }
+        }
+        // Strandjes/Zwemplekken (OSM data) - uitgebreide info
+        if (dataProps.leisure === 'swimming_area' || dataProps.sport === 'swimming' || dataProps.natural === 'beach') {
+          // Vervang standaard kop door cyaan kop
+          const strandNaam = dataProps.name || 'Zwemplek'
+          html = `<strong class="text-cyan-800">${strandNaam}</strong>`
+
+          // Type bepalen
+          const typeLabel = dataProps.natural === 'beach' ? 'Strand' :
+                           dataProps.leisure === 'swimming_area' ? 'Zwemplek' : 'Zwemwater'
+          html += `<br/><span class="text-sm text-gray-800">${typeLabel}</span>`
+
+          // Water type
+          if (dataProps.water) {
+            const waterTypes: Record<string, string> = {
+              'lake': 'Meer',
+              'river': 'Rivier',
+              'pond': 'Vijver',
+              'reservoir': 'Reservoir',
+              'canal': 'Kanaal'
+            }
+            html += `<br/><span class="text-sm text-gray-700">${waterTypes[dataProps.water] || dataProps.water}</span>`
+          }
+
+          // Voorzieningen
+          if (dataProps.supervised === 'yes') {
+            html += `<br/><span class="text-sm text-green-700">Met toezicht</span>`
+          }
+          if (dataProps.changing_rooms === 'yes') {
+            html += `<br/><span class="text-sm text-gray-600">Kleedruimte aanwezig</span>`
+          }
+
+          // Beschrijving
+          if (dataProps.description) {
+            html += `<div class="mt-2 text-sm text-gray-700">${dataProps.description}</div>`
+          }
+
+          // Tip voor detectoristen
+          html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Tip voor detectie</span></div>`
+          html += `<div class="text-sm text-gray-700">Zwemplekken kunnen interessant zijn voor detectie. Mensen verliezen hier sieraden en munten. Let op: niet overal is detecteren toegestaan.</div>`
         }
         // Kringloopwinkels (OSM data)
         if (dataProps.osm_id && dataProps.address !== undefined) {
