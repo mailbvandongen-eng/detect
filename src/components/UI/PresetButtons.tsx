@@ -63,8 +63,6 @@ const ALL_OVERLAYS = [
   'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling',
   // Hoogtekaarten (Esri)
   'AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m',
-  // Hoogtekaarten (WebGL)
-  'Hillshade (WebGL)', 'Hoogtekaart Kleur (WebGL)', 'Reliëfkaart (WebGL)',
   // Terrein
   'Veengebieden', 'Geomorfologie', 'Bodemkaart',
   // Fossielen, Mineralen & Goud

@@ -254,31 +254,8 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     tier: 'premium'
   },
 
-  // WebGL Hillshade layers - Dynamisch instelbaar, geen Esri!
-  'Hillshade (WebGL)': {
-    name: 'Hillshade (WebGL)',
-    factory: async () => {
-      const { createWebGLHillshadeLayerOL } = await import('./ahnWebGLHillshade')
-      return createWebGLHillshadeLayerOL()
-    },
-    immediateLoad: true
-  },
-  'Hoogtekaart Kleur (WebGL)': {
-    name: 'Hoogtekaart Kleur (WebGL)',
-    factory: async () => {
-      const { createWebGLColorHeightLayerOL } = await import('./ahnWebGLHillshade')
-      return createWebGLColorHeightLayerOL()
-    },
-    immediateLoad: true
-  },
-  'Reliëfkaart (WebGL)': {
-    name: 'Reliëfkaart (WebGL)',
-    factory: async () => {
-      const { createWebGLCombinedHillshadeLayerOL } = await import('./ahnWebGLHillshade')
-      return createWebGLCombinedHillshadeLayerOL()
-    },
-    immediateLoad: true
-  },
+  // WebGL Hillshade layers - UITGESCHAKELD (werkt niet correct in OL 10.7)
+  // TODO: Later opnieuw proberen met andere aanpak
   // World Hillshade VERWIJDERD - Esri commercieel, geen toestemming
 
   // Percelen - Kadaster & Landbouw
