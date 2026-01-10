@@ -1,0 +1,2 @@
+import{V as o,G as a,c as s}from"./index-Z41AKCn6.js";import{L as r}from"./iconStyles-NsgY8PgQ.js";async function p(){const e=await(await fetch("/detectorapp-nl/data/kastelen_osm.geojson")).json(),t=new o({features:new a().readFeatures(e,{dataProjection:"EPSG:4326",featureProjection:"EPSG:3857"})});return new s({source:t,properties:{title:"Kastelen"},visible:!1,zIndex:20,style:r.castle()})}export{p as createKastelenLayerOL};
+//# sourceMappingURL=kastelenOL-BXYG03vK.js.map
