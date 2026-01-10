@@ -21,17 +21,20 @@ const TERRARIUM_URL = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{
 /**
  * Convert Terrarium RGB to elevation in meters
  * Formula: elevation = (R * 256 + G + B / 256) - 32768
+ * NOTE: OpenLayers band values are normalized 0-1, so we multiply by 255
  */
-function getElevationExpression() {
+function getElevationExpression(xOffset = 0, yOffset = 0) {
+  // Band values are normalized 0-1, multiply by 255 to get actual values
+  const red = ['band', 1, xOffset, yOffset]
+  const green = ['band', 2, xOffset, yOffset]
+  const blue = ['band', 3, xOffset, yOffset]
+
   return [
-    '-',
-    [
-      '+',
-      ['*', ['band', 1], 256],  // R * 256
-      ['band', 2],              // + G
-      ['/', ['band', 3], 256]   // + B / 256
-    ],
-    32768  // - 32768
+    '+',
+    ['*', 255 * 256, red],    // R * 256 * 255
+    ['*', 255, green],        // G * 255
+    ['*', 255 / 256, blue],   // B / 256 * 255
+    -32768                    // - 32768
   ]
 }
 
@@ -136,19 +139,15 @@ export function createWebGLHillshadeLayerOL() {
     verticalExaggeration: store.verticalExaggeration
   }
 
-  // Elevation extraction from Terrarium tiles
-  const elevation = getElevationExpression()
-
-  // Sample neighboring pixels for slope calculation
-  // The 'band' operator with pixel offset samples adjacent pixels
-  const elevationNW = ['-', ['+', ['*', ['band', 1, -1, -1], 256], ['band', 2, -1, -1], ['/', ['band', 3, -1, -1], 256]], 32768]
-  const elevationN  = ['-', ['+', ['*', ['band', 1,  0, -1], 256], ['band', 2,  0, -1], ['/', ['band', 3,  0, -1], 256]], 32768]
-  const elevationNE = ['-', ['+', ['*', ['band', 1,  1, -1], 256], ['band', 2,  1, -1], ['/', ['band', 3,  1, -1], 256]], 32768]
-  const elevationW  = ['-', ['+', ['*', ['band', 1, -1,  0], 256], ['band', 2, -1,  0], ['/', ['band', 3, -1,  0], 256]], 32768]
-  const elevationE  = ['-', ['+', ['*', ['band', 1,  1,  0], 256], ['band', 2,  1,  0], ['/', ['band', 3,  1,  0], 256]], 32768]
-  const elevationSW = ['-', ['+', ['*', ['band', 1, -1,  1], 256], ['band', 2, -1,  1], ['/', ['band', 3, -1,  1], 256]], 32768]
-  const elevationS  = ['-', ['+', ['*', ['band', 1,  0,  1], 256], ['band', 2,  0,  1], ['/', ['band', 3,  0,  1], 256]], 32768]
-  const elevationSE = ['-', ['+', ['*', ['band', 1,  1,  1], 256], ['band', 2,  1,  1], ['/', ['band', 3,  1,  1], 256]], 32768]
+  // Sample neighboring pixels for slope calculation using the corrected elevation function
+  const elevationNW = getElevationExpression(-1, -1)
+  const elevationN  = getElevationExpression( 0, -1)
+  const elevationNE = getElevationExpression( 1, -1)
+  const elevationW  = getElevationExpression(-1,  0)
+  const elevationE  = getElevationExpression( 1,  0)
+  const elevationSW = getElevationExpression(-1,  1)
+  const elevationS  = getElevationExpression( 0,  1)
+  const elevationSE = getElevationExpression( 1,  1)
 
   // Calculate slope derivatives using Horn's method (3x3 neighborhood)
   // dz/dx = ((NE + 2*E + SE) - (NW + 2*W + SW)) / (8 * cellSize)
@@ -327,18 +326,18 @@ export function createWebGLCombinedHillshadeLayerOL() {
     maxElevation: store.maxElevation
   }
 
-  // Elevation extraction
-  const elevation = getElevationExpression()
+  // Elevation extraction - use center pixel
+  const elevation = getElevationExpression(0, 0)
 
-  // Neighboring elevations for slope calculation
-  const elevationNW = ['-', ['+', ['*', ['band', 1, -1, -1], 256], ['band', 2, -1, -1], ['/', ['band', 3, -1, -1], 256]], 32768]
-  const elevationN  = ['-', ['+', ['*', ['band', 1,  0, -1], 256], ['band', 2,  0, -1], ['/', ['band', 3,  0, -1], 256]], 32768]
-  const elevationNE = ['-', ['+', ['*', ['band', 1,  1, -1], 256], ['band', 2,  1, -1], ['/', ['band', 3,  1, -1], 256]], 32768]
-  const elevationW  = ['-', ['+', ['*', ['band', 1, -1,  0], 256], ['band', 2, -1,  0], ['/', ['band', 3, -1,  0], 256]], 32768]
-  const elevationE  = ['-', ['+', ['*', ['band', 1,  1,  0], 256], ['band', 2,  1,  0], ['/', ['band', 3,  1,  0], 256]], 32768]
-  const elevationSW = ['-', ['+', ['*', ['band', 1, -1,  1], 256], ['band', 2, -1,  1], ['/', ['band', 3, -1,  1], 256]], 32768]
-  const elevationS  = ['-', ['+', ['*', ['band', 1,  0,  1], 256], ['band', 2,  0,  1], ['/', ['band', 3,  0,  1], 256]], 32768]
-  const elevationSE = ['-', ['+', ['*', ['band', 1,  1,  1], 256], ['band', 2,  1,  1], ['/', ['band', 3,  1,  1], 256]], 32768]
+  // Neighboring elevations for slope calculation - use corrected function
+  const elevationNW = getElevationExpression(-1, -1)
+  const elevationN  = getElevationExpression( 0, -1)
+  const elevationNE = getElevationExpression( 1, -1)
+  const elevationW  = getElevationExpression(-1,  0)
+  const elevationE  = getElevationExpression( 1,  0)
+  const elevationSW = getElevationExpression(-1,  1)
+  const elevationS  = getElevationExpression( 0,  1)
+  const elevationSE = getElevationExpression( 1,  1)
 
   // Slope derivatives
   const dzdx = [
