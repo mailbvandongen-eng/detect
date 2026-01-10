@@ -1,4 +1,5 @@
 import './style.css'
+import { useEffect } from 'react'
 import { MapContainer } from './components/Map/MapContainer'
 import { GpsButton } from './components/GPS/GpsButton'
 import { GpsMarker } from './components/GPS/GpsMarker'
@@ -14,6 +15,7 @@ import { ZoomButtons } from './components/UI/ZoomButtons'
 import { SettingsPanel } from './components/UI/SettingsPanel'
 import { HamburgerMenu } from './components/UI/HamburgerMenu'
 import { InfoButton } from './components/UI/InfoButton'
+import { HillshadeControls } from './components/UI/HillshadeControls'
 import { AddVondstForm } from './components/Vondst/AddVondstForm'
 import { AddVondstButton } from './components/Vondst/AddVondstButton'
 import { RouteRecordButton, RouteRecordingLayer, SavedRoutesLayer, CoverageHeatmapLayer, GridOverlayLayer, RouteDashboard } from './components/Route'
@@ -24,8 +26,11 @@ import { PasswordGate } from './components/Auth/PasswordGate'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useCloudSync } from './hooks/useCloudSync'
-import { useSettingsStore, useUIStore } from './store'
+import { useSettingsStore, useUIStore, useLayerStore, useHillshadeStore } from './store'
 import { AnimatePresence } from 'framer-motion'
+
+// WebGL hillshade layer names
+const WEBGL_HILLSHADE_LAYERS = ['Hillshade (WebGL)', 'Hoogtekaart Kleur (WebGL)', 'Reliëfkaart (WebGL)']
 
 function App() {
   // Initialize hooks
@@ -46,6 +51,16 @@ function App() {
   // Route dashboard state
   const routeDashboardOpen = useUIStore(state => state.routeDashboardOpen)
   const toggleRouteDashboard = useUIStore(state => state.toggleRouteDashboard)
+
+  // Hillshade controls - auto show/hide when WebGL layer is active
+  const layerVisibility = useLayerStore(state => state.visible)
+  const setShowControls = useHillshadeStore(state => state.setShowControls)
+
+  useEffect(() => {
+    // Check if any WebGL hillshade layer is visible
+    const anyWebGLVisible = WEBGL_HILLSHADE_LAYERS.some(name => layerVisibility[name])
+    setShowControls(anyWebGLVisible)
+  }, [layerVisibility, setShowControls])
 
   return (
     <PasswordGate>
@@ -74,6 +89,7 @@ function App() {
         <InfoButton />
         <CompassButton />
         <SettingsPanel />
+        <HillshadeControls />
         <CreateLayerModal />
         <AddPointModal />
         <LayerManagerModal />

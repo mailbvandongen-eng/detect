@@ -61,8 +61,10 @@ const ALL_OVERLAYS = [
   'Paleokaart 1500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 9000 v.Chr.',
   // UIKAV
   'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling',
-  // Hoogtekaarten
+  // Hoogtekaarten (Esri)
   'AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m',
+  // Hoogtekaarten (WebGL)
+  'Hillshade (WebGL)', 'Hoogtekaart Kleur (WebGL)', 'Reliëfkaart (WebGL)',
   // Terrein
   'Veengebieden', 'Geomorfologie', 'Bodemkaart',
   // Fossielen, Mineralen & Goud

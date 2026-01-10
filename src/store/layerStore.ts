@@ -84,10 +84,14 @@ export const useLayerStore = create<LayerState>()(
       'UIKAV Buffer': false,
       'UIKAV Expert': false,
       'UIKAV Indeling': false,
-      // Hillshade NL
+      // Hillshade NL (Esri)
       'AHN4 Hoogtekaart Kleur': false,
       'AHN4 Hillshade NL': false,
       'AHN4 Multi-Hillshade NL': false,
+      // Hillshade (WebGL - dynamisch instelbaar)
+      'Hillshade (WebGL)': false,
+      'Hoogtekaart Kleur (WebGL)': false,
+      'Reliëfkaart (WebGL)': false,
       'AHN 0.5m': false,
       // Terrein
       'Veengebieden': false,
@@ -127,10 +131,14 @@ export const useLayerStore = create<LayerState>()(
 
     // Initial opacity state - all overlay/vlak layers
     opacity: {
-      // Hoogtekaarten
+      // Hoogtekaarten (Esri)
       'AHN4 Hoogtekaart Kleur': 0.85,
       'AHN4 Hillshade NL': 0.7,
       'AHN4 Multi-Hillshade NL': 0.7,
+      // Hoogtekaarten (WebGL)
+      'Hillshade (WebGL)': 0.7,
+      'Hoogtekaart Kleur (WebGL)': 0.8,
+      'Reliëfkaart (WebGL)': 0.8,
       'AHN 0.5m': 0.7,
       // Historische kaarten
       'TMK 1850': 0.8,

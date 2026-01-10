@@ -252,11 +252,20 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Hillshade & LiDAR Layers */}
-              <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false} layerNames={['AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m']}>
-                <LayerItem name="AHN4 Hoogtekaart Kleur" type="overlay" />
-                <LayerItem name="AHN4 Hillshade NL" type="overlay" />
-                <LayerItem name="AHN4 Multi-Hillshade NL" type="overlay" />
-                <LayerItem name="AHN 0.5m" type="overlay" />
+              <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false} layerNames={['Hillshade (WebGL)', 'Hoogtekaart Kleur (WebGL)', 'Reliëfkaart (WebGL)', 'AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m']}>
+                {/* WebGL - Dynamisch instelbaar (gratis!) */}
+                <LayerGroup title="WebGL (instelbaar)" defaultExpanded={true} layerNames={['Hillshade (WebGL)', 'Hoogtekaart Kleur (WebGL)', 'Reliëfkaart (WebGL)']}>
+                  <LayerItem name="Hillshade (WebGL)" type="overlay" />
+                  <LayerItem name="Hoogtekaart Kleur (WebGL)" type="overlay" />
+                  <LayerItem name="Reliëfkaart (WebGL)" type="overlay" />
+                </LayerGroup>
+                {/* Esri AHN */}
+                <LayerGroup title="Esri AHN" defaultExpanded={false} layerNames={['AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m']}>
+                  <LayerItem name="AHN4 Hoogtekaart Kleur" type="overlay" />
+                  <LayerItem name="AHN4 Hillshade NL" type="overlay" />
+                  <LayerItem name="AHN4 Multi-Hillshade NL" type="overlay" />
+                  <LayerItem name="AHN 0.5m" type="overlay" />
+                </LayerGroup>
               </LayerGroup>
 
               {/* Terrain Layers */}
