@@ -338,19 +338,16 @@ export function WeatherWidget() {
               <span className={`text-[10px] font-medium ${getScoreColor(score)}`}>
                 {getScoreLabel(score)}
               </span>
+              {/* Info button - only when expanded */}
+              {isExpanded && reasons.length > 0 && (
+                <ScoreReasons
+                  reasons={reasons}
+                  show={showReasons}
+                  onToggle={() => setShowReasons(!showReasons)}
+                />
+              )}
             </div>
           </button>
-
-          {/* Info button - only when expanded */}
-          {isExpanded && reasons.length > 0 && (
-            <div className="flex justify-end -mt-4 mr-1">
-              <ScoreReasons
-                reasons={reasons}
-                show={showReasons}
-                onToggle={() => setShowReasons(!showReasons)}
-              />
-            </div>
-          )}
 
           {/* Expanded view */}
           <AnimatePresence>
