@@ -224,10 +224,10 @@ export function WeatherWidget() {
   const showWeatherButton = useSettingsStore(state => state.showWeatherButton)
   const gps = useGPSStore()
   const weather = useWeatherStore()
-  const { activeLayers, toggleLayer } = useLayerStore()
+  const { visible, toggleLayer } = useLayerStore()
 
   const [isExpanded, setIsExpanded] = useState(false)
-  const windLayerActive = activeLayers.includes('wind')
+  const windLayerActive = visible['wind'] || false
 
   // Safe top position
   const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
