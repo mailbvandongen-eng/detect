@@ -218,7 +218,7 @@ export function RouteRecordButton() {
       case 'paused':
         return 'bg-yellow-500 hover:bg-yellow-600'
       default:
-        return 'bg-purple-500 hover:bg-purple-600'
+        return 'bg-green-500 hover:bg-green-600'
     }
   }
 
@@ -272,7 +272,7 @@ export function RouteRecordButton() {
       <AnimatePresence>
         {recordingState === 'idle' && savedRoutes.length > 0 && (
           <motion.button
-            className={`fixed bottom-2 ${secondaryButtonRight} z-[1000] w-11 h-11 bg-purple-400 hover:bg-purple-500 text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none`}
+            className={`fixed bottom-2 ${secondaryButtonRight} z-[1000] w-11 h-11 bg-green-400 hover:bg-green-500 text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none`}
             initial={{ opacity: 0, scale: 0.8, x: 20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.8, x: 20 }}
@@ -283,7 +283,7 @@ export function RouteRecordButton() {
           >
             <List size={18} strokeWidth={2} />
             {/* Badge showing count */}
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-purple-600 text-xs font-bold rounded-full flex items-center justify-center shadow-sm">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-green-600 text-xs font-bold rounded-full flex items-center justify-center shadow-sm">
               {savedRoutes.length}
             </span>
           </motion.button>
@@ -332,7 +332,7 @@ export function RouteRecordButton() {
             <div className="space-y-2">
               {/* Distance */}
               <div className="flex items-center gap-2">
-                <Ruler size={16} className="text-purple-500" />
+                <Ruler size={16} className="text-green-500" />
                 <span className="text-lg font-semibold text-gray-800">{formatDistance(distance)}</span>
               </div>
 
@@ -405,7 +405,7 @@ export function RouteRecordButton() {
                   type="text"
                   value={routeName}
                   onChange={(e) => setRouteName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="Route naam..."
                   autoFocus
                 />
@@ -422,7 +422,7 @@ export function RouteRecordButton() {
                 <button
                   onClick={handleSaveRoute}
                   disabled={currentPoints.length < 2}
-                  className="flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 text-white rounded-lg transition-colors border-0 outline-none flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white rounded-lg transition-colors border-0 outline-none flex items-center justify-center gap-2"
                 >
                   <Save size={16} />
                   Opslaan
