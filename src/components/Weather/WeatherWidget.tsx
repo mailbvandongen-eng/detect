@@ -196,9 +196,9 @@ function PrecipitationGraph({ data, data48h }: { data: PrecipitationForecast[]; 
         </div>
       )}
 
-      {/* Legend */}
-      {hasRain && (
-        <div className="flex items-center gap-2 text-[9px] text-gray-500">
+      {/* Legend - always visible */}
+      <div className="flex items-center justify-between text-[9px] text-gray-500">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-sm bg-blue-400" />
             <span>Licht</span>
@@ -212,7 +212,10 @@ function PrecipitationGraph({ data, data48h }: { data: PrecipitationForecast[]; 
             <span>Zwaar</span>
           </div>
         </div>
-      )}
+        {!hasRainAnywhere && (
+          <span className="text-green-600">Geen regen verwacht</span>
+        )}
+      </div>
     </div>
   )
 }
@@ -462,17 +465,17 @@ export function WeatherWidget() {
                     <PrecipitationGraph data={precipitation15min} data48h={precipitation48h} />
                   )}
 
-                  {/* Pollen info */}
-                  {pollen && (
-                    <PollenIndicator pollen={pollen} />
-                  )}
-
                   {/* Hourly forecast */}
                   {hourly.length > 0 && (
                     <div className="pt-2 border-t border-gray-200/50">
                       <div className="text-[10px] text-gray-500 mb-1">Komende uren</div>
                       <HourlyForecast hourly={hourly} />
                     </div>
+                  )}
+
+                  {/* Pollen info - at the bottom */}
+                  {pollen && (
+                    <PollenIndicator pollen={pollen} />
                   )}
 
                   {/* Last updated */}
