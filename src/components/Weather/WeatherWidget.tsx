@@ -158,15 +158,16 @@ function PollenIndicator({ pollen }: { pollen: PollenData }) {
 }
 
 // Score reasons tooltip
-function ScoreReasons({ reasons }: { reasons: string[] }) {
-  const [show, setShow] = useState(false)
-
+function ScoreReasons({ reasons, show, onToggle }: { reasons: string[]; show: boolean; onToggle: () => void }) {
   if (reasons.length === 0) return null
 
   return (
     <div className="relative">
       <button
-        onClick={() => setShow(!show)}
+        onClick={(e) => {
+          e.stopPropagation()
+          onToggle()
+        }}
         className="p-0.5 text-gray-400 hover:text-gray-600 border-0 outline-none bg-transparent"
       >
         <Info size={12} />
@@ -178,6 +179,7 @@ function ScoreReasons({ reasons }: { reasons: string[] }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             className="absolute right-0 top-5 z-50 bg-gray-800 text-white text-[10px] rounded-lg p-2 shadow-lg min-w-[140px]"
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-0.5">
               {reasons.map((r, i) => (
@@ -229,6 +231,7 @@ export function WeatherWidget() {
   const weather = useWeatherStore()
 
   const [isExpanded, setIsExpanded] = useState(false)
+  const [showReasons, setShowReasons] = useState(false)
 
   // Safe top position
   const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
@@ -286,7 +289,10 @@ export function WeatherWidget() {
         <div className="p-2.5 min-w-[160px]">
           {/* Collapsed view - compact */}
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => {
+              if (isExpanded) setShowReasons(false)
+              setIsExpanded(!isExpanded)
+            }}
             className="w-full border-0 outline-none bg-transparent p-0"
           >
             <div className="flex items-center gap-3">
@@ -317,7 +323,7 @@ export function WeatherWidget() {
 
             {/* Detecting score bar */}
             <div className="flex items-center gap-2 mt-1.5 pt-1.5 border-t border-gray-200/50">
-              <span className="text-[10px] text-gray-500">Detecteren</span><span className="text-[8px] text-red-400 mx-0.5">–</span>
+              <span className="text-[10px] text-gray-500">Detecteren</span>
               <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all ${
@@ -326,15 +332,25 @@ export function WeatherWidget() {
                     score >= 40 ? 'bg-amber-500' :
                     score >= 20 ? 'bg-orange-500' : 'bg-red-500'
                   }`}
-                  style={{ width: `${score}%` }}
+                  style={{ width: `${Math.max(score, 5)}%` }}
                 />
               </div>
               <span className={`text-[10px] font-medium ${getScoreColor(score)}`}>
                 {getScoreLabel(score)}
               </span>
-              <ScoreReasons reasons={reasons} />
             </div>
           </button>
+
+          {/* Info button - only when expanded */}
+          {isExpanded && reasons.length > 0 && (
+            <div className="flex justify-end -mt-4 mr-1">
+              <ScoreReasons
+                reasons={reasons}
+                show={showReasons}
+                onToggle={() => setShowReasons(!showReasons)}
+              />
+            </div>
+          )}
 
           {/* Expanded view */}
           <AnimatePresence>
