@@ -137,14 +137,18 @@ export function DetectorPlanner({ isOpen, onClose }: DetectorPlannerProps) {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[1800] bg-black/50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-[1800] bg-black/50 flex items-center justify-center p-2 overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
       >
         <motion.div
-          className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden"
+          className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden"
+          style={{
+            maxHeight: 'calc(100vh - 1rem)',
+            maxWidth: 'calc(100vw - 1rem)'
+          }}
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
@@ -165,41 +169,37 @@ export function DetectorPlanner({ isOpen, onClose }: DetectorPlannerProps) {
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ fontSize: `${baseFontSize}px` }}>
+          <div className="flex-1 overflow-y-auto p-3 space-y-3" style={{ fontSize: `${baseFontSize}px` }}>
 
             {/* Improvement alert */}
             {improvement && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <div className="flex items-center gap-2 text-green-700">
-                  <TrendingUp size={16} />
-                  <span className="font-medium">Betere omstandigheden!</span>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                <div className="flex items-center gap-2 text-green-700 text-sm">
+                  <TrendingUp size={14} />
+                  <span className="font-medium">
+                    Over {improvement.hoursUntil < 24
+                      ? `${improvement.hoursUntil}u`
+                      : `${Math.round(improvement.hoursUntil / 24)}d`
+                    }: {getScoreLabel(improvement.hour.score)} ({improvement.hour.score}%)
+                  </span>
                 </div>
-                <p className="text-green-600 text-sm mt-1">
-                  Over {improvement.hoursUntil < 24
-                    ? `${improvement.hoursUntil} uur`
-                    : `${Math.round(improvement.hoursUntil / 24)} dag${improvement.hoursUntil >= 48 ? 'en' : ''}`
-                  } wordt het {getScoreLabel(improvement.hour.score).toLowerCase()} ({improvement.hour.score}%)
-                </p>
               </div>
             )}
 
             {/* Best time highlight */}
             {bestTimeOverall && bestTimeOverall.score >= 40 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <div className="flex items-center gap-2 text-amber-700">
-                  <Star size={16} />
-                  <span className="font-medium">Beste moment (komende 3 dagen)</span>
-                </div>
-                <div className="flex items-center gap-3 mt-2 text-amber-600">
-                  <span className="text-sm">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-2">
+                <div className="flex items-center gap-2 text-amber-700 text-sm">
+                  <Star size={14} />
+                  <span className="font-medium">Beste:</span>
+                  <span>
                     {new Date(bestTimeOverall.hour.time).toLocaleDateString('nl-NL', { weekday: 'short' })}
-                    {' '}
-                    {new Date(bestTimeOverall.hour.time).getHours()}:00
+                    {' '}{new Date(bestTimeOverall.hour.time).getHours()}:00
                   </span>
-                  <span className={`text-sm font-medium ${getScoreColor(bestTimeOverall.score)}`}>
-                    {getScoreLabel(bestTimeOverall.score)} ({bestTimeOverall.score}%)
+                  <span className={`font-medium ${getScoreColor(bestTimeOverall.score)}`}>
+                    {bestTimeOverall.score}%
                   </span>
-                  <span className="text-sm">{Math.round(bestTimeOverall.hour.temperature)}°</span>
+                  <span>{Math.round(bestTimeOverall.hour.temperature)}°</span>
                 </div>
               </div>
             )}
@@ -230,7 +230,7 @@ export function DetectorPlanner({ isOpen, onClose }: DetectorPlannerProps) {
               <div className="text-xs text-gray-500">Detectie score per uur</div>
 
               {/* Graph */}
-              <div className="relative h-24 bg-gray-100 rounded-lg overflow-hidden">
+              <div className="relative h-20 bg-gray-100 rounded-lg overflow-hidden">
                 {/* Grid lines */}
                 <div className="absolute inset-0 flex flex-col justify-between py-1 px-2 pointer-events-none">
                   <div className="border-b border-gray-200/50 text-[8px] text-gray-400">100</div>
@@ -289,13 +289,13 @@ export function DetectorPlanner({ isOpen, onClose }: DetectorPlannerProps) {
             {/* Detailed hour list */}
             <div className="space-y-1">
               <div className="text-xs text-gray-500">Details per uur</div>
-              <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
+              <div className="max-h-36 overflow-y-auto space-y-0.5 pr-1">
                 {currentDay?.hours.map(item => {
                   const isBest = bestTime && item.hour.time === bestTime.hour.time
                   return (
                     <div
                       key={item.hour.time}
-                      className={`flex items-center gap-2 p-2 rounded-lg text-xs ${
+                      className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs ${
                         isBest ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50'
                       }`}
                     >
@@ -305,7 +305,7 @@ export function DetectorPlanner({ isOpen, onClose }: DetectorPlannerProps) {
                       </div>
 
                       {/* Score bar */}
-                      <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
                           className={`h-full transition-all ${getBarColor(item.score)}`}
                           style={{ width: `${Math.max(item.score, 5)}%` }}
@@ -313,34 +313,34 @@ export function DetectorPlanner({ isOpen, onClose }: DetectorPlannerProps) {
                       </div>
 
                       {/* Score */}
-                      <div className={`w-8 text-right font-medium ${getScoreColor(item.score)}`}>
+                      <div className={`w-7 text-right text-[10px] font-medium ${getScoreColor(item.score)}`}>
                         {item.score}%
                       </div>
 
                       {/* Weather icon */}
-                      <WeatherIconSmall code={item.hour.weatherCode} />
+                      <WeatherIconSmall code={item.hour.weatherCode} size={12} />
 
                       {/* Temp */}
-                      <div className="w-8 text-gray-600">
+                      <div className="w-6 text-[10px] text-gray-600">
                         {Math.round(item.hour.temperature)}°
                       </div>
 
                       {/* Wind */}
-                      <div className="w-10 text-gray-400 flex items-center gap-0.5">
-                        <Wind size={10} />
+                      <div className="w-8 text-[10px] text-gray-400 flex items-center gap-0.5">
+                        <Wind size={9} />
                         <span>{Math.round(item.hour.windSpeed)}</span>
                       </div>
 
                       {/* Rain */}
                       {item.hour.precipitation > 0 && (
-                        <div className="text-blue-500 flex items-center gap-0.5">
-                          <Droplets size={10} />
+                        <div className="text-[10px] text-blue-500 flex items-center gap-0.5">
+                          <Droplets size={9} />
                           <span>{item.hour.precipitation.toFixed(1)}</span>
                         </div>
                       )}
 
                       {/* Best marker */}
-                      {isBest && <Star size={12} className="text-yellow-500" />}
+                      {isBest && <Star size={10} className="text-yellow-500" />}
                     </div>
                   )
                 })}
