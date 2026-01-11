@@ -317,7 +317,7 @@ export function WeatherWidget() {
 
             {/* Detecting score bar */}
             <div className="flex items-center gap-2 mt-1.5 pt-1.5 border-t border-gray-200/50">
-              <span className="text-[10px] text-gray-500">Detecteren:</span>
+              <span className="text-[10px] text-gray-500">Detecteren</span><span className="text-[8px] text-red-400 mx-0.5">–</span>
               <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all ${

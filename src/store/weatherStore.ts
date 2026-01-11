@@ -296,7 +296,7 @@ export function getScoreLabel(score: number): string {
   if (score >= 60) return 'Goed'
   if (score >= 40) return 'Matig'
   if (score >= 20) return 'Lastig'
-  return 'Onmogelijk'
+  return 'Bijna onmogelijk'
 }
 
 // Get score color
