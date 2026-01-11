@@ -258,6 +258,13 @@ export function calculateDetectingScore(data: WeatherData): { score: number; rea
     reasons.push('Stevig windje')
   }
 
+  // === DARKNESS ===
+  // Detecting at night is uitdagend due to lighting requirements
+  if (!current.isDay) {
+    score -= 25
+    reasons.push('Donker - verlichting nodig')
+  }
+
   // === SEASON ===
   // Sept/Oct/Nov (8-10) = beste tijd (herfst, akkers geploegd)
   // March/April (2-3) = goed (voorjaar na ploegen)
@@ -378,6 +385,15 @@ export function calculateHourlyScore(
     reasons.push('Winderig')
   }
 
+  // === DARKNESS ===
+  // Check if it's night based on hour (rough estimate)
+  const hour = date.getHours()
+  const isNight = hour < 7 || hour > 19
+  if (isNight) {
+    score -= 25
+    reasons.push('Donker')
+  }
+
   // === SEASON ===
   if (month >= 8 && month <= 10) {
     score += 10
@@ -395,29 +411,26 @@ export function calculateHourlyScore(
   return { score, reasons }
 }
 
-// Get score label
+// Get score label - Prima/Redelijk/Uitdagend/Lastig
 export function getScoreLabel(score: number): string {
-  if (score >= 80) return 'Uitstekend'
-  if (score >= 60) return 'Goed'
-  if (score >= 40) return 'Matig'
-  if (score >= 20) return 'Lastig'
-  return 'Bijna onmogelijk'
+  if (score >= 70) return 'Prima'
+  if (score >= 50) return 'Redelijk'
+  if (score >= 30) return 'Uitdagend'
+  return 'Lastig'
 }
 
-// Get score color
+// Get score color - green/yellow/orange/red
 export function getScoreColor(score: number): string {
-  if (score >= 80) return 'text-green-500'
-  if (score >= 60) return 'text-lime-500'
-  if (score >= 40) return 'text-amber-500'
-  if (score >= 20) return 'text-orange-500'
+  if (score >= 70) return 'text-green-500'
+  if (score >= 50) return 'text-yellow-500'
+  if (score >= 30) return 'text-orange-500'
   return 'text-red-500'
 }
 
 export function getScoreBgColor(score: number): string {
-  if (score >= 80) return 'bg-green-50 border-green-200'
-  if (score >= 60) return 'bg-lime-50 border-lime-200'
-  if (score >= 40) return 'bg-amber-50 border-amber-200'
-  if (score >= 20) return 'bg-orange-50 border-orange-200'
+  if (score >= 70) return 'bg-green-50 border-green-200'
+  if (score >= 50) return 'bg-yellow-50 border-yellow-200'
+  if (score >= 30) return 'bg-orange-50 border-orange-200'
   return 'bg-red-50 border-red-200'
 }
 

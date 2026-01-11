@@ -402,10 +402,9 @@ export function WeatherWidget() {
               <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all ${
-                    score >= 80 ? 'bg-green-500' :
-                    score >= 60 ? 'bg-lime-500' :
-                    score >= 40 ? 'bg-amber-500' :
-                    score >= 20 ? 'bg-orange-500' : 'bg-red-500'
+                    score >= 70 ? 'bg-green-500' :
+                    score >= 50 ? 'bg-yellow-500' :
+                    score >= 30 ? 'bg-orange-500' : 'bg-red-500'
                   }`}
                   style={{ width: `${Math.max(score, 5)}%` }}
                 />

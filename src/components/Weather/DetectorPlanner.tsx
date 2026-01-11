@@ -28,12 +28,11 @@ function WeatherIconSmall({ code, size = 14 }: { code: WeatherCode; size?: numbe
   return <Cloud size={size} className="text-gray-400" />
 }
 
-// Score bar color
+// Score bar color - matches new 4-level system
 function getBarColor(score: number): string {
-  if (score >= 80) return 'bg-green-500'
-  if (score >= 60) return 'bg-lime-500'
-  if (score >= 40) return 'bg-amber-500'
-  if (score >= 20) return 'bg-orange-500'
+  if (score >= 70) return 'bg-green-500'
+  if (score >= 50) return 'bg-yellow-500'
+  if (score >= 30) return 'bg-orange-500'
   return 'bg-red-500'
 }
 
@@ -144,10 +143,10 @@ export function DetectorPlanner({ isOpen, onClose }: DetectorPlannerProps) {
         onClick={onClose}
       >
         <motion.div
-          className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden"
+          className="bg-white rounded-xl shadow-2xl w-full flex flex-col overflow-hidden"
           style={{
-            maxHeight: 'calc(100vh - 1rem)',
-            maxWidth: 'calc(100vw - 1rem)'
+            maxHeight: 'calc(100vh - 2rem)',
+            maxWidth: 'min(320px, calc(100vw - 2rem))'
           }}
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -155,17 +154,31 @@ export function DetectorPlanner({ isOpen, onClose }: DetectorPlannerProps) {
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+          <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
             <div className="flex items-center gap-2">
-              <Calendar size={18} />
-              <span className="font-medium">Detectie Planner</span>
+              <Calendar size={16} />
+              <span className="font-medium text-sm">Planner</span>
             </div>
-            <button
-              onClick={onClose}
-              className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none"
-            >
-              <X size={18} />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Font size slider */}
+              <span className="text-[10px] opacity-70">T</span>
+              <input
+                type="range"
+                min="80"
+                max="150"
+                step="10"
+                value={settings.fontScale}
+                onChange={(e) => settings.setFontScale(parseInt(e.target.value))}
+                className="header-slider w-12 opacity-70 hover:opacity-100 transition-opacity"
+              />
+              <span className="text-xs opacity-70">T</span>
+              <button
+                onClick={onClose}
+                className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none ml-1"
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           {/* Content */}
@@ -266,18 +279,18 @@ export function DetectorPlanner({ isOpen, onClose }: DetectorPlannerProps) {
               </div>
 
               {/* Legend */}
-              <div className="flex items-center justify-center gap-3 text-[9px] text-gray-500">
+              <div className="flex items-center justify-center gap-2 text-[9px] text-gray-500">
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-sm bg-green-500" />
-                  <span>Uitstekend</span>
+                  <span>Prima</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-sm bg-lime-500" />
-                  <span>Goed</span>
+                  <div className="w-2 h-2 rounded-sm bg-yellow-500" />
+                  <span>Redelijk</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-sm bg-amber-500" />
-                  <span>Matig</span>
+                  <div className="w-2 h-2 rounded-sm bg-orange-500" />
+                  <span>Uitdagend</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-sm bg-red-500" />
