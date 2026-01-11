@@ -18,6 +18,7 @@ import { InfoButton } from './components/UI/InfoButton'
 import { AddVondstForm } from './components/Vondst/AddVondstForm'
 import { AddVondstButton } from './components/Vondst/AddVondstButton'
 import { RouteRecordButton, RouteRecordingLayer, SavedRoutesLayer, CoverageHeatmapLayer, GridOverlayLayer, RouteDashboard } from './components/Route'
+import { WeatherButton, WeatherPanel } from './components/Weather'
 import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
 import { CustomLayerMarkers } from './components/CustomLayers'
 import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal, LayerDashboard } from './components/CustomPoints'
@@ -74,7 +75,9 @@ function App() {
         <PresetButtons />
         <InfoButton />
         <CompassButton />
+        <WeatherButton />
         <SettingsPanel />
+        <WeatherPanel />
         <CreateLayerModal />
         <AddPointModal />
         <LayerManagerModal />

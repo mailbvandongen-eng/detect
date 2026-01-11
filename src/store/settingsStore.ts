@@ -41,6 +41,9 @@ interface SettingsState {
   // Weergave opties
   showFontSliders: boolean  // Show/hide font size sliders (boomer mode)
 
+  // Weer
+  showWeatherButton: boolean  // Show/hide the weather button
+
   // Actions
   setDefaultBackground: (bg: DefaultBackground) => void
   setShowScaleBar: (value: boolean) => void
@@ -59,6 +62,7 @@ interface SettingsState {
   setVoiceFeedbackEnabled: (value: boolean) => void
   setShowStepCounter: (value: boolean) => void
   setShowFontSliders: (value: boolean) => void
+  setShowWeatherButton: (value: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -82,6 +86,7 @@ export const useSettingsStore = create<SettingsState>()(
       voiceFeedbackEnabled: false, // Off by default
       showStepCounter: false, // Hidden by default, can enable in settings
       showFontSliders: false, // Hidden by default (boomer mode off)
+      showWeatherButton: false, // Hidden by default, can enable in settings
 
       // Actions
       setDefaultBackground: (defaultBackground) => set({ defaultBackground }),
@@ -100,7 +105,8 @@ export const useSettingsStore = create<SettingsState>()(
       setMenuFontScale: (menuFontScale) => set({ menuFontScale }),
       setVoiceFeedbackEnabled: (voiceFeedbackEnabled) => set({ voiceFeedbackEnabled }),
       setShowStepCounter: (showStepCounter) => set({ showStepCounter }),
-      setShowFontSliders: (showFontSliders) => set({ showFontSliders })
+      setShowFontSliders: (showFontSliders) => set({ showFontSliders }),
+      setShowWeatherButton: (showWeatherButton) => set({ showWeatherButton })
     }),
     {
       name: 'detectorapp-settings',

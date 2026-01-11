@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Bug, Code, User, Sliders, Volume2 } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Bug, Code, User, Sliders, Volume2, Cloud } from 'lucide-react'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
@@ -206,6 +206,18 @@ export function SettingsPanel() {
                         Spreekt vondst info uit bij toevoegen
                       </p>
                     )}
+                  </Section>
+
+                  {/* Weer */}
+                  <Section title="Weer" icon={<Cloud size={16} />}>
+                    <ToggleRow
+                      label="Weerknop tonen"
+                      checked={settings.showWeatherButton}
+                      onChange={settings.setShowWeatherButton}
+                    />
+                    <p className="text-gray-500 mt-1" style={{ fontSize: '0.75em' }}>
+                      Actueel weer, voorspelling en buienradar
+                    </p>
                   </Section>
 
                   {/* Development */}
