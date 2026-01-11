@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Cloud, Sun, CloudRain, CloudSnow, CloudLightning, CloudFog, Wind,
   Thermometer, Droplets, ChevronDown, ChevronUp, X, RefreshCw,
-  Navigation, Snowflake, Flower2, AlertTriangle, Info
+  Navigation, Snowflake, Flower2, AlertTriangle
 } from 'lucide-react'
 import {
   useWeatherStore,
@@ -157,42 +157,6 @@ function PollenIndicator({ pollen }: { pollen: PollenData }) {
   )
 }
 
-// Score reasons tooltip
-function ScoreReasons({ reasons, show, onToggle }: { reasons: string[]; show: boolean; onToggle: () => void }) {
-  if (reasons.length === 0) return null
-
-  return (
-    <div className="relative">
-      <button
-        onClick={(e) => {
-          e.stopPropagation()
-          onToggle()
-        }}
-        className="p-0.5 text-gray-400 hover:text-gray-600 border-0 outline-none bg-transparent"
-      >
-        <Info size={12} />
-      </button>
-      <AnimatePresence>
-        {show && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="absolute right-0 top-5 z-50 bg-gray-800 text-white text-[10px] rounded-lg p-2 shadow-lg min-w-[140px]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="space-y-0.5">
-              {reasons.map((r, i) => (
-                <div key={i}>• {r}</div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
 // Hourly mini forecast
 function HourlyForecast({ hourly }: { hourly: any[] }) {
   const upcomingHours = hourly.slice(0, 8)
@@ -231,7 +195,6 @@ export function WeatherWidget() {
   const weather = useWeatherStore()
 
   const [isExpanded, setIsExpanded] = useState(false)
-  const [showReasons, setShowReasons] = useState(false)
 
   // Safe top position
   const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
@@ -289,10 +252,7 @@ export function WeatherWidget() {
         <div className="p-2.5 min-w-[160px]">
           {/* Collapsed view - compact */}
           <button
-            onClick={() => {
-              if (isExpanded) setShowReasons(false)
-              setIsExpanded(!isExpanded)
-            }}
+            onClick={() => setIsExpanded(!isExpanded)}
             className="w-full border-0 outline-none bg-transparent p-0"
           >
             <div className="flex items-center gap-3">
@@ -338,14 +298,6 @@ export function WeatherWidget() {
               <span className={`text-[10px] font-medium ${getScoreColor(score)}`}>
                 {getScoreLabel(score)}
               </span>
-              {/* Info button - only when expanded */}
-              {isExpanded && reasons.length > 0 && (
-                <ScoreReasons
-                  reasons={reasons}
-                  show={showReasons}
-                  onToggle={() => setShowReasons(!showReasons)}
-                />
-              )}
             </div>
           </button>
 
