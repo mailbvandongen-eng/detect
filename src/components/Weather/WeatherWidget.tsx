@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Cloud, Sun, CloudRain, CloudSnow, CloudLightning, CloudFog, Wind,
   Thermometer, Droplets, ChevronDown, ChevronUp, X, RefreshCw,
-  Navigation, Snowflake, Flower2, AlertTriangle, Calendar
+  Navigation, Snowflake, Flower2, AlertTriangle, Calendar, ChevronRight
 } from 'lucide-react'
 import {
   useWeatherStore,
@@ -17,6 +17,7 @@ import {
 } from '../../store'
 import type { WeatherCode, PrecipitationForecast, PollenData } from '../../store'
 import { DetectorPlanner } from './DetectorPlanner'
+import { RainRadar } from './RainRadar'
 
 // Default location: center of Netherlands
 const DEFAULT_LOCATION = { lat: 52.1326, lon: 5.2913 }
@@ -293,6 +294,7 @@ export function WeatherWidget() {
 
   const [isExpanded, setIsExpanded] = useState(false)
   const [showPlanner, setShowPlanner] = useState(false)
+  const [showRadar, setShowRadar] = useState(false)
 
   // Safe top position
   const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
@@ -485,6 +487,17 @@ export function WeatherWidget() {
                     <PrecipitationGraph data={precipitation15min} data48h={precipitation48h} />
                   )}
 
+                  {/* Buienradar button */}
+                  <button
+                    onClick={() => setShowRadar(true)}
+                    className="w-full flex items-center gap-2 p-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border-0 cursor-pointer"
+                  >
+                    <CloudRain size={14} className="text-blue-500" />
+                    <span className="text-xs text-blue-700 font-medium">Buienradar</span>
+                    <span className="text-[10px] text-blue-500 ml-auto">Live kaart</span>
+                    <ChevronRight size={12} className="text-blue-400" />
+                  </button>
+
                   {/* Hourly forecast */}
                   {hourly.length > 0 && (
                     <div className="pt-2 border-t border-gray-200/50">
@@ -525,6 +538,12 @@ export function WeatherWidget() {
       <DetectorPlanner
         isOpen={showPlanner}
         onClose={() => setShowPlanner(false)}
+      />
+
+      {/* Rain Radar Modal */}
+      <RainRadar
+        isOpen={showRadar}
+        onClose={() => setShowRadar(false)}
       />
     </>
   )
