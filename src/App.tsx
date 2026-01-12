@@ -23,6 +23,7 @@ import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
 import { CustomLayerMarkers } from './components/CustomLayers'
 import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal, LayerDashboard } from './components/CustomPoints'
 import { PasswordGate } from './components/Auth/PasswordGate'
+import { OfflineIndicator } from './components/UI/OfflineIndicator'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useCloudSync } from './hooks/useCloudSync'
@@ -52,6 +53,7 @@ function App() {
   return (
     <PasswordGate>
       <div style={{ fontSize: `${baseFontSize}px` }}>
+        <OfflineIndicator />
         <MapContainer />
         <GpsMarker />
         <LocalVondstMarkers />

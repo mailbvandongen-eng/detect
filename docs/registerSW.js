@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/detectorapp-nl/sw.js', { scope: '/detectorapp-nl/' })})}
