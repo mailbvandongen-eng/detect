@@ -2,21 +2,17 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Cloud, Sun, CloudRain, CloudSnow, CloudLightning, CloudFog, Wind,
-  Thermometer, Droplets, ChevronDown, ChevronUp, X, RefreshCw,
-  Navigation, Snowflake, Flower2, AlertTriangle, Calendar, ChevronRight
+  Droplets, ChevronDown, ChevronUp, RefreshCw,
+  Navigation, Flower2, ChevronRight
 } from 'lucide-react'
 import {
   useWeatherStore,
   useSettingsStore,
   useGPSStore,
   weatherCodeDescriptions,
-  windDirectionToText,
-  calculateDetectingScore,
-  getScoreLabel,
-  getScoreColor
+  windDirectionToText
 } from '../../store'
 import type { WeatherCode, PrecipitationForecast, PollenData } from '../../store'
-import { DetectorPlanner } from './DetectorPlanner'
 import { RainRadar } from './RainRadar'
 
 // Default location: center of Netherlands
@@ -293,7 +289,6 @@ export function WeatherWidget() {
   const weather = useWeatherStore()
 
   const [isExpanded, setIsExpanded] = useState(false)
-  const [showPlanner, setShowPlanner] = useState(false)
   const [showRadar, setShowRadar] = useState(false)
 
   // Safe top position
@@ -328,11 +323,6 @@ export function WeatherWidget() {
   const precipitation15min = weather.weatherData?.precipitation15min || []
   const precipitation48h = weather.weatherData?.precipitation48h || []
   const pollen = weather.weatherData?.pollen
-
-  // Calculate detecting score
-  const { score, reasons } = weather.weatherData
-    ? calculateDetectingScore(weather.weatherData)
-    : { score: 0, reasons: [] }
 
   return (
     <>
@@ -397,33 +387,6 @@ export function WeatherWidget() {
                 )}
               </div>
             </div>
-
-            {/* Detecting score bar - clickable for planner */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowPlanner(true)
-              }}
-              className="w-full flex items-center gap-2 mt-1.5 pt-1.5 border-t border-gray-200/50 border-0 border-t bg-transparent p-0 outline-none hover:opacity-80 transition-opacity"
-            >
-              <span className="text-[10px] text-gray-500 flex items-center gap-1">
-                <Calendar size={10} className="text-gray-400" />
-                Detecteren
-              </span>
-              <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-all ${
-                    score >= 70 ? 'bg-green-500' :
-                    score >= 50 ? 'bg-yellow-500' :
-                    score >= 30 ? 'bg-orange-500' : 'bg-red-500'
-                  }`}
-                  style={{ width: `${Math.max(score, 5)}%` }}
-                />
-              </div>
-              <span className={`text-[10px] font-medium ${getScoreColor(score)}`}>
-                {getScoreLabel(score)}
-              </span>
-            </button>
           </button>
 
           {/* Expanded view */}
@@ -443,24 +406,6 @@ export function WeatherWidget() {
                       · Voelt als {Math.round(current.apparentTemperature)}°
                     </span>
                   </div>
-
-                  {/* Frost warning */}
-                  {weather.weatherData && weather.weatherData.frostDays > 0 && (
-                    <div className="flex items-center gap-1.5 text-[10px] text-blue-600 bg-blue-50 rounded px-2 py-1">
-                      <Snowflake size={12} />
-                      <span>
-                        {weather.weatherData.frostDays} vorstdag{weather.weatherData.frostDays > 1 ? 'en' : ''} - bodem mogelijk bevroren
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Snow warning */}
-                  {current.snowDepth && current.snowDepth > 0 && (
-                    <div className="flex items-center gap-1.5 text-[10px] text-cyan-600 bg-cyan-50 rounded px-2 py-1">
-                      <Snowflake size={12} />
-                      <span>Sneeuwlaag: {current.snowDepth} cm</span>
-                    </div>
-                  )}
 
                   {/* Details grid */}
                   <div className="grid grid-cols-2 gap-2 text-xs">
@@ -533,12 +478,6 @@ export function WeatherWidget() {
         </button>
       )}
     </motion.div>
-
-      {/* Detector Planner Modal */}
-      <DetectorPlanner
-        isOpen={showPlanner}
-        onClose={() => setShowPlanner(false)}
-      />
 
       {/* Rain Radar Modal */}
       <RainRadar
