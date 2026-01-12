@@ -241,6 +241,11 @@ export function WeatherWidget() {
                   )}
                 </div>
               </div>
+              {/* Weather description - always visible */}
+              <div className="text-[11px] text-gray-500 text-left mt-1">
+                {weatherCodeDescriptions[current.weatherCode] || 'Onbekend'}
+                <span className="text-gray-400 ml-1">· {Math.round(current.apparentTemperature)}°</span>
+              </div>
             </button>
 
             {/* Expanded view */}
@@ -252,15 +257,7 @@ export function WeatherWidget() {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="pt-3 mt-2 border-t border-gray-200/50 space-y-3">
-                    {/* Weather description */}
-                    <div className="text-xs text-gray-600">
-                      {weatherCodeDescriptions[current.weatherCode] || 'Onbekend'}
-                      <span className="text-gray-400 ml-1">
-                        · Voelt als {Math.round(current.apparentTemperature)}°
-                      </span>
-                    </div>
-
+                  <div className="pt-2 mt-2 border-t border-gray-200/50 space-y-3">
                     {/* Weather details grid */}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="bg-blue-50 rounded-lg p-2">
