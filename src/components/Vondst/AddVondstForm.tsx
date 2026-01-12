@@ -9,6 +9,7 @@ import { useCustomPointLayerStore, DEFAULT_VONDSTEN_LAYER_ID } from '../../store
 import { useRouteRecordingStore } from '../../store/routeRecordingStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { announceVondst } from '../../utils/voiceFeedback'
+import { savePhoto, getThumbnailUrl, getPhoto } from '../../lib/photoStorage'
 
 interface Props {
   onClose: () => void
@@ -133,6 +134,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
   const vondstFormPhoto = useUIStore(state => state.vondstFormPhoto)
   const customLayers = useCustomPointLayerStore(state => state.layers)
   const addPointToLayer = useCustomPointLayerStore(state => state.addPoint)
+  const addPhotoToPoint = useCustomPointLayerStore(state => state.addPhotoToPoint)
   const voiceFeedbackEnabled = useSettingsStore(state => state.voiceFeedbackEnabled)
 
   // Get active route info for linking
@@ -273,12 +275,33 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
         }
       }
 
-      // Save to custom layer with optional route link
+      // Save photo to IndexedDB if we have one
+      let photoData: { id: string; thumbnailBase64?: string; createdAt: string } | undefined
+      if (photo) {
+        const photoId = crypto.randomUUID()
+        try {
+          const storedPhoto = await savePhoto(photoId, photo)
+          // Create base64 thumbnail for quick display in localStorage
+          const thumbnailBase64 = await blobToBase64(storedPhoto.thumbnail)
+          photoData = {
+            id: photoId,
+            thumbnailBase64,
+            createdAt: storedPhoto.createdAt
+          }
+        } catch (photoError) {
+          console.error('Failed to save photo:', photoError)
+          // Continue without photo
+        }
+      }
+
+      // Save to custom layer with optional route link and photo
       addPointToLayer(saveTarget, {
         coordinates: [location.lng, location.lat],
         name: objectType,
         category: saveTarget === DEFAULT_VONDSTEN_LAYER_ID ? objectType : 'Overig',
         notes: fullNotes || '',
+        // Include photo if saved
+        ...(photoData ? { photos: [photoData] } : {}),
         // Link to active route if recording
         ...(isRecordingRoute && routeStartTime ? {
           routeId: `recording-${routeStartTime}`, // Temporary ID, will be updated when route is saved
@@ -298,13 +321,23 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
         })
       }
 
-      alert(`Toegevoegd aan ${layerName}! ✅`)
+      alert(`Toegevoegd aan ${layerName}! ✅${photoData ? ' (met foto)' : ''}`)
       onClose()
     } catch (error: any) {
       alert('Fout bij opslaan: ' + error.message)
     } finally {
       setSaving(false)
     }
+  }
+
+  // Helper to convert blob to base64
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
   }
 
   // Layer options for save target - all custom layers
