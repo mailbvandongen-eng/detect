@@ -331,7 +331,6 @@ export function RainRadar({ isOpen, onClose }: RainRadarProps) {
                             src={radarFrames[frameIndex]?.replace('{z}', zoom.toString()).replace('{x}', (x + dx).toString()).replace('{y}', (y + dy).toString())}
                             alt=""
                             className="w-full h-full object-cover"
-                            style={{ mixBlendMode: 'multiply' }}
                           />
                         ))
                       )}
@@ -398,15 +397,15 @@ export function RainRadar({ isOpen, onClose }: RainRadarProps) {
                   </button>
                 </div>
 
-                {/* Legend */}
+                {/* Legend - matches RainViewer TITAN color scheme */}
                 <div className="flex items-center justify-center gap-2 text-[10px] text-gray-500">
                   <span>Licht</span>
                   <div className="flex h-2">
-                    <div className="w-4 bg-blue-200 rounded-l" />
-                    <div className="w-4 bg-blue-400" />
-                    <div className="w-4 bg-blue-600" />
-                    <div className="w-4 bg-purple-600" />
-                    <div className="w-4 bg-red-500 rounded-r" />
+                    <div className="w-4 rounded-l" style={{ backgroundColor: '#88D0F3' }} />
+                    <div className="w-4" style={{ backgroundColor: '#32B8A4' }} />
+                    <div className="w-4" style={{ backgroundColor: '#F4E61F' }} />
+                    <div className="w-4" style={{ backgroundColor: '#F09D1C' }} />
+                    <div className="w-4 rounded-r" style={{ backgroundColor: '#E12E18' }} />
                   </div>
                   <span>Zwaar</span>
                 </div>
