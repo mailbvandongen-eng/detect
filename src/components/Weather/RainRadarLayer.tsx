@@ -31,11 +31,10 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
   const [speed, setSpeed] = useState<'slow' | 'normal' | 'fast'>('normal')
   const [opacity, setOpacity] = useState(70)
 
-  // Calculate "now" position on the slider (percentage)
-  const nowPosition = frames.length > 0
+  // Find the "now" frame index (closest to current time)
+  const nowFrameIndex = frames.length > 0
     ? (() => {
         const now = Date.now()
-        // Find the index of the frame closest to now
         let closestIdx = 0
         let closestDiff = Math.abs(frames[0]?.time - now)
         frames.forEach((f, i) => {
@@ -45,9 +44,24 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
             closestIdx = i
           }
         })
-        return (closestIdx / (frames.length - 1)) * 100
+        return closestIdx
       })()
-    : 50
+    : 0
+
+  // Get time labels for the timeline
+  const getTimeLabels = useCallback(() => {
+    if (frames.length === 0) return { first: '', now: '', last: '' }
+
+    const formatTime = (timestamp: number) => {
+      return new Date(timestamp).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+    }
+
+    return {
+      first: formatTime(frames[0].time),
+      now: formatTime(frames[nowFrameIndex]?.time || Date.now()),
+      last: formatTime(frames[frames.length - 1].time)
+    }
+  }, [frames, nowFrameIndex])
 
   // Speed in ms
   const speedMs = speed === 'slow' ? 800 : speed === 'normal' ? 500 : 250
@@ -271,36 +285,27 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
             </button>
           </div>
 
-          {/* Timeline slider with "now" indicator */}
-          <div className="flex-1 flex items-center gap-1">
-            <span className="text-[9px] text-gray-400 w-6">-2u</span>
-            <div className="flex-1 relative">
-              <input
-                type="range"
-                min="0"
-                max={Math.max(0, frames.length - 1)}
-                value={currentFrameIndex}
-                onChange={(e) => {
-                  setIsPlaying(false)
-                  setCurrentFrameIndex(parseInt(e.target.value))
-                }}
-                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-              />
-              {/* "Nu" indicator line */}
-              <div
-                className="absolute top-0 h-3 w-0.5 bg-red-500 rounded pointer-events-none"
-                style={{ left: `${nowPosition}%`, transform: 'translateX(-50%) translateY(-25%)' }}
-                title="Nu"
-              />
-              {/* "Nu" label */}
-              <div
-                className="absolute text-[8px] text-red-500 font-medium pointer-events-none"
-                style={{ left: `${nowPosition}%`, transform: 'translateX(-50%)', top: '-10px' }}
-              >
-                nu
-              </div>
+          {/* Timeline slider with time labels below */}
+          <div className="flex-1 flex flex-col gap-0.5">
+            <input
+              type="range"
+              min="0"
+              max={Math.max(0, frames.length - 1)}
+              value={currentFrameIndex}
+              onChange={(e) => {
+                setIsPlaying(false)
+                setCurrentFrameIndex(parseInt(e.target.value))
+              }}
+              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            />
+            {/* Time labels below slider */}
+            <div className="flex justify-between text-[9px] text-gray-500 px-0.5">
+              <span>{getTimeLabels().first}</span>
+              <span className="text-blue-600 font-medium">
+                {currentFrameIndex === nowFrameIndex ? 'nu' : getTimeLabels().now}
+              </span>
+              <span>{getTimeLabels().last}</span>
             </div>
-            <span className="text-[9px] text-gray-400 w-6 text-right">+2u</span>
           </div>
 
           {/* Speed */}
