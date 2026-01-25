@@ -177,12 +177,14 @@ export function SearchBox() {
     )
   }
 
-  // Expanded state: full search bar (leave space for hamburger icon)
+  // Expanded state: full search bar (leave space for hamburger icon and weather widget)
+  const leftPosition = showWeatherButton ? '220px' : '52px'
+
   return (
     <div
       ref={containerRef}
-      className="fixed left-[52px] right-14 z-[850]"
-      style={safeTopStyle}
+      className="fixed right-14 z-[850]"
+      style={{ ...safeTopStyle, left: leftPosition }}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -216,7 +218,6 @@ export function SearchBox() {
         {isOpen && results.length > 0 && (
           <motion.ul
             className="search-results"
-            style={showWeatherButton ? { marginLeft: '160px' } : undefined}
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}

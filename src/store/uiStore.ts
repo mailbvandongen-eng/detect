@@ -10,6 +10,7 @@ interface UIState {
   settingsPanelOpen: boolean
   infoPanelOpen: boolean
   presetsPanelOpen: boolean
+  monumentSearchOpen: boolean
 
   // Vondst form state
   vondstFormOpen: boolean
@@ -60,6 +61,10 @@ interface UIState {
 
   // Route dashboard actions
   toggleRouteDashboard: () => void
+
+  // Monument search actions
+  toggleMonumentSearch: () => void
+  closeMonumentSearch: () => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -71,6 +76,7 @@ export const useUIStore = create<UIState>()(
     settingsPanelOpen: false,
     infoPanelOpen: false,
     presetsPanelOpen: false,
+    monumentSearchOpen: false,
     vondstFormOpen: false,
     vondstFormLocation: null,
     vondstFormPhoto: null,
@@ -296,6 +302,27 @@ export const useUIStore = create<UIState>()(
     toggleRouteDashboard: () => {
       set(state => {
         state.routeDashboardOpen = !state.routeDashboardOpen
+      })
+    },
+
+    // Monument search actions
+    toggleMonumentSearch: () => {
+      set(state => {
+        const wasOpen = state.monumentSearchOpen
+        // Close all panels first
+        state.backgroundsPanelOpen = false
+        state.themesPanelOpen = false
+        state.settingsPanelOpen = false
+        state.infoPanelOpen = false
+        state.presetsPanelOpen = false
+        // Toggle monument search
+        state.monumentSearchOpen = !wasOpen
+      })
+    },
+
+    closeMonumentSearch: () => {
+      set(state => {
+        state.monumentSearchOpen = false
       })
     }
   }))

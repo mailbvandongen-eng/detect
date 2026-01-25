@@ -24,6 +24,7 @@ import { CustomLayerMarkers } from './components/CustomLayers'
 import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal, LayerDashboard } from './components/CustomPoints'
 import { PasswordGate } from './components/Auth/PasswordGate'
 import { OfflineIndicator } from './components/UI/OfflineIndicator'
+import { MonumentSearch } from './components/UI/MonumentSearch'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useCloudSync } from './hooks/useCloudSync'
@@ -49,6 +50,10 @@ function App() {
   // Route dashboard state
   const routeDashboardOpen = useUIStore(state => state.routeDashboardOpen)
   const toggleRouteDashboard = useUIStore(state => state.toggleRouteDashboard)
+
+  // Monument search state
+  const monumentSearchOpen = useUIStore(state => state.monumentSearchOpen)
+  const closeMonumentSearch = useUIStore(state => state.closeMonumentSearch)
 
   // Rain radar state
   const showBuienradar = useWeatherStore(state => state.showBuienradar)
@@ -103,6 +108,10 @@ function App() {
             />
           )}
         </AnimatePresence>
+        <MonumentSearch
+          isOpen={monumentSearchOpen}
+          onClose={closeMonumentSearch}
+        />
       </div>
     </PasswordGate>
   )

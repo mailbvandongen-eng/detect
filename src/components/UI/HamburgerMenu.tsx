@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud } from 'lucide-react'
+import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud, Landmark } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
@@ -34,7 +34,7 @@ function GoogleLogo({ size = 18 }: { size?: number }) {
 export function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const { user, loading, signInWithGoogle, logout } = useAuthStore()
-  const { toggleInfoPanel, toggleSettingsPanel } = useUIStore()
+  const { toggleInfoPanel, toggleSettingsPanel, toggleMonumentSearch } = useUIStore()
 
   // Settings for font scale
   const menuFontScale = useSettingsStore(state => state.menuFontScale)
@@ -63,6 +63,11 @@ export function HamburgerMenu() {
   const handleSettingsClick = () => {
     closeMenu()
     toggleSettingsPanel()
+  }
+
+  const handleMonumentSearchClick = () => {
+    closeMenu()
+    toggleMonumentSearch()
   }
 
   const handleLogin = () => {
@@ -203,6 +208,15 @@ export function HamburgerMenu() {
                   <Info size={18} className="text-blue-500" />
                   <span>Info & handleiding</span>
                 </button>
+
+                <button
+                  onClick={handleMonumentSearchClick}
+                  className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-purple-50"
+                  style={{ fontSize: '0.95em' }}
+                >
+                  <Landmark size={18} className="text-purple-500" />
+                  <span>Zoek in monumenten</span>
+                </button>
               </div>
 
               {/* Toggle Options */}
@@ -247,11 +261,11 @@ export function HamburgerMenu() {
                   </button>
                 </div>
 
-                {/* Weer knop toggle */}
+                {/* Weerwidget toggle */}
                 <div className="px-3 py-2 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Cloud size={18} className="text-cyan-500" />
-                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Weer knop</span>
+                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Weerwidget</span>
                   </div>
                   <button
                     onClick={() => setShowWeatherButton(!showWeatherButton)}

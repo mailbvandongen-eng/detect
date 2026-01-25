@@ -211,7 +211,7 @@ export function SettingsPanel() {
                   {/* Weer */}
                   <Section title="Weer" icon={<Cloud size={16} />}>
                     <ToggleRow
-                      label="Weerknop tonen"
+                      label="Weerwidget tonen"
                       checked={settings.showWeatherButton}
                       onChange={settings.setShowWeatherButton}
                     />
