@@ -1,14 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
-import TileLayer from 'ol/layer/Tile'
-import XYZ from 'ol/source/XYZ'
-import { useMapStore } from '../../store/mapStore'
-import { useWeatherStore } from '../../store/weatherStore'
+import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CloudRain, Play, Pause, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { CloudRain, X, RefreshCw } from 'lucide-react'
+import { useGPSStore } from '../../store'
 
-interface RadarFrame {
-  path: string
-  time: number
+interface PrecipData {
+  time: string
+  precipitation: number
 }
 
 interface RainRadarLayerProps {
@@ -16,209 +13,81 @@ interface RainRadarLayerProps {
   onClose: () => void
 }
 
+// Default location: center of Netherlands
+const DEFAULT_LOCATION = { lat: 52.1326, lon: 5.2913 }
+
 export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
-  const map = useMapStore(state => state.map)
-  const weatherData = useWeatherStore(state => state.weatherData)
+  const gps = useGPSStore()
 
-  const layerRef = useRef<TileLayer<XYZ> | null>(null)
-  const animationRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Radar state
-  const [frames, setFrames] = useState<RadarFrame[]>([])
-  const [currentFrameIndex, setCurrentFrameIndex] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(true)
+  const [data, setData] = useState<PrecipData[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [speed, setSpeed] = useState<'slow' | 'normal' | 'fast'>('normal')
-  const [opacity, setOpacity] = useState(70)
+  const [error, setError] = useState<string | null>(null)
+  const [timeRange, setTimeRange] = useState<'2u' | '6u' | '24u'>('2u')
 
-  // Find the "now" frame index (closest to current time)
-  const nowFrameIndex = frames.length > 0
-    ? (() => {
-        const now = Date.now()
-        let closestIdx = 0
-        let closestDiff = Math.abs(frames[0]?.time - now)
-        frames.forEach((f, i) => {
-          const diff = Math.abs(f.time - now)
-          if (diff < closestDiff) {
-            closestDiff = diff
-            closestIdx = i
-          }
-        })
-        return closestIdx
-      })()
-    : 0
-
-  // Format time as HH:MM
-  const formatTime = useCallback((timestamp: number) => {
-    return new Date(timestamp).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
-  }, [])
-
-  // Speed in ms
-  const speedMs = speed === 'slow' ? 800 : speed === 'normal' ? 500 : 250
-
-  // Fetch radar frames from RainViewer API
-  const fetchRadarData = useCallback(async () => {
+  // Fetch precipitation data from Open-Meteo
+  const fetchPrecipData = useCallback(async () => {
     setIsLoading(true)
+    setError(null)
+
+    const loc = gps.position || DEFAULT_LOCATION
+
     try {
-      const response = await fetch('https://api.rainviewer.com/public/weather-maps.json')
-      const data = await response.json()
+      // Use DWD-ICON model for 15-minute resolution in Netherlands
+      const url = `https://api.open-meteo.com/v1/dwd-icon?latitude=${loc.lat}&longitude=${loc.lon}&minutely_15=precipitation&timezone=Europe/Amsterdam`
 
-      const allFrames: RadarFrame[] = []
+      const response = await fetch(url)
+      if (!response.ok) throw new Error('API error')
 
-      // Past frames (last ~2 hours)
-      if (data.radar?.past) {
-        data.radar.past.forEach((f: { path: string; time: number }) => {
-          allFrames.push({ path: f.path, time: f.time * 1000 })
-        })
+      const result = await response.json()
+
+      if (result.minutely_15?.time && result.minutely_15?.precipitation) {
+        const precipData: PrecipData[] = result.minutely_15.time.map((time: string, i: number) => ({
+          time,
+          precipitation: result.minutely_15.precipitation[i] || 0
+        }))
+        setData(precipData)
       }
-
-      // Nowcast/forecast frames (next ~2 hours)
-      if (data.radar?.nowcast) {
-        data.radar.nowcast.forEach((f: { path: string; time: number }) => {
-          allFrames.push({ path: f.path, time: f.time * 1000 })
-        })
-      }
-
-      setFrames(allFrames)
-      // Start at most recent past frame
-      const nowIndex = data.radar?.past?.length ? data.radar.past.length - 1 : 0
-      setCurrentFrameIndex(nowIndex)
-    } catch (error) {
-      console.error('Failed to fetch radar data:', error)
+    } catch (err) {
+      console.error('Failed to fetch precipitation data:', err)
+      setError('Kon neerslagdata niet laden')
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [gps.position?.lat, gps.position?.lon])
 
-  // Initial fetch
+  // Initial fetch and refresh
   useEffect(() => {
     if (isVisible) {
-      fetchRadarData()
-      // Refresh radar data every 5 minutes
-      const refreshInterval = setInterval(fetchRadarData, 5 * 60 * 1000)
-      return () => clearInterval(refreshInterval)
+      fetchPrecipData()
+      // Refresh every 5 minutes
+      const interval = setInterval(fetchPrecipData, 5 * 60 * 1000)
+      return () => clearInterval(interval)
     }
-  }, [isVisible, fetchRadarData])
+  }, [isVisible, fetchPrecipData])
 
+  // Filter data based on time range
+  const getFilteredData = useCallback(() => {
+    if (data.length === 0) return []
 
-  // Create and manage the radar layer
-  useEffect(() => {
-    if (!map || !isVisible || frames.length === 0) return
+    const now = new Date()
+    const hoursAhead = timeRange === '2u' ? 2 : timeRange === '6u' ? 6 : 24
+    const endTime = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000)
 
-    const frame = frames[currentFrameIndex]
-    if (!frame) return
-
-    // Create tile URL
-    const tileUrl = `https://tilecache.rainviewer.com${frame.path}/256/{z}/{x}/{y}/2/1_1.png`
-
-    // If layer exists, update source
-    if (layerRef.current) {
-      const source = layerRef.current.getSource()
-      if (source) {
-        source.setUrl(tileUrl)
-        source.refresh()
-      }
-    } else {
-      // Create new layer
-      const source = new XYZ({
-        url: tileUrl,
-        crossOrigin: 'anonymous'
-      })
-
-      const layer = new TileLayer({
-        source,
-        opacity: opacity / 100,
-        zIndex: 1500, // Above most layers but below UI
-        properties: {
-          name: 'rain-radar-layer',
-          title: 'Buienradar'
-        }
-      })
-
-      layerRef.current = layer
-      map.addLayer(layer)
-    }
-
-    return () => {
-      // Don't remove layer here, we manage it separately
-    }
-  }, [map, isVisible, frames, currentFrameIndex])
-
-  // Update opacity
-  useEffect(() => {
-    if (layerRef.current) {
-      layerRef.current.setOpacity(opacity / 100)
-    }
-  }, [opacity])
-
-  // Remove layer when hidden
-  useEffect(() => {
-    if (!isVisible && layerRef.current && map) {
-      map.removeLayer(layerRef.current)
-      layerRef.current = null
-    }
-  }, [isVisible, map])
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (layerRef.current && map) {
-        map.removeLayer(layerRef.current)
-        layerRef.current = null
-      }
-      if (animationRef.current) {
-        clearInterval(animationRef.current)
-      }
-    }
-  }, [map])
-
-  // Animation loop
-  useEffect(() => {
-    if (!isPlaying || frames.length === 0 || !isVisible) {
-      if (animationRef.current) {
-        clearInterval(animationRef.current)
-        animationRef.current = null
-      }
-      return
-    }
-
-    animationRef.current = setInterval(() => {
-      setCurrentFrameIndex(prev => (prev + 1) % frames.length)
-    }, speedMs)
-
-    return () => {
-      if (animationRef.current) {
-        clearInterval(animationRef.current)
-        animationRef.current = null
-      }
-    }
-  }, [isPlaying, frames.length, speedMs, isVisible])
-
-  // Get time label for current frame
-  const getTimeLabel = useCallback(() => {
-    if (frames.length === 0 || !frames[currentFrameIndex]) return '--:--'
-
-    const frameTime = frames[currentFrameIndex].time
-    const now = Date.now()
-    const diffMinutes = Math.round((frameTime - now) / 60000)
-
-    const time = new Date(frameTime)
-    const timeStr = time.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
-
-    if (Math.abs(diffMinutes) < 3) return `${timeStr} (nu)`
-    if (diffMinutes < 0) return `${timeStr} (${diffMinutes}m)`
-    return `${timeStr} (+${diffMinutes}m)`
-  }, [frames, currentFrameIndex])
-
-  // Step through frames manually
-  const stepFrame = (direction: 'prev' | 'next') => {
-    setIsPlaying(false)
-    setCurrentFrameIndex(prev => {
-      if (direction === 'prev') {
-        return prev > 0 ? prev - 1 : frames.length - 1
-      }
-      return (prev + 1) % frames.length
+    // Filter to show from now to endTime
+    return data.filter(d => {
+      const t = new Date(d.time)
+      return t >= now && t <= endTime
     })
+  }, [data, timeRange])
+
+  const filteredData = getFilteredData()
+  const maxPrecip = Math.max(...filteredData.map(d => d.precipitation), 0.5)
+  const totalPrecip = filteredData.reduce((sum, d) => sum + d.precipitation, 0)
+  const hasRain = filteredData.some(d => d.precipitation > 0)
+
+  // Format time as HH:MM
+  const formatTime = (isoTime: string) => {
+    return new Date(isoTime).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
   }
 
   if (!isVisible) return null
@@ -232,108 +101,126 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
         className="fixed bottom-4 left-2 right-2 z-[1600] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200"
         style={{ maxWidth: '400px', margin: '0 auto' }}
       >
-        {/* Compact header with time and close */}
-        <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-100">
+        {/* Header */}
+        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <CloudRain size={14} className="text-blue-500" />
-            <span className="text-xs font-medium text-gray-700">
-              {isLoading ? 'Laden...' : getTimeLabel()}
-            </span>
+            <CloudRain size={16} className="text-blue-500" />
+            <span className="text-sm font-medium text-gray-700">Neerslag</span>
+            {!isLoading && !error && (
+              <span className={`text-xs ${hasRain ? 'text-blue-600' : 'text-green-600'}`}>
+                {hasRain ? `${totalPrecip.toFixed(1)} mm` : 'Droog'}
+              </span>
+            )}
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
-          >
-            <X size={14} className="text-gray-500" />
-          </button>
-        </div>
-
-        {/* Compact controls row */}
-        <div className="px-3 py-2 flex items-center gap-2">
-          {/* Play controls */}
-          <div className="flex items-center gap-0.5">
-            <button
-              onClick={() => stepFrame('prev')}
-              className="p-1.5 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
-            >
-              <ChevronLeft size={14} className="text-gray-600" />
-            </button>
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className={`p-1.5 rounded transition-colors border-0 outline-none ${
-                isPlaying ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-            </button>
-            <button
-              onClick={() => stepFrame('next')}
-              className="p-1.5 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
-            >
-              <ChevronRight size={14} className="text-gray-600" />
-            </button>
-          </div>
-
-          {/* Timeline slider with time labels below */}
-          <div className="flex-1 flex flex-col gap-0.5">
-            <input
-              type="range"
-              min="0"
-              max={Math.max(0, frames.length - 1)}
-              value={currentFrameIndex}
-              onChange={(e) => {
-                setIsPlaying(false)
-                setCurrentFrameIndex(parseInt(e.target.value))
-              }}
-              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-            />
-            {/* Time labels below slider */}
-            <div className="flex justify-between text-[9px] px-0.5">
-              <span className="text-gray-400">{frames.length > 0 ? formatTime(frames[0].time) : ''}</span>
-              <span className="text-blue-600 font-medium">nu</span>
-              <span className="text-gray-400">{frames.length > 0 ? formatTime(frames[frames.length - 1].time) : ''}</span>
+          <div className="flex items-center gap-2">
+            {/* Time range selector */}
+            <div className="flex items-center gap-0.5 bg-gray-100 rounded p-0.5">
+              {(['2u', '6u', '24u'] as const).map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setTimeRange(range)}
+                  className={`px-2 py-0.5 text-[10px] rounded transition-colors border-0 outline-none ${
+                    timeRange === range ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 bg-transparent'
+                  }`}
+                >
+                  {range}
+                </button>
+              ))}
             </div>
-          </div>
 
-          {/* Speed */}
-          <div className="flex items-center gap-0.5 bg-gray-100 rounded p-0.5">
-            {(['slow', 'normal', 'fast'] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => setSpeed(s)}
-                className={`px-1.5 py-0.5 text-[9px] rounded transition-colors border-0 outline-none ${
-                  speed === s ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 bg-transparent'
-                }`}
-              >
-                {s === 'slow' ? '½' : s === 'normal' ? '1' : '2'}×
-              </button>
-            ))}
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
+            >
+              <X size={16} className="text-gray-500" />
+            </button>
           </div>
-
-          {/* Opacity mini slider */}
-          <input
-            type="range"
-            min="20"
-            max="100"
-            value={opacity}
-            onChange={(e) => setOpacity(parseInt(e.target.value))}
-            className="w-12 h-1 bg-gray-200 rounded appearance-none cursor-pointer accent-blue-500"
-            title={`Dekking: ${opacity}%`}
-          />
         </div>
 
-        {/* Legend */}
-        <div className="px-3 pb-1.5 flex items-center justify-center gap-1.5">
-          <span className="text-[8px] text-gray-400">Licht</span>
-          <div className="flex h-1.5 rounded overflow-hidden">
-            <div className="w-3" style={{ backgroundColor: '#88D0F3' }} />
-            <div className="w-3" style={{ backgroundColor: '#32B8A4' }} />
-            <div className="w-3" style={{ backgroundColor: '#F4E61F' }} />
-            <div className="w-3" style={{ backgroundColor: '#F09D1C' }} />
-            <div className="w-3" style={{ backgroundColor: '#E12E18' }} />
-          </div>
-          <span className="text-[8px] text-gray-400">Zwaar</span>
+        {/* Content */}
+        <div className="px-3 py-3">
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2 py-4">
+              <RefreshCw size={16} className="animate-spin text-blue-500" />
+              <span className="text-sm text-gray-500">Laden...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-4">
+              <span className="text-sm text-red-500">{error}</span>
+              <button
+                onClick={fetchPrecipData}
+                className="block mx-auto mt-2 text-xs text-blue-500 hover:underline border-0 bg-transparent"
+              >
+                Opnieuw proberen
+              </button>
+            </div>
+          ) : filteredData.length === 0 ? (
+            <div className="text-center py-4 text-sm text-gray-500">
+              Geen data beschikbaar
+            </div>
+          ) : (
+            <>
+              {/* Bar chart */}
+              <div className="relative h-16 bg-gray-50 rounded-lg overflow-hidden">
+                <div className="absolute inset-0 flex items-end">
+                  {filteredData.map((d, i) => {
+                    const height = (d.precipitation / maxPrecip) * 100
+                    const intensity = d.precipitation > 2 ? 'bg-blue-600' :
+                                     d.precipitation > 0.5 ? 'bg-blue-500' :
+                                     d.precipitation > 0.1 ? 'bg-blue-400' :
+                                     d.precipitation > 0 ? 'bg-blue-300' : 'bg-transparent'
+                    return (
+                      <div
+                        key={i}
+                        className="flex-1"
+                        title={`${formatTime(d.time)}: ${d.precipitation.toFixed(1)} mm`}
+                      >
+                        <div
+                          className={`w-full rounded-t ${intensity}`}
+                          style={{ height: `${Math.max(height, d.precipitation > 0 ? 8 : 0)}%` }}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* "Nu" indicator line */}
+                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-red-500" />
+                <div className="absolute left-0 top-0 text-[8px] text-red-500 font-medium px-0.5">
+                  nu
+                </div>
+              </div>
+
+              {/* Time labels */}
+              <div className="flex justify-between text-[9px] text-gray-400 mt-1 px-0.5">
+                <span>nu</span>
+                <span>
+                  {filteredData.length > 0 ? formatTime(filteredData[Math.floor(filteredData.length / 2)].time) : ''}
+                </span>
+                <span>
+                  {filteredData.length > 0 ? formatTime(filteredData[filteredData.length - 1].time) : ''}
+                </span>
+              </div>
+
+              {/* Legend */}
+              <div className="flex items-center justify-center gap-1.5 mt-2">
+                <span className="text-[8px] text-gray-400">Licht</span>
+                <div className="flex h-1.5 rounded overflow-hidden">
+                  <div className="w-3 bg-blue-300" />
+                  <div className="w-3 bg-blue-400" />
+                  <div className="w-3 bg-blue-500" />
+                  <div className="w-3 bg-blue-600" />
+                </div>
+                <span className="text-[8px] text-gray-400">Zwaar</span>
+              </div>
+
+              {/* Attribution */}
+              <div className="text-[7px] text-gray-300 text-center mt-2">
+                Data: Open-Meteo.com (DWD ICON)
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
     </AnimatePresence>
