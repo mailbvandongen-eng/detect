@@ -202,10 +202,7 @@ export function WeatherWidget() {
       {/* Widget */}
       <motion.div
         className="fixed left-2 z-[1100] bg-white shadow-lg border border-gray-200 select-none rounded-xl"
-        style={isExpanded
-          ? { top: '0.5rem', bottom: '0.5rem', width: '200px', overflowY: 'auto' }
-          : { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))', width: 'auto', maxWidth: '200px' }
-        }
+        style={{ top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))', width: isExpanded ? '200px' : 'auto', maxWidth: '200px' }}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         layout
