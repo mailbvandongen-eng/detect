@@ -353,16 +353,15 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
             </div>
           </>
         ) : (
-          /* 24h precipitation forecast graph */
-          <div className="px-3 py-2">
+          /* 24h precipitation forecast - compact, same height as 2h controls */
+          <div className="px-3 py-2 flex items-center gap-2">
             {hourlyPrecip.length > 0 ? (
-              <div className="space-y-1">
-                {/* Bar chart */}
-                <div className="flex items-end gap-px h-12 bg-gray-50 rounded p-1">
+              <>
+                {/* Compact bar chart */}
+                <div className="flex items-end gap-px h-8 flex-1 bg-gray-50 rounded px-1">
                   {hourlyPrecip.map((hour, i) => {
                     const maxPrecip = Math.max(...hourlyPrecip.map(h => h.precip), 1)
                     const height = (hour.precip / maxPrecip) * 100
-                    const time = new Date(hour.time)
                     const intensity = hour.precip > 2 ? 'bg-blue-600' :
                                      hour.precip > 0.5 ? 'bg-blue-500' :
                                      hour.precip > 0 ? 'bg-blue-400' : 'bg-gray-200'
@@ -370,28 +369,20 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
                       <div
                         key={i}
                         className={`flex-1 rounded-t ${intensity}`}
-                        style={{ height: `${Math.max(height, hour.precip > 0 ? 10 : 4)}%` }}
-                        title={`${time.getHours()}:00 - ${hour.precip.toFixed(1)} mm`}
+                        style={{ height: `${Math.max(height, hour.precip > 0 ? 15 : 8)}%` }}
+                        title={`${new Date(hour.time).getHours()}:00 - ${hour.precip.toFixed(1)} mm`}
                       />
                     )
                   })}
                 </div>
-                {/* Time labels */}
-                <div className="flex justify-between text-[8px] text-gray-400">
-                  <span>Nu</span>
-                  <span>+6u</span>
-                  <span>+12u</span>
-                  <span>+18u</span>
-                  <span>+24u</span>
-                </div>
                 {/* Total */}
-                <div className="text-center text-[10px] text-gray-500">
-                  Totaal: <span className="font-medium text-blue-600">{hourlyPrecip.reduce((s, h) => s + h.precip, 0).toFixed(1)} mm</span>
+                <div className="text-[10px] text-gray-500 whitespace-nowrap">
+                  <span className="font-medium text-blue-600">{hourlyPrecip.reduce((s, h) => s + h.precip, 0).toFixed(1)}</span> mm
                 </div>
-              </div>
+              </>
             ) : (
-              <div className="text-center py-2 text-xs text-gray-400">
-                Geen voorspelling beschikbaar
+              <div className="flex-1 text-center text-[10px] text-gray-400">
+                Geen 24u data - open eerst weerwidget
               </div>
             )}
           </div>
