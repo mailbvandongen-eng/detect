@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Search, X, ExternalLink } from 'lucide-react'
-import { useMapStore } from '../../store/mapStore'
+import { useMapStore, useSettingsStore } from '../../store'
 import { fromLonLat } from 'ol/proj'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -13,6 +13,7 @@ interface SearchResult {
 
 export function SearchBox() {
   const map = useMapStore(state => state.map)
+  const showWeatherButton = useSettingsStore(state => state.showWeatherButton)
 
   const [isExpanded, setIsExpanded] = useState(false)
   const [query, setQuery] = useState('')
@@ -215,6 +216,7 @@ export function SearchBox() {
         {isOpen && results.length > 0 && (
           <motion.ul
             className="search-results"
+            style={showWeatherButton ? { marginLeft: '160px' } : undefined}
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
