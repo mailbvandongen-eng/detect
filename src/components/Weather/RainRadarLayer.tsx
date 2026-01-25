@@ -48,38 +48,10 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
       })()
     : 0
 
-  // Get time labels for the timeline
-  const getTimeLabels = useCallback(() => {
-    if (frames.length === 0) return { first: '', firstRel: '', now: '', last: '', lastRel: '' }
-
-    const now = Date.now()
-    const formatTime = (timestamp: number) => {
-      return new Date(timestamp).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
-    }
-    const formatRelative = (timestamp: number) => {
-      const diffMin = Math.round((timestamp - now) / 60000)
-      const absDiff = Math.abs(diffMin)
-      const sign = diffMin < 0 ? '-' : '+'
-
-      if (absDiff < 60) {
-        return `${sign}${absDiff}m`
-      }
-      const hours = Math.floor(absDiff / 60)
-      const mins = absDiff % 60
-      if (mins === 0) {
-        return `${sign}${hours}u`
-      }
-      return `${sign}${hours}u${mins}m`
-    }
-
-    return {
-      first: formatTime(frames[0].time),
-      firstRel: formatRelative(frames[0].time),
-      now: formatTime(frames[nowFrameIndex]?.time || now),
-      last: formatTime(frames[frames.length - 1].time),
-      lastRel: formatRelative(frames[frames.length - 1].time)
-    }
-  }, [frames, nowFrameIndex])
+  // Format time as HH:MM
+  const formatTime = useCallback((timestamp: number) => {
+    return new Date(timestamp).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+  }, [])
 
   // Speed in ms
   const speedMs = speed === 'slow' ? 800 : speed === 'normal' ? 500 : 250
@@ -318,9 +290,9 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
             />
             {/* Time labels below slider */}
             <div className="flex justify-between text-[9px] px-0.5">
-              <span className="text-gray-400">{getTimeLabels().firstRel}</span>
+              <span className="text-gray-400">{frames.length > 0 ? formatTime(frames[0].time) : ''}</span>
               <span className="text-blue-600 font-medium">nu</span>
-              <span className="text-gray-400">{getTimeLabels().lastRel}</span>
+              <span className="text-gray-400">{frames.length > 0 ? formatTime(frames[frames.length - 1].time) : ''}</span>
             </div>
           </div>
 
