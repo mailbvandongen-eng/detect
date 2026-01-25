@@ -50,16 +50,31 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
 
   // Get time labels for the timeline
   const getTimeLabels = useCallback(() => {
-    if (frames.length === 0) return { first: '', now: '', last: '' }
+    if (frames.length === 0) return { first: '', firstRel: '', now: '', last: '', lastRel: '' }
 
+    const now = Date.now()
     const formatTime = (timestamp: number) => {
       return new Date(timestamp).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+    }
+    const formatRelative = (timestamp: number) => {
+      const diffMin = Math.round((timestamp - now) / 60000)
+      if (Math.abs(diffMin) < 60) {
+        return diffMin < 0 ? `${diffMin}m` : `+${diffMin}m`
+      }
+      const hours = Math.floor(Math.abs(diffMin) / 60)
+      const mins = Math.abs(diffMin) % 60
+      if (mins === 0) {
+        return diffMin < 0 ? `-${hours}u` : `+${hours}u`
+      }
+      return diffMin < 0 ? `-${hours}u${mins}` : `+${hours}u${mins}`
     }
 
     return {
       first: formatTime(frames[0].time),
-      now: formatTime(frames[nowFrameIndex]?.time || Date.now()),
-      last: formatTime(frames[frames.length - 1].time)
+      firstRel: formatRelative(frames[0].time),
+      now: formatTime(frames[nowFrameIndex]?.time || now),
+      last: formatTime(frames[frames.length - 1].time),
+      lastRel: formatRelative(frames[frames.length - 1].time)
     }
   }, [frames, nowFrameIndex])
 
@@ -299,12 +314,10 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
               className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
             {/* Time labels below slider */}
-            <div className="flex justify-between text-[9px] text-gray-500 px-0.5">
-              <span>{getTimeLabels().first}</span>
-              <span className="text-blue-600 font-medium">
-                {currentFrameIndex === nowFrameIndex ? 'nu' : getTimeLabels().now}
-              </span>
-              <span>{getTimeLabels().last}</span>
+            <div className="flex justify-between text-[9px] px-0.5">
+              <span className="text-gray-400">{getTimeLabels().firstRel}</span>
+              <span className="text-blue-600 font-medium">nu</span>
+              <span className="text-gray-400">{getTimeLabels().lastRel}</span>
             </div>
           </div>
 
