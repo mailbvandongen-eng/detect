@@ -1,11 +1,13 @@
-import { useEffect, useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { CloudRain, X, RefreshCw } from 'lucide-react'
-import { useGPSStore } from '../../store'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { motion } from 'framer-motion'
+import { CloudRain, X, Play, Pause } from 'lucide-react'
+import TileLayer from 'ol/layer/Tile'
+import XYZ from 'ol/source/XYZ'
+import { useMapStore } from '../../store'
 
-interface PrecipData {
-  time: string
-  precipitation: number
+interface RadarFrame {
+  time: number
+  path: string
 }
 
 interface RainRadarLayerProps {
@@ -13,226 +15,224 @@ interface RainRadarLayerProps {
   onClose: () => void
 }
 
-// Default location: center of Netherlands
-const DEFAULT_LOCATION = { lat: 52.1326, lon: 5.2913 }
-
 export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
-  const gps = useGPSStore()
-
-  const [data, setData] = useState<PrecipData[]>([])
+  const map = useMapStore(state => state.map)
+  const [frames, setFrames] = useState<RadarFrame[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [timeRange, setTimeRange] = useState<'2u' | '6u' | '24u'>('2u')
+  const layerRef = useRef<TileLayer<XYZ> | null>(null)
+  const playIntervalRef = useRef<number | null>(null)
 
-  // Fetch precipitation data from Open-Meteo
-  const fetchPrecipData = useCallback(async () => {
+  // Fetch available radar frames from RainViewer
+  const fetchFrames = useCallback(async () => {
     setIsLoading(true)
-    setError(null)
-
-    const loc = gps.position || DEFAULT_LOCATION
-
     try {
-      // Use DWD-ICON model for 15-minute resolution in Netherlands
-      const url = `https://api.open-meteo.com/v1/dwd-icon?latitude=${loc.lat}&longitude=${loc.lon}&minutely_15=precipitation&timezone=Europe/Amsterdam`
+      const response = await fetch('https://api.rainviewer.com/public/weather-maps.json')
+      const data = await response.json()
 
-      const response = await fetch(url)
-      if (!response.ok) throw new Error('API error')
+      // Combine past and nowcast (future) frames
+      const pastFrames: RadarFrame[] = (data.radar?.past || []).map((f: any) => ({
+        time: f.time,
+        path: f.path
+      }))
+      const nowcastFrames: RadarFrame[] = (data.radar?.nowcast || []).map((f: any) => ({
+        time: f.time,
+        path: f.path
+      }))
 
-      const result = await response.json()
+      const allFrames = [...pastFrames, ...nowcastFrames]
+      setFrames(allFrames)
 
-      if (result.minutely_15?.time && result.minutely_15?.precipitation) {
-        const precipData: PrecipData[] = result.minutely_15.time.map((time: string, i: number) => ({
-          time,
-          precipitation: result.minutely_15.precipitation[i] || 0
-        }))
-        setData(precipData)
-      }
+      // Find "now" index (last past frame)
+      const nowIndex = pastFrames.length > 0 ? pastFrames.length - 1 : 0
+      setCurrentIndex(nowIndex)
     } catch (err) {
-      console.error('Failed to fetch precipitation data:', err)
-      setError('Kon neerslagdata niet laden')
+      console.error('Failed to fetch radar frames:', err)
     } finally {
       setIsLoading(false)
     }
-  }, [gps.position?.lat, gps.position?.lon])
+  }, [])
 
-  // Initial fetch and refresh
+  // Initial fetch
   useEffect(() => {
     if (isVisible) {
-      fetchPrecipData()
+      fetchFrames()
       // Refresh every 5 minutes
-      const interval = setInterval(fetchPrecipData, 5 * 60 * 1000)
+      const interval = setInterval(fetchFrames, 5 * 60 * 1000)
       return () => clearInterval(interval)
     }
-  }, [isVisible, fetchPrecipData])
+  }, [isVisible, fetchFrames])
 
-  // Filter data based on time range
-  const getFilteredData = useCallback(() => {
-    if (data.length === 0) return []
+  // Create/update radar layer on map
+  useEffect(() => {
+    if (!map || !isVisible || frames.length === 0) return
 
-    const now = new Date()
-    const hoursAhead = timeRange === '2u' ? 2 : timeRange === '6u' ? 6 : 24
+    const frame = frames[currentIndex]
+    if (!frame) return
 
-    // Find the index closest to now
-    let startIdx = 0
-    let minDiff = Infinity
-    data.forEach((d, i) => {
-      const diff = Math.abs(new Date(d.time).getTime() - now.getTime())
-      if (diff < minDiff) {
-        minDiff = diff
-        startIdx = i
-      }
+    const radarSource = new XYZ({
+      url: `https://tilecache.rainviewer.com${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
+      tileSize: 256,
+      attributions: 'RainViewer.com'
     })
 
-    // Calculate how many 15-min intervals we need
-    const intervalsNeeded = hoursAhead * 4 // 4 intervals per hour (15 min each)
+    // Remove old layer if exists
+    if (layerRef.current) {
+      map.removeLayer(layerRef.current)
+    }
 
-    // Return data from startIdx for the required duration
-    return data.slice(startIdx, startIdx + intervalsNeeded)
-  }, [data, timeRange])
+    // Create new layer
+    const radarLayer = new TileLayer({
+      source: radarSource,
+      opacity: 0.6,
+      zIndex: 100
+    })
 
-  const filteredData = getFilteredData()
-  const maxPrecip = Math.max(...filteredData.map(d => d.precipitation), 0.5)
-  const totalPrecip = filteredData.reduce((sum, d) => sum + d.precipitation, 0)
-  const hasRain = filteredData.some(d => d.precipitation > 0)
+    map.addLayer(radarLayer)
+    layerRef.current = radarLayer
 
-  // Format time as HH:MM
-  const formatTime = (isoTime: string) => {
-    return new Date(isoTime).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+    return () => {
+      if (layerRef.current && map) {
+        map.removeLayer(layerRef.current)
+        layerRef.current = null
+      }
+    }
+  }, [map, isVisible, frames, currentIndex])
+
+  // Cleanup layer when closing
+  useEffect(() => {
+    if (!isVisible && layerRef.current && map) {
+      map.removeLayer(layerRef.current)
+      layerRef.current = null
+    }
+  }, [isVisible, map])
+
+  // Playback animation
+  useEffect(() => {
+    if (isPlaying && frames.length > 0) {
+      playIntervalRef.current = window.setInterval(() => {
+        setCurrentIndex(prev => (prev + 1) % frames.length)
+      }, 500)
+    } else if (playIntervalRef.current) {
+      clearInterval(playIntervalRef.current)
+      playIntervalRef.current = null
+    }
+
+    return () => {
+      if (playIntervalRef.current) {
+        clearInterval(playIntervalRef.current)
+      }
+    }
+  }, [isPlaying, frames.length])
+
+  // Format time
+  const formatTime = (timestamp: number) => {
+    const date = new Date(timestamp * 1000)
+    return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+  }
+
+  // Find "now" index for visual indicator
+  const getNowIndex = () => {
+    const now = Date.now() / 1000
+    let closestIdx = 0
+    let minDiff = Infinity
+    frames.forEach((f, i) => {
+      const diff = Math.abs(f.time - now)
+      if (diff < minDiff) {
+        minDiff = diff
+        closestIdx = i
+      }
+    })
+    return closestIdx
   }
 
   if (!isVisible) return null
 
+  const nowIdx = getNowIndex()
+  const currentFrame = frames[currentIndex]
+
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        className="fixed bottom-4 left-2 right-2 z-[1600] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200"
-        style={{ maxWidth: '400px', margin: '0 auto' }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <CloudRain size={16} className="text-blue-500" />
-            <span className="text-sm font-medium text-gray-700">Neerslag</span>
-            {!isLoading && !error && (
-              <span className={`text-xs ${hasRain ? 'text-blue-600' : 'text-green-600'}`}>
-                {hasRain ? `${totalPrecip.toFixed(1)} mm` : 'Droog'}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Time range selector */}
-            <div className="flex items-center gap-0.5 bg-gray-100 rounded p-0.5">
-              {(['2u', '6u', '24u'] as const).map((range) => (
-                <button
-                  key={range}
-                  onClick={() => setTimeRange(range)}
-                  className={`px-2 py-0.5 text-[10px] rounded transition-colors border-0 outline-none ${
-                    timeRange === range ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 bg-transparent'
-                  }`}
-                >
-                  {range}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
-            >
-              <X size={16} className="text-gray-500" />
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="px-3 py-3">
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2 py-4">
-              <RefreshCw size={16} className="animate-spin text-blue-500" />
-              <span className="text-sm text-gray-500">Laden...</span>
-            </div>
-          ) : error ? (
-            <div className="text-center py-4">
-              <span className="text-sm text-red-500">{error}</span>
-              <button
-                onClick={fetchPrecipData}
-                className="block mx-auto mt-2 text-xs text-blue-500 hover:underline border-0 bg-transparent"
-              >
-                Opnieuw proberen
-              </button>
-            </div>
-          ) : filteredData.length === 0 ? (
-            <div className="text-center py-4 text-sm text-gray-500">
-              Geen data beschikbaar
-            </div>
-          ) : (
-            <>
-              {/* Bar chart */}
-              <div className="relative h-16 bg-gray-50 rounded-lg overflow-hidden">
-                <div className="absolute inset-0 flex items-end">
-                  {filteredData.map((d, i) => {
-                    const height = (d.precipitation / maxPrecip) * 100
-                    const intensity = d.precipitation > 2 ? 'bg-blue-600' :
-                                     d.precipitation > 0.5 ? 'bg-blue-500' :
-                                     d.precipitation > 0.1 ? 'bg-blue-400' :
-                                     d.precipitation > 0 ? 'bg-blue-300' : 'bg-transparent'
-                    return (
-                      <div
-                        key={i}
-                        className="flex-1"
-                        title={`${formatTime(d.time)}: ${d.precipitation.toFixed(1)} mm`}
-                      >
-                        <div
-                          className={`w-full rounded-t ${intensity}`}
-                          style={{ height: `${Math.max(height, d.precipitation > 0 ? 8 : 0)}%` }}
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-
-                {/* "Nu" indicator line */}
-                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-red-500" />
-                <div className="absolute left-0 top-0 text-[8px] text-red-500 font-medium px-0.5">
-                  nu
-                </div>
-              </div>
-
-              {/* Time labels */}
-              <div className="flex justify-between text-[9px] text-gray-400 mt-1 px-0.5">
-                <span>nu</span>
-                <span>
-                  {filteredData.length > 0 ? formatTime(filteredData[Math.floor(filteredData.length / 2)].time) : ''}
-                </span>
-                <span>
-                  {filteredData.length > 0 ? formatTime(filteredData[filteredData.length - 1].time) : ''}
-                </span>
-              </div>
-
-              {/* Legend */}
-              <div className="flex items-center justify-center gap-1.5 mt-2">
-                <span className="text-[8px] text-gray-400">Licht</span>
-                <div className="flex h-1.5 rounded overflow-hidden">
-                  <div className="w-3 bg-blue-300" />
-                  <div className="w-3 bg-blue-400" />
-                  <div className="w-3 bg-blue-500" />
-                  <div className="w-3 bg-blue-600" />
-                </div>
-                <span className="text-[8px] text-gray-400">Zwaar</span>
-              </div>
-
-              {/* Attribution */}
-              <div className="text-[7px] text-gray-300 text-center mt-2">
-                Data: Open-Meteo.com (DWD ICON)
-              </div>
-            </>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="fixed bottom-4 left-2 right-2 z-[1600] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200"
+      style={{ maxWidth: '400px', margin: '0 auto' }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <CloudRain size={16} className="text-blue-500" />
+          <span className="text-sm font-medium text-gray-700">Buienradar</span>
+          {currentFrame && (
+            <span className="text-xs text-gray-500">
+              {formatTime(currentFrame.time)}
+            </span>
           )}
         </div>
-      </motion.div>
-    </AnimatePresence>
+        <button
+          onClick={onClose}
+          className="p-1 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
+        >
+          <X size={16} className="text-gray-500" />
+        </button>
+      </div>
+
+      {/* Controls */}
+      <div className="px-3 py-3">
+        {isLoading ? (
+          <div className="text-center py-2 text-sm text-gray-500">Laden...</div>
+        ) : frames.length === 0 ? (
+          <div className="text-center py-2 text-sm text-gray-500">Geen data</div>
+        ) : (
+          <>
+            {/* Play button + Slider */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="p-2 bg-blue-500 hover:bg-blue-600 rounded-full text-white border-0 outline-none transition-colors"
+              >
+                {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+              </button>
+
+              <div className="flex-1 relative">
+                <input
+                  type="range"
+                  min={0}
+                  max={frames.length - 1}
+                  value={currentIndex}
+                  onChange={(e) => {
+                    setIsPlaying(false)
+                    setCurrentIndex(parseInt(e.target.value))
+                  }}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-radar"
+                />
+
+                {/* "Nu" marker */}
+                <div
+                  className="absolute top-4 text-[8px] text-red-500 font-bold transform -translate-x-1/2 pointer-events-none"
+                  style={{ left: `${(nowIdx / (frames.length - 1)) * 100}%` }}
+                >
+                  ▲ nu
+                </div>
+              </div>
+            </div>
+
+            {/* Time labels */}
+            <div className="flex justify-between text-[10px] text-gray-400 mt-4 px-10">
+              <span>{frames.length > 0 ? formatTime(frames[0].time) : ''}</span>
+              <span>{frames.length > 0 ? formatTime(frames[Math.floor(frames.length / 2)].time) : ''}</span>
+              <span>{frames.length > 0 ? formatTime(frames[frames.length - 1].time) : ''}</span>
+            </div>
+
+            {/* Attribution */}
+            <div className="text-[7px] text-gray-300 text-center mt-2">
+              RainViewer.com
+            </div>
+          </>
+        )}
+      </div>
+    </motion.div>
   )
 }
