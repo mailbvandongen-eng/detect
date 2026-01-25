@@ -17,6 +17,32 @@ export interface MonumentSearchResult {
   omschrijving: string
   matchedText: string // The part of description that matched
   coordinates: [number, number] // [lng, lat] in WGS84
+  extent: [number, number, number, number] // [minX, minY, maxX, maxY] in EPSG:3857
+}
+
+// Province bounding boxes (approximate, in WGS84 lng/lat)
+export const PROVINCES: Record<string, { name: string; bounds: [number, number, number, number] }> = {
+  'all': { name: 'Alle provincies', bounds: [3.37, 50.75, 7.21, 53.47] },
+  'groningen': { name: 'Groningen', bounds: [6.2, 53.1, 7.21, 53.47] },
+  'friesland': { name: 'Friesland', bounds: [5.05, 52.85, 6.25, 53.45] },
+  'drenthe': { name: 'Drenthe', bounds: [6.1, 52.65, 7.1, 53.15] },
+  'overijssel': { name: 'Overijssel', bounds: [5.85, 52.15, 6.9, 52.7] },
+  'flevoland': { name: 'Flevoland', bounds: [5.15, 52.25, 6.0, 52.65] },
+  'gelderland': { name: 'Gelderland', bounds: [5.0, 51.75, 6.4, 52.45] },
+  'utrecht': { name: 'Utrecht', bounds: [4.85, 51.9, 5.65, 52.25] },
+  'noord-holland': { name: 'Noord-Holland', bounds: [4.5, 52.2, 5.25, 52.95] },
+  'zuid-holland': { name: 'Zuid-Holland', bounds: [3.85, 51.8, 4.9, 52.35] },
+  'zeeland': { name: 'Zeeland', bounds: [3.37, 51.2, 4.3, 51.75] },
+  'noord-brabant': { name: 'Noord-Brabant', bounds: [4.35, 51.25, 6.0, 51.85] },
+  'limburg': { name: 'Limburg', bounds: [5.55, 50.75, 6.25, 51.8] },
+}
+
+function isInProvince(lng: number, lat: number, provinceKey: string): boolean {
+  if (provinceKey === 'all') return true
+  const province = PROVINCES[provinceKey]
+  if (!province) return true
+  const [minLng, minLat, maxLng, maxLat] = province.bounds
+  return lng >= minLng && lng <= maxLng && lat >= minLat && lat <= maxLat
 }
 
 // Cache for AMK data
@@ -56,7 +82,8 @@ function extractMatchSnippet(text: string, keyword: string, contextLength: numbe
  */
 export async function searchMonuments(
   query: string,
-  maxResults: number = 50
+  maxResults: number = 50,
+  province: string = 'all'
 ): Promise<MonumentSearchResult[]> {
   if (!query || query.length < 2) return []
 
@@ -78,14 +105,16 @@ export async function searchMonuments(
     )
 
     if (allWordsMatch) {
-      // Get center coordinates
+      // Get center coordinates first to check province
       const geometry = feature.getGeometry()
       if (!geometry) continue
 
       const extent = geometry.getExtent()
       const center = getCenter(extent)
-      // Transform from EPSG:3857 (Web Mercator) to WGS84
       const [lng, lat] = transform(center, 'EPSG:3857', 'EPSG:4326')
+
+      // Check if in selected province
+      if (!isInProvince(lng, lat, province)) continue
 
       const originalOmschrijving = feature.get('omschrijving') || ''
 
@@ -97,7 +126,8 @@ export async function searchMonuments(
         periode: feature.get('txt_label') || '',
         omschrijving: originalOmschrijving,
         matchedText: extractMatchSnippet(originalOmschrijving, queryWords[0]),
-        coordinates: [lng, lat]
+        coordinates: [lng, lat],
+        extent: extent as [number, number, number, number]
       })
 
       if (results.length >= maxResults) break
@@ -130,4 +160,12 @@ export async function preloadMonumentData(): Promise<void> {
 export async function getMonumentCount(): Promise<number> {
   const features = await loadAMKData()
   return features.length
+}
+
+/**
+ * Get monument feature by monumentnummer for highlighting
+ */
+export async function getMonumentFeature(monumentnummer: number): Promise<Feature | null> {
+  const features = await loadAMKData()
+  return features.find(f => f.get('monumentnummer') === monumentnummer) || null
 }
