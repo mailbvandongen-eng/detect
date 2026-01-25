@@ -58,15 +58,18 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
     }
     const formatRelative = (timestamp: number) => {
       const diffMin = Math.round((timestamp - now) / 60000)
-      if (Math.abs(diffMin) < 60) {
-        return diffMin < 0 ? `${diffMin}m` : `+${diffMin}m`
+      const absDiff = Math.abs(diffMin)
+      const sign = diffMin < 0 ? '-' : '+'
+
+      if (absDiff < 60) {
+        return `${sign}${absDiff}m`
       }
-      const hours = Math.floor(Math.abs(diffMin) / 60)
-      const mins = Math.abs(diffMin) % 60
+      const hours = Math.floor(absDiff / 60)
+      const mins = absDiff % 60
       if (mins === 0) {
-        return diffMin < 0 ? `-${hours}u` : `+${hours}u`
+        return `${sign}${hours}u`
       }
-      return diffMin < 0 ? `-${hours}u${mins}` : `+${hours}u${mins}`
+      return `${sign}${hours}u${mins}m`
     }
 
     return {
