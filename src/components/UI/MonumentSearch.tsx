@@ -1,10 +1,11 @@
 /**
  * Monument Search Component
- * Compact search panel - shows full description, highlights monument polygon
+ * Bottom sheet style - 35% default, click header for fullscreen
+ * Highlight stays when closed
  */
 
 import { useState, useRef, useEffect } from 'react'
-import { Search, X, Landmark, ZoomIn, ChevronDown, ChevronUp } from 'lucide-react'
+import { Search, X, Landmark, ZoomIn, ChevronDown, ChevronUp, GripHorizontal } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMapStore, useSettingsStore } from '../../store'
 import { searchMonuments, getMonumentFeature, PROVINCES, type MonumentSearchResult } from '../../utils/monumentSearch'
@@ -31,7 +32,7 @@ const QUALITY_SHORT: Record<string, string> = {
   'archeologische waarde': 'Waarde'
 }
 
-// Highlight layer for selected monument
+// Highlight layer for selected monument - persists after close
 let highlightLayer: VectorLayer<VectorSource> | null = null
 
 function getHighlightLayer(map: any): VectorLayer<VectorSource> {
@@ -49,7 +50,8 @@ function getHighlightLayer(map: any): VectorLayer<VectorSource> {
   return highlightLayer
 }
 
-function clearHighlight() {
+// Export for external clear (e.g., from map click)
+export function clearMonumentHighlight() {
   if (highlightLayer) {
     highlightLayer.getSource()?.clear()
   }
@@ -63,7 +65,6 @@ async function highlightMonument(map: any, monumentnummer: number) {
   const source = layer.getSource()
   source?.clear()
 
-  // Clone the feature for highlighting
   const clonedFeature = feature.clone()
   source?.addFeature(clonedFeature)
 }
@@ -80,6 +81,7 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [maxResults, setMaxResults] = useState(50)
+  const [isExpanded, setIsExpanded] = useState(false) // false = 35%, true = fullscreen
 
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<number>()
@@ -93,17 +95,11 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
     }
   }, [isOpen])
 
-  // Reset when closed
+  // Reset search state when closed, but NOT the highlight
   useEffect(() => {
     if (!isOpen) {
-      setQuery('')
-      setProvince('all')
-      setResults([])
-      setHasSearched(false)
-      setSelectedId(null)
-      setExpandedId(null)
-      setMaxResults(50)
-      clearHighlight()
+      // Don't clear highlight - keep it visible!
+      setIsExpanded(false)
     }
   }, [isOpen])
 
@@ -157,7 +153,7 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
       // Highlight the monument polygon
       await highlightMonument(map, result.monumentnummer)
       setSelectedId(result.id)
-      setExpandedId(result.id) // Auto-expand description
+      setExpandedId(result.id)
     }
   }
 
@@ -176,8 +172,20 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
   }
 
   const handleClose = () => {
+    // Don't clear highlight - user can still see the monument
     onClose()
-    clearHighlight()
+  }
+
+  const handleClearAndClose = () => {
+    clearMonumentHighlight()
+    setQuery('')
+    setProvince('all')
+    setResults([])
+    setHasSearched(false)
+    setSelectedId(null)
+    setExpandedId(null)
+    setMaxResults(50)
+    onClose()
   }
 
   // Highlight matched words in text
@@ -198,57 +206,66 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 20 }}
-        className="fixed top-14 right-2 z-[1701] bg-white rounded-xl shadow-xl overflow-hidden flex flex-col w-80"
-        style={{ maxHeight: 'calc(100vh - 120px)' }}
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="fixed bottom-0 left-0 right-0 z-[1701] bg-white rounded-t-2xl shadow-2xl overflow-hidden flex flex-col"
+        style={{ height: isExpanded ? '85vh' : '38vh' }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+        {/* Header - click to toggle size */}
+        <div
+          className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white cursor-pointer select-none"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
           <div className="flex items-center gap-2">
             <Landmark size={16} />
             <span className="font-medium text-sm">Zoek monumenten</span>
           </div>
-          <button
-            onClick={handleClose}
-            className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Drag handle indicator */}
+            <GripHorizontal size={20} className="opacity-70" />
+            <button
+              onClick={(e) => { e.stopPropagation(); handleClose(); }}
+              className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none ml-2"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
-        {/* Search input */}
+        {/* Search input + province */}
         <div className="p-2 border-b border-gray-100 space-y-2">
-          <div className="relative">
-            <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => { setQuery(e.target.value); setSelectedId(null); setExpandedId(null); }}
-              placeholder="bouwvoor, scherven, munt..."
-              className="w-full pl-8 pr-8 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-purple-500 text-sm"
-            />
-            {query && (
-              <button
-                onClick={() => { setQuery(''); setSelectedId(null); setExpandedId(null); clearHighlight(); }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 border-0 outline-none bg-transparent"
-              >
-                <X size={14} />
-              </button>
-            )}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => { setQuery(e.target.value); setSelectedId(null); setExpandedId(null); }}
+                placeholder="bouwvoor, scherven..."
+                className="w-full pl-8 pr-8 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+              />
+              {query && (
+                <button
+                  onClick={() => { setQuery(''); setSelectedId(null); setExpandedId(null); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 border-0 outline-none bg-transparent"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <select
+              value={province}
+              onChange={(e) => { setProvince(e.target.value); setSelectedId(null); setExpandedId(null); }}
+              className="py-1.5 px-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-purple-500 text-sm text-gray-700 w-28"
+            >
+              {Object.entries(PROVINCES).map(([key, { name }]) => (
+                <option key={key} value={key}>{name}</option>
+              ))}
+            </select>
           </div>
-          {/* Province filter */}
-          <select
-            value={province}
-            onChange={(e) => { setProvince(e.target.value); setSelectedId(null); setExpandedId(null); }}
-            className="w-full py-1.5 px-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-purple-500 text-sm text-gray-700"
-          >
-            {Object.entries(PROVINCES).map(([key, { name }]) => (
-              <option key={key} value={key}>{name}</option>
-            ))}
-          </select>
         </div>
 
         {/* Results */}
@@ -323,12 +340,12 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
                         className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 border-0 outline-none bg-transparent mb-1"
                       >
                         {expandedId === result.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        {expandedId === result.id ? 'Minder' : 'Omschrijving tonen'}
+                        {expandedId === result.id ? 'Minder' : 'Omschrijving'}
                       </button>
 
                       {expandedId === result.id && (
                         <div
-                          className="text-xs text-gray-700 bg-gray-50 rounded p-2 max-h-48 overflow-y-auto whitespace-pre-wrap"
+                          className="text-xs text-gray-700 bg-gray-50 rounded p-2 max-h-32 overflow-y-auto whitespace-pre-wrap"
                           dangerouslySetInnerHTML={{ __html: highlightMatches(result.omschrijving) }}
                         />
                       )}
@@ -341,10 +358,22 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
 
           {!searching && !hasSearched && (
             <div className="p-3 text-xs text-gray-500">
-              Zoek op trefwoorden in 13.000+ AMK monumentomschrijvingen
+              Zoek op trefwoorden in 13.000+ AMK monumenten
             </div>
           )}
         </div>
+
+        {/* Footer with clear button */}
+        {(selectedId || query) && (
+          <div className="p-2 border-t border-gray-100">
+            <button
+              onClick={handleClearAndClose}
+              className="w-full py-2 text-sm text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none"
+            >
+              Wis zoekopdracht en highlight
+            </button>
+          </div>
+        )}
       </motion.div>
     </AnimatePresence>
   )
