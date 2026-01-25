@@ -2,9 +2,9 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import TileLayer from 'ol/layer/Tile'
 import XYZ from 'ol/source/XYZ'
 import { useMapStore } from '../../store/mapStore'
-import { useSettingsStore } from '../../store/settingsStore'
+import { useWeatherStore } from '../../store/weatherStore'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CloudRain, Play, Pause, X, Clock, ChevronLeft, ChevronRight, SkipBack, SkipForward } from 'lucide-react'
+import { CloudRain, Play, Pause, X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface RadarFrame {
   path: string
@@ -18,7 +18,7 @@ interface RainRadarLayerProps {
 
 export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
   const map = useMapStore(state => state.map)
-  const fontScale = useSettingsStore(state => state.fontScale)
+  const weatherData = useWeatherStore(state => state.weatherData)
 
   const layerRef = useRef<TileLayer<XYZ> | null>(null)
   const animationRef = useRef<NodeJS.Timeout | null>(null)
@@ -31,6 +31,17 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
   const [speed, setSpeed] = useState<'slow' | 'normal' | 'fast'>('normal')
   const [mode, setMode] = useState<'2h' | '24h'>('2h')
   const [opacity, setOpacity] = useState(70)
+
+  // Get 24h precipitation data grouped by hour
+  const hourlyPrecip = weatherData?.precipitation48h
+    ? weatherData.precipitation48h.reduce((acc: { time: string; precip: number }[], item, idx) => {
+        if (idx % 4 === 0) {
+          const hourTotal = weatherData.precipitation48h.slice(idx, idx + 4).reduce((sum, p) => sum + p.precipitation, 0)
+          acc.push({ time: item.time, precip: hourTotal })
+        }
+        return acc
+      }, []).slice(0, 24)
+    : []
 
   // Speed in ms
   const speedMs = speed === 'slow' ? 800 : speed === 'normal' ? 500 : 250
@@ -79,9 +90,18 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
     }
   }, [isVisible, fetchRadarData])
 
+  // Hide radar layer when in 24h mode
+  useEffect(() => {
+    if (mode === '24h' && layerRef.current) {
+      layerRef.current.setVisible(false)
+    } else if (mode === '2h' && layerRef.current) {
+      layerRef.current.setVisible(true)
+    }
+  }, [mode])
+
   // Create and manage the radar layer
   useEffect(() => {
-    if (!map || !isVisible || frames.length === 0) return
+    if (!map || !isVisible || frames.length === 0 || mode === '24h') return
 
     const frame = frames[currentFrameIndex]
     if (!frame) return
@@ -174,7 +194,7 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
 
   // Get time label for current frame
   const getTimeLabel = useCallback(() => {
-    if (frames.length === 0 || !frames[currentFrameIndex]) return 'Laden...'
+    if (frames.length === 0 || !frames[currentFrameIndex]) return '--:--'
 
     const frameTime = frames[currentFrameIndex].time
     const now = Date.now()
@@ -183,9 +203,9 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
     const time = new Date(frameTime)
     const timeStr = time.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
 
-    if (Math.abs(diffMinutes) < 3) return `${timeStr} (Nu)`
-    if (diffMinutes < 0) return `${timeStr} (${diffMinutes} min)`
-    return `${timeStr} (+${diffMinutes} min)`
+    if (Math.abs(diffMinutes) < 3) return `${timeStr} (nu)`
+    if (diffMinutes < 0) return `${timeStr} (${diffMinutes}m)`
+    return `${timeStr} (+${diffMinutes}m)`
   }, [frames, currentFrameIndex])
 
   // Step through frames manually
@@ -199,24 +219,7 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
     })
   }
 
-  // Jump to start or end
-  const jumpTo = (position: 'start' | 'end' | 'now') => {
-    setIsPlaying(false)
-    if (position === 'start') {
-      setCurrentFrameIndex(0)
-    } else if (position === 'end') {
-      setCurrentFrameIndex(frames.length - 1)
-    } else {
-      // Find frame closest to now
-      const now = Date.now()
-      const nowIndex = frames.findIndex(f => f.time >= now)
-      setCurrentFrameIndex(nowIndex >= 0 ? Math.max(0, nowIndex - 1) : frames.length - 1)
-    }
-  }
-
   if (!isVisible) return null
-
-  const baseFontSize = 14 * fontScale / 100
 
   return (
     <AnimatePresence>
@@ -224,148 +227,175 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
-        className="fixed bottom-20 left-2 right-2 z-[1600] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200"
-        style={{ fontSize: `${baseFontSize}px` }}
+        className="fixed bottom-4 left-2 right-2 z-[1600] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200"
+        style={{ maxWidth: '400px', margin: '0 auto' }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+        {/* Compact single-row header with time and close */}
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <CloudRain size={18} className="text-blue-500" />
-            <span className="font-medium text-gray-800">Buienradar</span>
-            {isLoading && (
-              <span className="text-xs text-gray-400 animate-pulse">Laden...</span>
-            )}
+            <CloudRain size={14} className="text-blue-500" />
+            <span className="text-xs font-medium text-gray-700">
+              {isLoading ? 'Laden...' : getTimeLabel()}
+            </span>
           </div>
+
+          {/* 2h / 24h toggle */}
+          <div className="flex items-center gap-1 bg-gray-100 rounded-md p-0.5">
+            <button
+              onClick={() => setMode('2h')}
+              className={`px-2 py-0.5 text-[10px] rounded transition-colors border-0 outline-none ${
+                mode === '2h' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-500 bg-transparent'
+              }`}
+            >
+              2 uur
+            </button>
+            <button
+              onClick={() => setMode('24h')}
+              className={`px-2 py-0.5 text-[10px] rounded transition-colors border-0 outline-none ${
+                mode === '24h' ? 'bg-white text-blue-600 shadow-sm font-medium' : 'text-gray-500 bg-transparent'
+              }`}
+            >
+              24 uur
+            </button>
+          </div>
+
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors border-0 outline-none bg-transparent"
+            className="p-1 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
           >
-            <X size={16} className="text-gray-500" />
+            <X size={14} className="text-gray-500" />
           </button>
         </div>
 
-        {/* Time display */}
-        <div className="px-3 py-2 bg-gray-50 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Clock size={14} className="text-gray-400" />
-              <span className="font-medium text-gray-700">{getTimeLabel()}</span>
+        {mode === '2h' ? (
+          <>
+            {/* Compact controls row for 2h radar */}
+            <div className="px-3 py-2 flex items-center gap-2">
+              {/* Play controls */}
+              <div className="flex items-center gap-0.5">
+                <button
+                  onClick={() => stepFrame('prev')}
+                  className="p-1.5 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
+                >
+                  <ChevronLeft size={14} className="text-gray-600" />
+                </button>
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className={`p-1.5 rounded transition-colors border-0 outline-none ${
+                    isPlaying ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+                </button>
+                <button
+                  onClick={() => stepFrame('next')}
+                  className="p-1.5 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
+                >
+                  <ChevronRight size={14} className="text-gray-600" />
+                </button>
+              </div>
+
+              {/* Timeline slider */}
+              <div className="flex-1 flex items-center gap-1">
+                <span className="text-[9px] text-gray-400 w-6">-2u</span>
+                <input
+                  type="range"
+                  min="0"
+                  max={Math.max(0, frames.length - 1)}
+                  value={currentFrameIndex}
+                  onChange={(e) => {
+                    setIsPlaying(false)
+                    setCurrentFrameIndex(parseInt(e.target.value))
+                  }}
+                  className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+                <span className="text-[9px] text-gray-400 w-6 text-right">+2u</span>
+              </div>
+
+              {/* Speed */}
+              <div className="flex items-center gap-0.5 bg-gray-100 rounded p-0.5">
+                {(['slow', 'normal', 'fast'] as const).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSpeed(s)}
+                    className={`px-1.5 py-0.5 text-[9px] rounded transition-colors border-0 outline-none ${
+                      speed === s ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 bg-transparent'
+                    }`}
+                  >
+                    {s === 'slow' ? '½' : s === 'normal' ? '1' : '2'}×
+                  </button>
+                ))}
+              </div>
+
+              {/* Opacity mini slider */}
+              <input
+                type="range"
+                min="20"
+                max="100"
+                value={opacity}
+                onChange={(e) => setOpacity(parseInt(e.target.value))}
+                className="w-12 h-1 bg-gray-200 rounded appearance-none cursor-pointer accent-blue-500"
+                title={`Dekking: ${opacity}%`}
+              />
             </div>
-            <div className="text-xs text-gray-500">
-              Frame {currentFrameIndex + 1} / {frames.length}
+
+            {/* Legend */}
+            <div className="px-3 pb-1.5 flex items-center justify-center gap-1.5">
+              <span className="text-[8px] text-gray-400">Licht</span>
+              <div className="flex h-1.5 rounded overflow-hidden">
+                <div className="w-3" style={{ backgroundColor: '#88D0F3' }} />
+                <div className="w-3" style={{ backgroundColor: '#32B8A4' }} />
+                <div className="w-3" style={{ backgroundColor: '#F4E61F' }} />
+                <div className="w-3" style={{ backgroundColor: '#F09D1C' }} />
+                <div className="w-3" style={{ backgroundColor: '#E12E18' }} />
+              </div>
+              <span className="text-[8px] text-gray-400">Zwaar</span>
             </div>
+          </>
+        ) : (
+          /* 24h precipitation forecast graph */
+          <div className="px-3 py-2">
+            {hourlyPrecip.length > 0 ? (
+              <div className="space-y-1">
+                {/* Bar chart */}
+                <div className="flex items-end gap-px h-12 bg-gray-50 rounded p-1">
+                  {hourlyPrecip.map((hour, i) => {
+                    const maxPrecip = Math.max(...hourlyPrecip.map(h => h.precip), 1)
+                    const height = (hour.precip / maxPrecip) * 100
+                    const time = new Date(hour.time)
+                    const intensity = hour.precip > 2 ? 'bg-blue-600' :
+                                     hour.precip > 0.5 ? 'bg-blue-500' :
+                                     hour.precip > 0 ? 'bg-blue-400' : 'bg-gray-200'
+                    return (
+                      <div
+                        key={i}
+                        className={`flex-1 rounded-t ${intensity}`}
+                        style={{ height: `${Math.max(height, hour.precip > 0 ? 10 : 4)}%` }}
+                        title={`${time.getHours()}:00 - ${hour.precip.toFixed(1)} mm`}
+                      />
+                    )
+                  })}
+                </div>
+                {/* Time labels */}
+                <div className="flex justify-between text-[8px] text-gray-400">
+                  <span>Nu</span>
+                  <span>+6u</span>
+                  <span>+12u</span>
+                  <span>+18u</span>
+                  <span>+24u</span>
+                </div>
+                {/* Total */}
+                <div className="text-center text-[10px] text-gray-500">
+                  Totaal: <span className="font-medium text-blue-600">{hourlyPrecip.reduce((s, h) => s + h.precip, 0).toFixed(1)} mm</span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-2 text-xs text-gray-400">
+                Geen voorspelling beschikbaar
+              </div>
+            )}
           </div>
-        </div>
-
-        {/* Timeline slider */}
-        <div className="px-3 py-2">
-          <input
-            type="range"
-            min="0"
-            max={Math.max(0, frames.length - 1)}
-            value={currentFrameIndex}
-            onChange={(e) => {
-              setIsPlaying(false)
-              setCurrentFrameIndex(parseInt(e.target.value))
-            }}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-          />
-          <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-            <span>-2 uur</span>
-            <span className="text-blue-500 font-medium">Nu</span>
-            <span>+2 uur</span>
-          </div>
-        </div>
-
-        {/* Controls */}
-        <div className="px-3 py-2 flex items-center justify-between gap-2">
-          {/* Playback controls */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => jumpTo('start')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors border-0 outline-none bg-transparent"
-              title="Naar begin"
-            >
-              <SkipBack size={16} className="text-gray-600" />
-            </button>
-            <button
-              onClick={() => stepFrame('prev')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors border-0 outline-none bg-transparent"
-              title="Vorige frame"
-            >
-              <ChevronLeft size={16} className="text-gray-600" />
-            </button>
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className={`p-2 rounded-lg transition-colors border-0 outline-none ${
-                isPlaying ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-              title={isPlaying ? 'Pauzeren' : 'Afspelen'}
-            >
-              {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-            </button>
-            <button
-              onClick={() => stepFrame('next')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors border-0 outline-none bg-transparent"
-              title="Volgende frame"
-            >
-              <ChevronRight size={16} className="text-gray-600" />
-            </button>
-            <button
-              onClick={() => jumpTo('end')}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors border-0 outline-none bg-transparent"
-              title="Naar einde"
-            >
-              <SkipForward size={16} className="text-gray-600" />
-            </button>
-          </div>
-
-          {/* Speed control */}
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
-            {(['slow', 'normal', 'fast'] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => setSpeed(s)}
-                className={`px-2 py-1 text-xs rounded-md transition-colors border-0 outline-none ${
-                  speed === s
-                    ? 'bg-white text-blue-600 shadow-sm font-medium'
-                    : 'text-gray-600 hover:text-gray-800 bg-transparent'
-                }`}
-              >
-                {s === 'slow' ? '0.5x' : s === 'normal' ? '1x' : '2x'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Opacity slider */}
-        <div className="px-3 py-2 border-t border-gray-100">
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-500 w-16">Dekking</span>
-            <input
-              type="range"
-              min="20"
-              max="100"
-              value={opacity}
-              onChange={(e) => setOpacity(parseInt(e.target.value))}
-              className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-            />
-            <span className="text-xs text-gray-600 w-10 text-right">{opacity}%</span>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="px-3 py-2 border-t border-gray-100 flex items-center justify-center gap-2">
-          <span className="text-[10px] text-gray-500">Licht</span>
-          <div className="flex h-2 rounded overflow-hidden">
-            <div className="w-5" style={{ backgroundColor: '#88D0F3' }} />
-            <div className="w-5" style={{ backgroundColor: '#32B8A4' }} />
-            <div className="w-5" style={{ backgroundColor: '#F4E61F' }} />
-            <div className="w-5" style={{ backgroundColor: '#F09D1C' }} />
-            <div className="w-5" style={{ backgroundColor: '#E12E18' }} />
-          </div>
-          <span className="text-[10px] text-gray-500">Zwaar</span>
-        </div>
+        )}
       </motion.div>
     </AnimatePresence>
   )

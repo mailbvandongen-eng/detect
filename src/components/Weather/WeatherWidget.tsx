@@ -153,6 +153,13 @@ export function WeatherWidget() {
   const showBuienradar = useWeatherStore(state => state.showBuienradar)
   const setShowBuienradar = useWeatherStore(state => state.setShowBuienradar)
 
+  // Collapse widget when buienradar is opened
+  useEffect(() => {
+    if (showBuienradar) {
+      setIsExpanded(false)
+    }
+  }, [showBuienradar])
+
   // Fetch weather on mount and when GPS changes
   useEffect(() => {
     if (!showWeatherButton) return
