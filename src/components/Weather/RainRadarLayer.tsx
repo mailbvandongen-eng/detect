@@ -19,6 +19,7 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
   const map = useMapStore(state => state.map)
   const [frames, setFrames] = useState<RadarFrame[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [nowIndex, setNowIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const layerRef = useRef<TileLayer<XYZ> | null>(null)
@@ -45,8 +46,9 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
       setFrames(allFrames)
 
       // Find "now" index (last past frame)
-      const nowIndex = pastFrames.length > 0 ? pastFrames.length - 1 : 0
-      setCurrentIndex(nowIndex)
+      const nowIdx = pastFrames.length > 0 ? pastFrames.length - 1 : 0
+      setNowIndex(nowIdx)
+      setCurrentIndex(nowIdx)
     } catch (err) {
       console.error('Failed to fetch radar frames:', err)
     } finally {
@@ -108,12 +110,12 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
     }
   }, [isVisible, map])
 
-  // Playback animation
+  // Playback animation - slower for smoother viewing
   useEffect(() => {
     if (isPlaying && frames.length > 0) {
       playIntervalRef.current = window.setInterval(() => {
         setCurrentIndex(prev => (prev + 1) % frames.length)
-      }, 500)
+      }, 700) // Slower animation
     } else if (playIntervalRef.current) {
       clearInterval(playIntervalRef.current)
       playIntervalRef.current = null
@@ -126,31 +128,52 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
     }
   }, [isPlaying, frames.length])
 
-  // Format time
-  const formatTime = (timestamp: number) => {
-    const date = new Date(timestamp * 1000)
-    return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+  // Format relative time from now
+  const formatRelativeTime = (timestamp: number, nowTimestamp: number) => {
+    const diffMinutes = Math.round((timestamp - nowTimestamp) / 60)
+
+    if (Math.abs(diffMinutes) < 5) return 'nu'
+
+    if (diffMinutes < 0) {
+      const absMin = Math.abs(diffMinutes)
+      if (absMin >= 60) {
+        const hours = Math.floor(absMin / 60)
+        const mins = absMin % 60
+        return mins > 0 ? `-${hours}u${mins}m` : `-${hours}u`
+      }
+      return `-${absMin}m`
+    } else {
+      if (diffMinutes >= 60) {
+        const hours = Math.floor(diffMinutes / 60)
+        const mins = diffMinutes % 60
+        return mins > 0 ? `+${hours}u${mins}m` : `+${hours}u`
+      }
+      return `+${diffMinutes}m`
+    }
   }
 
-  // Find "now" index for visual indicator
-  const getNowIndex = () => {
-    const now = Date.now() / 1000
-    let closestIdx = 0
-    let minDiff = Infinity
-    frames.forEach((f, i) => {
-      const diff = Math.abs(f.time - now)
-      if (diff < minDiff) {
-        minDiff = diff
-        closestIdx = i
-      }
-    })
-    return closestIdx
+  // Format current time display
+  const formatCurrentTime = (timestamp: number, nowTimestamp: number) => {
+    const diffMinutes = Math.round((timestamp - nowTimestamp) / 60)
+    const time = new Date(timestamp * 1000).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+
+    if (Math.abs(diffMinutes) < 5) return `${time} (nu)`
+
+    if (diffMinutes < 0) {
+      return `${time} (${Math.abs(diffMinutes)} min geleden)`
+    } else {
+      return `${time} (+${diffMinutes} min)`
+    }
   }
 
   if (!isVisible) return null
 
-  const nowIdx = getNowIndex()
   const currentFrame = frames[currentIndex]
+  const nowTimestamp = frames[nowIndex]?.time || Date.now() / 1000
+
+  // Calculate relative times for labels
+  const startLabel = frames.length > 0 ? formatRelativeTime(frames[0].time, nowTimestamp) : ''
+  const endLabel = frames.length > 0 ? formatRelativeTime(frames[frames.length - 1].time, nowTimestamp) : ''
 
   return (
     <motion.div
@@ -167,7 +190,7 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
           <span className="text-sm font-medium text-gray-700">Buienradar</span>
           {currentFrame && (
             <span className="text-xs text-gray-500">
-              {formatTime(currentFrame.time)}
+              {formatCurrentTime(currentFrame.time, nowTimestamp)}
             </span>
           )}
         </div>
@@ -187,6 +210,13 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
           <div className="text-center py-2 text-sm text-gray-500">Geen data</div>
         ) : (
           <>
+            {/* Time labels above slider */}
+            <div className="flex justify-between text-[11px] text-gray-500 mb-1 px-10">
+              <span>{startLabel}</span>
+              <span className="text-red-500 font-medium">nu</span>
+              <span>{endLabel}</span>
+            </div>
+
             {/* Play button + Slider */}
             <div className="flex items-center gap-2">
               <button
@@ -206,24 +236,15 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
                     setIsPlaying(false)
                     setCurrentIndex(parseInt(e.target.value))
                   }}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-radar"
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
 
-                {/* "Nu" marker */}
+                {/* "Nu" marker line */}
                 <div
-                  className="absolute top-4 text-[8px] text-red-500 font-bold transform -translate-x-1/2 pointer-events-none"
-                  style={{ left: `${(nowIdx / (frames.length - 1)) * 100}%` }}
-                >
-                  ▲ nu
-                </div>
+                  className="absolute top-0 w-0.5 h-2 bg-red-500 pointer-events-none rounded"
+                  style={{ left: `${(nowIndex / Math.max(frames.length - 1, 1)) * 100}%` }}
+                />
               </div>
-            </div>
-
-            {/* Time labels */}
-            <div className="flex justify-between text-[10px] text-gray-400 mt-4 px-10">
-              <span>{frames.length > 0 ? formatTime(frames[0].time) : ''}</span>
-              <span>{frames.length > 0 ? formatTime(frames[Math.floor(frames.length / 2)].time) : ''}</span>
-              <span>{frames.length > 0 ? formatTime(frames[frames.length - 1].time) : ''}</span>
             </div>
 
             {/* Attribution */}
