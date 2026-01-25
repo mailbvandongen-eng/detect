@@ -13,7 +13,7 @@ import {
   windDirectionToText
 } from '../../store'
 import type { WeatherCode, PrecipitationForecast, PollenData } from '../../store'
-import { RainRadar } from './RainRadar'
+// RainRadar modal replaced by RainRadarLayer (map overlay)
 
 // Default location: center of Netherlands
 const DEFAULT_LOCATION = { lat: 52.1326, lon: 5.2913 }
@@ -150,7 +150,8 @@ export function WeatherWidget() {
   const weather = useWeatherStore()
 
   const [isExpanded, setIsExpanded] = useState(false)
-  const [showRadar, setShowRadar] = useState(false)
+  const showBuienradar = useWeatherStore(state => state.showBuienradar)
+  const setShowBuienradar = useWeatherStore(state => state.setShowBuienradar)
 
   // Fetch weather on mount and when GPS changes
   useEffect(() => {
@@ -298,15 +299,22 @@ export function WeatherWidget() {
                       </div>
                     </div>
 
-                    {/* Buienradar button */}
+                    {/* Buienradar button - toggles map overlay */}
                     <button
-                      onClick={() => setShowRadar(true)}
-                      className="w-full flex items-center gap-2 p-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border-0 cursor-pointer"
+                      onClick={() => setShowBuienradar(!showBuienradar)}
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors border-0 cursor-pointer ${
+                        showBuienradar
+                          ? 'bg-blue-500 hover:bg-blue-600'
+                          : 'bg-blue-50 hover:bg-blue-100'
+                      }`}
                     >
-                      <CloudRain size={16} className="text-blue-500" />
-                      <span className="text-sm text-blue-700 font-medium">Buienradar</span>
-                      <span className="text-xs text-blue-500 ml-auto">Live</span>
-                      <ChevronRight size={14} className="text-blue-400" />
+                      <CloudRain size={16} className={showBuienradar ? 'text-white' : 'text-blue-500'} />
+                      <span className={`text-sm font-medium ${showBuienradar ? 'text-white' : 'text-blue-700'}`}>
+                        Buienradar
+                      </span>
+                      <span className={`text-xs ml-auto ${showBuienradar ? 'text-blue-100' : 'text-blue-500'}`}>
+                        {showBuienradar ? 'Aan' : 'Uit'}
+                      </span>
                     </button>
 
                     {/* Precipitation graph */}
@@ -347,11 +355,7 @@ export function WeatherWidget() {
         )}
       </motion.div>
 
-      {/* Rain Radar Modal */}
-      <RainRadar
-        isOpen={showRadar}
-        onClose={() => setShowRadar(false)}
-      />
+      {/* Rain Radar is now a map layer, controlled via App.tsx */}
     </>
   )
 }

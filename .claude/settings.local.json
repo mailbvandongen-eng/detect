@@ -65,7 +65,8 @@
       "WebFetch(domain:openlayers.org)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:wiki.openstreetmap.org)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(dir:*)"
     ]
   }
 }

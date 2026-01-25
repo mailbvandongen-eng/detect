@@ -18,7 +18,7 @@ import { InfoButton } from './components/UI/InfoButton'
 import { AddVondstForm } from './components/Vondst/AddVondstForm'
 import { AddVondstButton } from './components/Vondst/AddVondstButton'
 import { RouteRecordButton, RouteRecordingLayer, SavedRoutesLayer, CoverageHeatmapLayer, GridOverlayLayer, RouteDashboard } from './components/Route'
-import { WeatherWidget } from './components/Weather'
+import { WeatherWidget, RainRadarLayer } from './components/Weather'
 import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
 import { CustomLayerMarkers } from './components/CustomLayers'
 import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal, LayerDashboard } from './components/CustomPoints'
@@ -27,7 +27,7 @@ import { OfflineIndicator } from './components/UI/OfflineIndicator'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useCloudSync } from './hooks/useCloudSync'
-import { useSettingsStore, useUIStore } from './store'
+import { useSettingsStore, useUIStore, useWeatherStore } from './store'
 import { AnimatePresence } from 'framer-motion'
 
 function App() {
@@ -49,6 +49,10 @@ function App() {
   // Route dashboard state
   const routeDashboardOpen = useUIStore(state => state.routeDashboardOpen)
   const toggleRouteDashboard = useUIStore(state => state.toggleRouteDashboard)
+
+  // Rain radar state
+  const showBuienradar = useWeatherStore(state => state.showBuienradar)
+  const setShowBuienradar = useWeatherStore(state => state.setShowBuienradar)
 
   return (
     <PasswordGate>
@@ -78,6 +82,10 @@ function App() {
         <InfoButton />
         <CompassButton />
         <WeatherWidget />
+        <RainRadarLayer
+          isVisible={showBuienradar}
+          onClose={() => setShowBuienradar(false)}
+        />
         <SettingsPanel />
         <CreateLayerModal />
         <AddPointModal />
