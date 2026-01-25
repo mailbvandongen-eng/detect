@@ -71,13 +71,23 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
 
     const now = new Date()
     const hoursAhead = timeRange === '2u' ? 2 : timeRange === '6u' ? 6 : 24
-    const endTime = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000)
 
-    // Filter to show from now to endTime
-    return data.filter(d => {
-      const t = new Date(d.time)
-      return t >= now && t <= endTime
+    // Find the index closest to now
+    let startIdx = 0
+    let minDiff = Infinity
+    data.forEach((d, i) => {
+      const diff = Math.abs(new Date(d.time).getTime() - now.getTime())
+      if (diff < minDiff) {
+        minDiff = diff
+        startIdx = i
+      }
     })
+
+    // Calculate how many 15-min intervals we need
+    const intervalsNeeded = hoursAhead * 4 // 4 intervals per hour (15 min each)
+
+    // Return data from startIdx for the required duration
+    return data.slice(startIdx, startIdx + intervalsNeeded)
   }, [data, timeRange])
 
   const filteredData = getFilteredData()
