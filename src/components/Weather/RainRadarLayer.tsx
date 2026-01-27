@@ -282,16 +282,20 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
             ))}
           </div>
 
-          {/* Opacity mini slider */}
+        </div>
+
+        {/* Opacity slider - prominent row */}
+        <div className="px-3 py-1.5 flex items-center gap-2 border-t border-gray-100">
+          <span className="text-[10px] text-gray-500 w-14">Dekking</span>
           <input
             type="range"
-            min="20"
+            min="10"
             max="100"
             value={opacity}
             onChange={(e) => setOpacity(parseInt(e.target.value))}
-            className="w-12 h-1 bg-gray-200 rounded appearance-none cursor-pointer accent-blue-500"
-            title={`Dekking: ${opacity}%`}
+            className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
           />
+          <span className="text-[10px] text-gray-500 w-8 text-right">{opacity}%</span>
         </div>
 
         {/* Legend */}

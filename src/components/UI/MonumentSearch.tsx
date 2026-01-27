@@ -6,7 +6,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Search, X, Landmark, ZoomIn, ChevronDown, ChevronUp, GripHorizontal } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { useMapStore, useSettingsStore } from '../../store'
 import { searchMonuments, getMonumentFeature, PROVINCES, type MonumentSearchResult } from '../../utils/monumentSearch'
 import VectorLayer from 'ol/layer/Vector'
@@ -186,6 +186,26 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
     setExpandedId(null)
     setMaxResults(50)
     onClose()
+  }
+
+  // Handle drag gesture for swipe up/down
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    const velocity = info.velocity.y
+    const offset = info.offset.y
+
+    if (!isExpanded) {
+      // Currently at 38vh
+      if (offset < -50 || velocity < -500) {
+        setIsExpanded(true) // Swipe up → expand to 85vh
+      } else if (offset > 100 || velocity > 500) {
+        handleClose() // Strong swipe down → close
+      }
+    } else {
+      // Currently at 85vh (expanded)
+      if (offset > 50 || velocity > 300) {
+        setIsExpanded(false) // Swipe down → back to 38vh
+      }
+    }
   }
 
   // Highlight matched words in text
