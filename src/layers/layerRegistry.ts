@@ -253,6 +253,15 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: true,
     tier: 'premium'
   },
+  'AHN4 Hillshade Kleur': {
+    name: 'AHN4 Hillshade Kleur',
+    factory: async () => {
+      const { createAHN4ShadedReliefLayerOL } = await import('./hillshadeLayers')
+      return createAHN4ShadedReliefLayerOL()
+    },
+    immediateLoad: true,
+    tier: 'premium'
+  },
 
   // WebGL Elevation - Stap 1: Simpele grayscale test
   'Hoogtekaart (WebGL)': {

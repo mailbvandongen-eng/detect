@@ -27,6 +27,29 @@ export function createAHN4ColorElevationLayerOL() {
   return layer
 }
 
+// AHN4 Hillshade Kleur - 50cm resolutie met gekleurde shaded relief
+// Combineert hillshade schaduwwerking met hoogtegebaseerde kleuren
+// Bron: Esri Nederland Hoogteviewer (apps.arcgisonline.nl/hoogteviewer)
+export function createAHN4ShadedReliefLayerOL() {
+  const layer = new ImageLayer({
+    properties: { title: 'AHN4 Hillshade Kleur', type: 'arcgis' },
+    visible: false,
+    opacity: 0.8,
+    source: new ImageArcGISRest({
+      url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
+      params: {
+        renderingRule: JSON.stringify({
+          rasterFunction: 'AHN - Shaded Relief'  // Gekleurde hillshade
+        })
+      },
+      crossOrigin: 'anonymous',
+      attributions: '© Esri Nederland, AHN4 50cm'
+    })
+  })
+
+  return layer
+}
+
 // AHN4 Hillshade Netherlands - Esri Nederland ImageServer
 // Uses dynamic hillshade rendering from AHN4 DTM data
 export function createAHN4HillshadeLayerOL() {
