@@ -263,15 +263,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     tier: 'premium'
   },
 
-  // WebGL Elevation - Stap 1: Simpele grayscale test
-  'Hoogtekaart (WebGL)': {
-    name: 'Hoogtekaart (WebGL)',
-    factory: async () => {
-      const { createWebGLHillshadeLayerOL } = await import('./ahnWebGLHillshade')
-      return createWebGLHillshadeLayerOL()
-    },
-    immediateLoad: true
-  },
   // World Hillshade VERWIJDERD - Esri commercieel, geen toestemming
 
   // Percelen - Kadaster & Landbouw
