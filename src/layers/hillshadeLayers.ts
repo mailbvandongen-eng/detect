@@ -1,5 +1,6 @@
 import TileLayer from 'ol/layer/Tile'
 import ImageLayer from 'ol/layer/Image'
+import LayerGroup from 'ol/layer/Group'
 import TileWMS from 'ol/source/TileWMS'
 import XYZ from 'ol/source/XYZ'
 import ImageArcGISRest from 'ol/source/ImageArcGISRest'
@@ -27,19 +28,19 @@ export function createAHN4ColorElevationLayerOL() {
   return layer
 }
 
-// AHN4 Hillshade Kleur - 50cm resolutie met gekleurde shaded relief
-// Combineert hillshade schaduwwerking met hoogtegebaseerde kleuren
+// AHN4 Hillshade Kleur - Combineert kleur + hillshade in één GroupLayer
 // Bron: Esri Nederland Hoogteviewer (apps.arcgisonline.nl/hoogteviewer)
+// Geeft 3D-effect door hillshade over de kleurlaag te leggen met multiply blend
 export function createAHN4ShadedReliefLayerOL() {
-  const layer = new ImageLayer({
-    properties: { title: 'AHN4 Hillshade Kleur', type: 'arcgis' },
-    visible: false,
-    opacity: 0.8,
+  // Onderlaag: Kleur gebaseerd op hoogte
+  const colorLayer = new ImageLayer({
+    properties: { title: 'Color Base' },
+    opacity: 1.0,
     source: new ImageArcGISRest({
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({
-          rasterFunction: 'AHN - Shaded Relief'  // Gekleurde hillshade
+          rasterFunction: 'AHN - Color Ramp D'
         })
       },
       crossOrigin: 'anonymous',
@@ -47,7 +48,43 @@ export function createAHN4ShadedReliefLayerOL() {
     })
   })
 
-  return layer
+  // Bovenlaag: Hillshade met multiply blend
+  const hillshadeLayer = new ImageLayer({
+    properties: { title: 'Hillshade Overlay' },
+    opacity: 0.7,
+    source: new ImageArcGISRest({
+      url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
+      params: {
+        renderingRule: JSON.stringify({
+          rasterFunction: 'AHN - Hillshade'
+        })
+      },
+      crossOrigin: 'anonymous'
+    })
+  })
+
+  // Canvas blend mode voor multiply effect (3D schaduwwerking)
+  hillshadeLayer.on('prerender', (evt) => {
+    if (evt.context) {
+      const ctx = evt.context as CanvasRenderingContext2D
+      ctx.globalCompositeOperation = 'multiply'
+    }
+  })
+  hillshadeLayer.on('postrender', (evt) => {
+    if (evt.context) {
+      const ctx = evt.context as CanvasRenderingContext2D
+      ctx.globalCompositeOperation = 'source-over'
+    }
+  })
+
+  // Groepeer beide lagen
+  const group = new LayerGroup({
+    properties: { title: 'AHN4 Hillshade Kleur', type: 'group' },
+    visible: false,
+    layers: [colorLayer, hillshadeLayer]
+  })
+
+  return group
 }
 
 // AHN4 Hillshade Netherlands - Esri Nederland ImageServer
