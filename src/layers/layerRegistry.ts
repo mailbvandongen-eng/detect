@@ -1,13 +1,17 @@
 import type { Layer } from 'ol/layer'
+import type ImageryLayer from '@arcgis/core/layers/ImageryLayer'
 import type { LayerTier, Region } from '../store/subscriptionStore'
+
+export type MapPlatform = 'ol' | 'arcgis'
 
 export interface LayerDefinition {
   name: string
-  factory: () => Promise<Layer | null>
+  factory: () => Promise<Layer | ImageryLayer | null>
   immediateLoad: boolean  // true for WMS (tiles load on-demand), false for vector
   // Subscription/monetization fields (optional - defaults to free/nl for backwards compatibility)
   tier?: LayerTier        // 'free' | 'premium' | 'pro' - which subscription tier is required
   regions?: Region[]      // ['nl' | 'be' | 'de' | 'fr'] - which regions this layer belongs to
+  platform?: MapPlatform  // 'ol' (default) or 'arcgis' - which map engine handles this layer
 }
 
 // Layer registry - NL only version
@@ -225,42 +229,46 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: true
   },
 
-  // Hillshade layers - NL only
+  // Hillshade layers - NL only (ArcGIS SDK met API key authenticatie)
   'AHN4 Hoogtekaart Kleur': {
     name: 'AHN4 Hoogtekaart Kleur',
     factory: async () => {
-      const { createAHN4ColorElevationLayerOL } = await import('./hillshadeLayers')
-      return createAHN4ColorElevationLayerOL()
+      const { createArcGISAHN4ColorElevation } = await import('./arcgisAHNLayers')
+      return createArcGISAHN4ColorElevation()
     },
     immediateLoad: true,
-    tier: 'premium'
+    tier: 'premium',
+    platform: 'arcgis'
   },
   'AHN4 Hillshade NL': {
     name: 'AHN4 Hillshade NL',
     factory: async () => {
-      const { createAHN4HillshadeLayerOL } = await import('./hillshadeLayers')
-      return createAHN4HillshadeLayerOL()
+      const { createArcGISAHN4Hillshade } = await import('./arcgisAHNLayers')
+      return createArcGISAHN4Hillshade()
     },
     immediateLoad: true,
-    tier: 'premium'
+    tier: 'premium',
+    platform: 'arcgis'
   },
   'AHN4 Multi-Hillshade NL': {
     name: 'AHN4 Multi-Hillshade NL',
     factory: async () => {
-      const { createAHN4MultiHillshadeLayerOL } = await import('./hillshadeLayers')
-      return createAHN4MultiHillshadeLayerOL()
+      const { createArcGISAHN4MultiHillshade } = await import('./arcgisAHNLayers')
+      return createArcGISAHN4MultiHillshade()
     },
     immediateLoad: true,
-    tier: 'premium'
+    tier: 'premium',
+    platform: 'arcgis'
   },
   'AHN4 Hillshade Kleur': {
     name: 'AHN4 Hillshade Kleur',
     factory: async () => {
-      const { createAHN4ShadedReliefLayerOL } = await import('./hillshadeLayers')
-      return createAHN4ShadedReliefLayerOL()
+      const { createArcGISAHN4ShadedRelief } = await import('./arcgisAHNLayers')
+      return createArcGISAHN4ShadedRelief()
     },
     immediateLoad: true,
-    tier: 'premium'
+    tier: 'premium',
+    platform: 'arcgis'
   },
 
   // World Hillshade VERWIJDERD - Esri commercieel, geen toestemming

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import type { Layer } from 'ol/layer'
+import type ImageryLayer from '@arcgis/core/layers/ImageryLayer'
 import { layerRegistry } from '../layers/layerRegistry'
 import { useMapStore } from './mapStore'
 
@@ -16,14 +17,18 @@ interface LayerState {
   // Loading state for lazy-loaded layers
   loadingState: Record<string, LoadingState>
 
-  // Layer instances (OpenLayers VectorLayer)
+  // Layer instances - OpenLayers layers
   layers: Record<string, Layer>
+
+  // ArcGIS layer instances (separate because different API)
+  arcgisLayers: Record<string, ImageryLayer>
 
   // Actions
   toggleLayer: (name: string) => void
   setLayerVisibility: (name: string, visible: boolean) => void
   setLayerOpacity: (name: string, opacity: number) => void
   registerLayer: (name: string, layer: Layer) => void
+  registerArcGISLayer: (name: string, layer: ImageryLayer) => void
   unregisterLayer: (name: string) => void
   loadLayer: (name: string) => Promise<void>
 }
@@ -180,6 +185,7 @@ export const useLayerStore = create<LayerState>()(
     loadingState: {},
 
     layers: {},
+    arcgisLayers: {},
 
     toggleLayer: (name: string) => {
       const state = get()
@@ -190,39 +196,71 @@ export const useLayerStore = create<LayerState>()(
         state.visible[name] = newVisible
       })
 
-      // If turning on and layer doesn't exist, load it
-      if (newVisible && !state.layers[name]) {
-        get().loadLayer(name)
-      } else if (state.layers[name]) {
-        // Layer exists, just toggle visibility
-        state.layers[name].setVisible(newVisible)
+      // Check if this is an ArcGIS layer
+      const layerDef = layerRegistry[name]
+      const isArcGIS = layerDef?.platform === 'arcgis'
+
+      if (isArcGIS) {
+        // Handle ArcGIS layer
+        if (newVisible && !state.arcgisLayers[name]) {
+          get().loadLayer(name)
+        } else if (state.arcgisLayers[name]) {
+          state.arcgisLayers[name].visible = newVisible
+        }
+      } else {
+        // Handle OpenLayers layer
+        if (newVisible && !state.layers[name]) {
+          get().loadLayer(name)
+        } else if (state.layers[name]) {
+          state.layers[name].setVisible(newVisible)
+        }
       }
     },
 
     setLayerVisibility: (name: string, visible: boolean) => {
       const state = get()
+      const layerDef = layerRegistry[name]
+      const isArcGIS = layerDef?.platform === 'arcgis'
 
       // Set visibility in store
       set(s => {
         s.visible[name] = visible
-        const layer = s.layers[name]
-        if (layer) {
-          layer.setVisible(visible)
+        if (isArcGIS) {
+          const arcgisLayer = s.arcgisLayers[name]
+          if (arcgisLayer) {
+            arcgisLayer.visible = visible
+          }
+        } else {
+          const layer = s.layers[name]
+          if (layer) {
+            layer.setVisible(visible)
+          }
         }
       })
 
       // If turning on and layer doesn't exist yet, load it
-      if (visible && !state.layers[name]) {
+      const layerExists = isArcGIS ? state.arcgisLayers[name] : state.layers[name]
+      if (visible && !layerExists) {
         get().loadLayer(name)
       }
     },
 
     setLayerOpacity: (name: string, opacity: number) => {
+      const layerDef = layerRegistry[name]
+      const isArcGIS = layerDef?.platform === 'arcgis'
+
       set(state => {
         state.opacity[name] = opacity
-        const layer = state.layers[name]
-        if (layer) {
-          layer.setOpacity(opacity)
+        if (isArcGIS) {
+          const arcgisLayer = state.arcgisLayers[name]
+          if (arcgisLayer) {
+            arcgisLayer.opacity = opacity
+          }
+        } else {
+          const layer = state.layers[name]
+          if (layer) {
+            layer.setOpacity(opacity)
+          }
         }
       })
     },
@@ -242,20 +280,31 @@ export const useLayerStore = create<LayerState>()(
       })
     },
 
+    registerArcGISLayer: (name: string, layer: ImageryLayer) => {
+      set(state => {
+        state.arcgisLayers[name] = layer
+        state.loadingState[name] = 'loaded'
+        // Set initial visibility
+        if (state.visible[name] !== undefined) {
+          layer.visible = state.visible[name]
+        }
+        // Set initial opacity
+        if (state.opacity[name] !== undefined) {
+          layer.opacity = state.opacity[name]
+        }
+      })
+    },
+
     unregisterLayer: (name: string) => {
       set(state => {
         delete state.layers[name]
+        delete state.arcgisLayers[name]
         delete state.loadingState[name]
       })
     },
 
     loadLayer: async (name: string) => {
       const state = get()
-
-      // Skip if already loading or loaded
-      if (state.loadingState[name] === 'loading' || state.layers[name]) {
-        return
-      }
 
       // Check if layer exists in registry
       const layerDef = layerRegistry[name]
@@ -264,11 +313,28 @@ export const useLayerStore = create<LayerState>()(
         return
       }
 
-      // Get the map from mapStore
-      const map = useMapStore.getState().map
-      if (!map) {
-        console.warn(`⚠️ Cannot load layer "${name}": map not initialized`)
-        return
+      const isArcGIS = layerDef.platform === 'arcgis'
+
+      // Skip if already loading or loaded
+      if (state.loadingState[name] === 'loading') return
+      if (isArcGIS && state.arcgisLayers[name]) return
+      if (!isArcGIS && state.layers[name]) return
+
+      // Get the appropriate map
+      const mapState = useMapStore.getState()
+
+      if (isArcGIS) {
+        // Need ArcGIS map
+        if (!mapState.arcgisMap || !mapState.arcgisInitialized) {
+          console.warn(`⚠️ Cannot load ArcGIS layer "${name}": ArcGIS map not initialized`)
+          return
+        }
+      } else {
+        // Need OpenLayers map
+        if (!mapState.map) {
+          console.warn(`⚠️ Cannot load layer "${name}": map not initialized`)
+          return
+        }
       }
 
       // Set loading state
@@ -276,7 +342,7 @@ export const useLayerStore = create<LayerState>()(
         state.loadingState[name] = 'loading'
       })
 
-      console.log(`⏳ Loading layer: ${name}...`)
+      console.log(`⏳ Loading ${isArcGIS ? 'ArcGIS' : 'OL'} layer: ${name}...`)
 
       try {
         // Create the layer using the factory
@@ -286,21 +352,41 @@ export const useLayerStore = create<LayerState>()(
           throw new Error('Factory returned null')
         }
 
-        // Set visibility and opacity before adding to map
         const currentState = get()
-        layer.setVisible(currentState.visible[name] ?? false)
-        if (currentState.opacity[name] !== undefined) {
-          layer.setOpacity(currentState.opacity[name])
+
+        if (isArcGIS) {
+          // ArcGIS ImageryLayer
+          const arcgisLayer = layer as import('@arcgis/core/layers/ImageryLayer').default
+          arcgisLayer.visible = currentState.visible[name] ?? false
+          if (currentState.opacity[name] !== undefined) {
+            arcgisLayer.opacity = currentState.opacity[name]
+          }
+
+          // Add to ArcGIS map
+          mapState.arcgisMap!.add(arcgisLayer)
+
+          // Register in store
+          set(state => {
+            state.arcgisLayers[name] = arcgisLayer
+            state.loadingState[name] = 'loaded'
+          })
+        } else {
+          // OpenLayers layer
+          const olLayer = layer as Layer
+          olLayer.setVisible(currentState.visible[name] ?? false)
+          if (currentState.opacity[name] !== undefined) {
+            olLayer.setOpacity(currentState.opacity[name])
+          }
+
+          // Add to OL map
+          mapState.map!.addLayer(olLayer)
+
+          // Register in store
+          set(state => {
+            state.layers[name] = olLayer
+            state.loadingState[name] = 'loaded'
+          })
         }
-
-        // Add to map
-        map.addLayer(layer)
-
-        // Register in store
-        set(state => {
-          state.layers[name] = layer
-          state.loadingState[name] = 'loaded'
-        })
 
         console.log(`✅ Layer loaded: ${name}`)
       } catch (error) {

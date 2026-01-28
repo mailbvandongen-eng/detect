@@ -11,8 +11,10 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        // Don't precache data files (too large)
-        globIgnores: ['**/data/**'],
+        // Don't precache data files and ArcGIS assets (too large)
+        globIgnores: ['**/data/**', '**/assets/arcgis/**'],
+        // Increase max file size for ArcGIS SDK bundles
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         runtimeCaching: [
           // OpenStreetMap tiles
           {

@@ -1,10 +1,17 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import type Map from 'ol/Map'
+import type MapView from '@arcgis/core/views/MapView'
+import type EsriMap from '@arcgis/core/Map'
 
 interface MapState {
   // OpenLayers map instance
   map: Map | null
+
+  // ArcGIS map and view instances (voor AHN lagen)
+  arcgisMap: EsriMap | null
+  arcgisView: MapView | null
+  arcgisInitialized: boolean
 
   // View state
   rotation: number
@@ -12,6 +19,7 @@ interface MapState {
 
   // Actions
   setMap: (map: Map) => void
+  setArcGISMap: (map: EsriMap, view: MapView) => void
   setRotation: (rotation: number) => void
   enableRotation: () => void
   disableRotation: () => void
@@ -20,12 +28,23 @@ interface MapState {
 export const useMapStore = create<MapState>()(
   immer((set, get) => ({
     map: null,
+    arcgisMap: null,
+    arcgisView: null,
+    arcgisInitialized: false,
     rotation: 0,
     rotationEnabled: true,
 
     setMap: (map: Map) => {
       set(state => {
         state.map = map
+      })
+    },
+
+    setArcGISMap: (arcgisMap: EsriMap, arcgisView: MapView) => {
+      set(state => {
+        state.arcgisMap = arcgisMap
+        state.arcgisView = arcgisView
+        state.arcgisInitialized = true
       })
     },
 

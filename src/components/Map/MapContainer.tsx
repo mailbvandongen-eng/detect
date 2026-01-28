@@ -1,10 +1,15 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import 'ol/ol.css'
 import { Tile as TileLayer } from 'ol/layer'
 import { OSM, XYZ } from 'ol/source'
 import { useMap } from '../../hooks/useMap'
 import { useLayerStore, useMapStore, useSettingsStore, useGPSStore } from '../../store'
 import { layerRegistry, getImmediateLoadLayers } from '../../layers/layerRegistry'
+import { toLonLat } from 'ol/proj'
+
+// ArcGIS imports (lazy loaded)
+import EsriMap from '@arcgis/core/Map'
+import MapView from '@arcgis/core/views/MapView'
 
 // Base layer names
 const BASE_LAYERS = [
@@ -17,9 +22,14 @@ const BASE_LAYERS = [
 
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const arcgisContainerRef = useRef<HTMLDivElement>(null)
   const initialBgApplied = useRef(false)
-  useMap({ target: 'map' }) // Initialize map
-  const map = useMapStore(state => state.map) // Get reactive map from store
+  const arcgisInitialized = useRef(false)
+  const [arcgisReady, setArcgisReady] = useState(false)
+
+  useMap({ target: 'map' }) // Initialize OpenLayers map
+  const map = useMapStore(state => state.map) // Get reactive OL map from store
+  const setArcGISMap = useMapStore(state => state.setArcGISMap)
   const registerLayer = useLayerStore(state => state.registerLayer)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
   const defaultBackground = useSettingsStore(state => state.defaultBackground)
@@ -170,6 +180,68 @@ export function MapContainer() {
     console.log('💤 Vector layers will load on first toggle (lazy loading enabled)')
   }
 
+  // Initialize ArcGIS Map (for AHN layers)
+  useEffect(() => {
+    if (!map || !arcgisContainerRef.current || arcgisInitialized.current) return
+
+    console.log('🌐 Initializing ArcGIS MapView for AHN layers...')
+
+    // Get current OL view state
+    const olView = map.getView()
+    const center = olView.getCenter()
+    const zoom = olView.getZoom() || 8
+    const lonLat = center ? toLonLat(center) : [5.5, 52.0]
+
+    // Create ArcGIS Map (no basemap - we use OL for that)
+    const esriMap = new EsriMap({
+      // No basemap - transparent overlay
+    })
+
+    // Create ArcGIS MapView
+    const esriView = new MapView({
+      container: arcgisContainerRef.current,
+      map: esriMap,
+      center: lonLat,
+      zoom: zoom,
+      constraints: {
+        rotationEnabled: false
+      },
+      ui: {
+        components: [] // No UI elements - OL handles controls
+      }
+    })
+
+    // Wait for view to be ready
+    esriView.when(() => {
+      console.log('✅ ArcGIS MapView ready')
+      setArcGISMap(esriMap, esriView)
+      setArcgisReady(true)
+      arcgisInitialized.current = true
+
+      // Sync OL view changes to ArcGIS
+      olView.on('change:center', () => {
+        const newCenter = olView.getCenter()
+        if (newCenter) {
+          const newLonLat = toLonLat(newCenter)
+          esriView.goTo({ center: newLonLat }, { animate: false })
+        }
+      })
+
+      olView.on('change:resolution', () => {
+        const newZoom = olView.getZoom()
+        if (newZoom !== undefined) {
+          esriView.goTo({ zoom: newZoom }, { animate: false })
+        }
+      })
+    })
+
+    return () => {
+      if (esriView) {
+        esriView.destroy()
+      }
+    }
+  }, [map, setArcGISMap])
+
   // Apply default background setting on first load
   useEffect(() => {
     if (!map || initialBgApplied.current) return
@@ -223,11 +295,32 @@ export function MapContainer() {
     height: '100vh',
   }
 
+  const arcgisOverlayStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none', // Let OL handle all interactions
+    zIndex: 1, // Above OL base layers, below UI
+    opacity: arcgisReady ? 1 : 0,
+    transition: 'opacity 0.3s ease'
+  }
+
   return (
-    <div
-      id="map"
-      ref={containerRef}
-      style={mapStyle}
-    />
+    <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+      {/* OpenLayers Map (basis) */}
+      <div
+        id="map"
+        ref={containerRef}
+        style={mapStyle}
+      />
+      {/* ArcGIS MapView Overlay (voor AHN lagen) */}
+      <div
+        id="arcgis-map"
+        ref={arcgisContainerRef}
+        style={arcgisOverlayStyle}
+      />
+    </div>
   )
 }

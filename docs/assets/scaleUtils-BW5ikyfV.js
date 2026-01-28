@@ -1,0 +1,2 @@
+import{bo as o,bp as i,bq as u}from"./index-DbkovvcO.js";const I=96;function N(n,t){const e=n.extent,r=n.width,c=o(e?.spatialReference);return e&&r?e.width/r*c*i*I:0}function b(n,t){return n/(o(t)*i*I)}function m(n,t,e){return f(n,t)&&a(n,e)}function f(n,t){return t===0||u(n,t)||n<t}function a(n,t){return t===0||u(n,t)||n>t}function p(n,t){return u(n,t)?0:(n||Number.POSITIVE_INFINITY)>(t||Number.POSITIVE_INFINITY)?1:-1}export{m as d,N as i,p,b as u};
+//# sourceMappingURL=scaleUtils-BW5ikyfV.js.map
