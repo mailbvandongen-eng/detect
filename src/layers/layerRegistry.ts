@@ -20,6 +20,20 @@ export interface LayerDefinition {
 
 export const layerRegistry: Record<string, LayerDefinition> = {
   // ============================================
+  // SPECIAL ANALYSIS LAYERS
+  // ============================================
+
+  'Kansenkaart': {
+    name: 'Kansenkaart',
+    factory: async () => {
+      const { createKansenkaartLayerOL } = await import('./kansenkaartOL')
+      return createKansenkaartLayerOL()
+    },
+    immediateLoad: false,  // Lazy load - lots of data to combine
+    tier: 'premium'
+  },
+
+  // ============================================
   // BASE LAYERS - Created in MapContainer, but need tier info here
   // ============================================
   'TMK 1850': {
@@ -712,9 +726,9 @@ export const layerRegistry: Record<string, LayerDefinition> = {
 
 }
 
-// Helper to get all immediate load layers
+// Helper to get all immediate load layers (OpenLayers only - ArcGIS layers are handled separately)
 export function getImmediateLoadLayers(): LayerDefinition[] {
-  return Object.values(layerRegistry).filter(def => def.immediateLoad)
+  return Object.values(layerRegistry).filter(def => def.immediateLoad && def.platform !== 'arcgis')
 }
 
 // Helper to get all lazy load layers

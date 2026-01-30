@@ -223,7 +223,8 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Archeologische verwachtingen */}
-              <LayerGroup title="Archeologische verwachtingen" defaultExpanded={false} layerNames={['IKAW', 'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling']}>
+              <LayerGroup title="Archeologische verwachtingen" defaultExpanded={false} layerNames={['Kansenkaart', 'IKAW', 'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling']}>
+                <LayerItem name="Kansenkaart" type="overlay" />
                 <LayerItem name="IKAW" type="overlay" />
                 <LayerItem name="UIKAV Punten" type="overlay" />
                 <LayerItem name="UIKAV Vlakken" type="overlay" />
@@ -251,12 +252,12 @@ export function ThemesPanel() {
                 <LayerItem name="Inundatiegebieden" type="overlay" />
               </LayerGroup>
 
-              {/* Hillshade & LiDAR Layers */}
-              <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false} layerNames={['Hoogtekaart (WebGL)', 'AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m']}>
-                <LayerItem name="Hoogtekaart (WebGL)" type="overlay" />
+              {/* Hillshade & LiDAR Layers - via ArcGIS SDK */}
+              <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false} layerNames={['AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN4 Hillshade Kleur', 'AHN 0.5m']}>
                 <LayerItem name="AHN4 Hoogtekaart Kleur" type="overlay" />
                 <LayerItem name="AHN4 Hillshade NL" type="overlay" />
                 <LayerItem name="AHN4 Multi-Hillshade NL" type="overlay" />
+                <LayerItem name="AHN4 Hillshade Kleur" type="overlay" />
                 <LayerItem name="AHN 0.5m" type="overlay" />
               </LayerGroup>
 
