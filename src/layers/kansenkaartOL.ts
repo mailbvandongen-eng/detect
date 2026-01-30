@@ -2,18 +2,19 @@
  * Kansenkaart - Predictive Archaeological Expectation Map
  *
  * Combines multiple data sources to create a weighted heatmap showing
- * areas with high archaeological potential based on known finds and features.
+ * areas with high archaeological potential based on:
  *
- * Score weights:
- * - AMK Zeer Hoog: 5 (proven very important site)
- * - AMK Hoog: 4 (proven important site)
- * - AMK Basis: 3 (known archaeological value)
- * - Grafheuvels: 4 (prehistoric habitation indicator)
- * - Hunebedden: 4 (Neolithic culture marker)
- * - Steentijd sites: 3 (prehistoric habitation)
- * - UIKAV Punten: 3 (Utrecht expectation data)
- * - Kastelen: 2 (medieval habitation)
- * - Ruïnes: 2 (historic structures)
+ * 1. LANDSCAPE (geomorfologie) - where people COULD live:
+ *    - Stroomruggen, oeverwallen (dry elevated river areas)
+ *    - Rivierduinen (river dunes)
+ *    - Dekzandruggen (cover sand ridges)
+ *    - Terpen/wierden (artificial dwelling mounds)
+ *
+ * 2. FINDS - where people DID live:
+ *    - AMK Monumenten (known archaeological sites)
+ *    - Grafheuvels (burial mounds)
+ *    - Hunebedden (megalithic tombs)
+ *    - Steentijd sites (prehistoric settlements)
  *
  * The edges of hotspots indicate areas likely to contain undiscovered sites.
  */
@@ -28,7 +29,14 @@ import { loadTopoJSON, parseGeoJSON } from '../utils/layerLoaderOL'
 
 // Weight configuration for different feature types
 const WEIGHTS = {
-  amk_zeer_hoog: 1.0,      // Maximum weight
+  // Geomorfologie - landscape potential (where people COULD live)
+  geomorf_zeer_hoog: 1.0,   // Stroomruggen, oeverwallen, rivierduinen, terpen
+  geomorf_hoog: 0.8,        // Dekzandruggen, dekzandkopjes, stuwwallen
+  geomorf_middel: 0.6,      // Getij-oeverwallen, strandwallen, landduinen
+  geomorf_laag: 0.4,        // Dekzandwelvingen, stroomrugglooiingen
+
+  // Archaeological finds (where people DID live)
+  amk_zeer_hoog: 1.0,       // Proven very important site
   amk_hoog: 0.8,
   amk_basis: 0.6,
   grafheuvel: 0.8,
@@ -119,7 +127,8 @@ async function loadAllWeightedPoints(): Promise<Feature<Point>[]> {
       steentijdFeatures,
       uikavFeatures,
       kastelenFeatures,
-      ruinesFeatures
+      ruinesFeatures,
+      geomorfologieFeatures
     ] = await Promise.all([
       // AMK - TopoJSON
       loadTopoJSON('/detectorapp-nl/data/amk_monumenten_full.topojson').catch(() => null),
@@ -134,7 +143,9 @@ async function loadAllWeightedPoints(): Promise<Feature<Point>[]> {
       // Kastelen
       loadGeoJSONFeatures('/detectorapp-nl/data/kastelen.geojson'),
       // Ruïnes
-      loadGeoJSONFeatures('/detectorapp-nl/data/ruines_osm.geojson')
+      loadGeoJSONFeatures('/detectorapp-nl/data/ruines_osm.geojson'),
+      // Geomorfologie hotspots (stroomruggen, rivierduinen, dekzandruggen, etc.)
+      loadGeoJSONFeatures('/detectorapp-nl/data/geomorfologie_hotspots.geojson')
     ])
 
     // Process AMK monuments with quality-based weights
@@ -212,6 +223,18 @@ async function loadAllWeightedPoints(): Promise<Feature<Point>[]> {
     }
     console.log(`  ✓ Ruïnes: ${ruinesFeatures.length}`)
 
+    // Process Geomorfologie hotspots (stroomruggen, rivierduinen, dekzandruggen, etc.)
+    // The weight is already stored in the GeoJSON from the extraction script
+    for (const feature of geomorfologieFeatures) {
+      const coords = getCentroid(feature)
+      if (coords) {
+        // Get the pre-calculated weight from the feature properties
+        const featureWeight = feature.get('weight') || 0.5
+        weightedPoints.push(createWeightedPoint(coords, featureWeight))
+      }
+    }
+    console.log(`  ✓ Geomorfologie hotspots: ${geomorfologieFeatures.length}`)
+
     console.log(`🗺️ Kansenkaart: ${weightedPoints.length} total weighted points loaded`)
 
     cachedWeightedPoints = weightedPoints
@@ -237,7 +260,8 @@ export async function createKansenkaartLayerOL() {
       source: source,
       properties: {
         title: 'Kansenkaart',
-        type: 'heatmap'
+        type: 'heatmap',
+        queryable: false  // No popup for heatmap
       },
       visible: false,
       opacity: 0.7,
