@@ -250,7 +250,9 @@ async function loadAllWeightedPoints(): Promise<Feature<Point>[]> {
  */
 export async function createKansenkaartLayerOL() {
   try {
+    console.log('🗺️ Kansenkaart: Starting layer creation...')
     const weightedPoints = await loadAllWeightedPoints()
+    console.log(`🗺️ Kansenkaart: Got ${weightedPoints.length} weighted points`)
 
     const source = new VectorSource({
       features: weightedPoints
@@ -264,16 +266,16 @@ export async function createKansenkaartLayerOL() {
         queryable: false  // No popup for heatmap
       },
       visible: false,
-      opacity: 0.7,
+      opacity: 0.6,
       zIndex: 5, // Below other layers but above base map
-      blur: 25,
-      radius: 15,
+      blur: 15,   // Reduced for better performance
+      radius: 8,  // Reduced for better performance with many points
       weight: (feature) => {
         // Get the weight we stored on the feature
         return feature.get('weight') || 0.5
       },
-      // Gradient: blue (low) -> green -> yellow -> red (high)
-      gradient: ['#0000ff', '#00ffff', '#00ff00', '#ffff00', '#ff8800', '#ff0000']
+      // Gradient: transparent -> blue -> cyan -> green -> yellow -> orange -> red
+      gradient: ['rgba(0,0,255,0)', 'rgba(0,0,255,0.5)', '#00ffff', '#00ff00', '#ffff00', '#ff8800', '#ff0000']
     })
 
     console.log('✓ Kansenkaart heatmap layer created')
