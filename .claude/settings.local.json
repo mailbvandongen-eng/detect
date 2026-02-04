@@ -74,7 +74,8 @@
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
       "Bash(unzip:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(del \"C:\\VSCode\\detectorapp-nl\\.git\\index.lock\")"
     ]
   }
 }
