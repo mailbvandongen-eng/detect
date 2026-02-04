@@ -28,6 +28,7 @@ interface GPSState {
   }
 
   // Actions
+  fetchPassivePosition: () => void
   startTracking: () => void
   stopTracking: () => void
   updatePosition: (pos: GeolocationPosition) => void
@@ -58,6 +59,28 @@ export const useGPSStore = create<GPSState>()(
     },
 
     // Actions
+    fetchPassivePosition: () => {
+      if (!navigator.geolocation) return
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          set(state => {
+            // Only set passive position if not already tracking
+            if (!state.tracking) {
+              state.position = {
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude
+              }
+              state.accuracy = pos.coords.accuracy
+            }
+          })
+        },
+        () => {
+          // Silently fail - passive position is not critical
+        },
+        { enableHighAccuracy: false, maximumAge: 60000, timeout: 10000 }
+      )
+    },
+
     startTracking: () => {
       set(state => {
         state.tracking = true
@@ -74,9 +97,12 @@ export const useGPSStore = create<GPSState>()(
         state.tracking = false
         state.speed = null
         state.headingSource = null
+        state.heading = null
+        state.smoothHeading = null
+        state.rawGPSHeading = null
         state.watchId = null
         state.navigationMode = 'free'
-        // Keep position visible but clear heading
+        // Position stays visible as a passive dot
       })
     },
 

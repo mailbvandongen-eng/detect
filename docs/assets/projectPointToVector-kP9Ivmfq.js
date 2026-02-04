@@ -1,0 +1,2 @@
+import{e7 as f,dY as i,e8 as u,e9 as o,av as l}from"./index-BCsGf__R.js";function p(n,a,e,t){if(f(n.spatialReference,e)){s[0]=n.x,s[1]=n.y;const c=n.z;return s[2]=c??t??0,u(s,n.spatialReference,0,a,e,0)}const r=o(n,e);return!!r&&(a[0]=r?.x,a[1]=r?.y,a[2]=r?.z??t??0,!0)}async function y(n,a,e,t,r){return await l(n.spatialReference,e,null,r),p(n,a,e,t)}const s=i();export{y as c,p as i};
+//# sourceMappingURL=projectPointToVector-kP9Ivmfq.js.map

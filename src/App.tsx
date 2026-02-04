@@ -28,14 +28,21 @@ import { MonumentSearch } from './components/UI/MonumentSearch'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useCloudSync } from './hooks/useCloudSync'
-import { useSettingsStore, useUIStore, useWeatherStore } from './store'
+import { useSettingsStore, useUIStore, useWeatherStore, useGPSStore } from './store'
 import { AnimatePresence } from 'framer-motion'
+import { useEffect } from 'react'
 
 function App() {
   // Initialize hooks
   useHeading()
   useDynamicAHN()
   useCloudSync() // Sync data to Firebase when logged in
+
+  // Fetch passive position once on app start (shows blue dot)
+  const fetchPassivePosition = useGPSStore(state => state.fetchPassivePosition)
+  useEffect(() => {
+    fetchPassivePosition()
+  }, [fetchPassivePosition])
 
   // Get font scale setting (80-150%)
   const fontScale = useSettingsStore(state => state.fontScale)

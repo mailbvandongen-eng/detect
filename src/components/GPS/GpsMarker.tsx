@@ -3,7 +3,7 @@ import { Feature } from 'ol'
 import { Point } from 'ol/geom'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
-import { Style, Fill, Icon, Circle as CircleStyle } from 'ol/style'
+import { Style, Fill, Stroke, Icon, Circle as CircleStyle } from 'ol/style'
 import { fromLonLat } from 'ol/proj'
 import { useMapStore, useGPSStore } from '../../store'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -15,6 +15,15 @@ const ARROW_SVG = (() => {
   </svg>`
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
 })()
+
+// Passive dot style - small blue circle (Google Maps style)
+const DOT_STYLE = new Style({
+  image: new CircleStyle({
+    radius: 7,
+    fill: new Fill({ color: '#4285F4' }),
+    stroke: new Stroke({ color: 'white', width: 2.5 })
+  })
+})
 
 export function GpsMarker() {
   const map = useMapStore(state => state.map)
@@ -33,7 +42,6 @@ export function GpsMarker() {
   const layerRef = useRef<VectorLayer<VectorSource> | null>(null)
 
   // Arrow style - rotates with heading to show direction on the MAP
-  // rotateWithView: true means rotation is relative to the map, not the screen
   const createArrowStyle = useMemo(() => (rotation: number) => new Style({
     image: new Icon({
       src: ARROW_SVG,
@@ -44,22 +52,20 @@ export function GpsMarker() {
     })
   }), [])
 
-  // Initialize GPS marker layer
+  // Initialize GPS marker layer - show whenever we have a position
   useEffect(() => {
-    if (!map) return
-    if (!tracking && !position) return
+    if (!map || !position) return
 
-    const defaultCoords = fromLonLat([5.1214, 52.0907])
+    const coords = fromLonLat([position.lng, position.lat])
 
-    // GPS marker
     markerRef.current = new Feature({
-      geometry: new Point(defaultCoords)
+      geometry: new Point(coords)
     })
-    markerRef.current.setStyle(createArrowStyle(0))
+    // Start with dot or arrow depending on tracking state
+    markerRef.current.setStyle(tracking ? createArrowStyle(0) : DOT_STYLE)
 
-    // Accuracy circle
     accuracyRef.current = new Feature({
-      geometry: new Point(defaultCoords)
+      geometry: new Point(coords)
     })
 
     layerRef.current = new VectorLayer({
@@ -76,7 +82,19 @@ export function GpsMarker() {
         map.removeLayer(layerRef.current)
       }
     }
-  }, [map, tracking, position, createArrowStyle])
+  }, [map, !!position, createArrowStyle]) // Only re-create layer when map loads or position first appears
+
+  // Switch between dot and arrow when tracking state changes
+  useEffect(() => {
+    if (!markerRef.current) return
+
+    if (tracking) {
+      const rotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
+      markerRef.current.setStyle(createArrowStyle(rotation))
+    } else {
+      markerRef.current.setStyle(DOT_STYLE)
+    }
+  }, [tracking, createArrowStyle, smoothHeading])
 
   // Update position and center map
   useEffect(() => {
@@ -84,12 +102,11 @@ export function GpsMarker() {
 
     const coords = fromLonLat([position.lng, position.lat])
 
-    // Update marker position
     markerRef.current.getGeometry()?.setCoordinates(coords)
     accuracyRef.current.getGeometry()?.setCoordinates(coords)
 
-    // Update accuracy circle
-    if (showAccuracyCircle && accuracy) {
+    // Accuracy circle - only when tracking
+    if (tracking && showAccuracyCircle && accuracy) {
       const metersPerPixel = map.getView().getResolution() || 1
       const accuracyRadius = Math.min(accuracy / metersPerPixel, 80)
 
@@ -122,33 +139,28 @@ export function GpsMarker() {
     }
   }, [map, tracking, position, accuracy, firstFix, resetFirstFix, centerOnUser, showAccuracyCircle])
 
-  // Update arrow rotation - arrow rotates with heading relative to the map
+  // Update arrow rotation when tracking
   useEffect(() => {
-    if (!markerRef.current) return
+    if (!markerRef.current || !tracking) return
 
     const rotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
     markerRef.current.setStyle(createArrowStyle(rotation))
-  }, [smoothHeading, createArrowStyle])
+  }, [smoothHeading, createArrowStyle, tracking])
 
   // Heading-up mode: rotate map so heading direction is "up"
   useEffect(() => {
     if (!map || !tracking) return
 
     if (navigationMode === 'headingUp' && smoothHeading !== null) {
-      // Rotate map so the heading direction points up on screen
-      // OL: positive rotation = counter-clockwise
-      // To make heading direction point up: rotation = -heading_radians
       const targetRotation = -(smoothHeading * Math.PI) / 180
       const view = map.getView()
       const currentRotation = view.getRotation()
 
-      // Smooth rotation - only animate if difference is significant
       let diff = targetRotation - currentRotation
-      // Normalize to -π..π
       while (diff > Math.PI) diff -= 2 * Math.PI
       while (diff < -Math.PI) diff += 2 * Math.PI
 
-      if (Math.abs(diff) > 0.01) { // ~0.6 degrees threshold
+      if (Math.abs(diff) > 0.01) {
         view.animate({
           rotation: currentRotation + diff,
           duration: 200
