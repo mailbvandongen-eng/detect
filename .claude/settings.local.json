@@ -69,7 +69,12 @@
       "Bash(dir:*)",
       "WebFetch(domain:doc.arcgis.com)",
       "WebFetch(domain:developers.arcgis.com)",
-      "WebFetch(domain:location.arcgis.com)"
+      "WebFetch(domain:location.arcgis.com)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(unzip:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

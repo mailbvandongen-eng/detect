@@ -233,6 +233,8 @@ export function MapContainer() {
           esriView.goTo({ zoom: newZoom }, { animate: false })
         }
       })
+    }).catch((error: Error) => {
+      console.error('❌ ArcGIS MapView initialization failed:', error)
     })
 
     return () => {

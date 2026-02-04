@@ -1,9 +1,32 @@
 import { motion } from 'framer-motion'
-import { LocateFixed } from 'lucide-react'
+import { LocateFixed, Navigation } from 'lucide-react'
 import { useGPS } from '../../hooks/useGPS'
+import { useGPSStore } from '../../store/gpsStore'
 
+/**
+ * GPS button with 3-state cycling (Google Maps style):
+ * OFF → TRACKING (north-up, centered) → HEADING-UP (map rotates with heading) → OFF
+ */
 export function GpsButton() {
-  const { tracking, toggle } = useGPS()
+  const { tracking, start, stop } = useGPS()
+  const navigationMode = useGPSStore(state => state.navigationMode)
+  const setNavigationMode = useGPSStore(state => state.setNavigationMode)
+
+  const isHeadingUp = tracking && navigationMode === 'headingUp'
+
+  const handleClick = () => {
+    if (!tracking) {
+      // OFF → TRACKING (north-up)
+      start()
+      setNavigationMode('free')
+    } else if (navigationMode === 'free') {
+      // TRACKING → HEADING-UP
+      setNavigationMode('headingUp')
+    } else {
+      // HEADING-UP → OFF
+      stop()
+    }
+  }
 
   return (
     <motion.button
@@ -13,12 +36,14 @@ export function GpsButton() {
         flex items-center justify-center
         rounded-xl backdrop-blur-sm
         transition-all duration-200
-        ${tracking
-          ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg shadow-blue-500/30'
-          : 'bg-white/80 text-gray-500 hover:bg-white/90 shadow-sm'
+        ${isHeadingUp
+          ? 'bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg shadow-green-500/30'
+          : tracking
+            ? 'bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-lg shadow-blue-500/30'
+            : 'bg-white/80 text-gray-500 hover:bg-white/90 shadow-sm'
         }
       `}
-      onClick={toggle}
+      onClick={handleClick}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       animate={tracking ? {
@@ -31,10 +56,26 @@ export function GpsButton() {
           ease: 'easeInOut'
         }
       } : {}}
-      aria-label={tracking ? 'GPS tracking actief' : 'GPS tracking starten'}
-      title={tracking ? 'GPS tracking actief' : 'GPS tracking starten'}
+      aria-label={
+        isHeadingUp
+          ? 'Rijmodus actief (kaart draait mee)'
+          : tracking
+            ? 'GPS actief - klik voor rijmodus'
+            : 'GPS starten'
+      }
+      title={
+        isHeadingUp
+          ? 'Rijmodus actief - klik om GPS te stoppen'
+          : tracking
+            ? 'GPS actief - klik voor rijmodus'
+            : 'GPS starten'
+      }
     >
-      <LocateFixed size={22} strokeWidth={2} />
+      {isHeadingUp ? (
+        <Navigation size={22} strokeWidth={2} />
+      ) : (
+        <LocateFixed size={22} strokeWidth={2} />
+      )}
     </motion.button>
   )
 }

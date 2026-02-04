@@ -7,8 +7,7 @@ export function useGPS() {
     startTracking,
     stopTracking,
     updatePosition,
-    setWatchId,
-    resetFirstFix
+    setWatchId
   } = useGPSStore()
 
   const handleSuccess = useCallback((position: GeolocationPosition) => {

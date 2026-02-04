@@ -22,6 +22,7 @@ export function GpsMarker() {
   const accuracy = useGPSStore(state => state.accuracy)
   const tracking = useGPSStore(state => state.tracking)
   const smoothHeading = useGPSStore(state => state.smoothHeading)
+  const navigationMode = useGPSStore(state => state.navigationMode)
   const showAccuracyCircle = useSettingsStore(state => state.showAccuracyCircle)
   const firstFix = useGPSStore(state => state.firstFix)
   const resetFirstFix = useGPSStore(state => state.resetFirstFix)
@@ -31,13 +32,14 @@ export function GpsMarker() {
   const accuracyRef = useRef<Feature | null>(null)
   const layerRef = useRef<VectorLayer<VectorSource> | null>(null)
 
-  // Arrow style - rotates with heading to show direction
+  // Arrow style - rotates with heading to show direction on the MAP
+  // rotateWithView: true means rotation is relative to the map, not the screen
   const createArrowStyle = useMemo(() => (rotation: number) => new Style({
     image: new Icon({
       src: ARROW_SVG,
       scale: 0.9,
       rotation: rotation,
-      rotateWithView: false,
+      rotateWithView: true,
       anchor: [0.5, 0.5]
     })
   }), [])
@@ -120,13 +122,56 @@ export function GpsMarker() {
     }
   }, [map, tracking, position, accuracy, firstFix, resetFirstFix, centerOnUser, showAccuracyCircle])
 
-  // Update arrow rotation - arrow always rotates with heading (like Google Maps)
+  // Update arrow rotation - arrow rotates with heading relative to the map
   useEffect(() => {
     if (!markerRef.current) return
 
     const rotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
     markerRef.current.setStyle(createArrowStyle(rotation))
   }, [smoothHeading, createArrowStyle])
+
+  // Heading-up mode: rotate map so heading direction is "up"
+  useEffect(() => {
+    if (!map || !tracking) return
+
+    if (navigationMode === 'headingUp' && smoothHeading !== null) {
+      // Rotate map so the heading direction points up on screen
+      // OL: positive rotation = counter-clockwise
+      // To make heading direction point up: rotation = -heading_radians
+      const targetRotation = -(smoothHeading * Math.PI) / 180
+      const view = map.getView()
+      const currentRotation = view.getRotation()
+
+      // Smooth rotation - only animate if difference is significant
+      let diff = targetRotation - currentRotation
+      // Normalize to -π..π
+      while (diff > Math.PI) diff -= 2 * Math.PI
+      while (diff < -Math.PI) diff += 2 * Math.PI
+
+      if (Math.abs(diff) > 0.01) { // ~0.6 degrees threshold
+        view.animate({
+          rotation: currentRotation + diff,
+          duration: 200
+        })
+      }
+    }
+  }, [map, tracking, navigationMode, smoothHeading])
+
+  // Reset map rotation when leaving heading-up mode
+  useEffect(() => {
+    if (!map) return
+
+    if (navigationMode === 'free') {
+      const view = map.getView()
+      const currentRotation = view.getRotation()
+      if (Math.abs(currentRotation) > 0.01) {
+        view.animate({
+          rotation: 0,
+          duration: 300
+        })
+      }
+    }
+  }, [map, navigationMode])
 
   return null
 }

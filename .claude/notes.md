@@ -1,6 +1,24 @@
 # Detectorapp-NL - Sessienotities
 
-## Huidige versie: 2.26.3
+## Huidige versie: 2.32.2
+
+---
+
+## Esri Migratie - Glenn Heeres (Esri Nederland)
+
+**Status:** Glenn wil GEEN hybride aanpak. Volledige migratie naar ArcGIS Maps SDK met Esri basiskaarten.
+
+**Email context (jan 2026):** Glenn zegt dat alle OGC-services die in de OpenLayers-versie zitten ook direct moeten werken in de SDK. Hij wil dat de basiskaarten van Esri worden gebruikt.
+
+**Impact:**
+- 70 bestanden importeren uit `ol/` (OpenLayers)
+- ~50 layer factory files moeten worden omgebouwd
+- Core: Map, Popup, GPS, Search, Routes, Parking, Custom layers
+- WMS → WMSLayer, XYZ → WebTileLayer, GeoJSON → GeoJSONLayer, ImageServer → ImageryLayer (werkt al)
+- Popup systeem (~1000+ regels) moet herschreven
+- GPS/navigatie moet naar ArcGIS API
+
+**Nog niet gestart - eerst GPS/navigatie fixen.**
 
 ---
 
