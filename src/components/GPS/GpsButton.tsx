@@ -4,6 +4,25 @@ import { useGPS } from '../../hooks/useGPS'
 import { useGPSStore } from '../../store/gpsStore'
 
 /**
+ * Request iOS DeviceOrientation permission.
+ * Must be called from a user gesture (click/tap).
+ * On Android/desktop this is a no-op.
+ */
+async function requestOrientationPermission(): Promise<boolean> {
+  const DOE = DeviceOrientationEvent as any
+  if (typeof DOE.requestPermission === 'function') {
+    try {
+      const response = await DOE.requestPermission()
+      return response === 'granted'
+    } catch {
+      return false
+    }
+  }
+  // Android/desktop: no permission needed
+  return true
+}
+
+/**
  * GPS button with 3-state cycling (Google Maps style):
  * OFF → TRACKING (north-up, centered) → HEADING-UP (map rotates with heading) → OFF
  */
@@ -14,9 +33,11 @@ export function GpsButton() {
 
   const isHeadingUp = tracking && navigationMode === 'headingUp'
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (!tracking) {
       // OFF → TRACKING (north-up)
+      // Request iOS compass permission on first GPS activation
+      await requestOrientationPermission()
       start()
       setNavigationMode('free')
     } else if (navigationMode === 'free') {
