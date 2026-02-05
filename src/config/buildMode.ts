@@ -24,6 +24,7 @@ export const VISIBLE_THEMES: Record<BuildMode, string[]> = {
     'Hillshade & LiDAR',
     'Terrein & Bodem',
     'Percelen',
+    'Recreatie',
   ],
   personal: [
     // Alles
@@ -66,8 +67,8 @@ export const VISIBLE_BASE_LAYERS: Record<BuildMode, string[]> = {
  * Special sections visible in each build mode
  */
 export const VISIBLE_SPECIAL_SECTIONS: Record<BuildMode, string[]> = {
-  commercial: [],  // No special projects in commercial
-  personal: ['Speciale Projecten']
+  commercial: ['Specials (3D)'],
+  personal: ['Specials (3D)']
 }
 
 /**

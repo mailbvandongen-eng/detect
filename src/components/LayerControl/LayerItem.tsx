@@ -7,9 +7,10 @@ interface Props {
   name: string
   type: 'overlay' | 'base'
   hasOverlay?: boolean  // Show Labels Overlay toggle for this base layer
+  displayName?: string  // Optional display name (uses 'name' for layer lookup)
 }
 
-export function LayerItem({ name, type, hasOverlay }: Props) {
+export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
   const visible = useLayerStore(state => state.visible[name])
   const labelsVisible = useLayerStore(state => state.visible['Labels Overlay'])
   const loadingState = useLayerStore(state => state.loadingState[name]) as LoadingState | undefined
@@ -70,7 +71,7 @@ export function LayerItem({ name, type, hasOverlay }: Props) {
         title={isLocked ? 'Premium laag - upgrade om te ontgrendelen' : undefined}
       >
         <span className={`flex items-center gap-1 ${hasError ? 'text-red-500' : isLocked ? 'text-gray-400' : 'text-gray-600'}`}>
-          {name}
+          {displayName || name}
           {hasError && <AlertCircle size={12} className="text-red-500" />}
           {isLocked && <Lock size={12} className="text-amber-500" />}
         </span>

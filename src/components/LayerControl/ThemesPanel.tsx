@@ -8,7 +8,7 @@ import { useCustomLayerStore } from '../../store/customLayerStore'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
 import { CustomLayerItem } from '../CustomLayers/CustomLayerItem'
-import { isThemeVisible, isSpecialSectionVisible } from '../../config/buildMode'
+import { isThemeVisible, isSpecialSectionVisible, BUILD_MODE } from '../../config/buildMode'
 
 // Speciale archeologische 3D projecten - externe links
 const SPECIAL_PROJECTS = [
@@ -333,8 +333,16 @@ export function ThemesPanel() {
                 </LayerGroup>
               )}
 
-              {/* Recreation */}
-              {isThemeVisible('Recreatie') && (
+              {/* Recreation - commercial has limited layers */}
+              {isThemeVisible('Recreatie') && BUILD_MODE === 'commercial' && (
+                <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Parken', 'Speeltuinen', 'Strandjes']}>
+                  <LayerItem name="Parken" type="overlay" />
+                  <LayerItem name="Speeltuinen" type="overlay" />
+                  <LayerItem name="Strandjes" type="overlay" displayName="Recreatie (strand)" />
+                </LayerGroup>
+              )}
+              {/* Recreation - personal has all layers */}
+              {isThemeVisible('Recreatie') && BUILD_MODE === 'personal' && (
                 <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Ruiterpaden', 'Laarzenpaden', 'Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Kringloopwinkels']}>
                   <LayerItem name="Ruiterpaden" type="overlay" />
                   <LayerItem name="Laarzenpaden" type="overlay" />
@@ -346,8 +354,8 @@ export function ThemesPanel() {
                 </LayerGroup>
               )}
 
-              {/* Speciale Projecten - externe 3D archeologische sites */}
-              {isSpecialSectionVisible('Speciale Projecten') && (
+              {/* Specials (3D) - externe 3D archeologische sites */}
+              {isSpecialSectionVisible('Specials (3D)') && (
                 <div className="mb-2">
                   <button
                     onClick={(e) => { e.stopPropagation(); setSpecialProjectsOpen(!specialProjectsOpen) }}
@@ -359,7 +367,7 @@ export function ThemesPanel() {
                       <ChevronRight size={14} className="text-purple-500" />
                     )}
                     <Globe size={12} className="text-purple-500" />
-                    <span className="text-purple-600 font-medium" style={{ fontSize: '0.95em' }}>Speciale Projecten</span>
+                    <span className="text-purple-600 font-medium" style={{ fontSize: '0.95em' }}>Specials (3D)</span>
                     <ExternalLink size={10} className="text-purple-400 ml-auto" />
                   </button>
 
