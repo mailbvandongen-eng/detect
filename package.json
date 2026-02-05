@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:commercial": "vite --mode commercial",
     "build": "vite build",
+    "build:commercial": "vite build --mode commercial",
+    "build:personal": "vite build --mode personal --outDir dist-personal",
     "preview": "vite preview"
   },
   "devDependencies": {
