@@ -457,6 +457,16 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
     {
       name: 'detectorapp-custom-point-layers',
       version: 3,
+      // Ensure default layer exists after rehydration
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          const hasDefaultLayer = state.layers.some(l => l.id === DEFAULT_VONDSTEN_LAYER_ID)
+          if (!hasDefaultLayer) {
+            // Add default layer if missing
+            state.layers = [{ ...DEFAULT_VONDSTEN_LAYER, createdAt: new Date().toISOString() }, ...state.layers]
+          }
+        }
+      },
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as { layers: CustomPointLayer[], colorIndex: number }
         if (version < 2) {
