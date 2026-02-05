@@ -184,10 +184,12 @@ export function ThemesPanel() {
               </div>
               {/* Steentijd (Stone Age) */}
               {isThemeVisible('Steentijd & Prehistorie') && (
-                <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false} layerNames={['Hunebedden', 'Grafheuvels', 'Terpen']}>
+                <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false} layerNames={['Hunebedden', 'Grafheuvels', 'Terpen', 'FAMKE Steentijd', 'FAMKE IJzertijd']}>
                   <LayerItem name="Hunebedden" type="overlay" />
                   <LayerItem name="Grafheuvels" type="overlay" />
                   <LayerItem name="Terpen" type="overlay" />
+                  <LayerItem name="FAMKE Steentijd" type="overlay" />
+                  <LayerItem name="FAMKE IJzertijd" type="overlay" />
                 </LayerGroup>
               )}
 
@@ -206,12 +208,10 @@ export function ThemesPanel() {
 
               {/* Archaeological Layers */}
               {isThemeVisible('Archeologische lagen') && (
-                <LayerGroup title="Archeologische lagen" defaultExpanded={false} layerNames={['FAMKE Steentijd', 'FAMKE IJzertijd', 'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig', 'Archeo Onderzoeken', 'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen']}>
-                  <LayerItem name="FAMKE Steentijd" type="overlay" />
-                  <LayerItem name="FAMKE IJzertijd" type="overlay" />
+                <LayerGroup title="Archeologische lagen" defaultExpanded={false} layerNames={['AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig', 'Archeo Onderzoeken', 'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen']}>
                   <LayerItem name="AMK Monumenten" type="overlay" />
                   {/* AMK per periode */}
-                  <LayerGroup title="AMK per periode" defaultExpanded={false} layerNames={['AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig']}>
+                  <LayerGroup title="Per periode" defaultExpanded={false} layerNames={['AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig']}>
                     <LayerItem name="AMK Romeins" type="overlay" />
                     <LayerItem name="AMK Steentijd" type="overlay" />
                     <LayerItem name="AMK Vroege ME" type="overlay" />
@@ -219,12 +219,14 @@ export function ThemesPanel() {
                     <LayerItem name="AMK Overig" type="overlay" />
                   </LayerGroup>
                   <LayerItem name="Archeo Onderzoeken" type="overlay" />
-                  {/* Romeinse tijd - wegen en forten direct zichtbaar */}
+                  {/* Romeinse tijd - wegen en forten */}
                   <LayerGroup title="Romeinse tijd" defaultExpanded={false} layerNames={['Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen']}>
                     <LayerItem name="Romeinse wegen (regio)" type="overlay" />
                     <LayerItem name="Romeinse wegen (Wereld)" type="overlay" />
-                    <LayerItem name="Romeinse Forten" type="overlay" />
-                    <LayerItem name="Romeinse Forten Lijnen" type="overlay" />
+                    <LayerGroup title="Romeinse Forten" defaultExpanded={false} layerNames={['Romeinse Forten', 'Romeinse Forten Lijnen']}>
+                      <LayerItem name="Romeinse Forten" type="overlay" />
+                      <LayerItem name="Romeinse Forten Lijnen" type="overlay" />
+                    </LayerGroup>
                   </LayerGroup>
                 </LayerGroup>
               )}
