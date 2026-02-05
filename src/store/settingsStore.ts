@@ -31,6 +31,7 @@ interface SettingsState {
   layerPanelFontScale: number  // 80-150, for Kaartlagen panel
   presetPanelFontScale: number  // 80-150, for Presets panel
   menuFontScale: number  // 80-130, for Hamburger menu
+  weatherFontScale: number  // 80-150, for Weather widget
 
   // Voice feedback
   voiceFeedbackEnabled: boolean  // Speak aloud when adding vondsten
@@ -59,6 +60,7 @@ interface SettingsState {
   setLayerPanelFontScale: (value: number) => void
   setPresetPanelFontScale: (value: number) => void
   setMenuFontScale: (value: number) => void
+  setWeatherFontScale: (value: number) => void
   setVoiceFeedbackEnabled: (value: boolean) => void
   setShowStepCounter: (value: boolean) => void
   setShowFontSliders: (value: boolean) => void
@@ -83,6 +85,7 @@ export const useSettingsStore = create<SettingsState>()(
       layerPanelFontScale: 100, // Default 100%
       presetPanelFontScale: 100, // Default 100%
       menuFontScale: 100,       // Default 100%
+      weatherFontScale: 100,    // Default 100%
       voiceFeedbackEnabled: false, // Off by default
       showStepCounter: false, // Hidden by default, can enable in settings
       showFontSliders: false, // Hidden by default (boomer mode off)
@@ -103,6 +106,7 @@ export const useSettingsStore = create<SettingsState>()(
       setLayerPanelFontScale: (layerPanelFontScale) => set({ layerPanelFontScale }),
       setPresetPanelFontScale: (presetPanelFontScale) => set({ presetPanelFontScale }),
       setMenuFontScale: (menuFontScale) => set({ menuFontScale }),
+      setWeatherFontScale: (weatherFontScale) => set({ weatherFontScale }),
       setVoiceFeedbackEnabled: (voiceFeedbackEnabled) => set({ voiceFeedbackEnabled }),
       setShowStepCounter: (showStepCounter) => set({ showStepCounter }),
       setShowFontSliders: (showFontSliders) => set({ showFontSliders }),

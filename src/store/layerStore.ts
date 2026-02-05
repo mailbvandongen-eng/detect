@@ -118,6 +118,7 @@ export const useLayerStore = create<LayerState>()(
       'Scheepswrakken': false,
       'Woonheuvels ZH': false,
       'Romeinse Forten': false,
+      'Romeinse Forten Lijnen': false,
       'Windmolens': false,
       'Erfgoedlijnen': false,
       'Oude Kernen': false,

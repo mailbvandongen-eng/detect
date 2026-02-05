@@ -21,6 +21,7 @@ export const VISIBLE_THEMES: Record<BuildMode, string[]> = {
     'Archeologische lagen',
     'Archeologische verwachtingen',
     'Erfgoed & Monumenten',
+    'WOII & Militair',
     'Hillshade & LiDAR',
     'Terrein & Bodem',
     'Percelen',

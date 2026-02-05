@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Cloud, Sun, CloudRain, CloudSnow, CloudLightning, CloudFog, Wind,
   Droplets, ChevronDown, ChevronUp, RefreshCw,
-  Navigation, Flower2, ChevronRight
+  Navigation, Flower2, Type
 } from 'lucide-react'
 import {
   useWeatherStore,
@@ -146,10 +146,14 @@ function HourlyForecast({ hourly }: { hourly: any[] }) {
 
 export function WeatherWidget() {
   const showWeatherButton = useSettingsStore(state => state.showWeatherButton)
+  const showFontSliders = useSettingsStore(state => state.showFontSliders)
+  const weatherFontScale = useSettingsStore(state => state.weatherFontScale)
+  const setWeatherFontScale = useSettingsStore(state => state.setWeatherFontScale)
   const gps = useGPSStore()
   const weather = useWeatherStore()
 
   const [isExpanded, setIsExpanded] = useState(false)
+  const baseFontSize = 12 * weatherFontScale / 100
   const showBuienradar = useWeatherStore(state => state.showBuienradar)
   const setShowBuienradar = useWeatherStore(state => state.setShowBuienradar)
 
@@ -213,7 +217,7 @@ export function WeatherWidget() {
             <span className="text-sm text-gray-500">Laden...</span>
           </div>
         ) : current ? (
-          <div className="p-2.5">
+          <div className="p-2.5" style={{ fontSize: `${baseFontSize}px` }}>
             {/* Collapsed view - always visible as header */}
             <button
               onClick={() => setIsExpanded(!isExpanded)}
@@ -340,6 +344,23 @@ export function WeatherWidget() {
                     <div className="text-[9px] text-gray-400 text-center pt-1">
                       Bijgewerkt: {new Date(weather.weatherData!.lastUpdated).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
                     </div>
+
+                    {/* Font size slider - only show when showFontSliders is enabled */}
+                    {showFontSliders && (
+                      <div className="flex items-center gap-2 pt-2 border-t border-gray-200/50">
+                        <Type size={12} className="text-gray-400" />
+                        <input
+                          type="range"
+                          min="80"
+                          max="150"
+                          step="10"
+                          value={weatherFontScale}
+                          onChange={(e) => setWeatherFontScale(parseInt(e.target.value))}
+                          className="flex-1 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        />
+                        <span className="text-[10px] text-gray-400 w-8">{weatherFontScale}%</span>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}

@@ -80,7 +80,7 @@ const BUILT_IN_PRESETS: Preset[] = [
     icon: 'Search',
     // Bodem en terrein voor onderzoek, reliëf en hoogtekaart
     layers: [
-      'IKAW', 'Geomorfologie', 'Bodemkaart', 'Archeo Landschappen',
+      'IKAW', 'Geomorfologie', 'Bodemkaart',
       'AHN4 Multi-Hillshade NL', 'AHN4 Hoogtekaart Kleur'
     ],
     isBuiltIn: false
@@ -106,7 +106,7 @@ const ALL_OVERLAYS = [
   'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
   // Archeologie
   'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
-  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen', 'Kastelen', 'IKAW', 'Archeo Landschappen',
+  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Romeinse Forten Lijnen', 'Kastelen', 'IKAW',
   // Erfgoed
   'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Essen',
   // Militair
@@ -206,10 +206,10 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 9,
+      version: 10,
       migrate: (persistedState: unknown, version: number) => {
-        // v2.27.2: Romeinse Forten GeoJSON + preset hernoemd naar "Mid laat - Nieuwe tijd"
-        if (version < 9) {
+        // v10: Removed non-existent 'Archeo Landschappen' from Terrein Analyse preset
+        if (version < 10) {
           // Force reset all presets to new defaults
           return {
             presets: [...BUILT_IN_PRESETS]
