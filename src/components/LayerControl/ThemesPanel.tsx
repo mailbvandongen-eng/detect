@@ -35,6 +35,7 @@ export function ThemesPanel() {
   const layerPanelFontScale = useSettingsStore(state => state.layerPanelFontScale)
   const setLayerPanelFontScale = useSettingsStore(state => state.setLayerPanelFontScale)
   const showFontSliders = useSettingsStore(state => state.showFontSliders)
+  const showCustomPointLayers = useSettingsStore(state => state.showCustomPointLayers)
 
   // Calculate font size based on panel-specific fontScale
   const baseFontSize = 13 * layerPanelFontScale / 100
@@ -111,7 +112,7 @@ export function ThemesPanel() {
             </div>
           <div className="p-2 overflow-y-auto flex-1" style={{ fontSize: `${baseFontSize}px` }}>
             {/* Mijn lagen - custom point layers with orange header */}
-            {customLayers.filter(l => !l.archived).length > 0 && (
+            {showCustomPointLayers && customLayers.filter(l => !l.archived).length > 0 && (
               <div className="mb-2 pb-1 border-b border-gray-100">
                 <div className="flex items-center gap-1 py-0.5 px-1 mb-1">
                   <span className="text-orange-600 font-medium" style={{ fontSize: '0.9em' }}>Mijn lagen</span>
