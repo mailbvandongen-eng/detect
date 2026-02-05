@@ -1,2 +1,0 @@
-import{ai as s,aj as f}from"./index-rICleYbX.js";import{p as u,m as c}from"./query-__GGPg60.js";async function d(n,t,r,i){const o=s(n),{data:a}=await u(o,f.from(t),r,i);return a.count}async function $(n,t,r,i){const o=s(n),{data:a}=await c(o,f.from(t),r,i);return a.objectIds??m(a.uniqueIds)??[]}function e(n){return!Array.isArray(n[0])}function m(n){if(n)return e(n)?n:n.map(t=>JSON.stringify(t))}export{$ as i,d as s};
-//# sourceMappingURL=executeForIds-z6PUOSgI.js.map
