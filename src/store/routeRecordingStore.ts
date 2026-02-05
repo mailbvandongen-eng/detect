@@ -225,14 +225,19 @@ export const useRouteRecordingStore = create<RouteRecordingStore>()(
           createdAt: new Date().toISOString()
         }
 
-        set(state => ({
-          state: 'idle',
-          currentPoints: [],
-          startTime: null,
-          pauseStartTime: null,
-          totalPausedTime: 0,
-          savedRoutes: [route, ...state.savedRoutes]
-        }))
+        set(state => {
+          const newVisibleIds = new Set(state.visibleRouteIds)
+          newVisibleIds.add(route.id) // Make new route visible by default
+          return {
+            state: 'idle',
+            currentPoints: [],
+            startTime: null,
+            pauseStartTime: null,
+            totalPausedTime: 0,
+            savedRoutes: [route, ...state.savedRoutes],
+            visibleRouteIds: newVisibleIds
+          }
+        })
 
         return route
       },
@@ -455,9 +460,14 @@ export const useRouteRecordingStore = create<RouteRecordingStore>()(
             createdAt: new Date().toISOString()
           }
 
-          set(state => ({
-            savedRoutes: [route, ...state.savedRoutes]
-          }))
+          set(state => {
+            const newVisibleIds = new Set(state.visibleRouteIds)
+            newVisibleIds.add(route.id) // Make imported route visible by default
+            return {
+              savedRoutes: [route, ...state.savedRoutes],
+              visibleRouteIds: newVisibleIds
+            }
+          })
 
           return { success: true, routeId: route.id }
         } catch (e) {

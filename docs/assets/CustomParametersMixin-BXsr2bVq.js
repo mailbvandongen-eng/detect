@@ -1,0 +1,2 @@
+import{_ as s,m as a,k as c}from"./index-Zj8t54pl.js";const i=r=>{const o=r;let e=class extends o{constructor(){super(...arguments),this.customParameters=null}};return s([a({type:Object,json:{write:{overridePolicy:t=>({enabled:!!(t&&Object.keys(t).length>0)})}}})],e.prototype,"customParameters",void 0),e=s([c("esri.layers.mixins.CustomParametersMixin")],e),e};export{i as s};
+//# sourceMappingURL=CustomParametersMixin-BXsr2bVq.js.map
