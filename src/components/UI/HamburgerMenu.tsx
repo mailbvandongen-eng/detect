@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud, Landmark } from 'lucide-react'
+import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud, Landmark, Ruler, Pencil, Printer } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
@@ -49,6 +49,12 @@ export function HamburgerMenu() {
   const setShowCustomPointLayers = useSettingsStore(state => state.setShowCustomPointLayers)
   const showWeatherButton = useSettingsStore(state => state.showWeatherButton)
   const setShowWeatherButton = useSettingsStore(state => state.setShowWeatherButton)
+  const showMeasureTool = useSettingsStore(state => state.showMeasureTool)
+  const setShowMeasureTool = useSettingsStore(state => state.setShowMeasureTool)
+  const showDrawTool = useSettingsStore(state => state.showDrawTool)
+  const setShowDrawTool = useSettingsStore(state => state.setShowDrawTool)
+  const showPrintTool = useSettingsStore(state => state.showPrintTool)
+  const setShowPrintTool = useSettingsStore(state => state.setShowPrintTool)
 
   // Safe top position for mobile browsers (accounts for notch/status bar)
   const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
@@ -119,9 +125,9 @@ export function HamburgerMenu() {
 
             {/* Menu Panel */}
             <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.95 }}
+              initial={{ opacity: 0, x: 50, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 50, scale: 0.95 }}
               transition={{ duration: 0.15 }}
               className="fixed right-2 z-[801] w-64 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col"
               style={{
@@ -296,6 +302,66 @@ export function HamburgerMenu() {
                     <span
                       className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
                         showCustomPointLayers ? 'left-[22px]' : 'left-0.5'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Meetgereedschap toggle */}
+                <div className="px-3 py-2 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Ruler size={18} className="text-blue-500" />
+                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Meten</span>
+                  </div>
+                  <button
+                    onClick={() => setShowMeasureTool(!showMeasureTool)}
+                    className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
+                      showMeasureTool ? 'bg-gradient-to-r from-blue-500 to-blue-600' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
+                        showMeasureTool ? 'left-[22px]' : 'left-0.5'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Tekengereedschap toggle */}
+                <div className="px-3 py-2 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Pencil size={18} className="text-orange-500" />
+                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Tekenen</span>
+                  </div>
+                  <button
+                    onClick={() => setShowDrawTool(!showDrawTool)}
+                    className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
+                      showDrawTool ? 'bg-gradient-to-r from-orange-500 to-orange-600' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
+                        showDrawTool ? 'left-[22px]' : 'left-0.5'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Exporteren toggle */}
+                <div className="px-3 py-2 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Printer size={18} className="text-indigo-500" />
+                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Exporteren</span>
+                  </div>
+                  <button
+                    onClick={() => setShowPrintTool(!showPrintTool)}
+                    className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
+                      showPrintTool ? 'bg-gradient-to-r from-indigo-500 to-indigo-600' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
+                        showPrintTool ? 'left-[22px]' : 'left-0.5'
                       }`}
                     />
                   </button>

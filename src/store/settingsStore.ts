@@ -48,6 +48,11 @@ interface SettingsState {
   // Welkom modal
   hideWelcomeModal: boolean  // Don't show welcome modal on startup
 
+  // Gereedschappen (linkerkant)
+  showMeasureTool: boolean  // Show/hide measure tool button
+  showDrawTool: boolean     // Show/hide draw tool button
+  showPrintTool: boolean    // Show/hide print tool button
+
   // Actions
   setDefaultBackground: (bg: DefaultBackground) => void
   setShowScaleBar: (value: boolean) => void
@@ -69,6 +74,9 @@ interface SettingsState {
   setShowFontSliders: (value: boolean) => void
   setShowWeatherButton: (value: boolean) => void
   setHideWelcomeModal: (value: boolean) => void
+  setShowMeasureTool: (value: boolean) => void
+  setShowDrawTool: (value: boolean) => void
+  setShowPrintTool: (value: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -95,6 +103,9 @@ export const useSettingsStore = create<SettingsState>()(
       showFontSliders: false, // Hidden by default (boomer mode off)
       showWeatherButton: false, // Hidden by default, can enable in settings
       hideWelcomeModal: false, // Show welcome modal by default
+      showMeasureTool: true,   // Visible by default
+      showDrawTool: true,      // Visible by default
+      showPrintTool: true,     // Visible by default
 
       // Actions
       setDefaultBackground: (defaultBackground) => set({ defaultBackground }),
@@ -116,7 +127,10 @@ export const useSettingsStore = create<SettingsState>()(
       setShowStepCounter: (showStepCounter) => set({ showStepCounter }),
       setShowFontSliders: (showFontSliders) => set({ showFontSliders }),
       setShowWeatherButton: (showWeatherButton) => set({ showWeatherButton }),
-      setHideWelcomeModal: (hideWelcomeModal) => set({ hideWelcomeModal })
+      setHideWelcomeModal: (hideWelcomeModal) => set({ hideWelcomeModal }),
+      setShowMeasureTool: (showMeasureTool) => set({ showMeasureTool }),
+      setShowDrawTool: (showDrawTool) => set({ showDrawTool }),
+      setShowPrintTool: (showPrintTool) => set({ showPrintTool })
     }),
     {
       name: 'detectorapp-settings',

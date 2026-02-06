@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Ruler, X, Trash2 } from 'lucide-react'
-import { useMapStore, useUIStore } from '../../store'
+import { useMapStore, useUIStore, useSettingsStore } from '../../store'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Draw } from 'ol/interaction'
@@ -15,6 +15,7 @@ import type { EventsKey } from 'ol/events'
 export function MeasureTool() {
   const map = useMapStore(state => state.map)
   const setDrawingMode = useUIStore(state => state.setDrawingMode)
+  const showMeasureTool = useSettingsStore(state => state.showMeasureTool)
   const [isActive, setIsActive] = useState(false)
   const [currentDistance, setCurrentDistance] = useState<string | null>(null)
   const [totalMeasurements, setTotalMeasurements] = useState(0)
@@ -136,19 +137,22 @@ export function MeasureTool() {
     }
   }
 
+  // Don't render if hidden
+  if (!showMeasureTool) return null
+
   return (
     <>
       {/* Measure button - left side, under weather widget */}
       <motion.button
         onClick={toggleMeasure}
         className={`fixed top-[90px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
-          isActive ? 'bg-blue-500 text-white' : 'bg-white/80 hover:bg-white/90 text-gray-600'
+          isActive ? 'bg-blue-500' : 'bg-white/80 hover:bg-white/90'
         }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Afstanden meten"
       >
-        <Ruler size={20} className="drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
+        <Ruler size={20} className={isActive ? 'text-white' : 'text-blue-500 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]'} />
       </motion.button>
 
       {/* Measurement panel */}

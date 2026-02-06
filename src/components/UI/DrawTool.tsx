@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Pencil, X, Trash2, MapPin, Spline, Pentagon, Move, Save } from 'lucide-react'
-import { useMapStore, useUIStore } from '../../store'
+import { useMapStore, useUIStore, useSettingsStore } from '../../store'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
@@ -22,6 +22,7 @@ const DRAWINGS_LAYER_NAME = 'Mijn Tekeningen'
 export function DrawTool() {
   const map = useMapStore(state => state.map)
   const setDrawingMode = useUIStore(state => state.setDrawingMode)
+  const showDrawTool = useSettingsStore(state => state.showDrawTool)
   const [isActive, setIsActive] = useState(false)
   const [drawMode, setDrawMode] = useState<DrawMode>('select')
   const [featureCount, setFeatureCount] = useState(0)
@@ -279,19 +280,22 @@ export function DrawTool() {
     setIsActive(false)
   }
 
+  // Don't render if hidden
+  if (!showDrawTool) return null
+
   return (
     <>
       {/* Draw button - left side, under measure tool */}
       <motion.button
         onClick={toggleDraw}
         className={`fixed top-[146px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
-          isActive ? 'bg-orange-500 text-white' : 'bg-white/80 hover:bg-white/90 text-gray-600'
+          isActive ? 'bg-orange-500' : 'bg-white/80 hover:bg-white/90'
         }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Tekenen op de kaart"
       >
-        <Pencil size={20} className="drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
+        <Pencil size={20} className={isActive ? 'text-white' : 'text-orange-500 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]'} />
       </motion.button>
 
       {/* Drawing panel */}

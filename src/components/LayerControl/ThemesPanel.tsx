@@ -70,45 +70,34 @@ export function ThemesPanel() {
           <motion.div
             ref={panelRef}
             className="fixed top-2.5 right-2 z-[1101] bg-white rounded-lg shadow-lg overflow-hidden w-[300px] max-h-[calc(100vh-200px)] flex flex-col"
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 10 }}
+            initial={{ opacity: 0, x: 50, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 50, scale: 0.95 }}
             transition={{ duration: 0.15 }}
           >
             {/* Header with title and font size slider - blue bg, white text, scales with slider */}
-            <div className="flex items-center justify-between px-3 py-2 bg-blue-500" style={{ fontSize: `${baseFontSize}px` }}>
-              <div className="flex items-center gap-2">
-                <Layers size={14} className="text-white" />
-                <span className="font-medium text-white">Kaartlagen</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Font size slider - only if boomer mode enabled */}
-                {showFontSliders && (
-                  <>
-                    <span className="text-[10px] text-blue-200">T</span>
-                    <input
-                      type="range"
-                      min="80"
-                      max="130"
-                      step="10"
-                      value={layerPanelFontScale}
-                      onInput={(e) => {
-                        setLayerPanelFontScale(parseInt((e.target as HTMLInputElement).value))
-                      }}
-                      onChange={(e) => setLayerPanelFontScale(parseInt(e.target.value))}
-                      className="w-20 opacity-70 hover:opacity-100 transition-opacity"
-                      title={`Tekstgrootte: ${layerPanelFontScale}%`}
-                    />
-                    <span className="text-xs text-blue-200">T</span>
-                  </>
-                )}
-                <button
-                  onClick={toggleThemesPanel}
-                  className="p-0.5 rounded border-0 outline-none bg-blue-400/50 hover:bg-blue-400 transition-colors ml-1"
-                >
-                  <X size={16} className="text-white" strokeWidth={2.5} />
-                </button>
-              </div>
+            <div className="flex items-center justify-between px-3 py-1.5 bg-blue-500" style={{ fontSize: `${baseFontSize}px` }}>
+              <span className="font-medium text-white">Kaartlagen</span>
+              {/* Font size slider - only if boomer mode enabled */}
+              {showFontSliders && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] text-blue-200">T</span>
+                  <input
+                    type="range"
+                    min="80"
+                    max="130"
+                    step="10"
+                    value={layerPanelFontScale}
+                    onInput={(e) => {
+                      setLayerPanelFontScale(parseInt((e.target as HTMLInputElement).value))
+                    }}
+                    onChange={(e) => setLayerPanelFontScale(parseInt(e.target.value))}
+                    className="w-16 opacity-70 hover:opacity-100 transition-opacity"
+                    title={`Tekstgrootte: ${layerPanelFontScale}%`}
+                  />
+                  <span className="text-xs text-blue-200">T</span>
+                </div>
+              )}
             </div>
           <div className="p-2 overflow-y-auto flex-1" style={{ fontSize: `${baseFontSize}px` }}>
             {/* Mijn lagen - custom point layers with orange header */}

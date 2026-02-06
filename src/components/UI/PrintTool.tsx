@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Printer, X, Download, FileImage, Loader2 } from 'lucide-react'
-import { useMapStore } from '../../store'
+import { useMapStore, useSettingsStore } from '../../store'
 
 type PrintFormat = 'png' | 'jpeg' | 'pdf'
 
 export function PrintTool() {
   const map = useMapStore(state => state.map)
+  const showPrintTool = useSettingsStore(state => state.showPrintTool)
   const [isOpen, setIsOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [format, setFormat] = useState<PrintFormat>('png')
@@ -137,17 +138,20 @@ export function PrintTool() {
     }
   }
 
+  // Don't render if hidden
+  if (!showPrintTool) return null
+
   return (
     <>
       {/* Print button - left side, under draw tool */}
       <motion.button
         onClick={() => setIsOpen(true)}
-        className="fixed top-[202px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm text-gray-600"
+        className="fixed top-[202px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Kaart printen/exporteren"
       >
-        <Printer size={20} className="drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
+        <Printer size={20} className="text-indigo-500 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>
 
       {/* Print modal */}
