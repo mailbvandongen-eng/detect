@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Download, RefreshCw } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore, useMapStore } from '../../store'
 import type { Preset } from '../../store/presetStore'
@@ -99,7 +99,8 @@ export function PresetButtons() {
   const stopTracking = useGPSStore(state => state.stopTracking)
   const map = useMapStore(state => state.map)
   const { presetsPanelOpen, togglePresetsPanel, closeAllPanels } = useUIStore()
-  const { presets, applyPreset, updatePreset, createPreset, resetToDefaults } = usePresetStore()
+  const { presets, applyPreset, updatePreset, createPreset, saveAsDefaults, resetToDefaults, resetToBuiltIn } = usePresetStore()
+  const customDefaults = usePresetStore(state => state.customDefaults)
   const visible = useLayerStore(state => state.visible)
 
   // Explicit selectors to ensure re-render on state change
@@ -170,10 +171,28 @@ export function PresetButtons() {
     setShowAddPreset(false)
   }
 
-  // Reset presets to defaults
+  // Save current presets as user's defaults
+  const handleSaveAsDefaults = () => {
+    saveAsDefaults()
+  }
+
+  // Reset presets to user's saved defaults (or built-in if none)
   const handleResetPresets = () => {
-    if (confirm('Alle presets terugzetten naar standaard? Dit verwijdert aangepaste presets.')) {
-      resetToDefaults()
+    if (customDefaults) {
+      if (confirm('Presets terugzetten naar je opgeslagen standaard?')) {
+        resetToDefaults()
+      }
+    } else {
+      if (confirm('Presets terugzetten naar originele standaard?')) {
+        resetToDefaults()
+      }
+    }
+  }
+
+  // Reset to original built-in presets (clear custom defaults)
+  const handleResetToBuiltIn = () => {
+    if (confirm('Alle presets resetten naar originele instellingen?\nDit verwijdert ook je opgeslagen standaard.')) {
+      resetToBuiltIn()
     }
   }
 
@@ -283,7 +302,7 @@ export function PresetButtons() {
               </div>
 
               {/* Footer: Add preset & Reset */}
-              <div className="border-t border-gray-200 p-2">
+              <div className="border-t border-gray-200 p-2 space-y-1">
                 {showAddPreset ? (
                   <div className="flex gap-1">
                     <input
@@ -308,23 +327,44 @@ export function PresetButtons() {
                     </button>
                   </div>
                 ) : (
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => setShowAddPreset(true)}
-                      className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none"
-                      style={{ fontSize: `${baseFontSize}px` }}
-                    >
-                      <Plus size={14} />
-                      <span>Nieuwe preset</span>
-                    </button>
-                    <button
-                      onClick={handleResetPresets}
-                      className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors border-0 outline-none"
-                      title="Presets terugzetten naar standaard"
-                    >
-                      <RotateCw size={14} />
-                    </button>
-                  </div>
+                  <>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => setShowAddPreset(true)}
+                        className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none"
+                        style={{ fontSize: `${baseFontSize}px` }}
+                      >
+                        <Plus size={14} />
+                        <span>Nieuwe preset</span>
+                      </button>
+                      <button
+                        onClick={handleSaveAsDefaults}
+                        className="p-1.5 text-green-500 hover:text-green-600 hover:bg-green-50 rounded transition-colors border-0 outline-none"
+                        title="Huidige presets opslaan als standaard"
+                      >
+                        <Download size={14} />
+                      </button>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={handleResetPresets}
+                        className="flex-1 flex items-center justify-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded transition-colors border-0 outline-none"
+                        title={customDefaults ? 'Terugzetten naar je opgeslagen standaard' : 'Terugzetten naar originele standaard'}
+                      >
+                        <RotateCw size={12} />
+                        <span>{customDefaults ? 'Herstel mijn standaard' : 'Herstel standaard'}</span>
+                      </button>
+                      {customDefaults && (
+                        <button
+                          onClick={handleResetToBuiltIn}
+                          className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors border-0 outline-none"
+                          title="Reset naar originele instellingen"
+                        >
+                          <RefreshCw size={12} />
+                        </button>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
             </motion.div>

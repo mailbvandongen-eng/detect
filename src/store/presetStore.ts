@@ -89,13 +89,16 @@ const BUILT_IN_PRESETS: Preset[] = [
 
 interface PresetState {
   presets: Preset[]
+  customDefaults: Preset[] | null  // User's saved defaults (null = use BUILT_IN_PRESETS)
 
   // Actions
   applyPreset: (id: string) => void
   createPreset: (name: string, icon: string) => void
   updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers'>>) => void
   deletePreset: (id: string) => void
-  resetToDefaults: () => void
+  saveAsDefaults: () => void  // Save current presets as user's defaults
+  resetToDefaults: () => void  // Reset to user's defaults (or BUILT_IN if no custom)
+  resetToBuiltIn: () => void  // Reset to original BUILT_IN_PRESETS
 }
 
 // All overlay layer names for clearing - must match PresetButtons.tsx
@@ -139,6 +142,7 @@ export const usePresetStore = create<PresetState>()(
   persist(
     (set, get) => ({
       presets: [...BUILT_IN_PRESETS],
+      customDefaults: null,
 
       applyPreset: (id: string) => {
         const preset = get().presets.find(p => p.id === id)
@@ -200,8 +204,26 @@ export const usePresetStore = create<PresetState>()(
         }))
       },
 
+      saveAsDefaults: () => {
+        const currentPresets = get().presets
+        set({ customDefaults: [...currentPresets] })
+        console.log('💾 Presets opgeslagen als standaard')
+      },
+
       resetToDefaults: () => {
-        set({ presets: [...BUILT_IN_PRESETS] })
+        const { customDefaults } = get()
+        if (customDefaults) {
+          set({ presets: [...customDefaults] })
+          console.log('🔄 Presets hersteld naar eigen standaard')
+        } else {
+          set({ presets: [...BUILT_IN_PRESETS] })
+          console.log('🔄 Presets hersteld naar originele standaard')
+        }
+      },
+
+      resetToBuiltIn: () => {
+        set({ presets: [...BUILT_IN_PRESETS], customDefaults: null })
+        console.log('🔄 Presets gereset naar originele instellingen')
       }
     }),
     {
