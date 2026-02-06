@@ -48,8 +48,8 @@ function PrecipitationGraph({ data }: { data: PrecipitationForecast[] }) {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] text-gray-500">Neerslag 2 uur</span>
-        {!hasRain && <span className="text-[10px] text-green-600 font-medium">Droog</span>}
+        <span style={{ fontSize: '0.83em' }} className="text-gray-500">Neerslag 2 uur</span>
+        {!hasRain && <span style={{ fontSize: '0.83em' }} className="text-green-600 font-medium">Droog</span>}
       </div>
 
       <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden">
@@ -69,7 +69,7 @@ function PrecipitationGraph({ data }: { data: PrecipitationForecast[] }) {
             )
           })}
         </div>
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1 text-[8px] text-gray-400">
+        <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1 text-gray-400" style={{ fontSize: '0.67em' }}>
           <span>Nu</span>
           <span>+1u</span>
           <span>+2u</span>
@@ -90,7 +90,7 @@ function PollenIndicator({ pollen }: { pollen: PollenData }) {
 
   if (levels.length === 0) {
     return (
-      <div className="flex items-center gap-1.5 text-[10px] text-green-600">
+      <div className="flex items-center gap-1.5 text-green-600" style={{ fontSize: '0.83em' }}>
         <Flower2 size={12} />
         <span>Lage pollenconcentratie</span>
       </div>
@@ -103,7 +103,7 @@ function PollenIndicator({ pollen }: { pollen: PollenData }) {
                 maxLevel.value >= 2 ? 'text-amber-500' : 'text-green-600'
 
   return (
-    <div className={`flex items-center gap-1.5 text-[10px] ${color}`}>
+    <div className={`flex items-center gap-1.5 ${color}`} style={{ fontSize: '0.83em' }}>
       <Flower2 size={12} />
       <span>
         {maxLevel.name}: {maxLevel.value >= 4 ? 'Zeer hoog' : maxLevel.value >= 3 ? 'Hoog' : maxLevel.value >= 2 ? 'Matig' : 'Laag'}
@@ -119,7 +119,7 @@ function HourlyForecast({ hourly }: { hourly: any[] }) {
 
   return (
     <div className="space-y-1">
-      <div className="text-[10px] text-gray-500">Komende uren</div>
+      <div className="text-gray-500" style={{ fontSize: '0.83em' }}>Komende uren</div>
       <div className="flex gap-1">
         {upcomingHours.map((hour, i) => {
           const time = new Date(hour.time)
@@ -131,11 +131,11 @@ function HourlyForecast({ hourly }: { hourly: any[] }) {
                 isNow ? 'bg-blue-100' : 'bg-gray-50'
               }`}
             >
-              <span className="text-[9px] text-gray-500">
+              <span className="text-gray-500" style={{ fontSize: '0.75em' }}>
                 {isNow ? 'Nu' : `${time.getHours()}u`}
               </span>
               <WeatherIcon code={hour.weatherCode} size={14} />
-              <span className="text-[10px] font-medium">{Math.round(hour.temperature)}°</span>
+              <span className="font-medium" style={{ fontSize: '0.83em' }}>{Math.round(hour.temperature)}°</span>
             </div>
           )
         })}
@@ -212,9 +212,9 @@ export function WeatherWidget() {
         layout
       >
         {weather.isLoading && !current ? (
-          <div className="p-3 flex items-center gap-2">
+          <div className="p-3 flex items-center gap-2" style={{ fontSize: `${baseFontSize}px` }}>
             <RefreshCw size={16} className="animate-spin text-blue-500" />
-            <span className="text-sm text-gray-500">Laden...</span>
+            <span className="text-gray-500" style={{ fontSize: '1.17em' }}>Laden...</span>
           </div>
         ) : current ? (
           <div className="p-2.5" style={{ fontSize: `${baseFontSize}px` }}>
@@ -228,7 +228,7 @@ export function WeatherWidget() {
                 <div className="flex items-center gap-2">
                   <WeatherIcon code={current.weatherCode} size={24} />
                   <div className="flex flex-col leading-tight">
-                    <span className="text-lg font-bold text-gray-800">
+                    <span className="font-bold text-gray-800" style={{ fontSize: '1.5em' }}>
                       {Math.round(current.temperature)}°
                     </span>
                   </div>
@@ -237,7 +237,7 @@ export function WeatherWidget() {
                 {/* Wind */}
                 <div className="flex items-center gap-1">
                   <Wind size={14} className="text-gray-400" />
-                  <span className="text-sm text-gray-600">{Math.round(current.windSpeed)}</span>
+                  <span className="text-gray-600" style={{ fontSize: '1.17em' }}>{Math.round(current.windSpeed)}</span>
                   <WindArrow degrees={current.windDirection} size={12} />
                 </div>
 
@@ -251,7 +251,7 @@ export function WeatherWidget() {
                 </div>
               </div>
               {/* Weather description - always visible */}
-              <div className="text-[11px] text-gray-500 text-left mt-1">
+              <div className="text-gray-500 text-left mt-1" style={{ fontSize: '0.92em' }}>
                 {weatherCodeDescriptions[current.weatherCode] || 'Onbekend'}
                 <span className="text-gray-400 ml-1">· {Math.round(current.apparentTemperature)}°</span>
               </div>
@@ -270,38 +270,38 @@ export function WeatherWidget() {
                     {/* Weather details grid */}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="bg-blue-50 rounded-lg p-2">
-                        <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                        <div className="flex items-center gap-1 text-gray-500" style={{ fontSize: '0.83em' }}>
                           <Droplets size={12} className="text-blue-500" />
                           <span>Vocht</span>
                         </div>
-                        <div className="text-sm font-bold text-blue-600">
+                        <div className="font-bold text-blue-600" style={{ fontSize: '1.17em' }}>
                           {current.humidity}%
                         </div>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-2">
-                        <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                        <div className="flex items-center gap-1 text-gray-500" style={{ fontSize: '0.83em' }}>
                           <Wind size={12} className="text-gray-500" />
                           <span>Windstoten</span>
                         </div>
-                        <div className="text-sm font-bold text-gray-600">
+                        <div className="font-bold text-gray-600" style={{ fontSize: '1.17em' }}>
                           {Math.round(current.windGusts)} km/u
                         </div>
                       </div>
                       <div className="bg-cyan-50 rounded-lg p-2">
-                        <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                        <div className="flex items-center gap-1 text-gray-500" style={{ fontSize: '0.83em' }}>
                           <Navigation size={12} className="text-cyan-500" />
                           <span>Wind</span>
                         </div>
-                        <div className="text-sm font-bold text-cyan-600">
+                        <div className="font-bold text-cyan-600" style={{ fontSize: '1.17em' }}>
                           {windDirectionToText(current.windDirection)}
                         </div>
                       </div>
                       <div className="bg-purple-50 rounded-lg p-2">
-                        <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                        <div className="flex items-center gap-1 text-gray-500" style={{ fontSize: '0.83em' }}>
                           <Cloud size={12} className="text-purple-500" />
                           <span>Bewolking</span>
                         </div>
-                        <div className="text-sm font-bold text-purple-600">
+                        <div className="font-bold text-purple-600" style={{ fontSize: '1.17em' }}>
                           {current.cloudCover}%
                         </div>
                       </div>
@@ -317,10 +317,10 @@ export function WeatherWidget() {
                       }`}
                     >
                       <CloudRain size={16} className={showBuienradar ? 'text-white' : 'text-blue-500'} />
-                      <span className={`text-sm font-medium ${showBuienradar ? 'text-white' : 'text-blue-700'}`}>
+                      <span className={`font-medium ${showBuienradar ? 'text-white' : 'text-blue-700'}`} style={{ fontSize: '1.17em' }}>
                         Buienradar
                       </span>
-                      <span className={`text-xs ml-auto ${showBuienradar ? 'text-blue-100' : 'text-blue-500'}`}>
+                      <span className={`ml-auto ${showBuienradar ? 'text-blue-100' : 'text-blue-500'}`} style={{ fontSize: '1em' }}>
                         {showBuienradar ? 'Aan' : 'Uit'}
                       </span>
                     </button>
@@ -341,7 +341,7 @@ export function WeatherWidget() {
                     )}
 
                     {/* Last updated */}
-                    <div className="text-[9px] text-gray-400 text-center pt-1">
+                    <div className="text-gray-400 text-center pt-1" style={{ fontSize: '0.75em' }}>
                       Bijgewerkt: {new Date(weather.weatherData!.lastUpdated).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
                     </div>
 
@@ -358,7 +358,7 @@ export function WeatherWidget() {
                           onChange={(e) => setWeatherFontScale(parseInt(e.target.value))}
                           className="flex-1 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                         />
-                        <span className="text-[10px] text-gray-400 w-8">{weatherFontScale}%</span>
+                        <span className="text-gray-400 w-8" style={{ fontSize: '0.83em' }}>{weatherFontScale}%</span>
                       </div>
                     )}
                   </div>
@@ -373,9 +373,10 @@ export function WeatherWidget() {
               weather.fetchWeather(loc.lat, loc.lon)
             }}
             className="p-3 flex items-center gap-2 border-0 outline-none bg-transparent"
+            style={{ fontSize: `${baseFontSize}px` }}
           >
             <Cloud size={18} className="text-gray-400" />
-            <span className="text-sm text-gray-500">Weer laden</span>
+            <span className="text-gray-500" style={{ fontSize: '1.17em' }}>Weer laden</span>
           </button>
         )}
       </motion.div>
