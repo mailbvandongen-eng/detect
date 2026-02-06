@@ -57,12 +57,27 @@ export function MonumentFilter() {
   useEffect(() => {
     if (!map) return
 
-    map.getLayers().forEach(layer => {
-      const title = layer.get('title')
-      if (title && title.startsWith('AMK')) {
-        layer.changed()
-      }
-    })
+    // Recursive function to find all layers (including nested in groups)
+    const refreshAMKLayers = (layers: any) => {
+      layers.forEach((layer: any) => {
+        const title = layer.get('title')
+        if (title && title.startsWith('AMK')) {
+          // Force style recalculation
+          layer.changed()
+          const source = layer.getSource?.()
+          if (source) {
+            source.changed()
+          }
+        }
+        // Check for nested layers (group layers)
+        const nestedLayers = layer.getLayers?.()
+        if (nestedLayers) {
+          refreshAMKLayers(nestedLayers)
+        }
+      })
+    }
+
+    refreshAMKLayers(map.getLayers())
   }, [map, keyword, isActive])
 
   // Toggle filter on/off
@@ -116,51 +131,63 @@ export function MonumentFilter() {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="fixed bottom-[116px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden"
+              className="fixed bottom-[116px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden w-[220px]"
             >
-              <div className="flex items-center gap-2 px-3 py-2">
+              {/* Header */}
+              <div className="flex items-center justify-between px-3 py-1.5 bg-purple-500">
+                <span className="text-sm font-medium text-white">Monument Filter</span>
+                {isActive && totalCount > 0 && (
+                  <span className="text-xs text-purple-200">
+                    {filteredCount}/{totalCount}
+                  </span>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="p-3 space-y-3">
                 {/* Search input */}
                 <input
                   ref={inputRef}
                   type="text"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="Zoek..."
-                  className="w-28 px-2 py-1.5 text-sm bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-purple-400"
+                  placeholder="Zoek in monumenten..."
+                  className="w-full px-3 py-2 text-sm bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-purple-400"
                 />
 
-                {/* Toggle button */}
-                <button
-                  onClick={handleToggle}
-                  disabled={!hasKeyword}
-                  className={`px-2.5 py-1.5 text-sm rounded-lg transition-colors border-0 outline-none ${
-                    isActive
-                      ? 'bg-purple-500 text-white'
-                      : hasKeyword
-                        ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {isActive ? 'Aan' : 'Uit'}
-                </button>
-
-                {/* Clear button */}
-                {(hasKeyword || isActive) && (
+                {/* Buttons row */}
+                <div className="flex items-center gap-2">
+                  {/* Toggle button */}
                   <button
-                    onClick={handleClear}
-                    className="p-1 text-gray-400 hover:text-gray-600 rounded transition-colors border-0 outline-none"
-                    title="Wissen"
+                    onClick={handleToggle}
+                    disabled={!hasKeyword}
+                    className={`flex-1 px-3 py-2 text-sm rounded-lg transition-colors border-0 outline-none font-medium ${
+                      isActive
+                        ? 'bg-purple-500 text-white'
+                        : hasKeyword
+                          ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    }`}
                   >
-                    <X size={16} />
+                    {isActive ? 'Filter Aan' : 'Filter Uit'}
                   </button>
-                )}
 
-                {/* Count indicator */}
-                {isActive && totalCount > 0 && (
-                  <span className="text-xs text-purple-600 font-medium whitespace-nowrap">
-                    {filteredCount}/{totalCount}
-                  </span>
-                )}
+                  {/* Clear button */}
+                  {(hasKeyword || isActive) && (
+                    <button
+                      onClick={handleClear}
+                      className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0 outline-none"
+                      title="Wissen"
+                    >
+                      <X size={18} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Help text */}
+                <p className="text-xs text-gray-500">
+                  Zoek op toponiem, omschrijving of periode
+                </p>
               </div>
             </motion.div>
           </>
