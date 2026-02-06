@@ -284,7 +284,7 @@ export function DrawTool() {
       {/* Draw button - left side, under measure tool */}
       <motion.button
         onClick={toggleDraw}
-        className={`fixed top-[126px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
+        className={`fixed top-[146px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
           isActive ? 'bg-orange-500 text-white' : 'bg-white/80 hover:bg-white/90 text-gray-600'
         }`}
         whileHover={{ scale: 1.05 }}
@@ -302,7 +302,7 @@ export function DrawTool() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="fixed top-[126px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden min-w-[200px]"
+            className="fixed top-[146px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden min-w-[200px]"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-1.5 bg-orange-500">

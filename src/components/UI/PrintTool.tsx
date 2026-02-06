@@ -142,7 +142,7 @@ export function PrintTool() {
       {/* Print button - left side, under draw tool */}
       <motion.button
         onClick={() => setIsOpen(true)}
-        className="fixed top-[182px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm text-gray-600"
+        className="fixed top-[202px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm text-gray-600"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Kaart printen/exporteren"
