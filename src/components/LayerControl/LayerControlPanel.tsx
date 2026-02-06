@@ -103,11 +103,10 @@ export function LayerControlPanel() {
 
               {/* Hillshade & LiDAR Layers - via ArcGIS SDK */}
               <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false}>
-                <LayerItem name="AHN4 Hoogtekaart Kleur" type="overlay" />
+                <LayerItem name="AHN4 Hillshade Kleur" type="overlay" />
                 <LayerItem name="AHN4 Hillshade NL" type="overlay" />
                 <LayerItem name="AHN4 Multi-Hillshade NL" type="overlay" />
-                <LayerItem name="AHN4 Hillshade Kleur" type="overlay" />
-                <LayerItem name="AHN 0.5m" type="overlay" />
+                <LayerItem name="AHN4 Hoogtekaart Kleur" type="overlay" />
               </LayerGroup>
 
               {/* Terrain Layers */}
