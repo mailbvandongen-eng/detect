@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Info, X, FileText, BookOpen, Map, Navigation, MapPin, Layers, MousePointer, Bug, ExternalLink, Cloud, Upload, FolderPlus, Mountain, Gem, Skull, Shield } from 'lucide-react'
+import { Info, X, FileText, BookOpen, Map, Navigation, MapPin, Layers, MousePointer, Bug, ExternalLink, Cloud, Upload, FolderPlus, Mountain, Gem, Skull, Shield, Maximize2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUIStore } from '../../store'
 import { version } from '../../../package.json'
+import { HandleidingModal } from './HandleidingModal'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'

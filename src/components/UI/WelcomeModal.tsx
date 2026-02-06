@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Layers, Search, MapPin, Compass, SlidersHorizontal, Filter, Menu, RotateCcw, BookOpen } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
+import { HandleidingModal } from './HandleidingModal'
 
 interface WelcomeModalProps {
   isOpen: boolean
@@ -9,6 +11,7 @@ interface WelcomeModalProps {
 
 export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
   const setHideWelcomeModal = useSettingsStore(state => state.setHideWelcomeModal)
+  const [showHandleiding, setShowHandleiding] = useState(false)
 
   const handleClose = () => {
     onClose()
@@ -19,7 +22,13 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
     onClose()
   }
 
+  const handleShowHandleiding = () => {
+    onClose() // Close welcome modal
+    setShowHandleiding(true) // Open handleiding
+  }
+
   return (
+    <>
     <AnimatePresence>
       {isOpen && (
         <>
@@ -86,20 +95,18 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                 </section>
 
                 {/* Handleiding link */}
-                <section className="flex items-start gap-2 p-3 bg-gray-50 rounded-xl">
+                <button
+                  onClick={handleShowHandleiding}
+                  className="w-full flex items-start gap-2 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors border-0 outline-none text-left"
+                >
                   <BookOpen size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <h3 className="text-sm font-semibold text-gray-700 mb-0.5">Handleiding</h3>
-                    <a
-                      href="https://github.com/user/detectorapp-nl/wiki"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-blue-600 hover:text-blue-700 hover:underline"
-                    >
+                    <span className="text-xs text-blue-600">
                       Bekijk volledige handleiding &rarr;
-                    </a>
+                    </span>
                   </div>
-                </section>
+                </button>
               </div>
 
               {/* Footer */}
@@ -122,6 +129,10 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
         </>
       )}
     </AnimatePresence>
+
+      {/* Handleiding Modal - renders outside of welcome modal */}
+      <HandleidingModal isOpen={showHandleiding} onClose={() => setShowHandleiding(false)} />
+    </>
   )
 }
 

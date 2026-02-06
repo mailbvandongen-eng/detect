@@ -28,22 +28,22 @@ export function ZoomButtons() {
       className="fixed bottom-2 right-2 z-[800] flex flex-col gap-1"
     >
       <motion.button
-        className="w-9 h-9 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         onClick={handleZoomIn}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Inzoomen"
       >
-        <Plus size={18} className="text-gray-600" />
+        <Plus size={22} className="text-gray-600" />
       </motion.button>
       <motion.button
-        className="w-9 h-9 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         onClick={handleZoomOut}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Uitzoomen"
       >
-        <Minus size={18} className="text-gray-600" />
+        <Minus size={22} className="text-gray-600" />
       </motion.button>
     </motion.div>
   )
