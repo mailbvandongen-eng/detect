@@ -1,0 +1,2 @@
+import{ao as i,aR as n,_ as s,m as r,o as m}from"./index-COb2Lpbg.js";var o;let t=o=class extends i{static from(e){return n(o,e)}constructor(e){super(e),this.sessionId=void 0,this.moment=null}};s([r({type:String,json:{write:!0}})],t.prototype,"sessionId",void 0),s([r({type:Date,json:{type:Number,write:{writer:(e,a)=>{a.moment=e?e.getTime():null}}}})],t.prototype,"moment",void 0),t=o=s([m("esri.rest.versionManagement.gdbVersion.support.DeleteForwardEditsParameters")],t);const d=t;export{d as default};
+//# sourceMappingURL=DeleteForwardEditsParameters-BPt7519b.js.map

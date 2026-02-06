@@ -128,9 +128,23 @@ export async function createAMKLayerOL() {
       zIndex: 10
     })
 
-    // Subscribe to filter changes to update count
+    // Subscribe to filter changes to update count and refresh layer
+    // Track previous values to avoid infinite loop
+    let prevKeyword = ''
+    let prevIsActive = false
+
     useMonumentFilterStore.subscribe((state) => {
-      if (state.isActive) {
+      // Only recalculate if keyword or isActive changed (not when counts change)
+      if (state.keyword === prevKeyword && state.isActive === prevIsActive) {
+        return
+      }
+      prevKeyword = state.keyword
+      prevIsActive = state.isActive
+
+      // Force layer to re-render with new styles
+      layer.changed()
+
+      if (state.isActive && state.keyword.length >= 2) {
         // Count matching features
         let matchCount = 0
         features.forEach(feature => {

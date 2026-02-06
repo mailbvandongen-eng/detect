@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Filter, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
-import { useMapStore, useSettingsStore } from '../../store'
+import { useSettingsStore } from '../../store'
 
 export function MonumentFilter() {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -24,7 +24,6 @@ export function MonumentFilter() {
     clearFilter
   } = useMonumentFilterStore()
 
-  const map = useMapStore(state => state.map)
   const fontScale = useSettingsStore(state => state.fontScale)
   const setFontScale = useSettingsStore(state => state.setFontScale)
   const showFontSliders = useSettingsStore(state => state.showFontSliders)
@@ -57,32 +56,7 @@ export function MonumentFilter() {
     }
   }, [isExpanded])
 
-  // Trigger layer refresh when filter changes
-  useEffect(() => {
-    if (!map) return
-
-    // Recursive function to find all layers (including nested in groups)
-    const refreshAMKLayers = (layers: any) => {
-      layers.forEach((layer: any) => {
-        const title = layer.get('title')
-        if (title && title.startsWith('AMK')) {
-          // Force style recalculation
-          layer.changed()
-          const source = layer.getSource?.()
-          if (source) {
-            source.changed()
-          }
-        }
-        // Check for nested layers (group layers)
-        const nestedLayers = layer.getLayers?.()
-        if (nestedLayers) {
-          refreshAMKLayers(nestedLayers)
-        }
-      })
-    }
-
-    refreshAMKLayers(map.getLayers())
-  }, [map, keyword, isActive])
+  // Note: Layer refresh is handled by subscription in amkOL.ts
 
   // Toggle filter on/off
   const handleToggle = () => {
