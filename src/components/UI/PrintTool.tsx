@@ -147,7 +147,7 @@ export function PrintTool() {
         whileTap={{ scale: 0.95 }}
         title="Kaart printen/exporteren"
       >
-        <Printer size={20} />
+        <Printer size={20} className="drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>
 
       {/* Print modal */}

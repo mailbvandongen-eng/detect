@@ -291,7 +291,7 @@ export function DrawTool() {
         whileTap={{ scale: 0.95 }}
         title="Tekenen op de kaart"
       >
-        <Pencil size={20} />
+        <Pencil size={20} className="drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>
 
       {/* Drawing panel */}

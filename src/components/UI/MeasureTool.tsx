@@ -148,7 +148,7 @@ export function MeasureTool() {
         whileTap={{ scale: 0.95 }}
         title="Afstanden meten"
       >
-        <Ruler size={20} />
+        <Ruler size={20} className="drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>
 
       {/* Measurement panel */}

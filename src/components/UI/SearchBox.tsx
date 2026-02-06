@@ -172,7 +172,7 @@ export function SearchBox() {
         whileTap={{ scale: 0.95 }}
         title="Zoeken"
       >
-        <Search size={22} className="text-gray-600" />
+        <Search size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>
     )
   }

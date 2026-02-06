@@ -101,7 +101,7 @@ export function HamburgerMenu() {
         {isOpen ? (
           <X size={22} className="text-white" />
         ) : (
-          <Menu size={22} className="text-gray-600" />
+          <Menu size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
         )}
       </motion.button>
 

@@ -52,7 +52,7 @@ export function GpsButton() {
   return (
     <motion.button
       className={`
-        fixed bottom-2 right-[52px] z-[1000]
+        fixed bottom-2 right-[104px] z-[1000]
         w-11 h-11 cursor-pointer border-0 outline-none
         flex items-center justify-center
         rounded-xl backdrop-blur-sm
@@ -93,9 +93,9 @@ export function GpsButton() {
       }
     >
       {isHeadingUp ? (
-        <Navigation size={22} strokeWidth={2} />
+        <Navigation size={22} strokeWidth={2} className="drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       ) : (
-        <LocateFixed size={22} strokeWidth={2} />
+        <LocateFixed size={22} strokeWidth={2} className="drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       )}
     </motion.button>
   )

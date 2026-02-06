@@ -76,7 +76,7 @@ export function OpacitySliders() {
   const hasMore = activeSliders.length > 3
 
   return (
-    <div className="fixed bottom-[108px] right-2 z-[900]">
+    <div className="fixed bottom-[56px] right-2 z-[900]">
       {/* Toggle button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
@@ -86,7 +86,7 @@ export function OpacitySliders() {
         aria-label="Opacity sliders"
         title={isOpen ? 'Sluit opacity sliders' : 'Open opacity sliders'}
       >
-        <SlidersHorizontal size={22} strokeWidth={2} className="text-gray-500" />
+        <SlidersHorizontal size={22} strokeWidth={2} className="text-gray-500 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
         {activeSliders.length > 0 && (
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-[10px] rounded-full flex items-center justify-center">
             {activeSliders.length}

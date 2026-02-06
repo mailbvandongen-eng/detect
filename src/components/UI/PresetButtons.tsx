@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Bookmark } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore, useMapStore } from '../../store'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
@@ -198,7 +198,7 @@ export function PresetButtons() {
         whileTap={{ scale: 0.95 }}
         title="Reset - CartoDB, alle lagen uit, GPS uit"
       >
-        <RotateCcw size={20} className="text-gray-600" />
+        <RotateCcw size={20} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>
 
       {/* Presets button - above reset */}
@@ -210,9 +210,9 @@ export function PresetButtons() {
         title="Presets"
       >
         {presetsPanelOpen ? (
-          <ChevronUp size={20} className="text-blue-600" />
+          <ChevronUp size={20} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
         ) : (
-          <Layers size={20} className="text-blue-600" />
+          <Bookmark size={20} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
         )}
       </motion.button>
 

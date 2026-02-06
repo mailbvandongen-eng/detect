@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Map } from 'lucide-react'
+import { Layers } from 'lucide-react'
 import { useUIStore, useMapStore } from '../../store'
 import { useEffect, useState } from 'react'
 
@@ -57,7 +57,7 @@ export function KaartlagenButton() {
       aria-label={themesPanelOpen ? 'Kaartlagen sluiten' : 'Kaartlagen openen'}
       title="Kaartlagen"
     >
-      <Map size={22} strokeWidth={2} />
+      <Layers size={22} strokeWidth={2} className="drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
     </motion.button>
   )
 }

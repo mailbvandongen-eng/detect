@@ -25,17 +25,9 @@ export function ZoomButtons() {
 
   return (
     <motion.div
-      className="fixed bottom-2 right-2 z-[800] flex flex-col gap-1"
+      className="fixed bottom-2 right-2 z-[800] flex flex-row-reverse gap-1"
     >
-      <motion.button
-        className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
-        onClick={handleZoomIn}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        title="Inzoomen"
-      >
-        <Plus size={22} className="text-gray-600" />
-      </motion.button>
+      {/* Minus button - appears on the right due to flex-row-reverse */}
       <motion.button
         className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         onClick={handleZoomOut}
@@ -43,7 +35,17 @@ export function ZoomButtons() {
         whileTap={{ scale: 0.95 }}
         title="Uitzoomen"
       >
-        <Minus size={22} className="text-gray-600" />
+        <Minus size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
+      </motion.button>
+      {/* Plus button - appears in the middle */}
+      <motion.button
+        className="w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        onClick={handleZoomIn}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        title="Inzoomen"
+      >
+        <Plus size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>
     </motion.div>
   )
