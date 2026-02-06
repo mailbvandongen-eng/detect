@@ -243,46 +243,42 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: true
   },
 
-  // Hillshade layers - NL only (ArcGIS SDK met API key authenticatie)
+  // Hillshade layers - NL only (OpenLayers ImageArcGISRest - geen API key nodig)
   'AHN4 Hoogtekaart Kleur': {
     name: 'AHN4 Hoogtekaart Kleur',
     factory: async () => {
-      const { createArcGISAHN4ColorElevation } = await import('./arcgisAHNLayers')
-      return createArcGISAHN4ColorElevation()
+      const { createAHN4ColorElevationLayerOL } = await import('./hillshadeLayers')
+      return createAHN4ColorElevationLayerOL()
     },
     immediateLoad: true,
-    tier: 'premium',
-    platform: 'arcgis'
+    tier: 'premium'
   },
   'AHN4 Hillshade NL': {
     name: 'AHN4 Hillshade NL',
     factory: async () => {
-      const { createArcGISAHN4Hillshade } = await import('./arcgisAHNLayers')
-      return createArcGISAHN4Hillshade()
+      const { createAHN4HillshadeLayerOL } = await import('./hillshadeLayers')
+      return createAHN4HillshadeLayerOL()
     },
     immediateLoad: true,
-    tier: 'premium',
-    platform: 'arcgis'
+    tier: 'premium'
   },
   'AHN4 Multi-Hillshade NL': {
     name: 'AHN4 Multi-Hillshade NL',
     factory: async () => {
-      const { createArcGISAHN4MultiHillshade } = await import('./arcgisAHNLayers')
-      return createArcGISAHN4MultiHillshade()
+      const { createAHN4MultiHillshadeLayerOL } = await import('./hillshadeLayers')
+      return createAHN4MultiHillshadeLayerOL()
     },
     immediateLoad: true,
-    tier: 'premium',
-    platform: 'arcgis'
+    tier: 'premium'
   },
   'AHN4 Hillshade Kleur': {
     name: 'AHN4 Hillshade Kleur',
     factory: async () => {
-      const { createArcGISAHN4ShadedRelief } = await import('./arcgisAHNLayers')
-      return createArcGISAHN4ShadedRelief()
+      const { createAHN4ShadedReliefLayerOL } = await import('./hillshadeLayers')
+      return createAHN4ShadedReliefLayerOL()
     },
     immediateLoad: true,
-    tier: 'premium',
-    platform: 'arcgis'
+    tier: 'premium'
   },
 
   // World Hillshade VERWIJDERD - Esri commercieel, geen toestemming

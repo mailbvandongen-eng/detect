@@ -1,2 +1,0 @@
-import{cZ as t,bf as u}from"./index-rTQ1u7hy.js";import{m as o}from"./typeUtils-CR7PnWP1.js";function i(e,s){return r(e,null,s)}const l=t({types:o});function r(e,s,n){return e?e&&(e.styleName||e.styleUrl)&&e.type!=="uniqueValue"?(n?.messages&&n.messages.push(new u("renderer:unsupported","Only UniqueValueRenderer can be referenced from a web style, but found '"+e.type+"'",{definition:e,context:n})),null):l(e,s,n):null}export{r as o,i as t};
-//# sourceMappingURL=jsonUtils-K-Mkaoh2.js.map

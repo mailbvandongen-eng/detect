@@ -1,2 +1,0 @@
-import{b7 as o,b8 as t,b9 as n,ba as s}from"./index-rTQ1u7hy.js";import{l as e,o as a,S as m,t as u,s as l,y as c,r as f}from"./defaultsJSON-GKolV7NZ.js";const S=o.fromJSON(e),i=t.fromJSON(a),O=n.fromJSON(m),N=s.fromJSON(u);function y(r){if(r==null)return null;switch(r.type){case"mesh":return null;case"point":case"multipoint":return S;case"polyline":return i;case"polygon":case"extent":return O}return null}const $=o.fromJSON(f),b=t.fromJSON(l),g=n.fromJSON(c);export{y as J,$ as N,b as O,S,N as a,O as c,i as u,g as y};
-//# sourceMappingURL=defaults-RjYUKfJK.js.map
