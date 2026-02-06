@@ -1,0 +1,2 @@
+import{fX as i}from"./index-CS7N3m3p.js";import{fromGeometryToGXGeometry as p,getSpatialReference as a}from"./jsonConverter-C0fN2cSF.js";import"./Point2D-ByVU2sJE.js";import"./ProjectionTransformation-ngKAlzkB.js";import"./Envelope2D-PYZ6irrd.js";import"./Transformation2D-HOoFpL6n.js";import"./SimpleGeometryCursor-B92kdZ15.js";import"./OperatorDefinitions-DP7_WWTp.js";function x(e,m={}){const{unit:o}=m;let t=p(e).calculateLength2D();const r=a(e);return t&&o&&r&&(t=i(t,r,o)),t}export{x as execute};
+//# sourceMappingURL=lengthOperator-BiTFEO74.js.map
