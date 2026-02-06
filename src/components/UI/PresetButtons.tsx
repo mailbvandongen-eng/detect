@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Download, RefreshCw } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore, useMapStore } from '../../store'
+import { useMonumentFilterStore } from '../../store/monumentFilterStore'
 import type { Preset } from '../../store/presetStore'
 import { fromLonLat } from 'ol/proj'
 
@@ -97,6 +98,7 @@ const NL_ZOOM = 8 // ~50km view
 export function PresetButtons() {
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
   const stopTracking = useGPSStore(state => state.stopTracking)
+  const clearMonumentFilter = useMonumentFilterStore(state => state.clearFilter)
   const map = useMapStore(state => state.map)
   const { presetsPanelOpen, togglePresetsPanel, closeAllPanels } = useUIStore()
   const { presets, applyPreset, updatePreset, createPreset, saveAsDefaults, resetToDefaults, resetToBuiltIn } = usePresetStore()
@@ -130,6 +132,9 @@ export function PresetButtons() {
 
     // Stop GPS tracking
     stopTracking()
+
+    // Clear monument filter
+    clearMonumentFilter()
 
     // Zoom to center of Netherlands at ~50km view
     if (map) {
