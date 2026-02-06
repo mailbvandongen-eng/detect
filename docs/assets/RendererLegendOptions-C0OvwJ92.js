@@ -1,0 +1,2 @@
+import{aP as a,aQ as n,ao as o,aR as i,_ as r,m as d,aJ as l,o as c}from"./index-B5eMh3ws.js";var t;const p=a()({ascendingValues:"ascending-values",descendingValues:"descending-values"});let e=t=class extends n(o){static from(s){return i(t,s)}constructor(s){super(s),this.title=null,this.order=null}};r([d({type:String,json:{write:!0}})],e.prototype,"title",void 0),r([l(p)],e.prototype,"order",void 0),e=t=r([c("esri.renderers.support.RendererLegendOptions")],e);const m=e;export{m as d};
+//# sourceMappingURL=RendererLegendOptions-C0OvwJ92.js.map

@@ -11,6 +11,7 @@ interface UIState {
   infoPanelOpen: boolean
   presetsPanelOpen: boolean
   monumentSearchOpen: boolean
+  monumentFilterOpen: boolean
 
   // Vondst form state
   vondstFormOpen: boolean
@@ -65,6 +66,10 @@ interface UIState {
   // Monument search actions
   toggleMonumentSearch: () => void
   closeMonumentSearch: () => void
+
+  // Monument filter actions
+  toggleMonumentFilter: () => void
+  closeMonumentFilter: () => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -77,6 +82,7 @@ export const useUIStore = create<UIState>()(
     infoPanelOpen: false,
     presetsPanelOpen: false,
     monumentSearchOpen: false,
+    monumentFilterOpen: false,
     vondstFormOpen: false,
     vondstFormLocation: null,
     vondstFormPhoto: null,
@@ -98,6 +104,7 @@ export const useUIStore = create<UIState>()(
         state.settingsPanelOpen = false
         state.infoPanelOpen = false
         state.presetsPanelOpen = false
+        state.monumentFilterOpen = false
       })
     },
 
@@ -122,6 +129,7 @@ export const useUIStore = create<UIState>()(
         state.settingsPanelOpen = false
         state.infoPanelOpen = false
         state.presetsPanelOpen = false
+        state.monumentFilterOpen = false
         // Toggle this one
         if (!wasOpen) state.backgroundsPanelOpen = true
       })
@@ -136,6 +144,7 @@ export const useUIStore = create<UIState>()(
         state.settingsPanelOpen = false
         state.infoPanelOpen = false
         state.presetsPanelOpen = false
+        state.monumentFilterOpen = false
         // Toggle this one
         if (!wasOpen) state.themesPanelOpen = true
       })
@@ -150,6 +159,7 @@ export const useUIStore = create<UIState>()(
         state.settingsPanelOpen = false
         state.infoPanelOpen = false
         state.presetsPanelOpen = false
+        state.monumentFilterOpen = false
         // Toggle this one
         if (!wasOpen) state.settingsPanelOpen = true
       })
@@ -164,6 +174,7 @@ export const useUIStore = create<UIState>()(
         state.settingsPanelOpen = false
         state.infoPanelOpen = false
         state.presetsPanelOpen = false
+        state.monumentFilterOpen = false
         // Toggle this one
         if (!wasOpen) state.infoPanelOpen = true
       })
@@ -178,6 +189,7 @@ export const useUIStore = create<UIState>()(
         state.settingsPanelOpen = false
         state.infoPanelOpen = false
         state.presetsPanelOpen = false
+        state.monumentFilterOpen = false
         // Toggle this one
         if (!wasOpen) state.presetsPanelOpen = true
       })
@@ -323,6 +335,28 @@ export const useUIStore = create<UIState>()(
     closeMonumentSearch: () => {
       set(state => {
         state.monumentSearchOpen = false
+      })
+    },
+
+    // Monument filter actions
+    toggleMonumentFilter: () => {
+      set(state => {
+        const wasOpen = state.monumentFilterOpen
+        // Close ALL panels first
+        state.backgroundsPanelOpen = false
+        state.themesPanelOpen = false
+        state.settingsPanelOpen = false
+        state.infoPanelOpen = false
+        state.presetsPanelOpen = false
+        state.monumentFilterOpen = false
+        // Toggle this one
+        if (!wasOpen) state.monumentFilterOpen = true
+      })
+    },
+
+    closeMonumentFilter: () => {
+      set(state => {
+        state.monumentFilterOpen = false
       })
     }
   }))

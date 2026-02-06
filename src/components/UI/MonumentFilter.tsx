@@ -1,17 +1,26 @@
 /**
  * Monument Filter Component
- * Matches preset button styling, positioned above presets
+ * Only visible when AMK monument layers are active
+ * Compact design with inline toggle
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Filter, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
-import { useSettingsStore } from '../../store'
+import { useLayerStore, useUIStore } from '../../store'
+
+// AMK layers that trigger filter visibility
+const AMK_LAYERS = [
+  'AMK Monumenten',
+  'AMK Romeins',
+  'AMK Steentijd',
+  'AMK Vroege ME',
+  'AMK Late ME',
+  'AMK Overig'
+]
 
 export function MonumentFilter() {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const {
@@ -24,10 +33,14 @@ export function MonumentFilter() {
     clearFilter
   } = useMonumentFilterStore()
 
-  const fontScale = useSettingsStore(state => state.fontScale)
-  const setFontScale = useSettingsStore(state => state.setFontScale)
-  const showFontSliders = useSettingsStore(state => state.showFontSliders)
-  const baseFontSize = 12 * fontScale / 100
+  // Use UIStore for panel state (closes other panels)
+  const isExpanded = useUIStore(state => state.monumentFilterOpen)
+  const toggleMonumentFilter = useUIStore(state => state.toggleMonumentFilter)
+  const closeMonumentFilter = useUIStore(state => state.closeMonumentFilter)
+
+  // Check if any AMK layer is visible
+  const visible = useLayerStore(state => state.visible)
+  const isAMKVisible = AMK_LAYERS.some(layer => visible[layer])
 
   // Focus input when expanded
   useEffect(() => {
@@ -35,28 +48,6 @@ export function MonumentFilter() {
       setTimeout(() => inputRef.current?.focus(), 100)
     }
   }, [isExpanded])
-
-  // Click outside to collapse
-  useEffect(() => {
-    if (!isExpanded) return
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsExpanded(false)
-      }
-    }
-
-    const timer = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside)
-    }, 100)
-
-    return () => {
-      clearTimeout(timer)
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isExpanded])
-
-  // Note: Layer refresh is handled by subscription in amkOL.ts
 
   // Toggle filter on/off
   const handleToggle = () => {
@@ -75,11 +66,16 @@ export function MonumentFilter() {
 
   const hasKeyword = keyword.length >= 2
 
+  // Don't render if no AMK layer is visible
+  if (!isAMKVisible) {
+    return null
+  }
+
   return (
-    <div ref={containerRef}>
+    <div>
       {/* Button - same style as preset buttons, positioned above them */}
       <motion.button
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={toggleMonumentFilter}
         className={`fixed bottom-[116px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
           isActive
             ? 'bg-purple-500 text-white'
@@ -92,7 +88,7 @@ export function MonumentFilter() {
         <Filter size={20} />
       </motion.button>
 
-      {/* Expanded panel - opens to the right like presets */}
+      {/* Expanded panel - compact design */}
       <AnimatePresence>
         {isExpanded && (
           <>
@@ -102,89 +98,60 @@ export function MonumentFilter() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsExpanded(false)}
+              onClick={closeMonumentFilter}
             />
             <motion.div
               initial={{ opacity: 0, x: -10, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="fixed bottom-[116px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden w-[220px]"
+              className="fixed bottom-[116px] left-[56px] z-[801] bg-white/95 rounded-lg shadow-lg backdrop-blur-sm overflow-hidden"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between px-3 py-1.5 bg-purple-500">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-white">Monument Filter</span>
-                  {isActive && totalCount > 0 && (
-                    <span className="text-xs text-purple-200">
-                      {filteredCount}/{totalCount}
-                    </span>
-                  )}
-                </div>
-                {showFontSliders && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-white/70">T</span>
-                    <input
-                      type="range"
-                      min="80"
-                      max="150"
-                      step="10"
-                      value={fontScale}
-                      onChange={(e) => setFontScale(parseInt(e.target.value))}
-                      className="header-slider w-12 opacity-70 hover:opacity-100 transition-opacity"
-                    />
-                    <span className="text-xs text-white/70">T</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Content */}
-              <div className="p-3 space-y-3" style={{ fontSize: `${baseFontSize}px` }}>
+              {/* Compact content - search + toggle inline */}
+              <div className="flex items-center gap-1.5 p-2">
                 {/* Search input */}
                 <input
                   ref={inputRef}
                   type="text"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="Zoek..."
-                  className="w-full px-3 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-purple-400"
-                  style={{ fontSize: '1em' }}
+                  placeholder="Filter..."
+                  className="w-24 px-2 py-1.5 text-sm bg-gray-100 rounded border-0 outline-none focus:ring-2 focus:ring-purple-400"
                 />
 
-                {/* Buttons row */}
-                <div className="flex items-center gap-2">
-                  {/* Toggle button */}
+                {/* Toggle button - small, inline */}
+                <button
+                  onClick={handleToggle}
+                  disabled={!hasKeyword}
+                  className={`w-8 h-8 flex items-center justify-center rounded transition-colors border-0 outline-none ${
+                    isActive
+                      ? 'bg-purple-500 text-white'
+                      : hasKeyword
+                        ? 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  }`}
+                  title={isActive ? 'Filter uit' : 'Filter aan'}
+                >
+                  <Filter size={14} />
+                </button>
+
+                {/* Clear button */}
+                {(hasKeyword || isActive) && (
                   <button
-                    onClick={handleToggle}
-                    disabled={!hasKeyword}
-                    className={`flex-1 px-3 py-2 rounded-lg transition-colors border-0 outline-none font-medium ${
-                      isActive
-                        ? 'bg-purple-500 text-white'
-                        : hasKeyword
-                          ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    }`}
-                    style={{ fontSize: '1em' }}
+                    onClick={handleClear}
+                    className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors border-0 outline-none"
+                    title="Wissen"
                   >
-                    {isActive ? 'Filter Aan' : 'Filter Uit'}
+                    <X size={14} />
                   </button>
+                )}
 
-                  {/* Clear button */}
-                  {(hasKeyword || isActive) && (
-                    <button
-                      onClick={handleClear}
-                      className="px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0 outline-none"
-                      title="Wissen"
-                    >
-                      <X size={18} />
-                    </button>
-                  )}
-                </div>
-
-                {/* Help text */}
-                <p className="text-gray-500" style={{ fontSize: '0.85em' }}>
-                  Doorzoek de omschrijving van monumenten
-                </p>
+                {/* Count indicator */}
+                {isActive && totalCount > 0 && (
+                  <span className="text-xs text-purple-600 font-medium whitespace-nowrap">
+                    {filteredCount}/{totalCount}
+                  </span>
+                )}
               </div>
             </motion.div>
           </>
