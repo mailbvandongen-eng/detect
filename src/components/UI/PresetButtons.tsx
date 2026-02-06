@@ -154,8 +154,14 @@ export function PresetButtons() {
   }
 
   // Save current visible layers to a preset
-  const handleSaveToPreset = (e: React.MouseEvent, presetId: string) => {
+  const handleSaveToPreset = (e: React.MouseEvent, presetId: string, presetName: string) => {
     e.stopPropagation()
+
+    // Confirm before overwriting
+    if (!confirm(`Preset "${presetName}" overschrijven met huidige lagen?`)) {
+      return
+    }
+
     const currentLayers = Object.entries(visible)
       .filter(([layerName, isVisible]) => isVisible && ALL_OVERLAYS.includes(layerName))
       .map(([layerName]) => layerName)
@@ -264,19 +270,19 @@ export function PresetButtons() {
                     <button
                       key={preset.id}
                       onClick={() => handleApplyPreset(preset.id)}
-                      className={`w-full h-8 flex items-center gap-2 px-2 ${hoverColor} rounded text-left transition-colors border-0 outline-none bg-transparent overflow-hidden ${isSaved ? 'bg-green-50' : ''}`}
+                      className={`w-full h-8 flex items-center gap-1.5 px-2 ${hoverColor} rounded text-left transition-colors border-0 outline-none bg-transparent overflow-hidden ${isSaved ? 'bg-green-50' : ''}`}
                       style={{ fontSize: `${baseFontSize}px` }}
                     >
                       <IconComponent size={14} className={`${iconColor} flex-shrink-0`} />
                       <span className="text-gray-700 truncate flex-1">{preset.name}</span>
                       {isSaved ? (
-                        <span className="ml-auto p-1 flex-shrink-0">
+                        <span className="p-1 flex-shrink-0">
                           <Check size={14} className="text-green-500" />
                         </span>
                       ) : (
                         <span
-                          onClick={(e) => handleSaveToPreset(e, preset.id)}
-                          className="ml-auto p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+                          onClick={(e) => handleSaveToPreset(e, preset.id, preset.name)}
+                          className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
                           title="Huidige lagen opslaan naar deze preset"
                         >
                           <Save size={12} className="text-gray-400 hover:text-blue-500" />
@@ -313,10 +319,10 @@ export function PresetButtons() {
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between group">
+                  <div className="flex items-center justify-between">
                     <button
                       onClick={() => setShowAddPreset(true)}
-                      className="h-8 flex items-center gap-2 px-2 text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none"
+                      className="h-8 flex items-center gap-1.5 px-2 text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none"
                       style={{ fontSize: `${baseFontSize}px` }}
                     >
                       <Plus size={14} />
@@ -324,7 +330,7 @@ export function PresetButtons() {
                     </button>
                     <button
                       onClick={handleResetPresets}
-                      className="w-8 h-8 flex items-center justify-center text-gray-400 opacity-0 group-hover:opacity-100 hover:text-gray-600 hover:bg-gray-100 rounded transition-all border-0 outline-none"
+                      className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors border-0 outline-none"
                       title="Herstel standaard"
                     >
                       <RotateCw size={14} />
