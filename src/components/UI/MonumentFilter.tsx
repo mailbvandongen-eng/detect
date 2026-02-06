@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useRef } from 'react'
-import { Filter, X } from 'lucide-react'
+import { Filter } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
 import { useLayerStore, useUIStore } from '../../store'
@@ -107,9 +107,8 @@ export function MonumentFilter() {
               transition={{ duration: 0.15 }}
               className="fixed bottom-[116px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden"
             >
-              {/* Header - same style as Presets */}
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-500">
-                <Filter size={14} className="text-white" />
+              {/* Header */}
+              <div className="px-3 py-1.5 bg-purple-500">
                 <span className="font-medium text-white text-xs">Monument Filter</span>
               </div>
               <div className="p-2 space-y-1.5">

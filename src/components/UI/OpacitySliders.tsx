@@ -113,9 +113,8 @@ export function OpacitySliders() {
               transition={{ duration: 0.2 }}
               className="absolute bottom-0 right-14 bg-white/95 rounded-xl shadow-lg overflow-hidden min-w-[220px] max-h-[60vh] flex flex-col"
             >
-              {/* Header - same style as Presets */}
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500">
-                <SlidersHorizontal size={14} className="text-white" />
+              {/* Header */}
+              <div className="px-3 py-1.5 bg-blue-500">
                 <span className="font-medium text-white text-xs">Transparantie</span>
               </div>
             <div className="p-3 overflow-y-auto flex-1">
