@@ -8,6 +8,7 @@ export interface Preset {
   icon: string  // lucide icon name
   layers: string[]
   baseLayer?: string  // Optional base layer to activate (e.g., 'Luchtfoto')
+  layerOpacities?: Record<string, number>  // Optional per-layer opacity overrides
   isBuiltIn: boolean
 }
 
@@ -23,8 +24,12 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'detectie',
     name: 'Detectie',
     icon: 'Compass',
-    layers: ['AMK Monumenten', 'Gewaspercelen'],
+    layers: ['AMK Monumenten', 'Gewaspercelen', 'Geomorfologie', 'AHN4 Hoogtekaart Kleur'],
     baseLayer: 'CartoDB (licht)',  // Explicit default base layer
+    layerOpacities: {
+      'Geomorfologie': 0.25,
+      'AHN4 Hoogtekaart Kleur': 0.25
+    },
     isBuiltIn: false  // Now editable like other presets
   },
   {
@@ -156,6 +161,13 @@ export const usePresetStore = create<PresetState>()(
         // Turn on preset layers
         preset.layers.forEach(layer => layerStore.setLayerVisibility(layer, true))
 
+        // Apply layer opacities if specified
+        if (preset.layerOpacities) {
+          Object.entries(preset.layerOpacities).forEach(([layerName, opacity]) => {
+            layerStore.setLayerOpacity(layerName, opacity)
+          })
+        }
+
         // Set base layer if specified
         if (preset.baseLayer) {
           const baseLayerNames = ['CartoDB (licht)', 'OpenStreetMap', 'Luchtfoto', 'TMK 1850', 'Bonnebladen 1900']
@@ -228,10 +240,11 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 10,
+      version: 11,
       migrate: (persistedState: unknown, version: number) => {
+        // v11: Added Geomorfologie and AHN4 Hoogtekaart Kleur to Detectie preset with low opacity
         // v10: Removed non-existent 'Archeo Landschappen' from Terrein Analyse preset
-        if (version < 10) {
+        if (version < 11) {
           // Force reset all presets to new defaults
           return {
             presets: [...BUILT_IN_PRESETS]
