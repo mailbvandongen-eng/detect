@@ -5,14 +5,14 @@
  */
 
 import { useState, useRef, useEffect } from 'react'
-import { Search, X, Landmark, ZoomIn, ChevronDown, ChevronUp, GripHorizontal } from 'lucide-react'
+import { Search, X, Landmark, ZoomIn, ChevronDown, ChevronUp, GripHorizontal, MapIcon, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { useMapStore, useSettingsStore } from '../../store'
-import { searchMonuments, getMonumentFeature, PROVINCES, type MonumentSearchResult } from '../../utils/monumentSearch'
+import { searchMonuments, getMonumentFeature, getMonumentFeatures, PROVINCES, type MonumentSearchResult } from '../../utils/monumentSearch'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Style, Fill, Stroke } from 'ol/style'
-import { buffer } from 'ol/extent'
+import { buffer, extend, createEmpty } from 'ol/extent'
 
 interface MonumentSearchProps {
   isOpen: boolean
@@ -82,6 +82,8 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [maxResults, setMaxResults] = useState(50)
   const [isExpanded, setIsExpanded] = useState(false) // false = 35%, true = fullscreen
+  const [showingAll, setShowingAll] = useState(false)
+  const [loadingAll, setLoadingAll] = useState(false)
 
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<number>()
@@ -171,6 +173,51 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
     setExpandedId(expandedId === id ? null : id)
   }
 
+  // Show all search results on the map
+  const handleShowAllOnMap = async () => {
+    if (!map || results.length === 0) return
+
+    setLoadingAll(true)
+    try {
+      // Get all monument features
+      const monumentnummers = results.map(r => r.monumentnummer)
+      const features = await getMonumentFeatures(monumentnummers)
+
+      if (features.length === 0) return
+
+      // Add all features to highlight layer
+      const layer = getHighlightLayer(map)
+      const source = layer.getSource()
+      source?.clear()
+
+      // Calculate combined extent and add features
+      let combinedExtent = createEmpty()
+      features.forEach(feature => {
+        const clonedFeature = feature.clone()
+        source?.addFeature(clonedFeature)
+
+        const geometry = clonedFeature.getGeometry()
+        if (geometry) {
+          combinedExtent = extend(combinedExtent, geometry.getExtent())
+        }
+      })
+
+      // Zoom to combined extent with padding
+      const view = map.getView()
+      const paddedExtent = buffer(combinedExtent, 500)
+      view.fit(paddedExtent, { duration: 500, maxZoom: 14 })
+
+      setShowingAll(true)
+      setSelectedId(null)
+
+      console.log(`🗺️ ${features.length} monumenten getoond op kaart`)
+    } catch (error) {
+      console.error('Error showing all monuments:', error)
+    } finally {
+      setLoadingAll(false)
+    }
+  }
+
   const handleClose = () => {
     // Don't clear highlight - user can still see the monument
     onClose()
@@ -185,6 +232,7 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
     setSelectedId(null)
     setExpandedId(null)
     setMaxResults(50)
+    setShowingAll(false)
     onClose()
   }
 
@@ -263,13 +311,13 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
                 ref={inputRef}
                 type="text"
                 value={query}
-                onChange={(e) => { setQuery(e.target.value); setSelectedId(null); setExpandedId(null); }}
+                onChange={(e) => { setQuery(e.target.value); setSelectedId(null); setExpandedId(null); setShowingAll(false); }}
                 placeholder="bouwvoor, scherven..."
                 className="w-full pl-8 pr-8 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-purple-500 text-sm"
               />
               {query && (
                 <button
-                  onClick={() => { setQuery(''); setSelectedId(null); setExpandedId(null); }}
+                  onClick={() => { setQuery(''); setSelectedId(null); setExpandedId(null); setShowingAll(false); }}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 border-0 outline-none bg-transparent"
                 >
                   <X size={14} />
@@ -278,7 +326,7 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
             </div>
             <select
               value={province}
-              onChange={(e) => { setProvince(e.target.value); setSelectedId(null); setExpandedId(null); }}
+              onChange={(e) => { setProvince(e.target.value); setSelectedId(null); setExpandedId(null); setShowingAll(false); }}
               className="py-1.5 px-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-purple-500 text-sm text-gray-700 w-28"
             >
               {Object.entries(PROVINCES).map(([key, { name }]) => (
@@ -304,16 +352,34 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
 
           {!searching && results.length > 0 && (
             <div className="divide-y divide-gray-100">
-              <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-500 flex justify-between items-center">
+              <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-500 flex justify-between items-center gap-2">
                 <span>{results.length}{results.length >= maxResults ? '+' : ''} gevonden</span>
-                {results.length >= maxResults && (
+                <div className="flex items-center gap-2">
+                  {results.length >= maxResults && (
+                    <button
+                      onClick={() => setMaxResults(maxResults + 50)}
+                      className="text-purple-600 hover:text-purple-700 border-0 outline-none bg-transparent"
+                    >
+                      Meer laden
+                    </button>
+                  )}
                   <button
-                    onClick={() => setMaxResults(maxResults + 50)}
-                    className="text-purple-600 hover:text-purple-700 border-0 outline-none bg-transparent"
+                    onClick={handleShowAllOnMap}
+                    disabled={loadingAll}
+                    className={`flex items-center gap-1 px-2 py-1 rounded text-white border-0 outline-none transition-colors ${
+                      showingAll
+                        ? 'bg-green-500 hover:bg-green-600'
+                        : 'bg-purple-500 hover:bg-purple-600'
+                    } ${loadingAll ? 'opacity-50 cursor-wait' : ''}`}
                   >
-                    Meer laden
+                    {loadingAll ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : (
+                      <MapIcon size={12} />
+                    )}
+                    <span>{showingAll ? 'Getoond' : 'Toon alle'}</span>
                   </button>
-                )}
+                </div>
               </div>
               {results.map((result) => (
                 <div

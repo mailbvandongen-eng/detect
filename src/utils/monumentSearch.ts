@@ -169,3 +169,12 @@ export async function getMonumentFeature(monumentnummer: number): Promise<Featur
   const features = await loadAMKData()
   return features.find(f => f.get('monumentnummer') === monumentnummer) || null
 }
+
+/**
+ * Get multiple monument features by monumentnummers for bulk highlighting
+ */
+export async function getMonumentFeatures(monumentnummers: number[]): Promise<Feature[]> {
+  const features = await loadAMKData()
+  const nummerSet = new Set(monumentnummers)
+  return features.filter(f => nummerSet.has(f.get('monumentnummer')))
+}
