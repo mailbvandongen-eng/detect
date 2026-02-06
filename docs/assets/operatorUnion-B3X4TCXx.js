@@ -1,0 +1,2 @@
+import{s as o}from"./SimpleGeometryCursor-B92kdZ15.js";import"./Point2D-BtwadikP.js";import{g as u}from"./ProjectionTransformation-Cicr_hLD.js";import"./Envelope2D-v1krxB11.js";const t=new u;function m(n,r,e){return t.execute(n,r,e,null)}function f(n,r){return t.executeMany(new o(n),r,null).next()}function l(){return t.supportsCurves()}export{f as o,m as r,l as s};
+//# sourceMappingURL=operatorUnion-B3X4TCXx.js.map

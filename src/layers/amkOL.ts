@@ -18,6 +18,9 @@ import { Vector as VectorSource } from 'ol/source'
 import { Style, Fill, Stroke } from 'ol/style'
 import { loadTopoJSON, parseGeoJSON } from '../utils/layerLoaderOL.js'
 import type { Feature } from 'ol'
+import { getCenter } from 'ol/extent'
+import { transform } from 'ol/proj'
+import { useMonumentFilterStore, featureMatchesFilter } from '../store/monumentFilterStore'
 
 // AMK color scheme (RCE official colors)
 const AMK_COLORS: Record<string, string> = {
@@ -71,10 +74,48 @@ export async function createAMKLayerOL() {
   try {
     const features = await loadAMKData()
 
+    // Update total count in filter store
+    useMonumentFilterStore.getState().updateCounts(features.length, features.length)
+
     const layer = new VectorLayer({
       title: 'AMK Monumenten',
       source: new VectorSource({ features }),
       style: (feature) => {
+        // Check filter state
+        const filterState = useMonumentFilterStore.getState()
+
+        if (filterState.isActive && (filterState.keyword.length >= 2 || filterState.province !== 'all')) {
+          // Get feature properties
+          const omschrijving = feature.get('omschrijving') || ''
+          const toponiem = feature.get('toponiem') || ''
+          const txtLabel = feature.get('txt_label') || ''
+
+          // Get coordinates for province check
+          const geometry = feature.getGeometry()
+          let lng = 5.5, lat = 52.0 // Default center of NL
+          if (geometry) {
+            const center = getCenter(geometry.getExtent())
+            const lonLat = transform(center, 'EPSG:3857', 'EPSG:4326')
+            lng = lonLat[0]
+            lat = lonLat[1]
+          }
+
+          // Check if feature matches filter
+          const matches = featureMatchesFilter(
+            omschrijving,
+            toponiem,
+            txtLabel,
+            lng,
+            lat,
+            filterState.keyword,
+            filterState.province
+          )
+
+          if (!matches) {
+            return null // Hide feature
+          }
+        }
+
         const waarde = (feature.get('kwaliteitswaarde') || '').trim()
         const color = AMK_COLORS[waarde] || '#ddd'
 
@@ -85,6 +126,35 @@ export async function createAMKLayerOL() {
       },
       opacity: 0.45,
       zIndex: 10
+    })
+
+    // Subscribe to filter changes to update count
+    useMonumentFilterStore.subscribe((state) => {
+      if (state.isActive) {
+        // Count matching features
+        let matchCount = 0
+        features.forEach(feature => {
+          const omschrijving = feature.get('omschrijving') || ''
+          const toponiem = feature.get('toponiem') || ''
+          const txtLabel = feature.get('txt_label') || ''
+
+          const geometry = feature.getGeometry()
+          let lng = 5.5, lat = 52.0
+          if (geometry) {
+            const center = getCenter(geometry.getExtent())
+            const lonLat = transform(center, 'EPSG:3857', 'EPSG:4326')
+            lng = lonLat[0]
+            lat = lonLat[1]
+          }
+
+          if (featureMatchesFilter(omschrijving, toponiem, txtLabel, lng, lat, state.keyword, state.province)) {
+            matchCount++
+          }
+        })
+        useMonumentFilterStore.getState().updateCounts(features.length, matchCount)
+      } else {
+        useMonumentFilterStore.getState().updateCounts(features.length, features.length)
+      }
     })
 
     console.log(`✓ AMK Monumenten loaded (${features.length} features)`)

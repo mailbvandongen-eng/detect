@@ -25,6 +25,7 @@ import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal,
 import { PasswordGate } from './components/Auth/PasswordGate'
 import { OfflineIndicator } from './components/UI/OfflineIndicator'
 import { MonumentSearch } from './components/UI/MonumentSearch'
+import { MonumentFilter } from './components/UI/MonumentFilter'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useCloudSync } from './hooks/useCloudSync'
@@ -119,6 +120,7 @@ function App() {
           isOpen={monumentSearchOpen}
           onClose={closeMonumentSearch}
         />
+        <MonumentFilter />
       </div>
     </PasswordGate>
   )
