@@ -29,6 +29,7 @@ import { MonumentFilter } from './components/UI/MonumentFilter'
 import { WelcomeModal } from './components/UI/WelcomeModal'
 import { MeasureTool } from './components/UI/MeasureTool'
 import { DrawTool } from './components/UI/DrawTool'
+import { PrintTool } from './components/UI/PrintTool'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useCloudSync } from './hooks/useCloudSync'
@@ -101,6 +102,7 @@ function App() {
         <PresetButtons />
         <MeasureTool />
         <DrawTool />
+        <PrintTool />
         <InfoButton />
         <CompassButton />
         <WeatherWidget />
