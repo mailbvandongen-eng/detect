@@ -281,8 +281,8 @@ export function ThemesPanel() {
 
               {/* Terrain Layers */}
               {isThemeVisible('Terrein & Bodem') && (
-                <LayerGroup title="Terrein & Bodem" defaultExpanded={false} layerNames={['Veengebieden', 'Geomorfologie', 'Bodemkaart', 'Essen']}>
-                  <LayerItem name="Veengebieden" type="overlay" />
+                <LayerGroup title="Terrein & Bodem" defaultExpanded={false} layerNames={BUILD_MODE === 'commercial' ? ['Geomorfologie', 'Bodemkaart', 'Essen'] : ['Veengebieden', 'Geomorfologie', 'Bodemkaart', 'Essen']}>
+                  {BUILD_MODE === 'personal' && <LayerItem name="Veengebieden" type="overlay" />}
                   <LayerItem name="Geomorfologie" type="overlay" />
                   <LayerItem name="Bodemkaart" type="overlay" />
                   <LayerItem name="Essen" type="overlay" />

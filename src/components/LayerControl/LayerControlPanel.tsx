@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import { useUIStore } from '../../store'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
+import { BUILD_MODE } from '../../config/buildMode'
 
 export function LayerControlPanel() {
   const { layerControlOpen, toggleLayerControl } = useUIStore()
@@ -108,7 +109,7 @@ export function LayerControlPanel() {
 
               {/* Terrain Layers */}
               <LayerGroup title="Terrein & Bodem" defaultExpanded={false}>
-                <LayerItem name="Veengebieden" type="overlay" />
+                {BUILD_MODE === 'personal' && <LayerItem name="Veengebieden" type="overlay" />}
                 <LayerItem name="Geomorfologie" type="overlay" />
                 <LayerItem name="Bodemkaart" type="overlay" />
               </LayerGroup>

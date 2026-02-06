@@ -333,14 +333,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     },
     immediateLoad: false  // Vector layer, lazy load
   },
-  'Romeinse Forten Lijnen': {
-    name: 'Romeinse Forten Lijnen',
-    factory: async () => {
-      const { createRomeinseFortenLijnenLayerOL } = await import('./romeinseFortenOL')
-      return createRomeinseFortenLijnenLayerOL()
-    },
-    immediateLoad: false  // Vector layer, lazy load
-  },
   'Windmolens': {
     name: 'Windmolens',
     factory: async () => {

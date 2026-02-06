@@ -1,2 +1,0 @@
-import{cY as t,be as u}from"./index-D7BvpTsV.js";import{m as o}from"./typeUtils-uv3tIA2z.js";function m(e,s){return r(e,null,s)}const l=t({types:o});function r(e,s,n){return e?e&&(e.styleName||e.styleUrl)&&e.type!=="uniqueValue"?(n?.messages&&n.messages.push(new u("renderer:unsupported","Only UniqueValueRenderer can be referenced from a web style, but found '"+e.type+"'",{definition:e,context:n})),null):l(e,s,n):null}export{r as o,m as t};
-//# sourceMappingURL=jsonUtils-Do_Vmwsu.js.map

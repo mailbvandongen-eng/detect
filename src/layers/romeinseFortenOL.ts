@@ -1,58 +1,41 @@
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
+import LayerGroup from 'ol/layer/Group'
 import GeoJSON from 'ol/format/GeoJSON'
 import { Style, Stroke } from 'ol/style'
 import { LAYER_STYLES } from './iconStyles'
 
-// Create Roman Forts points layer (castella, watchtowers, etc.)
+// Combined Roman Forts layer (points + lines in one layer group)
 export async function createRomeinseFortenLayerOL() {
-  const response = await fetch('/detectorapp-nl/data/romeinse_forten.geojson')
-  const geojson = await response.json()
+  // Load both GeoJSON files in parallel
+  const [fortenResponse, lijnenResponse] = await Promise.all([
+    fetch('/detectorapp-nl/data/romeinse_forten.geojson'),
+    fetch('/detectorapp-nl/data/romeinse_forten_lijnen.geojson')
+  ])
 
-  const features = new GeoJSON().readFeatures(geojson, {
+  const [fortenGeojson, lijnenGeojson] = await Promise.all([
+    fortenResponse.json(),
+    lijnenResponse.json()
+  ])
+
+  // Create points features
+  const pointFeatures = new GeoJSON().readFeatures(fortenGeojson, {
     dataProjection: 'EPSG:4326',
     featureProjection: 'EPSG:3857'
   })
+  pointFeatures.forEach(f => f.set('layerType', 'romeinsFort'))
 
-  // Add layerType property to each feature for popup identification
-  features.forEach(f => f.set('layerType', 'romeinsFort'))
-
-  const source = new VectorSource({
-    features: features
-  })
-
-  const layer = new VectorLayer({
-    source: source,
-    properties: { title: 'Romeinse Forten' },
-    visible: false,
-    zIndex: 20,
-    style: LAYER_STYLES.landmark('#b91c1c')  // Red for Roman military
-  })
-
-  return layer
-}
-
-// Create Roman Forts lines layer (fort outlines/walls)
-export async function createRomeinseFortenLijnenLayerOL() {
-  const response = await fetch('/detectorapp-nl/data/romeinse_forten_lijnen.geojson')
-  const geojson = await response.json()
-
-  const features = new GeoJSON().readFeatures(geojson, {
+  // Create line features
+  const lineFeatures = new GeoJSON().readFeatures(lijnenGeojson, {
     dataProjection: 'EPSG:4326',
     featureProjection: 'EPSG:3857'
   })
+  lineFeatures.forEach(f => f.set('layerType', 'romeinsFortLijn'))
 
-  // Add layerType property to each feature for popup identification
-  features.forEach(f => f.set('layerType', 'romeinsFortLijn'))
-
-  const source = new VectorSource({
-    features: features
-  })
-
-  const layer = new VectorLayer({
-    source: source,
-    properties: { title: 'Romeinse Forten Lijnen' },
-    visible: false,
+  // Lines layer (under points)
+  const lijnenLayer = new VectorLayer({
+    source: new VectorSource({ features: lineFeatures }),
+    properties: { title: 'Forten Lijnen' },
     zIndex: 19,
     style: new Style({
       stroke: new Stroke({
@@ -63,5 +46,20 @@ export async function createRomeinseFortenLijnenLayerOL() {
     })
   })
 
-  return layer
+  // Points layer (on top of lines)
+  const fortenLayer = new VectorLayer({
+    source: new VectorSource({ features: pointFeatures }),
+    properties: { title: 'Forten Punten' },
+    zIndex: 20,
+    style: LAYER_STYLES.landmark('#b91c1c')  // Red for Roman military
+  })
+
+  // Combine in a layer group
+  const group = new LayerGroup({
+    properties: { title: 'Romeinse Forten' },
+    visible: false,
+    layers: [lijnenLayer, fortenLayer]
+  })
+
+  return group
 }

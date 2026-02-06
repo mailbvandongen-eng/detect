@@ -1,0 +1,2 @@
+import{fg as o}from"./index-rTQ1u7hy.js";function p(t){t?.writtenProperties&&t.writtenProperties.forEach(({target:r,propName:e,newOrigin:i})=>{o(r)&&i&&r.originOf(e)!==i&&r.updateOrigin(e,i)})}export{p as i};
+//# sourceMappingURL=originUtils-Bk7CJKj0.js.map
