@@ -26,12 +26,13 @@ import { PasswordGate } from './components/Auth/PasswordGate'
 import { OfflineIndicator } from './components/UI/OfflineIndicator'
 import { MonumentSearch } from './components/UI/MonumentSearch'
 import { MonumentFilter } from './components/UI/MonumentFilter'
+import { WelcomeModal } from './components/UI/WelcomeModal'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useCloudSync } from './hooks/useCloudSync'
 import { useSettingsStore, useUIStore, useWeatherStore, useGPSStore } from './store'
 import { AnimatePresence } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 function App() {
   // Initialize hooks
@@ -66,6 +67,10 @@ function App() {
   // Rain radar state
   const showBuienradar = useWeatherStore(state => state.showBuienradar)
   const setShowBuienradar = useWeatherStore(state => state.setShowBuienradar)
+
+  // Welcome modal state
+  const hideWelcomeModal = useSettingsStore(state => state.hideWelcomeModal)
+  const [welcomeModalOpen, setWelcomeModalOpen] = useState(!hideWelcomeModal)
 
   return (
     <PasswordGate>
@@ -121,6 +126,10 @@ function App() {
           onClose={closeMonumentSearch}
         />
         <MonumentFilter />
+        <WelcomeModal
+          isOpen={welcomeModalOpen}
+          onClose={() => setWelcomeModalOpen(false)}
+        />
       </div>
     </PasswordGate>
   )

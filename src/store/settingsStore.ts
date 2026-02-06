@@ -45,6 +45,9 @@ interface SettingsState {
   // Weer
   showWeatherButton: boolean  // Show/hide the weather button
 
+  // Welkom modal
+  hideWelcomeModal: boolean  // Don't show welcome modal on startup
+
   // Actions
   setDefaultBackground: (bg: DefaultBackground) => void
   setShowScaleBar: (value: boolean) => void
@@ -65,6 +68,7 @@ interface SettingsState {
   setShowStepCounter: (value: boolean) => void
   setShowFontSliders: (value: boolean) => void
   setShowWeatherButton: (value: boolean) => void
+  setHideWelcomeModal: (value: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -90,6 +94,7 @@ export const useSettingsStore = create<SettingsState>()(
       showStepCounter: false, // Hidden by default, can enable in settings
       showFontSliders: false, // Hidden by default (boomer mode off)
       showWeatherButton: false, // Hidden by default, can enable in settings
+      hideWelcomeModal: false, // Show welcome modal by default
 
       // Actions
       setDefaultBackground: (defaultBackground) => set({ defaultBackground }),
@@ -110,7 +115,8 @@ export const useSettingsStore = create<SettingsState>()(
       setVoiceFeedbackEnabled: (voiceFeedbackEnabled) => set({ voiceFeedbackEnabled }),
       setShowStepCounter: (showStepCounter) => set({ showStepCounter }),
       setShowFontSliders: (showFontSliders) => set({ showFontSliders }),
-      setShowWeatherButton: (showWeatherButton) => set({ showWeatherButton })
+      setShowWeatherButton: (showWeatherButton) => set({ showWeatherButton }),
+      setHideWelcomeModal: (hideWelcomeModal) => set({ hideWelcomeModal })
     }),
     {
       name: 'detectorapp-settings',

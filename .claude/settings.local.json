@@ -77,7 +77,8 @@
       "Bash(npx tsc:*)",
       "Bash(del \"C:\\VSCode\\detectorapp-nl\\.git\\index.lock\")",
       "Bash(npm run build:commercial:*)",
-      "Bash(npm run dev:commercial:*)"
+      "Bash(npm run dev:commercial:*)",
+      "WebFetch(domain:www.atlasleefomgeving.nl)"
     ]
   }
 }
