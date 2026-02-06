@@ -107,50 +107,49 @@ export function MonumentFilter() {
               transition={{ duration: 0.15 }}
               className="fixed bottom-[116px] left-[56px] z-[801] bg-white/95 rounded-lg shadow-lg backdrop-blur-sm overflow-hidden"
             >
-              {/* Compact content - search + toggle inline */}
-              <div className="flex items-center gap-1.5 p-2">
-                {/* Search input */}
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="Filter..."
-                  className="w-24 px-2 py-1.5 text-sm bg-gray-100 rounded border-0 outline-none focus:ring-2 focus:ring-purple-400"
-                />
+              <div className="p-2 space-y-1.5">
+                {/* Search + toggle row */}
+                <div className="flex items-center gap-2">
+                  {/* Search input */}
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="Filter..."
+                    className="w-24 px-2 py-1.5 text-sm bg-gray-100 rounded border-0 outline-none focus:ring-2 focus:ring-purple-400"
+                  />
 
-                {/* Toggle button - small, inline */}
-                <button
-                  onClick={handleToggle}
-                  disabled={!hasKeyword}
-                  className={`w-8 h-8 flex items-center justify-center rounded transition-colors border-0 outline-none ${
-                    isActive
-                      ? 'bg-purple-500 text-white'
-                      : hasKeyword
-                        ? 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  }`}
-                  title={isActive ? 'Filter uit' : 'Filter aan'}
-                >
-                  <Filter size={14} />
-                </button>
-
-                {/* Clear button */}
-                {(hasKeyword || isActive) && (
+                  {/* Toggle switch */}
                   <button
-                    onClick={handleClear}
-                    className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors border-0 outline-none"
-                    title="Wissen"
+                    onClick={handleToggle}
+                    disabled={!hasKeyword}
+                    className={`relative w-10 h-5 rounded-full transition-colors border-0 outline-none ${
+                      isActive
+                        ? 'bg-purple-500'
+                        : hasKeyword
+                          ? 'bg-gray-300'
+                          : 'bg-gray-200 cursor-not-allowed'
+                    }`}
+                    title={isActive ? 'Filter uit' : 'Filter aan'}
                   >
-                    <X size={14} />
+                    <span
+                      className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                        isActive ? 'translate-x-5' : 'translate-x-0.5'
+                      }`}
+                    />
                   </button>
-                )}
+                </div>
 
-                {/* Count indicator */}
-                {isActive && totalCount > 0 && (
-                  <span className="text-xs text-purple-600 font-medium whitespace-nowrap">
-                    {filteredCount}/{totalCount}
-                  </span>
+                {/* Count indicator - always visible when there's data */}
+                {totalCount > 0 && (
+                  <div className="text-xs text-gray-500 text-center">
+                    {isActive ? (
+                      <span className="text-purple-600 font-medium">{filteredCount} van {totalCount}</span>
+                    ) : (
+                      <span>{totalCount} monumenten</span>
+                    )}
+                  </div>
                 )}
               </div>
             </motion.div>
