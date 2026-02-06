@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import {
   collection,
   doc,
@@ -17,6 +17,29 @@ import { useRouteRecordingStore, type RecordedRoute } from '../store/routeRecord
 // Debounce time for syncing (ms)
 const SYNC_DEBOUNCE = 2000
 
+// Wait for all stores to hydrate from localStorage
+async function waitForHydration(): Promise<void> {
+  const stores = [
+    useCustomPointLayerStore,
+    useLocalVondstenStore,
+    useRouteRecordingStore
+  ]
+
+  await Promise.all(stores.map(store => {
+    // If already hydrated, resolve immediately
+    if (store.persist.hasHydrated()) {
+      return Promise.resolve()
+    }
+    // Otherwise wait for hydration
+    return new Promise<void>(resolve => {
+      const unsubscribe = store.persist.onFinishHydration(() => {
+        unsubscribe()
+        resolve()
+      })
+    })
+  }))
+}
+
 export function useCloudSync() {
   const user = useAuthStore(state => state.user)
   const { layers, clearAll: clearLayers } = useCustomPointLayerStore()
@@ -28,6 +51,15 @@ export function useCloudSync() {
   const lastSyncedLayersRef = useRef<string>('')
   const lastSyncedVondstenRef = useRef<string>('')
   const lastSyncedRoutesRef = useRef<string>('')
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Wait for hydration on mount
+  useEffect(() => {
+    waitForHydration().then(() => {
+      setIsHydrated(true)
+      console.log('💧 Stores gehydrateerd uit localStorage')
+    })
+  }, [])
 
   // Sync layers to Firestore
   const syncLayersToCloud = useCallback(async (layersData: CustomPointLayer[]) => {
@@ -176,8 +208,10 @@ export function useCloudSync() {
     }
   }, [user, layers, vondsten, savedRoutes, syncLayersToCloud, syncVondstenToCloud, syncRoutesToCloud])
 
-  // Load from cloud when user logs in
+  // Load from cloud when user logs in (after hydration)
   useEffect(() => {
+    if (!isHydrated) return // Wait for localStorage hydration first
+
     if (user) {
       isInitialLoadRef.current = true
       loadFromCloud()
@@ -186,12 +220,13 @@ export function useCloudSync() {
       isInitialLoadRef.current = true
       lastSyncedLayersRef.current = ''
       lastSyncedVondstenRef.current = ''
+      lastSyncedRoutesRef.current = ''
     }
-  }, [user?.uid]) // Only trigger on user change
+  }, [user?.uid, isHydrated]) // Trigger on user change AND when hydration completes
 
   // Sync layers when they change (debounced)
   useEffect(() => {
-    if (!user || isInitialLoadRef.current) return
+    if (!user || !isHydrated || isInitialLoadRef.current) return
 
     const layersJson = JSON.stringify(layers)
 
@@ -218,7 +253,7 @@ export function useCloudSync() {
 
   // Sync vondsten when they change (debounced)
   useEffect(() => {
-    if (!user || isInitialLoadRef.current) return
+    if (!user || !isHydrated || isInitialLoadRef.current) return
 
     const vondstenJson = JSON.stringify(vondsten)
 
@@ -245,7 +280,7 @@ export function useCloudSync() {
 
   // Sync routes when they change (debounced)
   useEffect(() => {
-    if (!user || isInitialLoadRef.current) return
+    if (!user || !isHydrated || isInitialLoadRef.current) return
 
     const routesJson = JSON.stringify(savedRoutes)
 

@@ -1,2 +1,0 @@
-import{as as o,ej as k,ek as u,el as m,em as C,en as i,eo as r}from"./index-DXfHins8.js";const U=new o(m),e=new o(k),n=new o(u),j=new o(C);function x(t){const l=c.get(t);if(l)return l;let s=U;if(t)if(t===e)s=e;else if(t===n)s=n;else{const a=t.wkid,f=t.latestWkid;if(a!=null||f!=null)i(a)||i(f)?s=e:(r(a)||r(f))&&(s=n);else{const p=t.wkt2??t.wkt;if(p){const w=p.toUpperCase();w===$?s=e:w===d&&(s=n)}}}return c.set(t,s),s}const c=new Map,$=e.wkt.toUpperCase(),d=n.wkt.toUpperCase();export{x as a,j as c};
-//# sourceMappingURL=spatialReferenceEllipsoidUtils-DIMaU38r.js.map
