@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Ruler, X, Trash2 } from 'lucide-react'
-import { useMapStore } from '../../store'
+import { useMapStore, useUIStore } from '../../store'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Draw } from 'ol/interaction'
@@ -14,6 +14,7 @@ import type { EventsKey } from 'ol/events'
 
 export function MeasureTool() {
   const map = useMapStore(state => state.map)
+  const setDrawingMode = useUIStore(state => state.setDrawingMode)
   const [isActive, setIsActive] = useState(false)
   const [currentDistance, setCurrentDistance] = useState<string | null>(null)
   const [totalMeasurements, setTotalMeasurements] = useState(0)
@@ -46,6 +47,14 @@ export function MeasureTool() {
       }
     }
   }, [map])
+
+  // Set drawing mode when active changes
+  useEffect(() => {
+    setDrawingMode(isActive)
+    return () => {
+      if (isActive) setDrawingMode(false)
+    }
+  }, [isActive, setDrawingMode])
 
   // Handle measurement mode
   useEffect(() => {
@@ -129,10 +138,10 @@ export function MeasureTool() {
 
   return (
     <>
-      {/* Measure button */}
+      {/* Measure button - left side, under weather widget */}
       <motion.button
         onClick={toggleMeasure}
-        className={`fixed bottom-[172px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
+        className={`fixed top-[70px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
           isActive ? 'bg-blue-500 text-white' : 'bg-white/80 hover:bg-white/90 text-gray-600'
         }`}
         whileHover={{ scale: 1.05 }}
@@ -150,14 +159,11 @@ export function MeasureTool() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="fixed bottom-[172px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden min-w-[180px]"
+            className="fixed top-[70px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden min-w-[180px]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-blue-500">
-              <div className="flex items-center gap-2">
-                <Ruler size={14} className="text-white" />
-                <span className="font-medium text-white text-xs">Meten</span>
-              </div>
+            <div className="flex items-center justify-between px-3 py-1.5 bg-blue-500">
+              <span className="font-medium text-white text-xs">Meten</span>
               <button
                 onClick={toggleMeasure}
                 className="p-0.5 rounded hover:bg-white/20 transition-colors border-0 outline-none"
@@ -169,7 +175,7 @@ export function MeasureTool() {
             {/* Content */}
             <div className="p-3 space-y-2">
               <p className="text-xs text-gray-500">
-                Klik op de kaart om te meten. Dubbelklik om te stoppen.
+                Klik om te meten. Dubbelklik om te stoppen.
               </p>
 
               {currentDistance && (

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Pencil, X, Trash2, Circle, Minus, Square, MousePointer, Save } from 'lucide-react'
-import { useMapStore } from '../../store'
+import { Pencil, X, Trash2, MapPin, Spline, Pentagon, Move, Save } from 'lucide-react'
+import { useMapStore, useUIStore } from '../../store'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
@@ -16,12 +16,12 @@ import type { FeatureGeometry, GeometryType } from '../../store/customPointLayer
 
 type DrawMode = 'select' | 'point' | 'line' | 'polygon'
 
-// Layer ID for drawings
-const DRAWINGS_LAYER_ID = 'drawings-layer'
+// Layer name for drawings
 const DRAWINGS_LAYER_NAME = 'Mijn Tekeningen'
 
 export function DrawTool() {
   const map = useMapStore(state => state.map)
+  const setDrawingMode = useUIStore(state => state.setDrawingMode)
   const [isActive, setIsActive] = useState(false)
   const [drawMode, setDrawMode] = useState<DrawMode>('select')
   const [featureCount, setFeatureCount] = useState(0)
@@ -34,16 +34,6 @@ export function DrawTool() {
   const drawRef = useRef<Draw | null>(null)
   const selectRef = useRef<Select | null>(null)
   const modifyRef = useRef<Modify | null>(null)
-
-  // Ensure drawings layer exists
-  const ensureDrawingsLayer = () => {
-    let layer = layers.find(l => l.id === DRAWINGS_LAYER_ID)
-    if (!layer) {
-      // Create the drawings layer
-      addLayer(DRAWINGS_LAYER_NAME, ['Tekening'])
-    }
-    return getLayer(DRAWINGS_LAYER_ID) || layers.find(l => l.name === DRAWINGS_LAYER_NAME)
-  }
 
   // Initialize vector layer for drawings preview
   useEffect(() => {
@@ -68,6 +58,14 @@ export function DrawTool() {
       }
     }
   }, [map])
+
+  // Set drawing mode when active changes
+  useEffect(() => {
+    setDrawingMode(isActive)
+    return () => {
+      if (isActive) setDrawingMode(false)
+    }
+  }, [isActive, setDrawingMode])
 
   // Handle draw mode changes
   useEffect(() => {
@@ -283,10 +281,10 @@ export function DrawTool() {
 
   return (
     <>
-      {/* Draw button */}
+      {/* Draw button - left side, under measure tool */}
       <motion.button
         onClick={toggleDraw}
-        className={`fixed bottom-[116px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
+        className={`fixed top-[126px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
           isActive ? 'bg-orange-500 text-white' : 'bg-white/80 hover:bg-white/90 text-gray-600'
         }`}
         whileHover={{ scale: 1.05 }}
@@ -304,14 +302,11 @@ export function DrawTool() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="fixed bottom-[116px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden min-w-[200px]"
+            className="fixed top-[126px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden min-w-[200px]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-orange-500">
-              <div className="flex items-center gap-2">
-                <Pencil size={14} className="text-white" />
-                <span className="font-medium text-white text-xs">Tekenen</span>
-              </div>
+            <div className="flex items-center justify-between px-3 py-1.5 bg-orange-500">
+              <span className="font-medium text-white text-xs">Tekenen</span>
               <button
                 onClick={toggleDraw}
                 className="p-0.5 rounded hover:bg-white/20 transition-colors border-0 outline-none"
@@ -325,28 +320,28 @@ export function DrawTool() {
               {/* Drawing tools */}
               <div className="flex gap-1">
                 <ToolButton
-                  icon={<MousePointer size={16} />}
+                  icon={<Move size={16} />}
                   active={drawMode === 'select'}
                   onClick={() => setDrawMode('select')}
-                  title="Selecteren/Bewerken"
+                  title="Selecteren"
                 />
                 <ToolButton
-                  icon={<Circle size={16} />}
+                  icon={<MapPin size={16} />}
                   active={drawMode === 'point'}
                   onClick={() => setDrawMode('point')}
-                  title="Punt tekenen"
+                  title="Punt"
                 />
                 <ToolButton
-                  icon={<Minus size={16} />}
+                  icon={<Spline size={16} />}
                   active={drawMode === 'line'}
                   onClick={() => setDrawMode('line')}
-                  title="Lijn tekenen"
+                  title="Lijn"
                 />
                 <ToolButton
-                  icon={<Square size={16} />}
+                  icon={<Pentagon size={16} />}
                   active={drawMode === 'polygon'}
                   onClick={() => setDrawMode('polygon')}
-                  title="Vlak tekenen"
+                  title="Vlak"
                 />
               </div>
 

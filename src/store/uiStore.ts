@@ -31,6 +31,9 @@ interface UIState {
   // Route dashboard state
   routeDashboardOpen: boolean
 
+  // Drawing/measuring mode - blocks popups
+  isDrawingMode: boolean
+
   // Collapsed categories
   collapsedCategories: Set<string>
 
@@ -70,6 +73,9 @@ interface UIState {
   // Monument filter actions
   toggleMonumentFilter: () => void
   closeMonumentFilter: () => void
+
+  // Drawing mode actions
+  setDrawingMode: (active: boolean) => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -95,6 +101,7 @@ export const useUIStore = create<UIState>()(
     layerDashboardOpen: false,
     layerDashboardLayerId: null,
     routeDashboardOpen: false,
+    isDrawingMode: false,
     collapsedCategories: new Set<string>(),
 
     closeAllPanels: () => {
@@ -357,6 +364,13 @@ export const useUIStore = create<UIState>()(
     closeMonumentFilter: () => {
       set(state => {
         state.monumentFilterOpen = false
+      })
+    },
+
+    // Drawing mode actions
+    setDrawingMode: (active) => {
+      set(state => {
+        state.isDrawingMode = active
       })
     }
   }))

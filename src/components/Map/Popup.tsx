@@ -5,7 +5,7 @@ import TileLayer from 'ol/layer/Tile'
 import { toLonLat } from 'ol/proj'
 import proj4 from 'proj4'
 import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2, Type, ExternalLink, Plus, Check, Pencil, PersonStanding, GripHorizontal } from 'lucide-react'
-import { useMapStore } from '../../store'
+import { useMapStore, useUIStore } from '../../store'
 import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
 import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondstenStore'
 import { useCustomPointLayerStore, type FeatureGeometry, type GeometryType } from '../../store/customPointLayerStore'
@@ -158,6 +158,7 @@ function getSoilExplanation(soilName: string, soilCode?: string): string[] {
 
 export function Popup() {
   const map = useMapStore(state => state.map)
+  const isDrawingMode = useUIStore(state => state.isDrawingMode)
   const removeVondst = useLocalVondstenStore(state => state.removeVondst)
   const updateVondst = useLocalVondstenStore(state => state.updateVondst)
   const vondsten = useLocalVondstenStore(state => state.vondsten)
@@ -1990,6 +1991,9 @@ export function Popup() {
 
     // Handle map clicks
     const handleClick = async (evt: MapBrowserEvent<any>) => {
+      // Don't show popups when in drawing/measuring mode
+      if (useUIStore.getState().isDrawingMode) return
+
       // Collect all popup contents from all sources
       const collectedContents: string[] = []
       // Parallel array for feature data (geometry + properties)

@@ -139,10 +139,10 @@ export function PrintTool() {
 
   return (
     <>
-      {/* Print button */}
+      {/* Print button - left side, under draw tool */}
       <motion.button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-[228px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm text-gray-600"
+        className="fixed top-[182px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm text-gray-600"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Kaart printen/exporteren"
@@ -179,10 +179,7 @@ export function PrintTool() {
             >
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-green-500 to-green-600">
-                <div className="flex items-center gap-2">
-                  <Printer size={18} className="text-white" />
-                  <span className="font-medium text-white">Kaart Exporteren</span>
-                </div>
+                <span className="font-medium text-white">Kaart Exporteren</span>
                 <button
                   onClick={() => setIsOpen(false)}
                   className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none"
