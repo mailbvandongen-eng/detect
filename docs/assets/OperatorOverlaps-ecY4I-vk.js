@@ -1,2 +1,0 @@
-import{C as a,D as o}from"./ProjectionTransformation-D7sivFJ4.js";class n extends a{getOperatorType(){return 9}execute(e,r,t,s){return o(e,r,t,32,s)}}export{n as t};
-//# sourceMappingURL=OperatorOverlaps-ecY4I-vk.js.map

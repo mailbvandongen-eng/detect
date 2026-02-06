@@ -287,8 +287,8 @@ export function PresetButtons() {
                 })}
               </div>
 
-              {/* Footer: Add preset & Reset - side by side */}
-              <div className="border-t border-gray-200 p-2">
+              {/* Footer: Add preset left, Reset right */}
+              <div className="border-t border-gray-200 px-2 py-1.5">
                 {showAddPreset ? (
                   <div className="flex gap-1">
                     <input
@@ -313,20 +313,21 @@ export function PresetButtons() {
                     </button>
                   </div>
                 ) : (
-                  <div className="flex justify-center gap-2">
+                  <div className="flex items-center justify-between group">
                     <button
                       onClick={() => setShowAddPreset(true)}
-                      className="w-8 h-8 flex items-center justify-center text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none"
-                      title="Nieuwe preset"
+                      className="h-8 flex items-center gap-2 px-2 text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none"
+                      style={{ fontSize: `${baseFontSize}px` }}
                     >
-                      <Plus size={16} />
+                      <Plus size={14} />
+                      <span className="text-gray-600">Voeg preset toe</span>
                     </button>
                     <button
                       onClick={handleResetPresets}
-                      className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded transition-colors border-0 outline-none"
+                      className="w-8 h-8 flex items-center justify-center text-gray-400 opacity-0 group-hover:opacity-100 hover:text-gray-600 hover:bg-gray-100 rounded transition-all border-0 outline-none"
                       title="Herstel standaard"
                     >
-                      <RotateCw size={16} />
+                      <RotateCw size={14} />
                     </button>
                   </div>
                 )}

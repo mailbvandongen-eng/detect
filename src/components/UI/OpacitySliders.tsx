@@ -111,11 +111,14 @@ export function OpacitySliders() {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 20, scale: 0.9 }}
               transition={{ duration: 0.2 }}
-              className="absolute bottom-0 right-14 bg-white/95 rounded-lg shadow-lg p-3 min-w-[220px] max-h-[60vh] overflow-y-auto"
+              className="absolute bottom-0 right-14 bg-white/95 rounded-xl shadow-lg overflow-hidden min-w-[220px] max-h-[60vh] flex flex-col"
             >
-            <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
-              Transparantie
-            </div>
+              {/* Header - same style as Presets */}
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500">
+                <SlidersHorizontal size={14} className="text-white" />
+                <span className="font-medium text-white text-xs">Transparantie</span>
+              </div>
+            <div className="p-3 overflow-y-auto flex-1">
             <div className="space-y-3">
               {displayedSliders.map(layer => {
                 const opacity = opacities[layer.name] ?? layer.default
@@ -161,6 +164,7 @@ export function OpacitySliders() {
                 )}
               </button>
             )}
+            </div>
           </motion.div>
           </>
         )}

@@ -105,8 +105,13 @@ export function MonumentFilter() {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="fixed bottom-[116px] left-[56px] z-[801] bg-white/95 rounded-lg shadow-lg backdrop-blur-sm overflow-hidden"
+              className="fixed bottom-[116px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden"
             >
+              {/* Header - same style as Presets */}
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-500">
+                <Filter size={14} className="text-white" />
+                <span className="font-medium text-white text-xs">Monument Filter</span>
+              </div>
               <div className="p-2 space-y-1.5">
                 {/* Search + toggle row */}
                 <div className="flex items-center gap-2">
