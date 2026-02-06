@@ -27,7 +27,7 @@ const BUILT_IN_PRESETS: Preset[] = [
     layers: ['AMK Monumenten', 'Gewaspercelen', 'Geomorfologie', 'AHN4 Hoogtekaart Kleur', 'Kadastrale Grenzen'],
     baseLayer: 'CartoDB (licht)',  // Explicit default base layer
     layerOpacities: {
-      'AMK Monumenten': 0.60,
+      'AMK Monumenten': 0.50,
       'Gewaspercelen': 0.25,
       'Geomorfologie': 0.25,
       'AHN4 Hoogtekaart Kleur': 0.25
@@ -242,12 +242,13 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 12,
+      version: 13,
       migrate: (persistedState: unknown, version: number) => {
+        // v13: Changed AMK opacity from 60% to 50% in Detectie preset
         // v12: Updated Detectie preset with specific opacities and added Kadastrale Grenzen
         // v11: Added Geomorfologie and AHN4 Hoogtekaart Kleur to Detectie preset with low opacity
         // v10: Removed non-existent 'Archeo Landschappen' from Terrein Analyse preset
-        if (version < 12) {
+        if (version < 13) {
           // Force reset all presets to new defaults
           return {
             presets: [...BUILT_IN_PRESETS]

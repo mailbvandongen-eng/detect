@@ -41,12 +41,15 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
             >
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 flex-shrink-0">
-                <h2 className="text-lg font-semibold text-white">Handleiding</h2>
+                <div className="flex items-center gap-2">
+                  <Map size={18} className="text-white" />
+                  <span className="font-medium text-white">Handleiding</span>
+                </div>
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-lg hover:bg-white/20 transition-colors border-0 outline-none"
+                  className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none"
                 >
-                  <X size={20} className="text-white" />
+                  <X size={18} className="text-white" />
                 </button>
               </div>
 
@@ -159,7 +162,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 </Section>
 
                 {/* Kaartlagen */}
-                <Section title="Kaartlagen" icon={<Layers size={16} />}>
+                <Section title="Kaartlagen">
                   <p className="text-xs text-gray-600 mb-2">
                     De app bevat vele informatieve lagen:
                   </p>
@@ -167,7 +170,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     <LayerCategory name="Archeologie" items={["AMK Monumenten", "IKAW gebieden", "Kastelen", "Romeinse wegen"]} />
                     <LayerCategory name="Landschap" items={["AHN Hoogtekaart", "Bodemkaart", "Geomorfologie"]} />
                     <LayerCategory name="Historisch" items={["Oude kaarten", "Luchtfoto's", "Kadaster"]} />
-                    <LayerCategory name="Natuur" items={["Veengebieden", "Grafheuvels", "Hunebedden"]} />
+                    <LayerCategory name="Natuur" items={["Grafheuvels", "Hunebedden", "Terpen"]} />
                   </div>
                   <p className="text-xs text-gray-500 mt-2 italic">
                     Tip: Klik op de kaart om popup-informatie te zien over lagen op die locatie.
@@ -318,11 +321,11 @@ function LayerCategory({ name, items }: { name: string, items: string[] }) {
   return (
     <div className="p-2 bg-gray-50 rounded-lg">
       <h4 className="text-xs font-semibold text-gray-600 mb-1">{name}</h4>
-      <ul className="text-xs text-gray-500 space-y-0.5">
+      <div className="text-xs text-gray-500 space-y-0.5">
         {items.map((item, i) => (
-          <li key={i}>• {item}</li>
+          <div key={i}>{item}</div>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }
