@@ -3632,10 +3632,10 @@ export function Popup() {
           >
             {/* Drag handle - clickable to toggle height */}
             <div
-              className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing"
+              className="flex justify-center py-1.5 cursor-grab active:cursor-grabbing"
               onClick={() => setPopupHeight(popupHeight === 'half' ? 'full' : 'half')}
             >
-              <GripHorizontal size={24} className="text-gray-400" />
+              <GripHorizontal size={18} className="text-gray-300" />
             </div>
 
             {/* Header row: navigation + title + close */}
