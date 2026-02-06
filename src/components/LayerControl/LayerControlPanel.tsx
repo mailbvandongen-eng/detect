@@ -47,13 +47,14 @@ export function LayerControlPanel() {
               </LayerGroup>
 
               {/* Archaeological Layers */}
-              <LayerGroup title="Archeologische lagen" defaultExpanded={false}>
+              <LayerGroup title="Archeologie" defaultExpanded={false}>
+                <LayerItem name="Archeo Onderzoeken" type="overlay" />
                 <LayerItem name="AMK Monumenten" type="overlay" />
-                <LayerItem name="Romeinse wegen" type="overlay" />
+                <LayerItem name="Romeinse wegen (regio)" type="overlay" />
                 <LayerItem name="Romeinse wegen (Wereld)" type="overlay" />
+                <LayerItem name="Romeinse Forten" type="overlay" />
                 <LayerItem name="Kastelen" type="overlay" />
                 <LayerItem name="IKAW" type="overlay" />
-                <LayerItem name="Archeo Landschappen" type="overlay" />
               </LayerGroup>
 
               {/* Erfgoed & Monumenten */}
