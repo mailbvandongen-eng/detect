@@ -4,7 +4,7 @@ import TileWMS from 'ol/source/TileWMS'
 import TileLayer from 'ol/layer/Tile'
 import { toLonLat } from 'ol/proj'
 import proj4 from 'proj4'
-import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2, Type, ExternalLink, Plus, Check, Pencil, PersonStanding } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2, Type, ExternalLink, Plus, Check, Pencil, PersonStanding, GripHorizontal } from 'lucide-react'
 import { useMapStore } from '../../store'
 import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
 import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondstenStore'
@@ -3635,7 +3635,7 @@ export function Popup() {
               className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing"
               onClick={() => setPopupHeight(popupHeight === 'half' ? 'full' : 'half')}
             >
-              <div className="w-10 h-1 bg-gray-300 rounded-full" />
+              <GripHorizontal size={24} className="text-gray-400" />
             </div>
 
             {/* Header row: navigation + title + close */}

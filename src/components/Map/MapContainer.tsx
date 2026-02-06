@@ -197,7 +197,7 @@ export function MapContainer() {
       // No basemap - transparent overlay
     })
 
-    // Create ArcGIS MapView
+    // Create ArcGIS MapView with transparent background
     const esriView = new MapView({
       container: arcgisContainerRef.current,
       map: esriMap,
@@ -208,12 +208,18 @@ export function MapContainer() {
       },
       ui: {
         components: [] // No UI elements - OL handles controls
+      },
+      // Make background fully transparent
+      background: {
+        color: [0, 0, 0, 0] // RGBA: transparent
       }
     })
 
     // Wait for view to be ready
     esriView.when(() => {
       console.log('✅ ArcGIS MapView ready')
+      console.log('📍 ArcGIS center:', esriView.center?.longitude, esriView.center?.latitude)
+      console.log('🔍 ArcGIS zoom:', esriView.zoom)
       setArcGISMap(esriMap, esriView)
       setArcgisReady(true)
       arcgisInitialized.current = true
@@ -235,6 +241,7 @@ export function MapContainer() {
       })
     }).catch((error: Error) => {
       console.error('❌ ArcGIS MapView initialization failed:', error)
+      console.error('Error details:', error.message)
     })
 
     return () => {
@@ -298,13 +305,6 @@ export function MapContainer() {
   }
 
   const arcgisOverlayStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    pointerEvents: 'none', // Let OL handle all interactions
-    zIndex: 1, // Above OL base layers, below UI
     opacity: arcgisReady ? 1 : 0,
     transition: 'opacity 0.3s ease'
   }
