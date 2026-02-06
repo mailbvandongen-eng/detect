@@ -87,6 +87,7 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
 
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<number>()
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const baseFontSize = 13 * settings.fontScale / 100
 
@@ -96,6 +97,27 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
       setTimeout(() => inputRef.current?.focus(), 100)
     }
   }, [isOpen])
+
+  // Click outside to close
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        onClose()
+      }
+    }
+
+    // Add listener with slight delay to avoid immediate close
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside)
+    }, 100)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen, onClose])
 
   // Reset search state when closed, but NOT the highlight
   useEffect(() => {
@@ -274,6 +296,7 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
   return (
     <AnimatePresence>
       <motion.div
+        ref={containerRef}
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}

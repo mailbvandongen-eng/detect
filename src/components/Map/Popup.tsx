@@ -3630,58 +3630,59 @@ export function Popup() {
             dragElastic={0.3}
             onDragEnd={handleDragEnd}
           >
-            {/* Drag handle - clickable to toggle height */}
+            {/* Blue gradient header - like MonumentSearch */}
             <div
-              className="flex justify-center py-1.5 cursor-grab active:cursor-grabbing"
+              className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white cursor-grab active:cursor-grabbing rounded-t-xl select-none"
               onClick={() => setPopupHeight(popupHeight === 'half' ? 'full' : 'half')}
             >
-              <GripHorizontal size={18} className="text-gray-300" />
-            </div>
+              {/* Left side: navigation (if multiple) + title */}
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                {/* Navigation buttons (only if multiple) */}
+                {hasMultiple && (
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
+                      className="p-1 text-white/80 hover:text-white transition-colors border-0 outline-none bg-transparent"
+                      aria-label="Vorige laag"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                    <span className="text-white/80 font-medium min-w-[32px] text-center" style={{ fontSize: '0.75em' }}>
+                      {currentIndex + 1}/{allContents.length}
+                    </span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); goToNext(); }}
+                      className="p-1 text-white/80 hover:text-white transition-colors border-0 outline-none bg-transparent"
+                      aria-label="Volgende laag"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                )}
 
-            {/* Header row: navigation + title + close */}
-            <div className="flex items-center gap-2 px-3 pb-2 border-b border-gray-100">
-              {/* Navigation buttons (only if multiple) */}
-              {hasMultiple && (
-                <div className="flex items-center gap-0.5 flex-shrink-0">
-                  <button
-                    onClick={goToPrevious}
-                    className="p-1 text-blue-500 hover:text-blue-600 transition-colors border-0 outline-none bg-transparent"
-                    aria-label="Vorige laag"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-                  <span className="text-gray-500 font-medium min-w-[32px] text-center" style={{ fontSize: '0.857em' }}>
-                    {currentIndex + 1}/{allContents.length}
-                  </span>
-                  <button
-                    onClick={goToNext}
-                    className="p-1 text-blue-500 hover:text-blue-600 transition-colors border-0 outline-none bg-transparent"
-                    aria-label="Volgende laag"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
-              )}
+                {/* Title */}
+                <span className="font-medium text-white truncate" style={{ fontSize: '0.9em' }}>
+                  {extractedTitle || 'Info'}
+                </span>
+              </div>
 
-              {/* Title - takes remaining space */}
-              <span className="flex-1 font-semibold text-gray-800 truncate" style={{ fontSize: '1em' }}>
-                {extractedTitle || 'Info'}
-              </span>
+              {/* Right side: action icons + grip handle + close */}
+              <div className="flex items-center gap-1 flex-shrink-0">
 
-              {/* Add to layer button - oranje voor eigen lagen */}
+              {/* Add to layer button */}
               {popupCoordinate && (
                 <div className="relative">
                   <button
-                    onClick={() => setShowLayerPicker(!showLayerPicker)}
-                    className={`p-1.5 transition-colors flex-shrink-0 border-0 outline-none bg-transparent ${
+                    onClick={(e) => { e.stopPropagation(); setShowLayerPicker(!showLayerPicker); }}
+                    className={`p-1 transition-colors flex-shrink-0 border-0 outline-none bg-transparent rounded hover:bg-white/20 ${
                       addedToLayer
-                        ? 'text-green-500'
-                        : 'text-orange-500 hover:text-orange-600'
+                        ? 'text-green-300'
+                        : 'text-white/80 hover:text-white'
                     }`}
                     title="Toevoegen aan mijn laag"
                     aria-label="Toevoegen aan mijn laag"
                   >
-                    {addedToLayer ? <Check size={18} /> : <Plus size={18} />}
+                    {addedToLayer ? <Check size={16} /> : <Plus size={16} />}
                   </button>
 
                   {/* Layer picker dropdown - opent naar beneden, binnen de popup content */}
@@ -3832,22 +3833,27 @@ export function Popup() {
                   href={mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-1.5 text-blue-500 hover:text-blue-600 transition-colors flex-shrink-0"
+                  onClick={(e) => e.stopPropagation()}
+                  className="p-1 text-white/80 hover:text-white transition-colors flex-shrink-0 rounded hover:bg-white/20"
                   title="Navigeer naar locatie"
                   aria-label="Open in Google Maps"
                 >
-                  <ExternalLink size={18} />
+                  <ExternalLink size={16} />
                 </a>
               )}
 
+              {/* Drag handle indicator */}
+              <GripHorizontal size={18} className="text-white/60 mx-1" />
+
               {/* Close button */}
               <button
-                onClick={handleClose}
-                className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 border-0 outline-none bg-transparent"
+                onClick={(e) => { e.stopPropagation(); handleClose(); }}
+                className="p-1 text-white/80 hover:text-white transition-colors flex-shrink-0 border-0 outline-none bg-transparent rounded hover:bg-white/20"
                 aria-label="Sluiten"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
+              </div>
             </div>
 
             {/* Content - scrollable, without title */}
