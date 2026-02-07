@@ -69,7 +69,8 @@ export function ThemesPanel() {
       {themesPanelOpen && (
           <motion.div
             ref={panelRef}
-            className="fixed top-2.5 right-2 z-[1101] bg-white rounded-lg shadow-lg overflow-hidden w-[300px] max-h-[calc(100vh-200px)] flex flex-col"
+            className="fixed right-[56px] z-[1101] bg-white rounded-lg shadow-lg overflow-hidden w-[300px] max-h-[calc(100vh-100px)] flex flex-col"
+            style={{ top: 'calc(max(0.5rem, env(safe-area-inset-top, 0.5rem)) + 52px)' }}
             initial={{ opacity: 0, x: 50, scale: 0.95 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 50, scale: 0.95 }}

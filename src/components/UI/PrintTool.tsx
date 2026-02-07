@@ -8,6 +8,8 @@ type PrintFormat = 'png' | 'jpeg' | 'pdf'
 export function PrintTool() {
   const map = useMapStore(state => state.map)
   const showPrintTool = useSettingsStore(state => state.showPrintTool)
+  const showMeasureTool = useSettingsStore(state => state.showMeasureTool)
+  const showDrawTool = useSettingsStore(state => state.showDrawTool)
   const [isOpen, setIsOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [format, setFormat] = useState<PrintFormat>('png')
@@ -141,12 +143,19 @@ export function PrintTool() {
   // Don't render if hidden
   if (!showPrintTool) return null
 
+  // Calculate position dynamically based on which tools above are visible
+  // Base position is 90px (under weather widget), each tool adds 48px (44px button + 4px gap)
+  let topPosition = 90
+  if (showMeasureTool) topPosition += 48
+  if (showDrawTool) topPosition += 48
+
   return (
     <>
-      {/* Print button - left side, under draw tool */}
+      {/* Print button - left side, dynamic position */}
       <motion.button
         onClick={() => setIsOpen(true)}
-        className="fixed top-[202px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        className="fixed left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        style={{ top: `${topPosition}px` }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Kaart printen/exporteren"

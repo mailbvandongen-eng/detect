@@ -23,6 +23,7 @@ export function DrawTool() {
   const map = useMapStore(state => state.map)
   const setDrawingMode = useUIStore(state => state.setDrawingMode)
   const showDrawTool = useSettingsStore(state => state.showDrawTool)
+  const showMeasureTool = useSettingsStore(state => state.showMeasureTool)
   const [isActive, setIsActive] = useState(false)
   const [drawMode, setDrawMode] = useState<DrawMode>('select')
   const [featureCount, setFeatureCount] = useState(0)
@@ -283,14 +284,19 @@ export function DrawTool() {
   // Don't render if hidden
   if (!showDrawTool) return null
 
+  // Calculate position dynamically based on which tools above are visible
+  // Base position is 90px (under weather widget), each tool adds 48px (44px button + 4px gap)
+  const topPosition = 90 + (showMeasureTool ? 48 : 0)
+
   return (
     <>
-      {/* Draw button - left side, under measure tool */}
+      {/* Draw button - left side, dynamic position */}
       <motion.button
         onClick={toggleDraw}
-        className={`fixed top-[146px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
+        className={`fixed left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
           isActive ? 'bg-orange-500' : 'bg-white/80 hover:bg-white/90'
         }`}
+        style={{ top: `${topPosition}px` }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Tekenen op de kaart"
@@ -306,7 +312,8 @@ export function DrawTool() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="fixed top-[146px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden min-w-[200px]"
+            className="fixed left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden min-w-[200px]"
+            style={{ top: `${topPosition}px` }}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-1.5 bg-orange-500">

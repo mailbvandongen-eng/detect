@@ -159,9 +159,10 @@ export function RouteRecordButton() {
   if (!showRouteRecordButton) return null
 
   // Dynamic positioning based on whether Vondst button is visible
-  // GPS button is at right-2 (8px), each button is 44px + 6px gap = 50px
-  const mainButtonRight = showVondstButton ? 'right-[114px]' : 'right-[60px]'
-  const secondaryButtonRight = showVondstButton ? 'right-[168px]' : 'right-[114px]'
+  // GPS button is at right-[104px], VondstButton at right-[152px]
+  // Each button is 44px + 4px gap = 48px
+  const mainButtonRight = showVondstButton ? 'right-[200px]' : 'right-[152px]'
+  const secondaryButtonRight = showVondstButton ? 'right-[248px]' : 'right-[200px]'
 
   const handleStartRecording = () => {
     startRecording()

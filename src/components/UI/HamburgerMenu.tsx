@@ -123,15 +123,15 @@ export function HamburgerMenu() {
               onClick={closeMenu}
             />
 
-            {/* Menu Panel */}
+            {/* Menu Panel - positioned to the left of the hamburger button */}
             <motion.div
               initial={{ opacity: 0, x: 50, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 50, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="fixed right-2 z-[801] w-64 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col"
+              className="fixed right-[56px] z-[801] w-64 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[80vh]"
               style={{
-                top: 'calc(max(0.5rem, env(safe-area-inset-top, 0.5rem)) + 52px)',
+                top: 'calc(max(0.5rem, env(safe-area-inset-top, 0.5rem)))',
                 fontSize: `${baseFontSize}px`
               }}
             >
