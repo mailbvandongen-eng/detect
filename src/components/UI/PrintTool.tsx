@@ -178,13 +178,7 @@ export function PrintTool() {
 
             {/* Modal */}
             <motion.div
-              className="fixed z-[1701] bg-white rounded-xl shadow-2xl overflow-hidden"
-              style={{
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 'min(90vw, 320px)'
-              }}
+              className="fixed inset-4 z-[1701] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-w-sm mx-auto my-auto max-h-[85vh]"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -202,7 +196,7 @@ export function PrintTool() {
               </div>
 
               {/* Content */}
-              <div className="p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {/* Title option */}
                 <div>
                   <label className="flex items-center gap-2 text-sm text-gray-700 mb-2">
