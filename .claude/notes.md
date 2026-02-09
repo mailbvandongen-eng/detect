@@ -1,24 +1,276 @@
 # Detectorapp-NL - Sessienotities
 
-## Huidige versie: 2.32.2
+## Huidige versie: 2.32.45
 
 ---
 
-## Esri Migratie - Glenn Heeres (Esri Nederland)
+# 🚀 ESRI MIGRATIE PLAN - Versie 1.0 (feb 2026)
 
-**Status:** Glenn wil GEEN hybride aanpak. Volledige migratie naar ArcGIS Maps SDK met Esri basiskaarten.
+## Samenvatting voor Esri Nederland
 
-**Email context (jan 2026):** Glenn zegt dat alle OGC-services die in de OpenLayers-versie zitten ook direct moeten werken in de SDK. Hij wil dat de basiskaarten van Esri worden gebruikt.
+**Contactpersoon:** Glenn Heeres (Esri Nederland)
+**Vereiste:** Volledige migratie naar ArcGIS Maps SDK for JavaScript (geen hybride)
+**API Key:** Geldig tot 27 januari 2027
 
-**Impact:**
-- 70 bestanden importeren uit `ol/` (OpenLayers)
-- ~50 layer factory files moeten worden omgebouwd
-- Core: Map, Popup, GPS, Search, Routes, Parking, Custom layers
-- WMS → WMSLayer, XYZ → WebTileLayer, GeoJSON → GeoJSONLayer, ImageServer → ImageryLayer (werkt al)
-- Popup systeem (~1000+ regels) moet herschreven
-- GPS/navigatie moet naar ArcGIS API
+---
 
-**Nog niet gestart - eerst GPS/navigatie fixen.**
+## 📊 HUIDIGE STATUS ANALYSE
+
+### Wat al werkt met ArcGIS SDK:
+| Component | Status | Bestand |
+|-----------|--------|---------|
+| API Key configuratie | ✅ | `src/config/arcgisConfig.ts` |
+| AHN4 ImageryLayers | ✅ | `src/layers/arcgisAHNLayers.ts` |
+| Hybride MapView overlay | ✅ | `src/components/Map/MapContainer.tsx` |
+| View synchronisatie OL↔ArcGIS | ✅ | `MapContainer.tsx:228-252` |
+
+### Wat nog gemigreerd moet worden:
+
+#### 1. Bestanden met OpenLayers imports (74 bestanden)
+```
+src/components/Map/MapContainer.tsx      - Core map initialisatie
+src/components/Map/Popup.tsx             - 4015 regels popup logica!
+src/components/GPS/GpsMarker.tsx         - GPS tracking & marker
+src/components/UI/SearchBox.tsx          - Adres zoeken
+src/components/UI/DrawTool.tsx           - Tekenen op kaart
+src/components/UI/MeasureTool.tsx        - Afstanden meten
+src/components/Route/*.tsx               - Route opname (5 bestanden)
+src/components/Parking/*.tsx             - Parkeer markers
+src/components/Vondst/*.tsx              - Vondsten markers
+src/components/CustomLayers/*.tsx        - Eigen lagen
+src/components/CustomPoints/*.tsx        - Eigen punten
+src/components/Weather/RainRadarLayer.tsx
+src/store/mapStore.ts                    - Map state
+src/store/layerStore.ts                  - Layer state
+src/hooks/useMap.ts                      - Map hook
+src/utils/*.ts                           - Utilities
+```
+
+#### 2. Layer Factory bestanden (49 bestanden)
+| Type | Aantal | Migratie |
+|------|--------|----------|
+| WMS layers (`pdokWMSLayers.ts` etc.) | ~20 | `ol/source/TileWMS` → `WMSLayer` |
+| Vector layers (`*OL.ts`) | ~25 | `ol/layer/Vector` → `GeoJSONLayer` of `FeatureLayer` |
+| XYZ/Tile layers | ~4 | `ol/source/XYZ` → `WebTileLayer` |
+| ImageServer (AHN) | 4 | ✅ Al gemigreerd |
+
+#### 3. Core Systems
+| Systeem | Regels | Complexiteit |
+|---------|--------|--------------|
+| Popup.tsx | 4015 | 🔴 Zeer hoog |
+| MapContainer.tsx | 329 | 🟡 Medium |
+| GpsMarker.tsx | ~300 | 🟡 Medium |
+| useMap.ts | ~150 | 🟢 Laag |
+| layerStore.ts | ~400 | 🟡 Medium |
+
+---
+
+## 📋 MIGRATIEPLAN IN FASES
+
+### Fase 1: Core Infrastructure (Week 1-2)
+**Doel:** ArcGIS SDK als primaire kaartengine
+
+1. **MapContainer.tsx herschrijven**
+   - Verwijder OpenLayers Map initialisatie
+   - ArcGIS MapView als primaire view
+   - Esri basemaps implementeren:
+     - `streets-vector` (vervangt CartoDB)
+     - `satellite` (vervangt PDOK Luchtfoto)
+     - `topo-vector` (nieuw)
+   - View events (click, pointer-move, extent-change)
+
+2. **mapStore.ts aanpassen**
+   - `map: Map` → `mapView: MapView`
+   - Nieuwe getters voor ArcGIS objecten
+   - Backwards compatibility layer (tijdelijk)
+
+3. **useMap.ts herschrijven**
+   - ArcGIS MapView initialisatie
+   - View event handlers
+
+### Fase 2: Layer Migratie (Week 3-5)
+**Doel:** Alle lagen naar ArcGIS SDK formaat
+
+#### 2a. WMS Layers → WMSLayer
+```typescript
+// OUD (OpenLayers)
+import TileLayer from 'ol/layer/Tile'
+import TileWMS from 'ol/source/TileWMS'
+const layer = new TileLayer({
+  source: new TileWMS({ url, params })
+})
+
+// NIEUW (ArcGIS)
+import WMSLayer from '@arcgis/core/layers/WMSLayer'
+const layer = new WMSLayer({
+  url,
+  sublayers: [{ name: layerName }]
+})
+```
+
+**Bestanden:** `pdokWMSLayers.ts`, `paleokaartOL.ts`, `religieusErfgoedOL.ts`, `verdedigingswerkenOL.ts`, `terpenOL.ts`
+
+#### 2b. Vector/GeoJSON Layers → GeoJSONLayer
+```typescript
+// OUD (OpenLayers)
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import GeoJSON from 'ol/format/GeoJSON'
+
+// NIEUW (ArcGIS)
+import GeoJSONLayer from '@arcgis/core/layers/GeoJSONLayer'
+const layer = new GeoJSONLayer({
+  url: '/data/file.geojson',
+  renderer: { ... }
+})
+```
+
+**Bestanden:** Alle `*OL.ts` files (amkOL, bunkersOL, grafheuvelsOL, etc.)
+
+#### 2c. XYZ Tiles → WebTileLayer
+```typescript
+// OUD (OpenLayers)
+import XYZ from 'ol/source/XYZ'
+
+// NIEUW (ArcGIS)
+import WebTileLayer from '@arcgis/core/layers/WebTileLayer'
+const layer = new WebTileLayer({
+  urlTemplate: 'https://.../{z}/{x}/{y}.png'
+})
+```
+
+**Bestanden:** CartoDB, Map5.nl historische kaarten
+
+### Fase 3: Popup Systeem (Week 6-8)
+**Doel:** Volledig nieuw popup systeem op ArcGIS
+
+Het huidige popup systeem (4015 regels) moet volledig herschreven:
+
+1. **ArcGIS Popup Framework**
+   - `PopupTemplate` per layer type
+   - Custom popup content via `content` function
+   - Arcade expressions voor dynamische content
+
+2. **Feature identificatie**
+   - `mapView.hitTest()` i.p.v. OL `forEachFeatureAtPixel`
+   - Multi-layer hit testing
+   - Prioriteit per layer type
+
+3. **WMS GetFeatureInfo**
+   - ArcGIS `identify` task
+   - Of custom fetch naar WMS endpoint
+
+4. **Custom React popup**
+   - Behoud huidige UI/UX
+   - ArcGIS popup container
+   - React portal voor content
+
+### Fase 4: GPS & Navigatie (Week 9-10)
+**Doel:** GPS tracking met ArcGIS
+
+1. **Geolocation API** (blijft Web API)
+2. **GPS Marker**
+   - `GraphicsLayer` voor GPS punt
+   - `SimpleMarkerSymbol` voor locatie
+   - Heading indicator met rotatie
+3. **Tracking mode**
+   - `mapView.goTo()` voor centrage
+   - View rotation voor heading-up
+
+### Fase 5: Tools & Features (Week 11-12)
+**Doel:** Alle tools migreren
+
+1. **DrawTool** → ArcGIS `Sketch` widget
+2. **MeasureTool** → ArcGIS `Measurement` widget
+3. **SearchBox** → ArcGIS `Search` widget + PDOK Locatieserver
+4. **Route Recording** → `GraphicsLayer` + geometry
+5. **Parking Marker** → `GraphicsLayer`
+
+### Fase 6: Testing & Polish (Week 13-14)
+1. Volledige functionaliteitstest
+2. Performance optimalisatie
+3. Mobile testing
+4. Bug fixes
+5. Documentatie update
+
+---
+
+## 🔧 TECHNISCHE DETAILS
+
+### ArcGIS SDK Versie
+- Huidige: `@arcgis/core@4.34.8`
+- Aanbevolen: Blijven op 4.x LTS
+
+### Layer Type Mapping
+| OpenLayers | ArcGIS SDK | Notes |
+|------------|------------|-------|
+| `TileLayer` + `TileWMS` | `WMSLayer` | Sublayers nodig |
+| `TileLayer` + `XYZ` | `WebTileLayer` | urlTemplate syntax |
+| `VectorLayer` + `GeoJSON` | `GeoJSONLayer` | Renderer nodig |
+| `ImageLayer` + `ImageArcGISRest` | `ImageryLayer` | ✅ Al werkend |
+| `VectorLayer` + `Vector` | `FeatureLayer` | Voor editing |
+
+### Esri Basemaps (gratis met API key)
+- `streets-vector` - Standaard stratenkaart
+- `satellite` - Luchtfoto (wereldwijd)
+- `hybrid` - Luchtfoto + labels
+- `topo-vector` - Topografisch
+- `gray-vector` - Grijs (licht)
+- `dark-gray-vector` - Grijs (donker)
+
+### PDOK Compatibiliteit
+Alle PDOK WMS/WMTS services zijn OGC-compliant en werken direct met ArcGIS WMSLayer.
+
+---
+
+## ⚠️ RISICO'S & AANDACHTSPUNTEN
+
+1. **Popup complexiteit** - 4015 regels is veel om te herschrijven
+2. **Custom styling** - ArcGIS renderers vs OL styles
+3. **Performance** - ArcGIS SDK is zwaarder dan OL
+4. **Bundle size** - ArcGIS core is ~1.5MB
+5. **Projectie** - EPSG:28992 ondersteuning checken
+
+---
+
+## 📅 TIJDLIJN
+
+| Week | Fase | Deliverable |
+|------|------|-------------|
+| 1-2 | Core | MapContainer, mapStore, useMap |
+| 3-5 | Layers | Alle 49 layer files |
+| 6-8 | Popup | Nieuw popup systeem |
+| 9-10 | GPS | Tracking & navigatie |
+| 11-12 | Tools | Draw, Measure, Search, Routes |
+| 13-14 | Test | QA, bugs, polish |
+
+**Totaal: ~14 weken voor volledige migratie**
+
+---
+
+## ✅ ESRI LIVEGANG CHECKLIST
+
+### Technisch
+- [ ] Alle OL imports verwijderd
+- [ ] ArcGIS SDK als enige kaartengine
+- [ ] Esri basemaps geïmplementeerd
+- [ ] Alle 70+ lagen werkend
+- [ ] Popup systeem volledig
+- [ ] GPS tracking werkend
+- [ ] Alle tools werkend
+- [ ] Performance acceptabel
+
+### Licentie
+- [ ] AHN lagen licentie bevestigd door Esri
+- [ ] API key productie-ready
+- [ ] Attributie correct
+
+### Documentatie
+- [ ] Handleiding bijgewerkt
+- [ ] Technische documentatie
+- [ ] Esri Marketplace beschrijving
+
+---
 
 ---
 

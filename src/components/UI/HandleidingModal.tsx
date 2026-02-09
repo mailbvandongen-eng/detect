@@ -59,8 +59,8 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 {/* Intro */}
                 <section>
                   <p className="text-sm text-gray-600">
-                    DetectorApp.nl is een kaartapplicatie voor metaaldetectoristen en amateur-archeologen.
-                    Ontdek archeologische data, monumenten en interessante locaties in Nederland.
+                    DetectorApp.nl is dé gratis kaartapplicatie voor metaaldetectoristen, fossielen- en mineralenzoekers en amateur-archeologen.
+                    Met <strong>70+ kaartlagen</strong>, GPS tracking, cloud sync en uitgebreid vondstenbeheer.
                   </p>
                 </section>
 
@@ -162,15 +162,19 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 </Section>
 
                 {/* Kaartlagen */}
-                <Section title="Kaartlagen">
+                <Section title="Kaartlagen (70+)">
                   <p className="text-xs text-gray-600 mb-2">
-                    De app bevat vele informatieve lagen:
+                    De app bevat uitgebreide informatielagen:
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    <LayerCategory name="Archeologie" items={["AMK Monumenten", "IKAW gebieden", "Kastelen", "Romeinse wegen"]} />
-                    <LayerCategory name="Landschap" items={["AHN Hoogtekaart", "Bodemkaart", "Geomorfologie"]} />
-                    <LayerCategory name="Historisch" items={["Oude kaarten", "Luchtfoto's", "Kadaster"]} />
-                    <LayerCategory name="Natuur" items={["Grafheuvels", "Hunebedden", "Terpen"]} />
+                    <LayerCategory name="Archeologie" items={["AMK per periode", "IKAW", "Archeo Onderzoeken", "Essen"]} />
+                    <LayerCategory name="Prehistorie" items={["Hunebedden", "Grafheuvels", "Terpen", "Paleokaarten"]} />
+                    <LayerCategory name="Romeins" items={["Romeinse wegen", "Forten", "Limesweg"]} />
+                    <LayerCategory name="WOII & Militair" items={["Bunkers", "Slagvelden", "Vliegvelden", "Linies"]} />
+                    <LayerCategory name="Hoogtekaarten" items={["AHN Hillshade", "Multi-Hillshade", "Hoogtekaart Kleur"]} />
+                    <LayerCategory name="Bodem & Terrein" items={["Bodemkaart", "Geomorfologie", "Veengebieden"]} />
+                    <LayerCategory name="Fossielen" items={["Fossiel hotspots", "Mineralen", "Goudrivieren"]} />
+                    <LayerCategory name="Erfgoed" items={["Rijksmonumenten", "Kastelen", "Ruïnes", "Kerken"]} />
                   </div>
                   <p className="text-xs text-gray-500 mt-2 italic">
                     Tip: Klik op de kaart om popup-informatie te zien over lagen op die locatie.
@@ -215,10 +219,68 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     Presets zijn vooraf ingestelde combinaties van kaartlagen. Ideaal om snel te wisselen tussen:
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
-                    <li>Archeologisch onderzoek (AMK, IKAW, Archeo Onderzoeken)</li>
-                    <li>Terreinverkenning (AHN, Bodem, Geomorfologie)</li>
-                    <li>Historische context (Oude kaarten, Luchtfoto's)</li>
+                    <li><strong>Detectie</strong> - AMK, IKAW, Archeo Onderzoeken, Gewaspercelen</li>
+                    <li><strong>Steentijd</strong> - Hunebedden, Grafheuvels, Paleokaarten</li>
+                    <li><strong>Romeins</strong> - Romeinse wegen, Forten, AMK Romeins</li>
+                    <li><strong>WOII</strong> - Bunkers, Slagvelden, Vliegvelden</li>
+                    <li><strong>Fossielen</strong> - Fossiel hotspots, PBDB data</li>
+                    <li><strong>Mineralen</strong> - Mineralen hotspots, Goudrivieren</li>
                   </ul>
+                  <p className="text-xs text-gray-500 mt-2 italic">
+                    Tip: Overschrijf een preset met je eigen lagen via het diskette-icoon.
+                  </p>
+                </Section>
+
+                {/* Mijn Lagen */}
+                <Section title="Mijn Lagen" icon={<MapPin size={16} />}>
+                  <p className="text-xs text-gray-600 mb-2">
+                    Sla interessante locaties op in eigen lagen:
+                  </p>
+                  <ol className="text-xs text-gray-600 space-y-1 ml-4 list-decimal">
+                    <li>Tik op een object op de kaart (monument, bunker, etc.)</li>
+                    <li>Tik op de <strong>oranje +</strong> knop in de popup</li>
+                    <li>Kies een bestaande laag of maak een nieuwe aan</li>
+                  </ol>
+                  <div className="mt-2 p-2 bg-orange-50 rounded-lg">
+                    <p className="text-xs text-orange-700">
+                      <strong>Tip:</strong> De volledige vorm (polygoon) en popup-info worden mee opgeslagen!
+                    </p>
+                  </div>
+                </Section>
+
+                {/* Vondsten */}
+                <Section title="Vondsten Registreren" icon={<MapPin size={16} />}>
+                  <p className="text-xs text-gray-600 mb-2">
+                    Registreer je vondsten met locatie, foto's en details:
+                  </p>
+                  <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
+                    <li><strong>Via GPS:</strong> Menu → Vondst toevoegen</li>
+                    <li><strong>Long-press:</strong> Houd vinger op kaart → "Vondst toevoegen"</li>
+                    <li><strong>Velden:</strong> Type, materiaal, periode, diepte, conditie, gewicht</li>
+                    <li><strong>Export:</strong> Excel, CSV, GeoJSON, GPX, KML</li>
+                  </ul>
+                </Section>
+
+                {/* Cloud Sync */}
+                <Section title="Cloud Sync" icon={<Cloud size={16} />}>
+                  <p className="text-xs text-gray-600 mb-2">
+                    Synchroniseer je data tussen apparaten met Google login:
+                  </p>
+                  <div className="space-y-2">
+                    <div className="p-2 bg-green-50 rounded-lg">
+                      <p className="text-xs text-green-700">
+                        <strong>Wat wordt gesynchroniseerd:</strong><br/>
+                        • Mijn Lagen (eigen punten)<br/>
+                        • Vondsten registraties<br/>
+                        • Preset instellingen
+                      </p>
+                    </div>
+                    <div className="p-2 bg-blue-50 rounded-lg">
+                      <p className="text-xs text-blue-700">
+                        <strong>Privacy:</strong> Je data is alleen voor jou toegankelijk. GPS wordt niet opgeslagen.
+                      </p>
+                    </div>
+                  </div>
                 </Section>
 
                 {/* Monster Filter */}
@@ -237,23 +299,27 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
 
                 {/* Tips */}
                 <section className="p-4 bg-gradient-to-br from-green-50 to-blue-50 rounded-xl">
-                  <h3 className="text-sm font-semibold text-gray-800 mb-2">Tips</h3>
+                  <h3 className="text-sm font-semibold text-gray-800 mb-2">Tips voor gebruik</h3>
                   <ul className="text-xs text-gray-700 space-y-2">
                     <li className="flex items-start gap-2">
                       <ChevronRight size={12} className="text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>Gebruik de transparantie-slider om lagen over elkaar heen te vergelijken</span>
+                      <span><strong>Detectie:</strong> Combineer AMK + Gewaspercelen + IKAW voor kansrijke locaties</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <ChevronRight size={12} className="text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>Schakel knoppen uit in het menu voor een schoner scherm</span>
+                      <span><strong>Terrein:</strong> AHN Hillshade toont grafheuvels, wallen en greppels</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <ChevronRight size={12} className="text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>Combineer AHN hoogtekaart met Geomorfologie voor terreinanalyse</span>
+                      <span><strong>Fossielen:</strong> Check Fossiel Hotspots + Geomorfologie voor oude zeebodems</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <ChevronRight size={12} className="text-green-500 flex-shrink-0 mt-0.5" />
-                      <span>Sla vondsten op met locatie en foto voor je eigen administratie</span>
+                      <span><strong>Historisch:</strong> TMK 1850 toont verdwenen structuren en oude wegen</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <ChevronRight size={12} className="text-green-500 flex-shrink-0 mt-0.5" />
+                      <span><strong>Privacy:</strong> Alle functies werken ook zonder login (lokale opslag)</span>
                     </li>
                   </ul>
                 </section>
@@ -278,11 +344,11 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
 }
 
 // Helper components
-function Section({ title, icon, children }: { title: string, icon: React.ReactNode, children: React.ReactNode }) {
+function Section({ title, icon, children }: { title: string, icon?: React.ReactNode, children: React.ReactNode }) {
   return (
     <section>
       <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-        <span className="text-blue-500">{icon}</span>
+        {icon && <span className="text-blue-500">{icon}</span>}
         {title}
       </h3>
       {children}
