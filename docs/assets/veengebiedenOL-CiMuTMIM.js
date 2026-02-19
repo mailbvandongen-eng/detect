@@ -1,2 +1,0 @@
-import{V as t,G as a,c as n,S as r,d as s,i as c}from"./index-DTPXw7Ph.js";async function w(){const e=await(await fetch("/detect/data/veengebieden_toemaakdekken.geojson")).json(),o=new t({features:new a().readFeatures(e,{featureProjection:"EPSG:3857"})});return new n({source:o,title:"Veengebieden/Toemaakdekken",visible:!1,style:new r({fill:new c({color:"rgba(139, 69, 19, 0.15)"}),stroke:new s({color:"#8B4513",width:1})})})}export{w as createVeengebiedenLayerOL};
-//# sourceMappingURL=veengebiedenOL-CiMuTMIM.js.map
