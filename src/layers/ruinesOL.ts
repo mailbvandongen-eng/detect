@@ -4,7 +4,7 @@ import GeoJSON from 'ol/format/GeoJSON'
 import { LAYER_STYLES } from './iconStyles'
 
 export async function createRuinesLayerOL() {
-  const response = await fetch('/detectorapp-nl/data/ruines_osm.geojson')
+  const response = await fetch('/detect/data/ruines_osm.geojson')
   const geojson = await response.json()
 
   const source = new VectorSource({

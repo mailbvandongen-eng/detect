@@ -51,7 +51,7 @@ let cachedFeatures: Feature[] | null = null
 async function loadAMKData(): Promise<Feature[]> {
   if (cachedFeatures) return cachedFeatures
 
-  const geojson = await loadTopoJSON('/detectorapp-nl/data/amk_monumenten_full.topojson')
+  const geojson = await loadTopoJSON('/detect/data/amk_monumenten_full.topojson')
   cachedFeatures = parseGeoJSON(geojson)
   return cachedFeatures
 }

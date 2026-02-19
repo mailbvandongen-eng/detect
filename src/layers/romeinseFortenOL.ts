@@ -9,8 +9,8 @@ import { LAYER_STYLES } from './iconStyles'
 export async function createRomeinseFortenLayerOL() {
   // Load both GeoJSON files in parallel
   const [fortenResponse, lijnenResponse] = await Promise.all([
-    fetch('/detectorapp-nl/data/romeinse_forten.geojson'),
-    fetch('/detectorapp-nl/data/romeinse_forten_lijnen.geojson')
+    fetch('/detect/data/romeinse_forten.geojson'),
+    fetch('/detect/data/romeinse_forten_lijnen.geojson')
   ])
 
   const [fortenGeojson, lijnenGeojson] = await Promise.all([

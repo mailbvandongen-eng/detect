@@ -8,7 +8,7 @@ import { LAYER_STYLES } from './iconStyles'
 
 export async function createSlagveldenLayerOL(): Promise<VectorLayer<VectorSource>> {
   try {
-    const response = await fetch('/detectorapp-nl/data/military/slagvelden.geojson')
+    const response = await fetch('/detect/data/military/slagvelden.geojson')
     if (!response.ok) throw new Error('Failed to load slagvelden data')
 
     const geojson = await response.json()

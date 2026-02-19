@@ -83,7 +83,7 @@ function geojsonFeatureIntersectsBounds(feature: any): boolean {
  */
 export async function createRomeinseWegenLayerOL() {
   try {
-    const geojson = await loadGeoJSON('/detectorapp-nl/data/romeinse_wegen_itiner_e.geojson')
+    const geojson = await loadGeoJSON('/detect/data/romeinse_wegen_itiner_e.geojson')
 
     // Filter GeoJSON features BEFORE converting to OpenLayers (coordinates are still WGS84)
     const filteredGeojson = {
@@ -118,7 +118,7 @@ export async function createRomeinseWegenLayerOL() {
  */
 export async function createRomeinseWegenWereldLayerOL() {
   try {
-    const geojson = await loadGeoJSON('/detectorapp-nl/data/romeinse_wegen_itiner_e.geojson')
+    const geojson = await loadGeoJSON('/detect/data/romeinse_wegen_itiner_e.geojson')
 
     const format = new GeoJSON({ featureProjection: 'EPSG:3857' })
     const features = format.readFeatures(geojson)

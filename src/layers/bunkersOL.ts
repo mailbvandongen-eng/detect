@@ -4,7 +4,7 @@ import GeoJSON from 'ol/format/GeoJSON'
 import { LAYER_STYLES } from './iconStyles'
 
 export async function createBunkersLayerOL() {
-  const response = await fetch('/detectorapp-nl/data/bunkers.geojson')
+  const response = await fetch('/detect/data/bunkers.geojson')
   const geojson = await response.json()
 
   const source = new VectorSource({

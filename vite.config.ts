@@ -93,7 +93,7 @@ export default defineConfig({
           },
           // GeoJSON data files
           {
-            urlPattern: /\/detectorapp-nl\/data\/.*/i,
+            urlPattern: /\/detect\/data\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'geojson-data',
@@ -109,15 +109,15 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: 'DetectorApp NL',
-        short_name: 'DetectorApp',
-        description: 'Metaaldetector kaarten app voor Nederland',
+        name: 'Detect',
+        short_name: 'Detect',
+        description: 'Persoonlijke metaaldetector kaarten app',
         theme_color: '#3b82f6',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/detectorapp-nl/',
-        scope: '/detectorapp-nl/',
+        start_url: '/detect/',
+        scope: '/detect/',
         icons: [
           {
             src: 'icon-192.png',
@@ -134,7 +134,7 @@ export default defineConfig({
       }
     })
   ],
-  base: '/detectorapp-nl/',
+  base: '/detect/',
   build: {
     outDir: 'docs',
     assetsDir: 'assets',

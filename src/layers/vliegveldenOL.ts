@@ -8,7 +8,7 @@ import { Style, Icon } from 'ol/style'
 
 export async function createVliegveldenLayerOL(): Promise<VectorLayer<VectorSource>> {
   try {
-    const response = await fetch('/detectorapp-nl/data/military/vliegvelden.geojson')
+    const response = await fetch('/detect/data/military/vliegvelden.geojson')
     if (!response.ok) throw new Error('Failed to load vliegvelden data')
 
     const geojson = await response.json()

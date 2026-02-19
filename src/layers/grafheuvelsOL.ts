@@ -8,7 +8,7 @@ import { LAYER_STYLES } from './iconStyles'
  * 1815 Bronze Age and Iron Age burial mounds in the Netherlands
  */
 export async function createGrafheuvelsLayerOL() {
-  const response = await fetch('/detectorapp-nl/data/grafheuvels.geojson')
+  const response = await fetch('/detect/data/grafheuvels.geojson')
   const geojson = await response.json()
 
   const source = new VectorSource({

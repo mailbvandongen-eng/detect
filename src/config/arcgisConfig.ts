@@ -7,7 +7,7 @@
  * API Key geldig tot: 27 januari 2027
  * Toegestane referrers:
  * - https://mailbvandongen-eng.github.io
- * - https://mailbvandongen-eng.github.io/detectorapp-nl
+ * - https://mailbvandongen-eng.github.io/detect
  * - http://localhost:5173
  * - http://localhost:5174
  */
@@ -25,7 +25,7 @@ export function initArcGIS(): void {
   esriConfig.apiKey = ARCGIS_API_KEY
 
   // Optioneel: assets path configureren als nodig
-  // esriConfig.assetsPath = '/detectorapp-nl/assets'
+  // esriConfig.assetsPath = '/detect/assets'
 }
 
 /**

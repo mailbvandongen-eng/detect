@@ -1,26 +1,28 @@
 # Project Notes voor Claude
 
-## ⚠️ PROJECT IDENTIFICATIE
-**Dit is: DETECTORAPP-NL** - Alleen Nederlandse lagen
-- GitHub repo: `detectorapp-nl`
-- Vite base path: `/detectorapp-nl/`
-- Directory: `C:\VSCode\detectorapp-nl`
+## PROJECT IDENTIFICATIE
+**Dit is: DETECT** - Persoonlijke versie
+- GitHub repo: `detect`
+- Vite base path: `/detect/`
+- Directory: `C:\VSCode\detect`
 
-**Let op:** Er bestaat ook `webapp` (detectorapp-v3) - internationale versie met NL/BE/DE/FR!
+**Let op:** Er bestaan ook:
+- `detectorapp-nl` - Commerciele Nederlandse versie
+- `webapp` (detectorapp-v3) - Internationale versie met NL/BE/DE/FR
 
 ## EERSTE ACTIE BIJ NIEUWE SESSIE
 **Lees ALTIJD eerst `.claude/notes.md` voor lopende taken, plannen en context uit vorige sessies!**
 
-## 🚨 VERSIE BUMPEN - ALLEEN NPM VERSION!
+## VERSIE BUMPEN - ALLEEN NPM VERSION!
 **Bij ELKE wijziging, alleen dit commando:**
 ```bash
 npm version patch   # of: minor / major
 ```
 
 Alle versies komen nu uit `package.json`:
-- `src/main.tsx` → `import { version } from '../package.json'`
-- `src/components/UI/HamburgerMenu.tsx` → `import { version } from '../../../package.json'`
-- `src/components/UI/InfoButton.tsx` → `import { version } from '../../../package.json'`
+- `src/main.tsx` -> `import { version } from '../package.json'`
+- `src/components/UI/HamburgerMenu.tsx` -> `import { version } from '../../../package.json'`
+- `src/components/UI/InfoButton.tsx` -> `import { version } from '../../../package.json'`
 
 **Na versie bump: build en push!**
 ```bash
@@ -30,12 +32,17 @@ npm run build && git add -A && git commit -m "vX.X.X: beschrijving" && git push
 ## Belangrijke Regels
 - **ALTIJD pushen naar GitHub na elke wijziging + versie bump**
 - Screenshots staan in: `C:\VSCode\_Screenshots`
-- Vite base path is `/detectorapp-nl/` - alle data paden moeten `/detectorapp-nl/data/...` zijn
+- Vite base path is `/detect/` - alle data paden moeten `/detect/data/...` zijn
+
+## Firebase Setup
+Dit project heeft een eigen Firebase project nodig (detect-personal of vergelijkbaar).
+- `.env` file moet aangemaakt worden met Firebase credentials
+- Zie `.env.example` voor het template
 
 ## Dutch RD Shapefiles (EPSG:28992)
 
-Nederlandse overheidsdata komt vaak in Rijksdriehoek (RD) coördinaten. Herken dit aan:
-- Coördinaten zoals `[155000, 463000]` of `[207260, 474100]`
+Nederlandse overheidsdata komt vaak in Rijksdriehoek (RD) coordinaten. Herken dit aan:
+- Coordinaten zoals `[155000, 463000]` of `[207260, 474100]`
 - X tussen ~7000-300000, Y tussen ~289000-629000
 
 ### Oplossing voor OpenLayers:
@@ -61,9 +68,9 @@ const source = new VectorSource({
 StrictMode is UITGESCHAKELD in `main.tsx` omdat het OpenLayers breekt (double-render van effects).
 
 ## Layer Paden
-Alle layer files moeten `/detectorapp-nl/data/...` gebruiken, NIET `/data/...`
+Alle layer files moeten `/detect/data/...` gebruiken, NIET `/data/...`
 
-## 🎨 MODAL TEMPLATE - ALTIJD GEBRUIKEN!
+## MODAL TEMPLATE - ALTIJD GEBRUIKEN!
 
 **Elke modal/venster MOET dit template volgen (zoals Instellingen):**
 
@@ -96,39 +103,40 @@ className="fixed inset-4 z-[1701] bg-white rounded-xl shadow-2xl overflow-hidden
 </div>
 ```
 
-### Content (met font scaling):
-```tsx
-const baseFontSize = 14 * settings.fontScale / 100
-
-<div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ fontSize: `${baseFontSize}px` }}>
-```
-
 ### Input velden - GEEN BORDERS!
 ```tsx
-// ❌ FOUT - geeft zwarte lijnen:
+// FOUT - geeft zwarte lijnen:
 className="border border-gray-300"
 
-// ✅ GOED - clean look:
+// GOED - clean look:
 className="w-full px-3 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-blue-500"
 style={{ fontSize: '1em' }}
 ```
 
-### Labels:
+## NIEUWE LAGEN TOEVOEGEN - ALTIJD RESET UPDATEN!
+
+**Bij ELKE nieuwe laag die je toevoegt, MOET je deze ook toevoegen aan de reset functie!**
+
+| # | Bestand | Array | Wat toevoegen |
+|---|---------|-------|---------------|
+| 1 | `src/store/layerStore.ts` | `visible` | Nieuwe laag met `false` |
+| 2 | `src/components/UI/PresetButtons.tsx` | `ALL_OVERLAYS` | Laagnaam als string |
+
+## CLICK EVENTS IN PANELS - ALTIJD STOPPROPAGATION!
+
+**KRITIEK:** Bij ELKE klikbare item (link, button) in een panel dat sluit bij "click outside":
 ```tsx
-<label className="block font-medium text-gray-700 mb-1" style={{ fontSize: '0.9em' }}>
+onClick={(e) => e.stopPropagation()}
 ```
 
-### Footer buttons:
+## UI STYLING REGELS
+
+### Icon Buttons (ONZICHTBAAR - alleen icoon)
 ```tsx
-<div className="p-4 flex gap-3" style={{ fontSize: `${baseFontSize}px` }}>
-  <button className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none">
-  <button className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors border-0 outline-none">
+className="p-1.5 border-0 outline-none bg-transparent text-{color}-500 hover:text-{color}-600 transition-colors"
 ```
 
-### Checklist nieuwe modal:
-- [ ] `useSettingsStore` importeren
-- [ ] `baseFontSize` berekenen
-- [ ] Font slider in header
-- [ ] GEEN `border border-gray-300` op inputs
-- [ ] WEL `bg-gray-100 border-0 outline-none` op inputs
-- [ ] Em-based font sizes (0.9em, 1em, 0.75em)
+### Zichtbare Knoppen (met achtergrond)
+```tsx
+className="bg-white/80 hover:bg-white/90 rounded-xl shadow-sm backdrop-blur-sm"
+```

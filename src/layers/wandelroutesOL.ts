@@ -197,7 +197,7 @@ export async function createWandelroutesLayer(): Promise<VectorLayer<VectorSourc
   // Load all GPX files
   for (const route of ROUTES) {
     try {
-      const response = await fetch(`/detectorapp-nl/data/wandelroutes/${route.file}.gpx`)
+      const response = await fetch(`/detect/data/wandelroutes/${route.file}.gpx`)
       if (!response.ok) continue
 
       const gpxText = await response.text()

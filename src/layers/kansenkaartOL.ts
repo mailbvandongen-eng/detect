@@ -131,21 +131,21 @@ async function loadAllWeightedPoints(): Promise<Feature<Point>[]> {
       geomorfologieFeatures
     ] = await Promise.all([
       // AMK - TopoJSON
-      loadTopoJSON('/detectorapp-nl/data/amk_monumenten_full.topojson').catch(() => null),
+      loadTopoJSON('/detect/data/amk_monumenten_full.topojson').catch(() => null),
       // Grafheuvels
-      loadGeoJSONFeatures('/detectorapp-nl/data/grafheuvels.geojson'),
+      loadGeoJSONFeatures('/detect/data/grafheuvels.geojson'),
       // Hunebedden
-      loadGeoJSONFeatures('/detectorapp-nl/data/steentijd/hunebedden.geojson'),
+      loadGeoJSONFeatures('/detect/data/steentijd/hunebedden.geojson'),
       // EuroEVOL Steentijd sites
-      loadGeoJSONFeatures('/detectorapp-nl/data/steentijd/euroevol_nl_be.geojson'),
+      loadGeoJSONFeatures('/detect/data/steentijd/euroevol_nl_be.geojson'),
       // UIKAV Punten
-      loadGeoJSONFeatures('/detectorapp-nl/data/uikav/uikav_archeo_punten.geojson'),
+      loadGeoJSONFeatures('/detect/data/uikav/uikav_archeo_punten.geojson'),
       // Kastelen
-      loadGeoJSONFeatures('/detectorapp-nl/data/kastelen.geojson'),
+      loadGeoJSONFeatures('/detect/data/kastelen.geojson'),
       // Ruïnes
-      loadGeoJSONFeatures('/detectorapp-nl/data/ruines_osm.geojson'),
+      loadGeoJSONFeatures('/detect/data/ruines_osm.geojson'),
       // Geomorfologie hotspots (stroomruggen, rivierduinen, dekzandruggen, etc.)
-      loadGeoJSONFeatures('/detectorapp-nl/data/geomorfologie_hotspots.geojson')
+      loadGeoJSONFeatures('/detect/data/geomorfologie_hotspots.geojson')
     ])
 
     // Process AMK monuments with quality-based weights
