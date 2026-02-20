@@ -41,6 +41,7 @@ export const useLayerStore = create<LayerState>()(
       'CartoDB (licht)': true,
       'OpenStreetMap': false,
       'Luchtfoto': false,
+      'Satelliet (wereld)': false,
       'Labels Overlay': false,
       'TMK 1850': false,
       'Bonnebladen 1900': false,
