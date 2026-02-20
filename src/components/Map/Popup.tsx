@@ -2169,6 +2169,58 @@ export function Popup() {
           continue
         }
 
+        // Sites Classés Frankrijk (GeoJSON) - beschermde gebieden
+        if (dataProps.nomgen && dataProps.typesite) {
+          const naam = dataProps.nomgen || 'Beschermd gebied'
+          const type = dataProps.typesite || ''
+          const isClasse = type.toLowerCase().includes('class')
+
+          // Header met naam
+          let sitesHtml = `<strong class="text-green-800">${naam}</strong>`
+
+          // Type: Site classé (strengste bescherming) of Site inscrit (minder streng)
+          const typeLabel = isClasse ? 'Site classé (strikt beschermd)' : 'Site inscrit (beschermd)'
+          sitesHtml += `<br/><span class="text-sm text-green-700">${typeLabel}</span>`
+
+          // Datum bescherming
+          if (dataProps.datecrea) {
+            sitesHtml += `<br/><span class="text-xs text-gray-500">Beschermd sinds: ${dataProps.datecrea}</span>`
+          }
+
+          // Oppervlakte (waarde is in m², omrekenen naar ha)
+          if (dataProps.surfdclha) {
+            const ha = (dataProps.surfdclha / 10000).toFixed(1)
+            sitesHtml += `<br/><span class="text-xs text-gray-500">Oppervlakte: ${ha} ha</span>`
+          }
+
+          // Beheerder
+          if (dataProps.gestnom) {
+            const regio = dataProps.gestnom.replace('DREAL ', '').split(' -')[0]
+            sitesHtml += `<br/><span class="text-xs text-gray-500">Regio: ${regio}</span>`
+          }
+
+          // Uitleg wat Sites Classés zijn
+          sitesHtml += `<div class="mt-2 pt-2 border-t border-gray-200">`
+          sitesHtml += `<span class="text-xs text-gray-600">`
+          if (isClasse) {
+            sitesHtml += `<strong>Site classé</strong>: Hoogste beschermingsniveau in Frankrijk. Geen wijzigingen toegestaan zonder speciale vergunning. Vergelijkbaar met Nederlands Rijksmonument.`
+          } else {
+            sitesHtml += `<strong>Site inscrit</strong>: Beschermd gebied waar wijzigingen moeten worden gemeld. Minder streng dan Site classé.`
+          }
+          sitesHtml += `</span></div>`
+
+          // Link naar meer info
+          sitesHtml += `<div class="mt-2"><a href="https://fr.wikipedia.org/wiki/Site_class%C3%A9_ou_inscrit_(France)" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline text-xs">Meer over Sites Classés</a></div>`
+
+          collectedContents.push(sitesHtml)
+          collectedFeatureData.push({
+            geometry: extractGeometry(geometry),
+            properties: dataProps,
+            popupHtml: sitesHtml
+          })
+          continue
+        }
+
         // Romeinse Forten (GeoJSON) - compacte popup zoals AMK stijl
         if (dataProps.layerType === 'romeinsFort' || dataProps.layerType === 'romeinsFortLijn') {
           const fortNaam = dataProps.Name || dataProps.name || ''

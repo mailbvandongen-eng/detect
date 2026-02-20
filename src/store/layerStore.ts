@@ -210,7 +210,21 @@ export const useLayerStore = create<LayerState>()(
       // Provinciale Waardenkaarten
       'Erfgoedlijnen': 0.7,
       'Oude Kernen': 0.6,
-      'Relictenkaart Vlakken': 0.5
+      'Relictenkaart Vlakken': 0.5,
+      // Sites Classés Frankrijk (per regio)
+      'Sites Classés Bretagne': 0.5,
+      'Sites Classés Normandie': 0.5,
+      'Sites Classés Hauts-de-France': 0.5,
+      'Sites Classés Grand Est': 0.5,
+      'Sites Classés Île-de-France': 0.5,
+      'Sites Classés Centre-Val de Loire': 0.5,
+      'Sites Classés Bourgogne-FC': 0.5,
+      'Sites Classés Pays de la Loire': 0.5,
+      'Sites Classés Nouvelle-Aquitaine': 0.5,
+      'Sites Classés Auvergne-RA': 0.5,
+      'Sites Classés Occitanie': 0.5,
+      'Sites Classés PACA': 0.5,
+      'Sites Classés Corse': 0.5
     },
 
     // Loading state for lazy-loaded layers
