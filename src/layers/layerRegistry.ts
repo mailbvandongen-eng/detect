@@ -847,11 +847,120 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: false,
     regions: ['fr', 'de']
   },
-  'Sites Classés FR': {
-    name: 'Sites Classés FR',
+  // Sites Classés per regio
+  'Sites Classés Bretagne': {
+    name: 'Sites Classés Bretagne',
     factory: async () => {
-      const { createSitesClassesFrLayerOL } = await import('./sitesClassesFrOL')
-      return createSitesClassesFrLayerOL()
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Bretagne')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Normandie': {
+    name: 'Sites Classés Normandie',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Normandie')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Hauts-de-France': {
+    name: 'Sites Classés Hauts-de-France',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Hauts-de-France')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Grand Est': {
+    name: 'Sites Classés Grand Est',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Grand Est')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Île-de-France': {
+    name: 'Sites Classés Île-de-France',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Île-de-France')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Centre-Val de Loire': {
+    name: 'Sites Classés Centre-Val de Loire',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Centre-Val de Loire')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Bourgogne-FC': {
+    name: 'Sites Classés Bourgogne-FC',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Bourgogne-FC')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Pays de la Loire': {
+    name: 'Sites Classés Pays de la Loire',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Pays de la Loire')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Nouvelle-Aquitaine': {
+    name: 'Sites Classés Nouvelle-Aquitaine',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Nouvelle-Aquitaine')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Auvergne-RA': {
+    name: 'Sites Classés Auvergne-RA',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Auvergne-RA')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Occitanie': {
+    name: 'Sites Classés Occitanie',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Occitanie')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés PACA': {
+    name: 'Sites Classés PACA',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés PACA')
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Classés Corse': {
+    name: 'Sites Classés Corse',
+    factory: async () => {
+      const { createSitesClassesRegionLayerOL } = await import('./sitesClassesRegionOL')
+      return createSitesClassesRegionLayerOL('Sites Classés Corse')
     },
     immediateLoad: false,
     regions: ['fr']

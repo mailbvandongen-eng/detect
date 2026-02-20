@@ -332,8 +332,36 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Frankrijk */}
-              <LayerGroup title="Frankrijk" defaultExpanded={false} layerNames={['Sites Classés FR', 'Monumenten IDF', 'Hist. Gebouwen FR', 'INRAP Sites FR', 'Archeo Sites Bretagne', 'Operaties Bretagne', 'Archeo Parijs', 'Sites Patrimoine Occitanie', 'Sites Patrimoine PACA', 'Sites Patrimoine Normandie', 'Maginotlinie']}>
-                <LayerItem name="Sites Classés FR" type="overlay" />
+              <LayerGroup title="Frankrijk" defaultExpanded={false} layerNames={[
+                'Sites Classés Bretagne', 'Sites Classés Normandie', 'Sites Classés Hauts-de-France',
+                'Sites Classés Grand Est', 'Sites Classés Île-de-France', 'Sites Classés Centre-Val de Loire',
+                'Sites Classés Bourgogne-FC', 'Sites Classés Pays de la Loire', 'Sites Classés Nouvelle-Aquitaine',
+                'Sites Classés Auvergne-RA', 'Sites Classés Occitanie', 'Sites Classés PACA', 'Sites Classés Corse',
+                'Monumenten IDF', 'Hist. Gebouwen FR', 'INRAP Sites FR', 'Archeo Sites Bretagne',
+                'Operaties Bretagne', 'Archeo Parijs', 'Sites Patrimoine Occitanie', 'Sites Patrimoine PACA',
+                'Sites Patrimoine Normandie', 'Maginotlinie'
+              ]}>
+                {/* Sites Classés per regio */}
+                <LayerGroup title="Sites Classés (13 regio's)" defaultExpanded={false} layerNames={[
+                  'Sites Classés Bretagne', 'Sites Classés Normandie', 'Sites Classés Hauts-de-France',
+                  'Sites Classés Grand Est', 'Sites Classés Île-de-France', 'Sites Classés Centre-Val de Loire',
+                  'Sites Classés Bourgogne-FC', 'Sites Classés Pays de la Loire', 'Sites Classés Nouvelle-Aquitaine',
+                  'Sites Classés Auvergne-RA', 'Sites Classés Occitanie', 'Sites Classés PACA', 'Sites Classés Corse'
+                ]}>
+                  <LayerItem name="Sites Classés Bretagne" type="overlay" />
+                  <LayerItem name="Sites Classés Normandie" type="overlay" />
+                  <LayerItem name="Sites Classés Pays de la Loire" type="overlay" />
+                  <LayerItem name="Sites Classés Centre-Val de Loire" type="overlay" />
+                  <LayerItem name="Sites Classés Île-de-France" type="overlay" />
+                  <LayerItem name="Sites Classés Hauts-de-France" type="overlay" />
+                  <LayerItem name="Sites Classés Grand Est" type="overlay" />
+                  <LayerItem name="Sites Classés Bourgogne-FC" type="overlay" />
+                  <LayerItem name="Sites Classés Nouvelle-Aquitaine" type="overlay" />
+                  <LayerItem name="Sites Classés Auvergne-RA" type="overlay" />
+                  <LayerItem name="Sites Classés Occitanie" type="overlay" />
+                  <LayerItem name="Sites Classés PACA" type="overlay" />
+                  <LayerItem name="Sites Classés Corse" type="overlay" />
+                </LayerGroup>
                 <LayerItem name="Monumenten IDF" type="overlay" />
                 <LayerItem name="Hist. Gebouwen FR" type="overlay" />
                 <LayerItem name="INRAP Sites FR" type="overlay" />
