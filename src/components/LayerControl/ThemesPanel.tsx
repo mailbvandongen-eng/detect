@@ -321,31 +321,27 @@ export function ThemesPanel() {
                 </LayerGroup>
               )}
 
-              {/* België - International Heritage */}
-              {BUILD_MODE === 'personal' && (
-                <LayerGroup title="België" defaultExpanded={false} layerNames={['Monumenten BE', 'Archeo Zones BE', 'Arch Sites BE', 'Erfgoed Landschap BE', 'CAI Elementen']}>
-                  <LayerItem name="Monumenten BE" type="overlay" />
-                  <LayerItem name="Archeo Zones BE" type="overlay" />
-                  <LayerItem name="Arch Sites BE" type="overlay" />
-                  <LayerItem name="Erfgoed Landschap BE" type="overlay" />
-                  <LayerItem name="CAI Elementen" type="overlay" />
-                </LayerGroup>
-              )}
+              {/* België */}
+              <LayerGroup title="België" defaultExpanded={false} layerNames={['Monumenten BE', 'Archeo Zones BE', 'Arch Sites BE', 'Erfgoed Landschap BE', 'CAI Elementen']}>
+                <LayerItem name="Monumenten BE" type="overlay" />
+                <LayerItem name="Archeo Zones BE" type="overlay" />
+                <LayerItem name="Arch Sites BE" type="overlay" />
+                <LayerItem name="Erfgoed Landschap BE" type="overlay" />
+                <LayerItem name="CAI Elementen" type="overlay" />
+              </LayerGroup>
 
-              {/* Frankrijk - International Heritage */}
-              {BUILD_MODE === 'personal' && (
-                <LayerGroup title="Frankrijk" defaultExpanded={false} layerNames={['Hist. Gebouwen FR', 'INRAP Sites FR', 'Archeo Sites Bretagne', 'Operaties Bretagne', 'Archeo Parijs', 'Sites Patrimoine Occitanie', 'Sites Patrimoine PACA', 'Sites Patrimoine Normandie', 'Maginotlinie']}>
-                  <LayerItem name="Hist. Gebouwen FR" type="overlay" />
-                  <LayerItem name="INRAP Sites FR" type="overlay" />
-                  <LayerItem name="Archeo Sites Bretagne" type="overlay" />
-                  <LayerItem name="Operaties Bretagne" type="overlay" />
-                  <LayerItem name="Archeo Parijs" type="overlay" />
-                  <LayerItem name="Sites Patrimoine Occitanie" type="overlay" />
-                  <LayerItem name="Sites Patrimoine PACA" type="overlay" />
-                  <LayerItem name="Sites Patrimoine Normandie" type="overlay" />
-                  <LayerItem name="Maginotlinie" type="overlay" />
-                </LayerGroup>
-              )}
+              {/* Frankrijk */}
+              <LayerGroup title="Frankrijk" defaultExpanded={false} layerNames={['Hist. Gebouwen FR', 'INRAP Sites FR', 'Archeo Sites Bretagne', 'Operaties Bretagne', 'Archeo Parijs', 'Sites Patrimoine Occitanie', 'Sites Patrimoine PACA', 'Sites Patrimoine Normandie', 'Maginotlinie']}>
+                <LayerItem name="Hist. Gebouwen FR" type="overlay" />
+                <LayerItem name="INRAP Sites FR" type="overlay" />
+                <LayerItem name="Archeo Sites Bretagne" type="overlay" />
+                <LayerItem name="Operaties Bretagne" type="overlay" />
+                <LayerItem name="Archeo Parijs" type="overlay" />
+                <LayerItem name="Sites Patrimoine Occitanie" type="overlay" />
+                <LayerItem name="Sites Patrimoine PACA" type="overlay" />
+                <LayerItem name="Sites Patrimoine Normandie" type="overlay" />
+                <LayerItem name="Maginotlinie" type="overlay" />
+              </LayerGroup>
 
               {/* Recreation - commercial has limited layers */}
               {isThemeVisible('Recreatie') && BUILD_MODE === 'commercial' && (
