@@ -15,6 +15,12 @@ export default defineConfig({
         globIgnores: ['**/data/**', '**/assets/arcgis/**'],
         // Increase max file size for ArcGIS SDK bundles
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        // Clean up old caches when new SW is installed
+        cleanupOutdatedCaches: true,
+        // Skip waiting - activate new SW immediately
+        skipWaiting: true,
+        // Claim clients immediately
+        clientsClaim: true,
         runtimeCaching: [
           // OpenStreetMap tiles
           {
