@@ -332,7 +332,9 @@ export function ThemesPanel() {
               </LayerGroup>
 
               {/* Frankrijk */}
-              <LayerGroup title="Frankrijk" defaultExpanded={false} layerNames={['Hist. Gebouwen FR', 'INRAP Sites FR', 'Archeo Sites Bretagne', 'Operaties Bretagne', 'Archeo Parijs', 'Sites Patrimoine Occitanie', 'Sites Patrimoine PACA', 'Sites Patrimoine Normandie', 'Maginotlinie']}>
+              <LayerGroup title="Frankrijk" defaultExpanded={false} layerNames={['Sites Classés FR', 'Monumenten IDF', 'Hist. Gebouwen FR', 'INRAP Sites FR', 'Archeo Sites Bretagne', 'Operaties Bretagne', 'Archeo Parijs', 'Sites Patrimoine Occitanie', 'Sites Patrimoine PACA', 'Sites Patrimoine Normandie', 'Maginotlinie']}>
+                <LayerItem name="Sites Classés FR" type="overlay" />
+                <LayerItem name="Monumenten IDF" type="overlay" />
                 <LayerItem name="Hist. Gebouwen FR" type="overlay" />
                 <LayerItem name="INRAP Sites FR" type="overlay" />
                 <LayerItem name="Archeo Sites Bretagne" type="overlay" />

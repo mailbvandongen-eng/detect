@@ -120,6 +120,8 @@ export const useLayerStore = create<LayerState>()(
       'Sites Patrimoine PACA': false,
       'Sites Patrimoine Normandie': false,
       'Maginotlinie': false,
+      'Sites Classés FR': false,
+      'Monumenten IDF': false,
       // Recreatie
       'Parken': false,
       'Speeltuinen': false,

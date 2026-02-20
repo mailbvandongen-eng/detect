@@ -847,6 +847,24 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: false,
     regions: ['fr', 'de']
   },
+  'Sites Classés FR': {
+    name: 'Sites Classés FR',
+    factory: async () => {
+      const { createSitesClassesFrLayerOL } = await import('./sitesClassesFrOL')
+      return createSitesClassesFrLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Monumenten IDF': {
+    name: 'Monumenten IDF',
+    factory: async () => {
+      const { createMonumentsIdfLayerOL } = await import('./monumentsIdfOL')
+      return createMonumentsIdfLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
 
 }
 

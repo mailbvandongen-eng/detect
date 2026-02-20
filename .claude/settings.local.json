@@ -82,7 +82,13 @@
       "Bash(gh api:*)",
       "WebFetch(domain:mailbvandongen-eng.github.io)",
       "Bash(find:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "WebFetch(domain:www.data.gouv.fr)",
+      "WebFetch(domain:data.geopf.fr)",
+      "WebFetch(domain:datacarto.picto-occitanie.fr)",
+      "WebFetch(domain:opendata.iledefrance.fr)",
+      "WebFetch(domain:www.geo2france.fr)",
+      "WebFetch(domain:www.geoportail-urbanisme.gouv.fr)"
     ]
   }
 }
