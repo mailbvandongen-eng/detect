@@ -1,11 +1,22 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { writeFileSync } from 'fs'
+import { resolve } from 'path'
+
+// Plugin to create .nojekyll file (GitHub Pages ignores _underscore files otherwise)
+const noJekyllPlugin = () => ({
+  name: 'no-jekyll',
+  closeBundle() {
+    writeFileSync(resolve(__dirname, 'docs/.nojekyll'), '')
+  }
+})
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    noJekyllPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png'],
