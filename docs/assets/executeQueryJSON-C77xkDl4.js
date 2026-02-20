@@ -1,0 +1,2 @@
+import{cm as i,cn as s}from"./index-DaJxlHXM.js";import{y as e}from"./query-CsDh6vlm.js";import{g as p}from"./FeatureSet-BikIcbpT.js";async function S(r,a,o,t){const n=await u(r,a,o,t);return p.fromJSON(n)}async function u(r,a,o,t){const n=i(r),m={...o},c=s.from(a),{data:f}=await e(n,c,c.sourceSpatialReference,m,t);return f}export{u as a,S as s};
+//# sourceMappingURL=executeQueryJSON-C77xkDl4.js.map
