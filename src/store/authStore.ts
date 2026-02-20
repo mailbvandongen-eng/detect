@@ -3,6 +3,8 @@ import { immer } from 'zustand/middleware/immer'
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   type User
@@ -64,9 +66,14 @@ export const useAuthStore = create<AuthState>()(
       set(state => { state.loading = true; state.error = null })
       try {
         const provider = new GoogleAuthProvider()
-        // Basic login - no sensitive scopes
-        await signInWithPopup(auth, provider)
-        // User will be set by onAuthStateChanged
+        // Use redirect on production (GitHub Pages has COOP restrictions)
+        // Use popup on localhost for faster development
+        if (window.location.hostname === 'localhost') {
+          await signInWithPopup(auth, provider)
+        } else {
+          await signInWithRedirect(auth, provider)
+        }
+        // User will be set by onAuthStateChanged (or getRedirectResult)
       } catch (error: any) {
         console.error('Google sign-in error:', error)
         set(state => {
@@ -125,6 +132,18 @@ export const useAuthStore = create<AuthState>()(
       if (get().initialized) return
 
       set(state => { state.initialized = true })
+
+      // Handle redirect result (for production sign-in)
+      getRedirectResult(auth)
+        .then((result) => {
+          if (result?.user) {
+            console.log('✅ Ingelogd via redirect')
+          }
+        })
+        .catch((error) => {
+          console.error('Redirect result error:', error)
+          set(state => { state.error = error.message })
+        })
 
       onAuthStateChanged(auth, (user) => {
         set(state => {
