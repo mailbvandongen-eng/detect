@@ -104,6 +104,22 @@ export const useLayerStore = create<LayerState>()(
       'Fossielen België': false,
       'Fossielen Duitsland': false,
       'Fossielen Frankrijk': false,
+      // België
+      'Monumenten BE': false,
+      'Archeo Zones BE': false,
+      'Arch Sites BE': false,
+      'Erfgoed Landschap BE': false,
+      'CAI Elementen': false,
+      // Frankrijk
+      'Hist. Gebouwen FR': false,
+      'INRAP Sites FR': false,
+      'Archeo Sites Bretagne': false,
+      'Operaties Bretagne': false,
+      'Archeo Parijs': false,
+      'Sites Patrimoine Occitanie': false,
+      'Sites Patrimoine PACA': false,
+      'Sites Patrimoine Normandie': false,
+      'Maginotlinie': false,
       // Recreatie
       'Parken': false,
       'Speeltuinen': false,

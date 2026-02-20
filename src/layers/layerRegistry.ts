@@ -712,6 +712,142 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: false
   },
 
+  // ============================================
+  // INTERNATIONAL LAYERS - BELGIUM
+  // ============================================
+
+  'Monumenten BE': {
+    name: 'Monumenten BE',
+    factory: async () => {
+      const { createBeschermdeMonumentenBELayerOL } = await import('./belgieErfgoedLayers')
+      return createBeschermdeMonumentenBELayerOL()
+    },
+    immediateLoad: false,
+    regions: ['be']
+  },
+  'Archeo Zones BE': {
+    name: 'Archeo Zones BE',
+    factory: async () => {
+      const { createArcheoZonesBELayerOL } = await import('./belgieErfgoedLayers')
+      return createArcheoZonesBELayerOL()
+    },
+    immediateLoad: false,
+    regions: ['be']
+  },
+  'Arch Sites BE': {
+    name: 'Arch Sites BE',
+    factory: async () => {
+      const { createBeschArchSitesBELayerOL } = await import('./belgieErfgoedLayers')
+      return createBeschArchSitesBELayerOL()
+    },
+    immediateLoad: false,
+    regions: ['be']
+  },
+  'Erfgoed Landschap BE': {
+    name: 'Erfgoed Landschap BE',
+    factory: async () => {
+      const { createErfgoedLandschappenBELayerOL } = await import('./belgieErfgoedLayers')
+      return createErfgoedLandschappenBELayerOL()
+    },
+    immediateLoad: false,
+    regions: ['be']
+  },
+  'CAI Elementen': {
+    name: 'CAI Elementen',
+    factory: async () => {
+      const { createCAIElementenBELayerOL } = await import('./belgieErfgoedLayers')
+      return createCAIElementenBELayerOL()
+    },
+    immediateLoad: false,
+    regions: ['be']
+  },
+
+  // ============================================
+  // INTERNATIONAL LAYERS - FRANCE
+  // ============================================
+
+  'Hist. Gebouwen FR': {
+    name: 'Hist. Gebouwen FR',
+    factory: async () => {
+      const { createFrankrijkMonumentenLayerOL } = await import('./frankrijkMonumentenOL')
+      return createFrankrijkMonumentenLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'INRAP Sites FR': {
+    name: 'INRAP Sites FR',
+    factory: async () => {
+      const { createInrapSitesFRLayerOL } = await import('./inrapSitesFROL')
+      return createInrapSitesFRLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Archeo Sites Bretagne': {
+    name: 'Archeo Sites Bretagne',
+    factory: async () => {
+      const { createArcheoBretagneLayerOL } = await import('./archeoBretagneOL')
+      return createArcheoBretagneLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Operaties Bretagne': {
+    name: 'Operaties Bretagne',
+    factory: async () => {
+      const { createBretagneOperationsLayerOL } = await import('./bretagneOperationsOL')
+      return createBretagneOperationsLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Archeo Parijs': {
+    name: 'Archeo Parijs',
+    factory: async () => {
+      const { createParisArcheoLayerOL } = await import('./parisArcheoOL')
+      return createParisArcheoLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Patrimoine Occitanie': {
+    name: 'Sites Patrimoine Occitanie',
+    factory: async () => {
+      const { createOccitaniePatrimoineLayerOL } = await import('./occitaniePatrimoineOL')
+      return createOccitaniePatrimoineLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Patrimoine PACA': {
+    name: 'Sites Patrimoine PACA',
+    factory: async () => {
+      const { createPacaPatrimoineLayerOL } = await import('./pacaPatrimoineOL')
+      return createPacaPatrimoineLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Sites Patrimoine Normandie': {
+    name: 'Sites Patrimoine Normandie',
+    factory: async () => {
+      const { createNormandiePatrimoineLayerOL } = await import('./normandiePatrimoineOL')
+      return createNormandiePatrimoineLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr']
+  },
+  'Maginotlinie': {
+    name: 'Maginotlinie',
+    factory: async () => {
+      const { createWikimaginotLayerOL } = await import('./wikimaginotOL')
+      return createWikimaginotLayerOL()
+    },
+    immediateLoad: false,
+    regions: ['fr', 'de']
+  },
+
 }
 
 // Helper to get all immediate load layers (OpenLayers only - ArcGIS layers are handled separately)

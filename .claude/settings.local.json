@@ -80,7 +80,9 @@
       "Bash(npm run dev:commercial:*)",
       "WebFetch(domain:www.atlasleefomgeving.nl)",
       "Bash(gh api:*)",
-      "WebFetch(domain:mailbvandongen-eng.github.io)"
+      "WebFetch(domain:mailbvandongen-eng.github.io)",
+      "Bash(find:*)",
+      "Bash(wc:*)"
     ]
   }
 }
