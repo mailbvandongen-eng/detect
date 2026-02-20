@@ -162,7 +162,8 @@ export function ThemesPanel() {
               <div className="space-y-0">
                 <LayerItem name="CartoDB (licht)" type="base" />
                 <LayerItem name="OpenStreetMap" type="base" />
-                <LayerItem name="Luchtfoto" type="base" hasOverlay />
+                <LayerItem name="Luchtfoto" type="base" hasOverlay displayName="Luchtfoto (NL)" />
+                <LayerItem name="Satelliet (wereld)" type="base" hasOverlay />
                 <LayerItem name="TMK 1850" type="base" hasOverlay />
                 <LayerItem name="Bonnebladen 1900" type="base" hasOverlay />
               </div>

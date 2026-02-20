@@ -16,6 +16,7 @@ const BASE_LAYERS = [
   'CartoDB (licht)',
   'OpenStreetMap',
   'Luchtfoto',
+  'Satelliet (wereld)',
   'TMK 1850',
   'Bonnebladen 1900'
 ]
@@ -58,7 +59,7 @@ export function MapContainer() {
       })
     })
 
-    // PDOK Luchtfoto RGB - 8cm resolutie, meest recente jaargang
+    // PDOK Luchtfoto RGB - 8cm resolutie, meest recente jaargang (alleen Nederland)
     // Gratis en commercieel toegestaan (CC-BY)
     const satelliteLayer = new TileLayer({
       properties: { title: 'Luchtfoto', type: 'base' },
@@ -67,6 +68,19 @@ export function MapContainer() {
         url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
         attributions: '© Kadaster / PDOK Luchtfoto',
         maxZoom: 19
+      })
+    })
+
+    // Esri World Imagery - Wereldwijde satellietbeelden (Europa, België, Frankrijk, etc.)
+    // Gratis voor niet-commercieel gebruik
+    const worldSatelliteLayer = new TileLayer({
+      properties: { title: 'Satelliet (wereld)', type: 'base' },
+      visible: false,
+      source: new XYZ({
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        attributions: '© Esri, Maxar, Earthstar Geographics',
+        maxZoom: 19,
+        crossOrigin: 'anonymous'
       })
     })
 
@@ -110,19 +124,22 @@ export function MapContainer() {
     map.addLayer(osmLayer)
     map.addLayer(cartoDBLayer)
     map.addLayer(satelliteLayer)
+    map.addLayer(worldSatelliteLayer)
     map.addLayer(labelsLayer) // Labels overlay for hybrid map
     map.addLayer(tmk1850Layer)
     map.addLayer(bonne1900Layer)
     console.log('✅ Base layers added:', {
       osm: osmLayer.getVisible(),
       cartodb: cartoDBLayer.getVisible(),
-      satellite: satelliteLayer.getVisible()
+      satellite: satelliteLayer.getVisible(),
+      worldSatellite: worldSatelliteLayer.getVisible()
     })
 
     // Register base layers in store
     registerLayer('OpenStreetMap', osmLayer)
     registerLayer('CartoDB (licht)', cartoDBLayer)
     registerLayer('Luchtfoto', satelliteLayer)
+    registerLayer('Satelliet (wereld)', worldSatelliteLayer)
     registerLayer('Labels Overlay', labelsLayer)
     registerLayer('TMK 1850', tmk1850Layer)
     registerLayer('Bonnebladen 1900', bonne1900Layer)
