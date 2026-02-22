@@ -9,7 +9,7 @@ import {
   onAuthStateChanged,
   type User
 } from 'firebase/auth'
-import { auth } from '../lib/firebase'
+import { auth, googleProvider } from '../lib/firebase'
 import { useSettingsStore } from './settingsStore'
 
 interface AuthState {
@@ -65,17 +65,16 @@ export const useAuthStore = create<AuthState>()(
     signInWithGoogle: async () => {
       set(state => { state.loading = true; state.error = null })
       try {
-        const provider = new GoogleAuthProvider()
+        // Use the pre-created googleProvider from firebase.ts
         // Always use popup - redirect has issues with Chrome's bounce tracking protection
-        // Chrome blocks Firebase redirect as "tracking" which breaks auth
         try {
-          await signInWithPopup(auth, provider)
+          await signInWithPopup(auth, googleProvider)
         } catch (popupError: any) {
           // If popup fails (e.g., blocked), fall back to redirect
           if (popupError.code === 'auth/popup-blocked' ||
               popupError.code === 'auth/popup-closed-by-user') {
             console.log('Popup blocked/closed, trying redirect...')
-            await signInWithRedirect(auth, provider)
+            await signInWithRedirect(auth, googleProvider)
           } else {
             throw popupError
           }

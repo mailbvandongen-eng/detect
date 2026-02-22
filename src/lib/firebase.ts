@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
@@ -16,6 +16,7 @@ const firebaseConfig = {
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
+export const googleProvider = new GoogleAuthProvider()
 
 // Initialize Firestore with persistent cache (modern API - replaces deprecated enableIndexedDbPersistence)
 export const db = initializeFirestore(app, {
