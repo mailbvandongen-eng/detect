@@ -66,12 +66,19 @@ export const useAuthStore = create<AuthState>()(
       set(state => { state.loading = true; state.error = null })
       try {
         const provider = new GoogleAuthProvider()
-        // Use redirect on production (GitHub Pages has COOP restrictions)
-        // Use popup on localhost for faster development
-        if (window.location.hostname === 'localhost') {
+        // Always use popup - redirect has issues with Chrome's bounce tracking protection
+        // Chrome blocks Firebase redirect as "tracking" which breaks auth
+        try {
           await signInWithPopup(auth, provider)
-        } else {
-          await signInWithRedirect(auth, provider)
+        } catch (popupError: any) {
+          // If popup fails (e.g., blocked), fall back to redirect
+          if (popupError.code === 'auth/popup-blocked' ||
+              popupError.code === 'auth/popup-closed-by-user') {
+            console.log('Popup blocked/closed, trying redirect...')
+            await signInWithRedirect(auth, provider)
+          } else {
+            throw popupError
+          }
         }
         // User will be set by onAuthStateChanged (or getRedirectResult)
       } catch (error: any) {
