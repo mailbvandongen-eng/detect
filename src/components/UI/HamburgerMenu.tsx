@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud, Landmark, Ruler, Pencil, Printer } from 'lucide-react'
+import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
 import { useSettingsStore } from '../../store/settingsStore'
+import { useCloudSync } from '../../hooks/useCloudSync'
 import { version } from '../../../package.json'
 
 // Google logo SVG component
@@ -33,8 +34,17 @@ function GoogleLogo({ size = 18 }: { size?: number }) {
 
 export function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState<{
+    success: boolean
+    uploaded: { layers: number; vondsten: number; routes: number }
+    downloaded: { layers: number; vondsten: number; routes: number }
+    error?: string
+  } | null>(null)
+
   const { user, loading, signInWithGoogle, logout } = useAuthStore()
   const { toggleInfoPanel, toggleSettingsPanel, toggleMonumentSearch } = useUIStore()
+  const { syncNow } = useCloudSync()
 
   // Settings for font scale
   const menuFontScale = useSettingsStore(state => state.menuFontScale)
@@ -84,6 +94,29 @@ export function HamburgerMenu() {
   const handleLogout = () => {
     closeMenu()
     logout()
+  }
+
+  const handleSync = async () => {
+    if (!user || isSyncing) return
+
+    setIsSyncing(true)
+    setSyncResult(null)
+
+    try {
+      const result = await syncNow()
+      setSyncResult(result)
+      // Auto-hide result after 5 seconds
+      setTimeout(() => setSyncResult(null), 5000)
+    } catch (err) {
+      setSyncResult({
+        success: false,
+        uploaded: { layers: 0, vondsten: 0, routes: 0 },
+        downloaded: { layers: 0, vondsten: 0, routes: 0 },
+        error: err instanceof Error ? err.message : 'Sync mislukt'
+      })
+    } finally {
+      setIsSyncing(false)
+    }
   }
 
   // Calculate font size based on menuFontScale
@@ -193,6 +226,46 @@ export function HamburgerMenu() {
                       <LogOut size={16} />
                     </button>
                   </div>
+
+                  {/* Sync button */}
+                  <button
+                    onClick={handleSync}
+                    disabled={isSyncing}
+                    className="mt-2 w-full px-3 py-2 flex items-center gap-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border-0 outline-none disabled:opacity-50"
+                  >
+                    <RefreshCw size={16} className={`text-blue-500 ${isSyncing ? 'animate-spin' : ''}`} />
+                    <span className="text-blue-700" style={{ fontSize: '0.85em' }}>
+                      {isSyncing ? 'Synchroniseren...' : 'Synchroniseren'}
+                    </span>
+                  </button>
+
+                  {/* Sync result */}
+                  {syncResult && (
+                    <div className={`mt-2 p-2 rounded-lg text-xs ${
+                      syncResult.success
+                        ? 'bg-green-50 text-green-700'
+                        : 'bg-red-50 text-red-700'
+                    }`}>
+                      {syncResult.error ? (
+                        <p>{syncResult.error}</p>
+                      ) : (
+                        <p>
+                          {syncResult.uploaded.layers + syncResult.uploaded.vondsten + syncResult.uploaded.routes > 0 && (
+                            <span>{syncResult.uploaded.layers + syncResult.uploaded.vondsten + syncResult.uploaded.routes} geupload</span>
+                          )}
+                          {syncResult.uploaded.layers + syncResult.uploaded.vondsten + syncResult.uploaded.routes > 0 &&
+                           syncResult.downloaded.layers + syncResult.downloaded.vondsten + syncResult.downloaded.routes > 0 && ', '}
+                          {syncResult.downloaded.layers + syncResult.downloaded.vondsten + syncResult.downloaded.routes > 0 && (
+                            <span>{syncResult.downloaded.layers + syncResult.downloaded.vondsten + syncResult.downloaded.routes} gedownload</span>
+                          )}
+                          {syncResult.uploaded.layers + syncResult.uploaded.vondsten + syncResult.uploaded.routes === 0 &&
+                           syncResult.downloaded.layers + syncResult.downloaded.vondsten + syncResult.downloaded.routes === 0 && (
+                            <span>Alles is gesynchroniseerd</span>
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <button

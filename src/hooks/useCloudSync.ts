@@ -305,10 +305,112 @@ export function useCloudSync() {
     }
   }, [user, savedRoutes, syncRoutesToCloud])
 
+  // Manual sync function - forces immediate sync of all data
+  const syncNow = useCallback(async (): Promise<{
+    success: boolean
+    uploaded: { layers: number; vondsten: number; routes: number }
+    downloaded: { layers: number; vondsten: number; routes: number }
+    error?: string
+  }> => {
+    if (!user) {
+      return {
+        success: false,
+        uploaded: { layers: 0, vondsten: 0, routes: 0 },
+        downloaded: { layers: 0, vondsten: 0, routes: 0 },
+        error: 'Niet ingelogd'
+      }
+    }
+
+    try {
+      // Get current local data
+      const currentLayers = useCustomPointLayerStore.getState().layers
+      const currentVondsten = useLocalVondstenStore.getState().vondsten
+      const currentRoutes = useRouteRecordingStore.getState().savedRoutes
+
+      // Get cloud data
+      const userDocRef = doc(db, 'users', user.uid)
+      const docSnap = await getDoc(userDocRef)
+      const cloudData = docSnap.exists() ? docSnap.data() : {}
+
+      const cloudLayers = (cloudData.layers || []) as CustomPointLayer[]
+      const cloudVondsten = (cloudData.vondsten || []) as LocalVondst[]
+      const cloudRoutes = (cloudData.routes || []) as RecordedRoute[]
+
+      // Merge layers
+      const cloudLayerIds = new Set(cloudLayers.map(l => l.id))
+      const localLayerIds = new Set(currentLayers.map(l => l.id))
+      const newLocalLayers = currentLayers.filter(l => !cloudLayerIds.has(l.id))
+      const newCloudLayers = cloudLayers.filter(l => !localLayerIds.has(l.id))
+      const mergedLayers = [...cloudLayers, ...newLocalLayers]
+
+      // Merge vondsten
+      const cloudVondstIds = new Set(cloudVondsten.map(v => v.id))
+      const localVondstIds = new Set(currentVondsten.map(v => v.id))
+      const newLocalVondsten = currentVondsten.filter(v => !cloudVondstIds.has(v.id))
+      const newCloudVondsten = cloudVondsten.filter(v => !localVondstIds.has(v.id))
+      const mergedVondsten = [...cloudVondsten, ...newLocalVondsten]
+
+      // Merge routes
+      const cloudRouteIds = new Set(cloudRoutes.map(r => r.id))
+      const localRouteIds = new Set(currentRoutes.map(r => r.id))
+      const newLocalRoutes = currentRoutes.filter(r => !cloudRouteIds.has(r.id))
+      const newCloudRoutes = cloudRoutes.filter(r => !localRouteIds.has(r.id))
+      const mergedRoutes = [...cloudRoutes, ...newLocalRoutes]
+
+      // Update local stores with merged data
+      useCustomPointLayerStore.setState({ layers: mergedLayers })
+      useLocalVondstenStore.setState({ vondsten: mergedVondsten })
+      useRouteRecordingStore.setState({
+        savedRoutes: mergedRoutes,
+        visibleRouteIds: new Set(mergedRoutes.map(r => r.id))
+      })
+
+      // Update refs
+      lastSyncedLayersRef.current = JSON.stringify(mergedLayers)
+      lastSyncedVondstenRef.current = JSON.stringify(mergedVondsten)
+      lastSyncedRoutesRef.current = JSON.stringify(mergedRoutes)
+
+      // Upload merged data to cloud
+      await setDoc(userDocRef, {
+        layers: mergedLayers,
+        vondsten: mergedVondsten,
+        routes: mergedRoutes,
+        layersUpdatedAt: serverTimestamp(),
+        vondstenUpdatedAt: serverTimestamp(),
+        routesUpdatedAt: serverTimestamp()
+      }, { merge: true })
+
+      console.log('☁️ Handmatige sync voltooid')
+
+      return {
+        success: true,
+        uploaded: {
+          layers: newLocalLayers.length,
+          vondsten: newLocalVondsten.length,
+          routes: newLocalRoutes.length
+        },
+        downloaded: {
+          layers: newCloudLayers.length,
+          vondsten: newCloudVondsten.length,
+          routes: newCloudRoutes.length
+        }
+      }
+    } catch (error) {
+      console.error('❌ Sync fout:', error)
+      return {
+        success: false,
+        uploaded: { layers: 0, vondsten: 0, routes: 0 },
+        downloaded: { layers: 0, vondsten: 0, routes: 0 },
+        error: error instanceof Error ? error.message : 'Sync mislukt'
+      }
+    }
+  }, [user])
+
   return {
     isLoggedIn: !!user,
     syncLayersToCloud,
     syncVondstenToCloud,
-    syncRoutesToCloud
+    syncRoutesToCloud,
+    syncNow
   }
 }
