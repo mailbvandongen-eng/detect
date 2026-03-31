@@ -1,43 +1,27 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import type { Layer } from 'ol/layer'
-import type ImageryLayer from '@arcgis/core/layers/ImageryLayer'
 import { layerRegistry } from '../layers/layerRegistry'
 import { useMapStore } from './mapStore'
 
 export type LoadingState = 'idle' | 'loading' | 'loaded' | 'error'
 
 interface LayerState {
-  // Visibility state
   visible: Record<string, boolean>
-
-  // Opacity state for WMS layers
   opacity: Record<string, number>
-
-  // Loading state for lazy-loaded layers
   loadingState: Record<string, LoadingState>
-
-  // Layer instances - OpenLayers layers
   layers: Record<string, Layer>
-
-  // ArcGIS layer instances (separate because different API)
-  arcgisLayers: Record<string, ImageryLayer>
-
-  // Actions
   toggleLayer: (name: string) => void
   setLayerVisibility: (name: string, visible: boolean) => void
   setLayerOpacity: (name: string, opacity: number) => void
   registerLayer: (name: string, layer: Layer) => void
-  registerArcGISLayer: (name: string, layer: ImageryLayer) => void
   unregisterLayer: (name: string) => void
   loadLayer: (name: string) => Promise<void>
 }
 
 export const useLayerStore = create<LayerState>()(
   immer((set, get) => ({
-    // Initial visibility state - NL only
     visible: {
-      // Base layers
       'CartoDB (licht)': true,
       'OpenStreetMap': false,
       'Luchtfoto': false,
@@ -45,13 +29,11 @@ export const useLayerStore = create<LayerState>()(
       'Labels Overlay': false,
       'TMK 1850': false,
       'Bonnebladen 1900': false,
-      // Steentijd
       'Hunebedden': false,
       'FAMKE Steentijd': false,
       'FAMKE IJzertijd': false,
       'Grafheuvels': false,
       'Terpen': false,
-      // Archeologische lagen
       'AMK Monumenten': false,
       'AMK Romeins': false,
       'AMK Steentijd': false,
@@ -64,17 +46,14 @@ export const useLayerStore = create<LayerState>()(
       'Kastelen': false,
       'IKAW': false,
       'Essen': false,
-      // Erfgoed & Monumenten
       'Rijksmonumenten': false,
       'Werelderfgoed': false,
       'WWII Bunkers': false,
       'Slagvelden': false,
       'Militaire Vliegvelden': false,
-      // Verdedigingswerken
       'Verdedigingslinies': false,
       'Inundatiegebieden': false,
       'Militaire Objecten': false,
-      // Paleogeografische kaarten
       'Paleokaart 800 n.Chr.': false,
       'Paleokaart 100 n.Chr.': false,
       'Paleokaart 500 v.Chr.': false,
@@ -82,36 +61,29 @@ export const useLayerStore = create<LayerState>()(
       'Paleokaart 2750 v.Chr.': false,
       'Paleokaart 5500 v.Chr.': false,
       'Paleokaart 9000 v.Chr.': false,
-      // Religieus erfgoed
       'Religieus Erfgoed': false,
-      // Uiterwaarden (UIKAV)
       'UIKAV Punten': false,
       'UIKAV Vlakken': false,
       'UIKAV Buffer': false,
       'UIKAV Expert': false,
       'UIKAV Indeling': false,
-      // Hillshade NL (via ArcGIS SDK)
       'AHN4 Hoogtekaart Kleur': false,
       'AHN4 Hillshade NL': false,
       'AHN4 Multi-Hillshade NL': false,
       'AHN4 Hillshade Kleur': false,
       'AHN 0.5m': false,
-      // Terrein
       'Veengebieden': false,
       'Geomorfologie': false,
       'Bodemkaart': false,
-      // Fossielen
       'Fossielen Nederland': false,
-      'Fossielen België': false,
+      'Fossielen BelgiÃ«': false,
       'Fossielen Duitsland': false,
       'Fossielen Frankrijk': false,
-      // België
       'Monumenten BE': false,
       'Archeo Zones BE': false,
       'Arch Sites BE': false,
       'Erfgoed Landschap BE': false,
       'CAI Elementen': false,
-      // Frankrijk
       'Hist. Gebouwen FR': false,
       'INRAP Sites FR': false,
       'Archeo Sites Bretagne': false,
@@ -121,77 +93,63 @@ export const useLayerStore = create<LayerState>()(
       'Sites Patrimoine PACA': false,
       'Sites Patrimoine Normandie': false,
       'Maginotlinie': false,
-      // Sites Classés per regio
-      'Sites Classés Bretagne': false,
-      'Sites Classés Normandie': false,
-      'Sites Classés Hauts-de-France': false,
-      'Sites Classés Grand Est': false,
-      'Sites Classés Île-de-France': false,
-      'Sites Classés Centre-Val de Loire': false,
-      'Sites Classés Bourgogne-FC': false,
-      'Sites Classés Pays de la Loire': false,
-      'Sites Classés Nouvelle-Aquitaine': false,
-      'Sites Classés Auvergne-RA': false,
-      'Sites Classés Occitanie': false,
-      'Sites Classés PACA': false,
-      'Sites Classés Corse': false,
+      'Sites ClassÃ©s Bretagne': false,
+      'Sites ClassÃ©s Normandie': false,
+      'Sites ClassÃ©s Hauts-de-France': false,
+      'Sites ClassÃ©s Grand Est': false,
+      'Sites ClassÃ©s ÃŽle-de-France': false,
+      'Sites ClassÃ©s Centre-Val de Loire': false,
+      'Sites ClassÃ©s Bourgogne-FC': false,
+      'Sites ClassÃ©s Pays de la Loire': false,
+      'Sites ClassÃ©s Nouvelle-Aquitaine': false,
+      'Sites ClassÃ©s Auvergne-RA': false,
+      'Sites ClassÃ©s Occitanie': false,
+      'Sites ClassÃ©s PACA': false,
+      'Sites ClassÃ©s Corse': false,
       'Monumenten IDF': false,
-      // Recreatie
       'Parken': false,
       'Speeltuinen': false,
       'Musea': false,
       'Strandjes': false,
       'Ruiterpaden': false,
       'Laarzenpaden': false,
-      // Percelen (Kadaster & Landbouw)
       'Gewaspercelen': false,
       'Kadastrale Grenzen': false,
-      // Provinciale Waardenkaarten - Zuid-Holland
       'Scheepswrakken': false,
       'Woonheuvels ZH': false,
       'Romeinse Forten': false,
       'Windmolens': false,
       'Erfgoedlijnen': false,
       'Oude Kernen': false,
-      // Provinciale Waardenkaarten - Gelderland
       'Relictenkaart Punten': false,
       'Relictenkaart Lijnen': false,
       'Relictenkaart Vlakken': false,
-      // Provinciale Waardenkaarten - Zeeland
       'Verdronken Dorpen': false,
-      // Persoonlijk
       'Mijn Vondsten': true
     },
 
-    // Initial opacity state - all overlay/vlak layers
     opacity: {
-      // Hoogtekaarten (via ArcGIS SDK)
       'AHN4 Hoogtekaart Kleur': 0.85,
       'AHN4 Hillshade NL': 0.7,
       'AHN4 Multi-Hillshade NL': 0.7,
       'AHN4 Hillshade Kleur': 0.8,
       'AHN 0.5m': 0.7,
-      // Historische kaarten
       'TMK 1850': 0.8,
       'Bonnebladen 1900': 0.8,
-      // Terrein/bodem
       'Geomorfologie': 0.5,
       'Bodemkaart': 0.6,
       'Veengebieden': 0.6,
-      // Archeologie
       'IKAW': 0.5,
       'FAMKE Steentijd': 0.6,
       'FAMKE IJzertijd': 0.6,
       'Essen': 0.6,
       'Terpen': 0.7,
-      // AMK Monumenten - alle perioden
       'AMK Monumenten': 0.45,
       'AMK Romeins': 0.6,
       'AMK Steentijd': 0.6,
       'AMK Vroege ME': 0.6,
       'AMK Late ME': 0.6,
       'AMK Overig': 0.6,
-      // Paleokaarten
       'Paleokaart 9000 v.Chr.': 0.7,
       'Paleokaart 5500 v.Chr.': 0.7,
       'Paleokaart 2750 v.Chr.': 0.7,
@@ -199,114 +157,70 @@ export const useLayerStore = create<LayerState>()(
       'Paleokaart 500 v.Chr.': 0.7,
       'Paleokaart 100 n.Chr.': 0.7,
       'Paleokaart 800 n.Chr.': 0.7,
-      // Militair
       'Verdedigingslinies': 0.7,
       'Inundatiegebieden': 0.5,
       'Militaire Objecten': 0.8,
       'Religieus Erfgoed': 0.8,
-      // Percelen
       'Gewaspercelen': 0.6,
       'Kadastrale Grenzen': 0.7,
-      // Provinciale Waardenkaarten
       'Erfgoedlijnen': 0.7,
       'Oude Kernen': 0.6,
       'Relictenkaart Vlakken': 0.5,
-      // Sites Classés Frankrijk (per regio)
-      'Sites Classés Bretagne': 0.5,
-      'Sites Classés Normandie': 0.5,
-      'Sites Classés Hauts-de-France': 0.5,
-      'Sites Classés Grand Est': 0.5,
-      'Sites Classés Île-de-France': 0.5,
-      'Sites Classés Centre-Val de Loire': 0.5,
-      'Sites Classés Bourgogne-FC': 0.5,
-      'Sites Classés Pays de la Loire': 0.5,
-      'Sites Classés Nouvelle-Aquitaine': 0.5,
-      'Sites Classés Auvergne-RA': 0.5,
-      'Sites Classés Occitanie': 0.5,
-      'Sites Classés PACA': 0.5,
-      'Sites Classés Corse': 0.5
+      'Sites ClassÃ©s Bretagne': 0.5,
+      'Sites ClassÃ©s Normandie': 0.5,
+      'Sites ClassÃ©s Hauts-de-France': 0.5,
+      'Sites ClassÃ©s Grand Est': 0.5,
+      'Sites ClassÃ©s ÃŽle-de-France': 0.5,
+      'Sites ClassÃ©s Centre-Val de Loire': 0.5,
+      'Sites ClassÃ©s Bourgogne-FC': 0.5,
+      'Sites ClassÃ©s Pays de la Loire': 0.5,
+      'Sites ClassÃ©s Nouvelle-Aquitaine': 0.5,
+      'Sites ClassÃ©s Auvergne-RA': 0.5,
+      'Sites ClassÃ©s Occitanie': 0.5,
+      'Sites ClassÃ©s PACA': 0.5,
+      'Sites ClassÃ©s Corse': 0.5
     },
 
-    // Loading state for lazy-loaded layers
     loadingState: {},
-
     layers: {},
-    arcgisLayers: {},
 
     toggleLayer: (name: string) => {
       const state = get()
       const newVisible = !state.visible[name]
 
-      // Set visibility immediately for responsive UI
-      set(state => {
-        state.visible[name] = newVisible
+      set(current => {
+        current.visible[name] = newVisible
       })
 
-      // Check if this is an ArcGIS layer
-      const layerDef = layerRegistry[name]
-      const isArcGIS = layerDef?.platform === 'arcgis'
-
-      if (isArcGIS) {
-        // Handle ArcGIS layer
-        if (newVisible && !state.arcgisLayers[name]) {
-          get().loadLayer(name)
-        } else if (state.arcgisLayers[name]) {
-          state.arcgisLayers[name].visible = newVisible
-        }
-      } else {
-        // Handle OpenLayers layer
-        if (newVisible && !state.layers[name]) {
-          get().loadLayer(name)
-        } else if (state.layers[name]) {
-          state.layers[name].setVisible(newVisible)
-        }
+      if (newVisible && !state.layers[name]) {
+        void get().loadLayer(name)
+      } else if (state.layers[name]) {
+        state.layers[name].setVisible(newVisible)
       }
     },
 
     setLayerVisibility: (name: string, visible: boolean) => {
       const state = get()
-      const layerDef = layerRegistry[name]
-      const isArcGIS = layerDef?.platform === 'arcgis'
 
-      // Set visibility in store
-      set(s => {
-        s.visible[name] = visible
-        if (isArcGIS) {
-          const arcgisLayer = s.arcgisLayers[name]
-          if (arcgisLayer) {
-            arcgisLayer.visible = visible
-          }
-        } else {
-          const layer = s.layers[name]
-          if (layer) {
-            layer.setVisible(visible)
-          }
+      set(current => {
+        current.visible[name] = visible
+        const layer = current.layers[name]
+        if (layer) {
+          layer.setVisible(visible)
         }
       })
 
-      // If turning on and layer doesn't exist yet, load it
-      const layerExists = isArcGIS ? state.arcgisLayers[name] : state.layers[name]
-      if (visible && !layerExists) {
-        get().loadLayer(name)
+      if (visible && !state.layers[name]) {
+        void get().loadLayer(name)
       }
     },
 
     setLayerOpacity: (name: string, opacity: number) => {
-      const layerDef = layerRegistry[name]
-      const isArcGIS = layerDef?.platform === 'arcgis'
-
       set(state => {
         state.opacity[name] = opacity
-        if (isArcGIS) {
-          const arcgisLayer = state.arcgisLayers[name]
-          if (arcgisLayer) {
-            arcgisLayer.opacity = opacity
-          }
-        } else {
-          const layer = state.layers[name]
-          if (layer) {
-            layer.setOpacity(opacity)
-          }
+        const layer = state.layers[name]
+        if (layer) {
+          layer.setOpacity(opacity)
         }
       })
     },
@@ -315,28 +229,11 @@ export const useLayerStore = create<LayerState>()(
       set(state => {
         state.layers[name] = layer
         state.loadingState[name] = 'loaded'
-        // Set initial visibility
         if (state.visible[name] !== undefined) {
           layer.setVisible(state.visible[name])
         }
-        // Set initial opacity
         if (state.opacity[name] !== undefined) {
           layer.setOpacity(state.opacity[name])
-        }
-      })
-    },
-
-    registerArcGISLayer: (name: string, layer: ImageryLayer) => {
-      set(state => {
-        state.arcgisLayers[name] = layer
-        state.loadingState[name] = 'loaded'
-        // Set initial visibility
-        if (state.visible[name] !== undefined) {
-          layer.visible = state.visible[name]
-        }
-        // Set initial opacity
-        if (state.opacity[name] !== undefined) {
-          layer.opacity = state.opacity[name]
         }
       })
     },
@@ -344,101 +241,58 @@ export const useLayerStore = create<LayerState>()(
     unregisterLayer: (name: string) => {
       set(state => {
         delete state.layers[name]
-        delete state.arcgisLayers[name]
         delete state.loadingState[name]
       })
     },
 
     loadLayer: async (name: string) => {
       const state = get()
-
-      // Check if layer exists in registry
       const layerDef = layerRegistry[name]
       if (!layerDef) {
-        console.warn(`⚠️ Layer "${name}" not found in registry`)
+        console.warn(`âš ï¸ Layer "${name}" not found in registry`)
         return
       }
 
-      const isArcGIS = layerDef.platform === 'arcgis'
-
-      // Skip if already loading or loaded
       if (state.loadingState[name] === 'loading') return
-      if (isArcGIS && state.arcgisLayers[name]) return
-      if (!isArcGIS && state.layers[name]) return
+      if (state.layers[name]) return
 
-      // Get the appropriate map
       const mapState = useMapStore.getState()
-
-      if (isArcGIS) {
-        // Need ArcGIS map
-        if (!mapState.arcgisMap || !mapState.arcgisInitialized) {
-          console.warn(`⚠️ Cannot load ArcGIS layer "${name}": ArcGIS map not initialized`)
-          return
-        }
-      } else {
-        // Need OpenLayers map
-        if (!mapState.map) {
-          console.warn(`⚠️ Cannot load layer "${name}": map not initialized`)
-          return
-        }
+      if (!mapState.map) {
+        console.warn(`âš ï¸ Cannot load layer "${name}": map not initialized`)
+        return
       }
 
-      // Set loading state
-      set(state => {
-        state.loadingState[name] = 'loading'
+      set(current => {
+        current.loadingState[name] = 'loading'
       })
 
-      console.log(`⏳ Loading ${isArcGIS ? 'ArcGIS' : 'OL'} layer: ${name}...`)
+      console.log(`â³ Loading OL layer: ${name}...`)
 
       try {
-        // Create the layer using the factory
         const layer = await layerDef.factory()
-
         if (!layer) {
           throw new Error('Factory returned null')
         }
 
         const currentState = get()
-
-        if (isArcGIS) {
-          // ArcGIS ImageryLayer
-          const arcgisLayer = layer as import('@arcgis/core/layers/ImageryLayer').default
-          arcgisLayer.visible = currentState.visible[name] ?? false
-          if (currentState.opacity[name] !== undefined) {
-            arcgisLayer.opacity = currentState.opacity[name]
-          }
-
-          // Add to ArcGIS map
-          mapState.arcgisMap!.add(arcgisLayer)
-
-          // Register in store
-          set(state => {
-            state.arcgisLayers[name] = arcgisLayer
-            state.loadingState[name] = 'loaded'
-          })
-        } else {
-          // OpenLayers layer
-          const olLayer = layer as Layer
-          olLayer.setVisible(currentState.visible[name] ?? false)
-          if (currentState.opacity[name] !== undefined) {
-            olLayer.setOpacity(currentState.opacity[name])
-          }
-
-          // Add to OL map
-          mapState.map!.addLayer(olLayer)
-
-          // Register in store
-          set(state => {
-            state.layers[name] = olLayer
-            state.loadingState[name] = 'loaded'
-          })
+        const olLayer = layer as Layer
+        olLayer.setVisible(currentState.visible[name] ?? false)
+        if (currentState.opacity[name] !== undefined) {
+          olLayer.setOpacity(currentState.opacity[name])
         }
 
-        console.log(`✅ Layer loaded: ${name}`)
+        mapState.map.addLayer(olLayer)
+
+        set(current => {
+          current.layers[name] = olLayer
+          current.loadingState[name] = 'loaded'
+        })
+
+        console.log(`âœ… Layer loaded: ${name}`)
       } catch (error) {
-        console.error(`❌ Failed to load layer "${name}":`, error)
-        set(state => {
-          state.loadingState[name] = 'error'
+        console.error(`âŒ Failed to load layer "${name}":`, error)
+        set(current => {
+          current.loadingState[name] = 'error'
         })
       }
     }
