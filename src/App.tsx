@@ -30,6 +30,8 @@ import { WelcomeModal } from './components/UI/WelcomeModal'
 import { MeasureTool } from './components/UI/MeasureTool'
 import { DrawTool } from './components/UI/DrawTool'
 import { PrintTool } from './components/UI/PrintTool'
+import { AgentButton } from './components/Agent/AgentButton'
+import { AgentPanel } from './components/Agent/AgentPanel'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
 import { useCloudSync } from './hooks/useCloudSync'
@@ -105,6 +107,7 @@ function App() {
         <PrintTool />
         <InfoButton />
         <CompassButton />
+        <AgentButton />
         <WeatherWidget />
         <RainRadarLayer
           isVisible={showBuienradar}
@@ -132,6 +135,7 @@ function App() {
           onClose={closeMonumentSearch}
         />
         <MonumentFilter />
+        <AgentPanel />
         <WelcomeModal
           isOpen={welcomeModalOpen}
           onClose={() => setWelcomeModalOpen(false)}
