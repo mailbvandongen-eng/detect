@@ -155,9 +155,7 @@ export default defineConfig({
   build: {
     outDir: 'docs',
     assetsDir: 'assets',
-    sourcemap: true,
-    // Keep older hashed assets on Pages so cached HTML/SW versions don't break on deploy.
-    emptyOutDir: false
+    sourcemap: true
   },
   server: {
     port: 5173,
