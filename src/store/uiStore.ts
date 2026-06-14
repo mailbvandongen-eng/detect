@@ -78,6 +78,36 @@ interface UIState {
   setDrawingMode: (active: boolean) => void
 }
 
+type ExclusivePanelKey =
+  | 'backgroundsPanelOpen'
+  | 'themesPanelOpen'
+  | 'settingsPanelOpen'
+  | 'infoPanelOpen'
+  | 'presetsPanelOpen'
+  | 'monumentFilterOpen'
+
+function closeStandardPanels(state: UIState) {
+  state.backgroundsPanelOpen = false
+  state.themesPanelOpen = false
+  state.settingsPanelOpen = false
+  state.infoPanelOpen = false
+  state.presetsPanelOpen = false
+}
+
+function closeExclusivePanels(state: UIState) {
+  closeStandardPanels(state)
+  state.monumentFilterOpen = false
+}
+
+function toggleExclusivePanel(state: UIState, key: ExclusivePanelKey) {
+  const wasOpen = state[key]
+  closeExclusivePanels(state)
+
+  if (!wasOpen) {
+    state[key] = true
+  }
+}
+
 export const useUIStore = create<UIState>()(
   immer((set, get) => ({
     layerControlOpen: false,
@@ -106,12 +136,7 @@ export const useUIStore = create<UIState>()(
 
     closeAllPanels: () => {
       set(state => {
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
+        closeExclusivePanels(state)
       })
     },
 
@@ -129,76 +154,31 @@ export const useUIStore = create<UIState>()(
 
     toggleBackgroundsPanel: () => {
       set(state => {
-        const wasOpen = state.backgroundsPanelOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.backgroundsPanelOpen = true
+        toggleExclusivePanel(state, 'backgroundsPanelOpen')
       })
     },
 
     toggleThemesPanel: () => {
       set(state => {
-        const wasOpen = state.themesPanelOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.themesPanelOpen = true
+        toggleExclusivePanel(state, 'themesPanelOpen')
       })
     },
 
     toggleSettingsPanel: () => {
       set(state => {
-        const wasOpen = state.settingsPanelOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.settingsPanelOpen = true
+        toggleExclusivePanel(state, 'settingsPanelOpen')
       })
     },
 
     toggleInfoPanel: () => {
       set(state => {
-        const wasOpen = state.infoPanelOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.infoPanelOpen = true
+        toggleExclusivePanel(state, 'infoPanelOpen')
       })
     },
 
     togglePresetsPanel: () => {
       set(state => {
-        const wasOpen = state.presetsPanelOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.presetsPanelOpen = true
+        toggleExclusivePanel(state, 'presetsPanelOpen')
       })
     },
 
@@ -226,13 +206,7 @@ export const useUIStore = create<UIState>()(
 
     openVondstForm: (location, photo) => {
       set(state => {
-        // Close all panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        // Open vondst form
+        closeStandardPanels(state)
         state.vondstFormOpen = true
         state.vondstFormLocation = location || null
         state.vondstFormPhoto = photo || null
@@ -250,13 +224,7 @@ export const useUIStore = create<UIState>()(
     toggleVondstDashboard: () => {
       set(state => {
         const wasOpen = state.vondstDashboardOpen
-        // Close all panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        // Toggle dashboard
+        closeStandardPanels(state)
         state.vondstDashboardOpen = !wasOpen
       })
     },
@@ -328,13 +296,7 @@ export const useUIStore = create<UIState>()(
     toggleMonumentSearch: () => {
       set(state => {
         const wasOpen = state.monumentSearchOpen
-        // Close all panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        // Toggle monument search
+        closeStandardPanels(state)
         state.monumentSearchOpen = !wasOpen
       })
     },
@@ -348,16 +310,7 @@ export const useUIStore = create<UIState>()(
     // Monument filter actions
     toggleMonumentFilter: () => {
       set(state => {
-        const wasOpen = state.monumentFilterOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.monumentFilterOpen = true
+        toggleExclusivePanel(state, 'monumentFilterOpen')
       })
     },
 

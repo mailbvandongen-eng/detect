@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { BASE_LAYER_IDS } from '../layers/layerConfig'
 import { useLayerStore } from './layerStore'
 
 export interface Preset {
@@ -172,8 +173,7 @@ export const usePresetStore = create<PresetState>()(
 
         // Set base layer if specified
         if (preset.baseLayer) {
-          const baseLayerNames = ['CartoDB (licht)', 'OpenStreetMap', 'Luchtfoto', 'TMK 1850', 'Bonnebladen 1900']
-          baseLayerNames.forEach(layerName => {
+          BASE_LAYER_IDS.forEach(layerName => {
             layerStore.setLayerVisibility(layerName, layerName === preset.baseLayer)
           })
         }
