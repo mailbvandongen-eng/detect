@@ -1,2 +1,0 @@
-import{V as o,G as r,a}from"./index-Cjjl26b7.js";import{L as n}from"./iconStyles-DtRi3lPP.js";async function f(){const e=await(await fetch("/detect/data/monuments_fr.geojson")).json(),t=new o({features:new r().readFeatures(e,{dataProjection:"EPSG:4326",featureProjection:"EPSG:3857"})});return new a({source:t,properties:{title:"Hist. Gebouwen FR"},visible:!1,zIndex:18,style:n.landmark("#dc2626")})}export{f as createFrankrijkMonumentenLayerOL};
-//# sourceMappingURL=frankrijkMonumentenOL-2JR5Kf-E.js.map

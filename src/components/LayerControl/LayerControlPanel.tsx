@@ -101,7 +101,7 @@ export function LayerControlPanel() {
                 <LayerItem name="UIKAV Indeling" type="overlay" />
               </LayerGroup>
 
-              {/* Hillshade & LiDAR Layers */}
+              {/* Hillshade & LiDAR Layers - via ArcGIS SDK */}
               <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false}>
                 <LayerItem name="AHN4 Hillshade Kleur" type="overlay" />
                 <LayerItem name="AHN4 Hillshade NL" type="overlay" />

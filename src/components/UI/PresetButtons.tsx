@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Bookmark } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BASE_LAYER_IDS } from '../../layers/layerConfig'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore, useMapStore } from '../../store'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
 import type { Preset } from '../../store/presetStore'
@@ -83,6 +82,15 @@ const ALL_OVERLAYS = [
   'Verdronken Dorpen'
 ]
 
+// Base layers
+const BASE_LAYERS = [
+  'CartoDB (licht)',
+  'OpenStreetMap',
+  'Luchtfoto',
+  'TMK 1850',
+  'Bonnebladen 1900'
+]
+
 // Center of Netherlands (Utrecht area) and zoom level for ~50km view
 const NL_CENTER = [5.2913, 52.1326] // [lon, lat]
 const NL_ZOOM = 8 // ~50km view
@@ -117,7 +125,7 @@ export function PresetButtons() {
     ALL_OVERLAYS.forEach(layer => setLayerVisibility(layer, false))
 
     // Set CartoDB as active base layer
-    BASE_LAYER_IDS.forEach(layer => {
+    BASE_LAYERS.forEach(layer => {
       setLayerVisibility(layer, layer === 'CartoDB (licht)')
     })
 

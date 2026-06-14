@@ -1,117 +1,240 @@
-import { useState, type ReactNode } from 'react'
-import { ChevronDown, ChevronRight, Layers, Mountain, Landmark, TreePine, Shield, Map, Globe, Gem, Compass, Download, Sparkles } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useRef, useEffect } from 'react'
+import { X, Layers, Check, Upload, ExternalLink, Globe, ChevronDown, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
+import { useUIStore, useSettingsStore } from '../../store'
+import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
+import { useCustomLayerStore } from '../../store/customLayerStore'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
-import { useSettingsStore } from '../../store'
-import { BUILD_MODE } from '../../config/buildMode'
+import { CustomLayerItem } from '../CustomLayers/CustomLayerItem'
+import { isThemeVisible, isSpecialSectionVisible, BUILD_MODE } from '../../config/buildMode'
+
+// Speciale archeologische 3D projecten - externe links
+const SPECIAL_PROJECTS = [
+  { name: 'Rapa Nui - Moai Productie', url: 'https://arcg.is/qu59O1', desc: 'Paaseiland steengroeve in 3D' },
+  { name: 'Digital Giza - Piramides', url: 'http://giza.fas.harvard.edu/giza3d/', desc: 'Harvard 3D reconstructie' },
+  { name: 'Stonehenge 360°', url: 'https://www.english-heritage.org.uk/visit/places/stonehenge/history-and-stories/stonehenge360/', desc: 'English Heritage virtuele tour' },
+  { name: 'Pompeii 3D Explorer', url: 'https://www.cyark.org/projects/pompeii/3D-Explorer', desc: 'CyArk LiDAR scans' },
+  { name: 'Virtual Angkor Wat', url: 'https://www.virtualangkor.com/', desc: '3D reconstructie 1300 n.Chr.' },
+  { name: 'Petra Virtuele Tour', url: 'https://www.zamaniproject.org/site-jordan-petra.html', desc: 'Zamani Project 3D' },
+]
+
+const HERITAGE_PLATFORMS = [
+  { name: 'CyArk (200+ sites)', url: 'https://www.cyark.org/projects/', desc: 'Wereldwijd erfgoed archief' },
+  { name: 'Google Open Heritage', url: 'https://artsandculture.google.com/project/openheritage', desc: '26+ UNESCO sites in 3D' },
+]
 
 export function ThemesPanel() {
-  const [expandedThemes, setExpandedThemes] = useState<Record<string, boolean>>({
-    'Archeologie': true,
-    'Erfgoed & Monumenten': false,
-    'WOII & Militair': false,
-    'Hillshade & LiDAR': false,
-    'Terrein & Bodem': false,
-    'Internationaal': false,
-    'Fossielen, Mineralen & Goud': false,
-    'Recreatie': false,
-    "Provinciale Thema's": false,
-    'Percelen': false,
-    'Geïmporteerde lagen': false,
-  })
+  const { themesPanelOpen, toggleThemesPanel, toggleSettingsPanel } = useUIStore()
+  const { layers: customLayers, toggleVisibility } = useCustomPointLayerStore()
+  const importedLayers = useCustomLayerStore(state => state.layers)
+  const panelRef = useRef<HTMLDivElement>(null)
 
-  const enabledThemes = useSettingsStore((state) => state.enabledThemes)
+  // Explicit selectors to ensure re-render on state change
+  const layerPanelFontScale = useSettingsStore(state => state.layerPanelFontScale)
+  const setLayerPanelFontScale = useSettingsStore(state => state.setLayerPanelFontScale)
+  const showFontSliders = useSettingsStore(state => state.showFontSliders)
+  const showCustomPointLayers = useSettingsStore(state => state.showCustomPointLayers)
 
-  const toggleTheme = (theme: string) => {
-    setExpandedThemes((prev) => ({
-      ...prev,
-      [theme]: !prev[theme]
-    }))
-  }
+  // Calculate font size based on panel-specific fontScale
+  const baseFontSize = 13 * layerPanelFontScale / 100
 
-  const isThemeVisible = (theme: string) => enabledThemes.includes(theme)
+  // State for special projects section
+  const [specialProjectsOpen, setSpecialProjectsOpen] = useState(false)
 
-  const themeIcons: Record<string, ReactNode> = {
-    'Archeologie': <Landmark size={16} className="text-amber-700" />,
-    'Erfgoed & Monumenten': <Sparkles size={16} className="text-purple-700" />,
-    'WOII & Militair': <Shield size={16} className="text-red-700" />,
-    'Hillshade & LiDAR': <Mountain size={16} className="text-slate-700" />,
-    'Terrein & Bodem': <TreePine size={16} className="text-green-700" />,
-    'Internationaal': <Globe size={16} className="text-blue-700" />,
-    'Fossielen, Mineralen & Goud': <Gem size={16} className="text-cyan-700" />,
-    'Recreatie': <Compass size={16} className="text-emerald-700" />,
-    "Provinciale Thema's": <Map size={16} className="text-orange-700" />,
-    'Percelen': <Layers size={16} className="text-lime-700" />,
-    'Geïmporteerde lagen': <Download size={16} className="text-cyan-600" />,
-  }
+  // Close on click outside
+  useEffect(() => {
+    if (!themesPanelOpen) return
 
-  const themes = [
-    'Archeologie',
-    'Erfgoed & Monumenten',
-    'WOII & Militair',
-    'Hillshade & LiDAR',
-    'Terrein & Bodem',
-    "Provinciale Thema's",
-    'Percelen',
-    'Fossielen, Mineralen & Goud',
-    'Internationaal',
-    'Recreatie',
-    'Geïmporteerde lagen',
-  ]
+    const handleClickOutside = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        toggleThemesPanel()
+      }
+    }
+
+    // Small delay to prevent immediate close
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside)
+    }, 100)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [themesPanelOpen, toggleThemesPanel])
 
   return (
-    <div className="space-y-2">
-      {themes.filter(isThemeVisible).map((theme) => (
-        <div key={theme} className="rounded-xl border border-white/60 bg-white/85 shadow-sm backdrop-blur-sm">
-          <button
-            type="button"
-            onClick={() => toggleTheme(theme)}
-            className="flex w-full items-center justify-between px-3 py-2 text-left"
+    <AnimatePresence>
+      {themesPanelOpen && (
+          <motion.div
+            ref={panelRef}
+            className="fixed right-[56px] z-[1101] bg-white rounded-lg shadow-lg overflow-hidden w-[300px] max-h-[calc(100vh-100px)] flex flex-col"
+            style={{ top: 'calc(max(0.5rem, env(safe-area-inset-top, 0.5rem)) + 52px)' }}
+            initial={{ opacity: 0, x: 50, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 50, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
           >
-            <div className="flex items-center gap-2">
-              {themeIcons[theme]}
-              <span className="text-sm font-medium text-slate-800">{theme}</span>
+            {/* Header with title and font size slider - blue bg, white text, scales with slider */}
+            <div className="flex items-center justify-between px-3 py-1.5 bg-blue-500" style={{ fontSize: `${baseFontSize}px` }}>
+              <span className="font-medium text-white">Kaartlagen</span>
+              {/* Font size slider - only if boomer mode enabled */}
+              {showFontSliders && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] text-blue-200">T</span>
+                  <input
+                    type="range"
+                    min="80"
+                    max="130"
+                    step="10"
+                    value={layerPanelFontScale}
+                    onInput={(e) => {
+                      setLayerPanelFontScale(parseInt((e.target as HTMLInputElement).value))
+                    }}
+                    onChange={(e) => setLayerPanelFontScale(parseInt(e.target.value))}
+                    className="w-16 opacity-70 hover:opacity-100 transition-opacity"
+                    title={`Tekstgrootte: ${layerPanelFontScale}%`}
+                  />
+                  <span className="text-xs text-blue-200">T</span>
+                </div>
+              )}
             </div>
-            {expandedThemes[theme] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-          </button>
+          <div className="p-2 overflow-y-auto flex-1" style={{ fontSize: `${baseFontSize}px` }}>
+            {/* Mijn lagen - custom point layers with orange header */}
+            {showCustomPointLayers && customLayers.filter(l => !l.archived).length > 0 && (
+              <div className="mb-2 pb-1 border-b border-gray-100">
+                <div className="flex items-center gap-1 py-0.5 px-1 mb-1">
+                  <span className="text-orange-600 font-medium" style={{ fontSize: '0.9em' }}>Mijn lagen</span>
+                </div>
+                {customLayers.filter(l => !l.archived).map(layer => (
+                  <button
+                    key={layer.id}
+                    onClick={(e) => { e.stopPropagation(); toggleVisibility(layer.id) }}
+                    className={`w-full flex items-center justify-between py-1 pl-3 pr-2 border-0 outline-none transition-colors text-left ${
+                      layer.visible ? 'bg-orange-50 hover:bg-orange-100' : 'bg-transparent hover:bg-orange-50'
+                    }`}
+                    style={{ fontSize: 'inherit' }}
+                  >
+                    <span className="flex items-center gap-2 text-gray-600">
+                      {layer.name}
+                      <span className="text-xs text-gray-400">({layer.points.length})</span>
+                    </span>
+                    <div
+                      className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-100 flex-shrink-0"
+                      style={{
+                        backgroundColor: layer.visible ? '#f97316' : 'white',
+                        border: layer.visible ? '2px solid #f97316' : '2px solid #fb923c',
+                        color: 'white'
+                      }}
+                    >
+                      {layer.visible && <Check size={12} strokeWidth={3} />}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
 
-          {expandedThemes[theme] && (
-            <div className="border-t border-slate-200/70 px-2 py-2">
-              {theme === 'Archeologie' && (
-                <>
-                  <LayerGroup title="Archeologie" defaultExpanded={false} layerNames={['AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig', 'Archeo Onderzoeken', 'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Terpen', 'Hunebedden', 'Kansenkaart', 'Paleokaart 800 n.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 500 v.Chr.', 'Paleokaart 1500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 9000 v.Chr.']}>
-                    <LayerItem name="AMK Monumenten" type="overlay" />
+            {/* Geïmporteerde lagen - section with teal/cyan header */}
+            {importedLayers.length > 0 && (
+              <div className="mb-2 pb-1 border-b border-gray-100">
+                <div className="flex items-center gap-1 py-0.5 px-1 mb-1">
+                  <Upload size={12} className="text-cyan-600" />
+                  <span className="text-cyan-600 font-medium" style={{ fontSize: '0.9em' }}>Geïmporteerde lagen</span>
+                </div>
+                {importedLayers.map(layer => (
+                  <CustomLayerItem key={layer.id} layer={layer} compact />
+                ))}
+                <button
+                  onClick={() => { toggleThemesPanel(); toggleSettingsPanel() }}
+                  className="w-full text-left py-1 pl-3 text-xs text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50 transition-colors"
+                >
+                  + Laag importeren...
+                </button>
+              </div>
+            )}
+
+            {/* Basislaag - vaste sectie zonder pijltje */}
+            <div className="mb-2">
+              <div className="flex items-center gap-1 py-1 px-1 mb-1">
+                <span className="text-blue-600 font-medium" style={{ fontSize: '0.95em' }}>Basislaag</span>
+              </div>
+              <div className="space-y-0">
+                <LayerItem name="CartoDB (licht)" type="base" />
+                <LayerItem name="OpenStreetMap" type="base" />
+                <LayerItem name="Luchtfoto" type="base" hasOverlay displayName="Luchtfoto (NL)" />
+                <LayerItem name="Satelliet (wereld)" type="base" hasOverlay />
+                <LayerItem name="TMK 1850" type="base" hasOverlay />
+                <LayerItem name="Bonnebladen 1900" type="base" hasOverlay />
+              </div>
+            </div>
+
+            {/* Thema's - vaste sectie, daaronder inklapbare groepen */}
+            <div className="mb-2">
+              <div className="flex items-center gap-1 py-1 px-1 mb-1 border-t border-gray-100 pt-2">
+                <span className="text-blue-600 font-medium" style={{ fontSize: '0.95em' }}>Thema's</span>
+              </div>
+              {/* Steentijd (Stone Age) */}
+              {isThemeVisible('Steentijd & Prehistorie') && (
+                <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false} layerNames={['Hunebedden', 'Grafheuvels', 'Terpen', 'FAMKE Steentijd', 'FAMKE IJzertijd']}>
+                  <LayerItem name="Hunebedden" type="overlay" />
+                  <LayerItem name="Grafheuvels" type="overlay" />
+                  <LayerItem name="Terpen" type="overlay" />
+                  <LayerItem name="FAMKE Steentijd" type="overlay" />
+                  <LayerItem name="FAMKE IJzertijd" type="overlay" />
+                </LayerGroup>
+              )}
+
+              {/* Paleogeografische kaarten - eigen groep */}
+              {isThemeVisible('Paleokaarten') && (
+                <LayerGroup title="Paleokaarten" defaultExpanded={false} layerNames={['Paleokaart 9000 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 1500 v.Chr.', 'Paleokaart 500 v.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 800 n.Chr.']}>
+                  <LayerItem name="Paleokaart 9000 v.Chr." type="overlay" />
+                  <LayerItem name="Paleokaart 5500 v.Chr." type="overlay" />
+                  <LayerItem name="Paleokaart 2750 v.Chr." type="overlay" />
+                  <LayerItem name="Paleokaart 1500 v.Chr." type="overlay" />
+                  <LayerItem name="Paleokaart 500 v.Chr." type="overlay" />
+                  <LayerItem name="Paleokaart 100 n.Chr." type="overlay" />
+                  <LayerItem name="Paleokaart 800 n.Chr." type="overlay" />
+                </LayerGroup>
+              )}
+
+              {/* Archaeological Layers */}
+              {isThemeVisible('Archeologische lagen') && (
+                <LayerGroup title="Archeologische lagen" defaultExpanded={false} layerNames={['AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig', 'Archeo Onderzoeken', 'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten']}>
+                  <LayerItem name="AMK Monumenten" type="overlay" />
+                  {/* AMK per periode */}
+                  <LayerGroup title="Per periode" defaultExpanded={false} layerNames={['AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig']}>
                     <LayerItem name="AMK Romeins" type="overlay" />
                     <LayerItem name="AMK Steentijd" type="overlay" />
                     <LayerItem name="AMK Vroege ME" type="overlay" />
                     <LayerItem name="AMK Late ME" type="overlay" />
                     <LayerItem name="AMK Overig" type="overlay" />
-                    <LayerItem name="Archeo Onderzoeken" type="overlay" />
+                  </LayerGroup>
+                  <LayerItem name="Archeo Onderzoeken" type="overlay" />
+                  {/* Romeinse tijd - wegen en forten */}
+                  <LayerGroup title="Romeinse tijd" defaultExpanded={false} layerNames={['Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten']}>
                     <LayerItem name="Romeinse wegen (regio)" type="overlay" />
                     <LayerItem name="Romeinse wegen (Wereld)" type="overlay" />
-                    <LayerItem name="Terpen" type="overlay" />
-                    <LayerItem name="Hunebedden" type="overlay" />
-                    <LayerItem name="Kansenkaart" type="overlay" />
-                    <LayerItem name="Paleokaart 800 n.Chr." type="overlay" />
-                    <LayerItem name="Paleokaart 100 n.Chr." type="overlay" />
-                    <LayerItem name="Paleokaart 500 v.Chr." type="overlay" />
-                    <LayerItem name="Paleokaart 1500 v.Chr." type="overlay" />
-                    <LayerItem name="Paleokaart 2750 v.Chr." type="overlay" />
-                    <LayerItem name="Paleokaart 5500 v.Chr." type="overlay" />
-                    <LayerItem name="Paleokaart 9000 v.Chr." type="overlay" />
+                    <LayerItem name="Romeinse Forten" type="overlay" />
                   </LayerGroup>
-
-                  <LayerGroup title="UIKAV" defaultExpanded={false} layerNames={['UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling']}>
-                    <LayerItem name="UIKAV Punten" type="overlay" />
-                    <LayerItem name="UIKAV Vlakken" type="overlay" />
-                    <LayerItem name="UIKAV Expert" type="overlay" />
-                    <LayerItem name="UIKAV Buffer" type="overlay" />
-                    <LayerItem name="UIKAV Indeling" type="overlay" />
-                  </LayerGroup>
-                </>
+                </LayerGroup>
               )}
 
-              {theme === 'Erfgoed & Monumenten' && (
+              {/* Archeologische verwachtingen */}
+              {isThemeVisible('Archeologische verwachtingen') && (
+                <LayerGroup title="Archeologische verwachtingen" defaultExpanded={false} layerNames={['Kansenkaart', 'IKAW', 'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling']}>
+                  <LayerItem name="Kansenkaart" type="overlay" />
+                  <LayerItem name="IKAW" type="overlay" />
+                  <LayerItem name="UIKAV Punten" type="overlay" />
+                  <LayerItem name="UIKAV Vlakken" type="overlay" />
+                  <LayerItem name="UIKAV Expert" type="overlay" />
+                  <LayerItem name="UIKAV Buffer" type="overlay" />
+                  <LayerItem name="UIKAV Indeling" type="overlay" />
+                </LayerGroup>
+              )}
+
+              {/* Erfgoed & Monumenten */}
+              {isThemeVisible('Erfgoed & Monumenten') && (
                 <LayerGroup title="Erfgoed & Monumenten" defaultExpanded={false} layerNames={['Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Kastelen', 'Ruïnes']}>
                   <LayerItem name="Rijksmonumenten" type="overlay" />
                   <LayerItem name="Werelderfgoed" type="overlay" />
@@ -121,7 +244,8 @@ export function ThemesPanel() {
                 </LayerGroup>
               )}
 
-              {theme === 'WOII & Militair' && (
+              {/* WOII & Militair */}
+              {isThemeVisible('WOII & Militair') && (
                 <LayerGroup title="WOII & Militair" defaultExpanded={false} layerNames={['WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden', 'Verdedigingslinies', 'Militaire Objecten', 'Inundatiegebieden']}>
                   <LayerItem name="WWII Bunkers" type="overlay" />
                   <LayerItem name="Slagvelden" type="overlay" />
@@ -132,7 +256,8 @@ export function ThemesPanel() {
                 </LayerGroup>
               )}
 
-              {theme === 'Hillshade & LiDAR' && (
+              {/* Hillshade & LiDAR Layers - via ArcGIS SDK */}
+              {isThemeVisible('Hillshade & LiDAR') && (
                 <LayerGroup title="Hillshade & LiDAR" defaultExpanded={false} layerNames={['AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN4 Hillshade Kleur', 'AHN 0.5m']}>
                   <LayerItem name="AHN4 Hoogtekaart Kleur" type="overlay" />
                   <LayerItem name="AHN4 Hillshade NL" type="overlay" />
@@ -142,7 +267,8 @@ export function ThemesPanel() {
                 </LayerGroup>
               )}
 
-              {theme === 'Terrein & Bodem' && (
+              {/* Terrain Layers */}
+              {isThemeVisible('Terrein & Bodem') && (
                 <LayerGroup title="Terrein & Bodem" defaultExpanded={false} layerNames={BUILD_MODE === 'commercial' ? ['Geomorfologie', 'Bodemkaart', 'Essen'] : ['Veengebieden', 'Geomorfologie', 'Bodemkaart', 'Essen']}>
                   {BUILD_MODE === 'personal' && <LayerItem name="Veengebieden" type="overlay" />}
                   <LayerItem name="Geomorfologie" type="overlay" />
@@ -151,8 +277,18 @@ export function ThemesPanel() {
                 </LayerGroup>
               )}
 
-              {theme === "Provinciale Thema's" && (
+              {/* Percelen - Kadaster & Landbouw */}
+              {isThemeVisible('Percelen') && (
+                <LayerGroup title="Percelen" defaultExpanded={false} layerNames={['Gewaspercelen', 'Kadastrale Grenzen']}>
+                  <LayerItem name="Gewaspercelen" type="overlay" />
+                  <LayerItem name="Kadastrale Grenzen" type="overlay" />
+                </LayerGroup>
+              )}
+
+              {/* Provinciale Thema's */}
+              {isThemeVisible("Provinciale Thema's") && (
                 <LayerGroup title="Provinciale Thema's" defaultExpanded={false} layerNames={['Scheepswrakken', 'Woonheuvels ZH', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen', 'Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken', 'Verdronken Dorpen']}>
+                  {/* Zuid-Holland */}
                   <LayerGroup title="Zuid-Holland" defaultExpanded={false} layerNames={['Scheepswrakken', 'Woonheuvels ZH', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen']}>
                     <LayerItem name="Scheepswrakken" type="overlay" />
                     <LayerItem name="Woonheuvels ZH" type="overlay" />
@@ -160,25 +296,21 @@ export function ThemesPanel() {
                     <LayerItem name="Erfgoedlijnen" type="overlay" />
                     <LayerItem name="Oude Kernen" type="overlay" />
                   </LayerGroup>
+                  {/* Gelderland */}
                   <LayerGroup title="Gelderland" defaultExpanded={false} layerNames={['Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken']}>
                     <LayerItem name="Relictenkaart Punten" type="overlay" />
                     <LayerItem name="Relictenkaart Lijnen" type="overlay" />
                     <LayerItem name="Relictenkaart Vlakken" type="overlay" />
                   </LayerGroup>
+                  {/* Zeeland */}
                   <LayerGroup title="Zeeland" defaultExpanded={false} layerNames={['Verdronken Dorpen']}>
                     <LayerItem name="Verdronken Dorpen" type="overlay" />
                   </LayerGroup>
                 </LayerGroup>
               )}
 
-              {theme === 'Percelen' && (
-                <LayerGroup title="Percelen" defaultExpanded={false} layerNames={['Gewaspercelen', 'Kadastrale Grenzen']}>
-                  <LayerItem name="Gewaspercelen" type="overlay" />
-                  <LayerItem name="Kadastrale Grenzen" type="overlay" />
-                </LayerGroup>
-              )}
-
-              {theme === 'Fossielen, Mineralen & Goud' && (
+              {/* Fossils, Minerals & Gold */}
+              {isThemeVisible('Fossielen, Mineralen & Goud') && (
                 <LayerGroup title="Fossielen, Mineralen & Goud" defaultExpanded={false} layerNames={['Fossiel Hotspots', 'Mineralen Hotspots', 'Goudrivieren', 'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk']}>
                   <LayerItem name="Fossiel Hotspots" type="overlay" />
                   <LayerItem name="Mineralen Hotspots" type="overlay" />
@@ -190,60 +322,68 @@ export function ThemesPanel() {
                 </LayerGroup>
               )}
 
-              {theme === 'Internationaal' && (
-                <>
-                  <LayerGroup title="België" defaultExpanded={false} layerNames={['Monumenten BE', 'Archeo Zones BE', 'Arch Sites BE', 'Erfgoed Landschap BE', 'CAI Elementen']}>
-                    <LayerItem name="Monumenten BE" type="overlay" />
-                    <LayerItem name="Archeo Zones BE" type="overlay" />
-                    <LayerItem name="Arch Sites BE" type="overlay" />
-                    <LayerItem name="Erfgoed Landschap BE" type="overlay" />
-                    <LayerItem name="CAI Elementen" type="overlay" />
-                  </LayerGroup>
+              {/* België */}
+              <LayerGroup title="België" defaultExpanded={false} layerNames={['Monumenten BE', 'Archeo Zones BE', 'Arch Sites BE', 'Erfgoed Landschap BE', 'CAI Elementen']}>
+                <LayerItem name="Monumenten BE" type="overlay" />
+                <LayerItem name="Archeo Zones BE" type="overlay" />
+                <LayerItem name="Arch Sites BE" type="overlay" />
+                <LayerItem name="Erfgoed Landschap BE" type="overlay" />
+                <LayerItem name="CAI Elementen" type="overlay" />
+              </LayerGroup>
 
-                  <LayerGroup title="Frankrijk" defaultExpanded={false} layerNames={[
-                    'Sites Classés Bretagne', 'Sites Classés Normandie', 'Sites Classés Hauts-de-France',
-                    'Sites Classés Grand Est', 'Sites Classés Île-de-France', 'Sites Classés Centre-Val de Loire',
-                    'Sites Classés Bourgogne-FC', 'Sites Classés Pays de la Loire', 'Sites Classés Nouvelle-Aquitaine',
-                    'Sites Classés Auvergne-RA', 'Sites Classés Occitanie', 'Sites Classés PACA', 'Sites Classés Corse',
-                    'Monumenten IDF', 'Hist. Gebouwen FR', 'INRAP Sites FR', 'Archeo Sites Bretagne',
-                    'Operaties Bretagne', 'Archeo Parijs', 'Sites Patrimoine Occitanie', 'Sites Patrimoine PACA',
-                    'Sites Patrimoine Normandie', 'Maginotlinie'
-                  ]}>
-                    <LayerGroup title="Sites Classés (13 regio's)" defaultExpanded={false} layerNames={[
-                      'Sites Classés Bretagne', 'Sites Classés Normandie', 'Sites Classés Hauts-de-France',
-                      'Sites Classés Grand Est', 'Sites Classés Île-de-France', 'Sites Classés Centre-Val de Loire',
-                      'Sites Classés Bourgogne-FC', 'Sites Classés Pays de la Loire', 'Sites Classés Nouvelle-Aquitaine',
-                      'Sites Classés Auvergne-RA', 'Sites Classés Occitanie', 'Sites Classés PACA', 'Sites Classés Corse'
-                    ]}>
-                      <LayerItem name="Sites Classés Bretagne" type="overlay" />
-                      <LayerItem name="Sites Classés Normandie" type="overlay" />
-                      <LayerItem name="Sites Classés Pays de la Loire" type="overlay" />
-                      <LayerItem name="Sites Classés Centre-Val de Loire" type="overlay" />
-                      <LayerItem name="Sites Classés Île-de-France" type="overlay" />
-                      <LayerItem name="Sites Classés Hauts-de-France" type="overlay" />
-                      <LayerItem name="Sites Classés Grand Est" type="overlay" />
-                      <LayerItem name="Sites Classés Bourgogne-FC" type="overlay" />
-                      <LayerItem name="Sites Classés Nouvelle-Aquitaine" type="overlay" />
-                      <LayerItem name="Sites Classés Auvergne-RA" type="overlay" />
-                      <LayerItem name="Sites Classés Occitanie" type="overlay" />
-                      <LayerItem name="Sites Classés PACA" type="overlay" />
-                      <LayerItem name="Sites Classés Corse" type="overlay" />
-                    </LayerGroup>
-                    <LayerItem name="Monumenten IDF" type="overlay" />
-                    <LayerItem name="Hist. Gebouwen FR" type="overlay" />
-                    <LayerItem name="INRAP Sites FR" type="overlay" />
-                    <LayerItem name="Archeo Sites Bretagne" type="overlay" />
-                    <LayerItem name="Operaties Bretagne" type="overlay" />
-                    <LayerItem name="Archeo Parijs" type="overlay" />
-                    <LayerItem name="Sites Patrimoine Occitanie" type="overlay" />
-                    <LayerItem name="Sites Patrimoine PACA" type="overlay" />
-                    <LayerItem name="Sites Patrimoine Normandie" type="overlay" />
-                    <LayerItem name="Maginotlinie" type="overlay" />
-                  </LayerGroup>
-                </>
+              {/* Frankrijk */}
+              <LayerGroup title="Frankrijk" defaultExpanded={false} layerNames={[
+                'Sites Classés Bretagne', 'Sites Classés Normandie', 'Sites Classés Hauts-de-France',
+                'Sites Classés Grand Est', 'Sites Classés Île-de-France', 'Sites Classés Centre-Val de Loire',
+                'Sites Classés Bourgogne-FC', 'Sites Classés Pays de la Loire', 'Sites Classés Nouvelle-Aquitaine',
+                'Sites Classés Auvergne-RA', 'Sites Classés Occitanie', 'Sites Classés PACA', 'Sites Classés Corse',
+                'Monumenten IDF', 'Hist. Gebouwen FR', 'INRAP Sites FR', 'Archeo Sites Bretagne',
+                'Operaties Bretagne', 'Archeo Parijs', 'Sites Patrimoine Occitanie', 'Sites Patrimoine PACA',
+                'Sites Patrimoine Normandie', 'Maginotlinie'
+              ]}>
+                {/* Sites Classés per regio */}
+                <LayerGroup title="Sites Classés (13 regio's)" defaultExpanded={false} layerNames={[
+                  'Sites Classés Bretagne', 'Sites Classés Normandie', 'Sites Classés Hauts-de-France',
+                  'Sites Classés Grand Est', 'Sites Classés Île-de-France', 'Sites Classés Centre-Val de Loire',
+                  'Sites Classés Bourgogne-FC', 'Sites Classés Pays de la Loire', 'Sites Classés Nouvelle-Aquitaine',
+                  'Sites Classés Auvergne-RA', 'Sites Classés Occitanie', 'Sites Classés PACA', 'Sites Classés Corse'
+                ]}>
+                  <LayerItem name="Sites Classés Bretagne" type="overlay" />
+                  <LayerItem name="Sites Classés Normandie" type="overlay" />
+                  <LayerItem name="Sites Classés Pays de la Loire" type="overlay" />
+                  <LayerItem name="Sites Classés Centre-Val de Loire" type="overlay" />
+                  <LayerItem name="Sites Classés Île-de-France" type="overlay" />
+                  <LayerItem name="Sites Classés Hauts-de-France" type="overlay" />
+                  <LayerItem name="Sites Classés Grand Est" type="overlay" />
+                  <LayerItem name="Sites Classés Bourgogne-FC" type="overlay" />
+                  <LayerItem name="Sites Classés Nouvelle-Aquitaine" type="overlay" />
+                  <LayerItem name="Sites Classés Auvergne-RA" type="overlay" />
+                  <LayerItem name="Sites Classés Occitanie" type="overlay" />
+                  <LayerItem name="Sites Classés PACA" type="overlay" />
+                  <LayerItem name="Sites Classés Corse" type="overlay" />
+                </LayerGroup>
+                <LayerItem name="Monumenten IDF" type="overlay" />
+                <LayerItem name="Hist. Gebouwen FR" type="overlay" />
+                <LayerItem name="INRAP Sites FR" type="overlay" />
+                <LayerItem name="Archeo Sites Bretagne" type="overlay" />
+                <LayerItem name="Operaties Bretagne" type="overlay" />
+                <LayerItem name="Archeo Parijs" type="overlay" />
+                <LayerItem name="Sites Patrimoine Occitanie" type="overlay" />
+                <LayerItem name="Sites Patrimoine PACA" type="overlay" />
+                <LayerItem name="Sites Patrimoine Normandie" type="overlay" />
+                <LayerItem name="Maginotlinie" type="overlay" />
+              </LayerGroup>
+
+              {/* Recreation - commercial has limited layers */}
+              {isThemeVisible('Recreatie') && BUILD_MODE === 'commercial' && (
+                <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Parken', 'Speeltuinen', 'Strandjes']}>
+                  <LayerItem name="Parken" type="overlay" />
+                  <LayerItem name="Speeltuinen" type="overlay" />
+                  <LayerItem name="Strandjes" type="overlay" displayName="Recreatie (strand)" />
+                </LayerGroup>
               )}
-
-              {theme === 'Recreatie' && (
+              {/* Recreation - personal has all layers */}
+              {isThemeVisible('Recreatie') && BUILD_MODE === 'personal' && (
                 <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Ruiterpaden', 'Laarzenpaden', 'Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Kringloopwinkels']}>
                   <LayerItem name="Ruiterpaden" type="overlay" />
                   <LayerItem name="Laarzenpaden" type="overlay" />
@@ -255,15 +395,73 @@ export function ThemesPanel() {
                 </LayerGroup>
               )}
 
-              {theme === 'Geïmporteerde lagen' && (
-                <div className="px-2 py-1 text-sm text-slate-600">
-                  Geïmporteerde lagen worden apart beheerd via het importmenu.
+              {/* Specials (3D) - externe 3D archeologische sites */}
+              {isSpecialSectionVisible('Specials (3D)') && (
+                <div className="mb-2">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSpecialProjectsOpen(!specialProjectsOpen) }}
+                    className="w-full flex items-center gap-1 py-1 px-1 hover:bg-purple-50 rounded transition-colors border-0 outline-none bg-transparent"
+                  >
+                    {specialProjectsOpen ? (
+                      <ChevronDown size={14} className="text-purple-500" />
+                    ) : (
+                      <ChevronRight size={14} className="text-purple-500" />
+                    )}
+                    <Globe size={12} className="text-purple-500" />
+                    <span className="text-purple-600 font-medium" style={{ fontSize: '0.95em' }}>Specials (3D)</span>
+                    <ExternalLink size={10} className="text-purple-400 ml-auto" />
+                  </button>
+
+                  {specialProjectsOpen && (
+                    <div className="mt-1" onClick={(e) => e.stopPropagation()}>
+                      {/* Individuele sites */}
+                      {SPECIAL_PROJECTS.map((project) => (
+                        <a
+                          key={project.name}
+                          href={project.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-full flex items-center justify-between py-1.5 pl-6 pr-2 hover:bg-purple-50 rounded transition-colors text-left"
+                          style={{ fontSize: 'inherit' }}
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-gray-700">{project.name}</span>
+                            <span className="text-gray-400" style={{ fontSize: '0.8em' }}>{project.desc}</span>
+                          </div>
+                          <ExternalLink size={12} className="text-purple-400 flex-shrink-0 ml-2" />
+                        </a>
+                      ))}
+
+                      {/* Divider */}
+                      <div className="border-t border-gray-200 my-1.5 mx-2" />
+
+                      {/* Platforms */}
+                      {HERITAGE_PLATFORMS.map((platform) => (
+                        <a
+                          key={platform.name}
+                          href={platform.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-full flex items-center justify-between py-1.5 pl-6 pr-2 hover:bg-purple-50 rounded transition-colors text-left"
+                          style={{ fontSize: 'inherit' }}
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-gray-700 font-medium">{platform.name}</span>
+                            <span className="text-gray-400" style={{ fontSize: '0.8em' }}>{platform.desc}</span>
+                          </div>
+                          <ExternalLink size={12} className="text-purple-400 flex-shrink-0 ml-2" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
-      ))}
-    </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

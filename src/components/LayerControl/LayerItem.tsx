@@ -1,5 +1,4 @@
 import { Check, Loader2, AlertCircle, Lock, Tag } from 'lucide-react'
-import { BASE_LAYER_IDS } from '../../layers/layerConfig'
 import { useLayerStore, useSubscriptionStore } from '../../store'
 import type { LoadingState } from '../../store/layerStore'
 import { layerRegistry } from '../../layers/layerRegistry'
@@ -40,7 +39,8 @@ export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
       toggleLayer(name)
     } else {
       // For base layers, turn off all other base layers
-      BASE_LAYER_IDS.forEach(layerName => {
+      const baseLayerNames = ['CartoDB (licht)', 'OpenStreetMap', 'Luchtfoto', 'Satelliet (wereld)', 'TMK 1850', 'Bonnebladen 1900']
+      baseLayerNames.forEach(layerName => {
         setLayerVisibility(layerName, layerName === name)
       })
     }

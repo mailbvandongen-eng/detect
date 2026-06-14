@@ -1,26 +1,145 @@
 import './style.css'
 import { MapContainer } from './components/Map/MapContainer'
+import { GpsButton } from './components/GPS/GpsButton'
+import { GpsMarker } from './components/GPS/GpsMarker'
+import { LayerControlButton } from './components/LayerControl/LayerControlButton'
+import { ThemesPanel } from './components/LayerControl/ThemesPanel'
+import { Popup } from './components/Map/Popup'
+import { LongPressMenu } from './components/Map/LongPressMenu'
+import { PresetButtons } from './components/UI/PresetButtons'
+import { CompassButton } from './components/UI/CompassButton'
+import { OpacitySliders } from './components/UI/OpacitySliders'
+import { SearchBox } from './components/UI/SearchBox'
+import { ZoomButtons } from './components/UI/ZoomButtons'
+import { SettingsPanel } from './components/UI/SettingsPanel'
+import { HamburgerMenu } from './components/UI/HamburgerMenu'
+import { InfoButton } from './components/UI/InfoButton'
+// HillshadeControls uitgeschakeld - WebGL werkt niet in OL 10.7
+import { AddVondstForm } from './components/Vondst/AddVondstForm'
+import { AddVondstButton } from './components/Vondst/AddVondstButton'
+import { RouteRecordButton, RouteRecordingLayer, SavedRoutesLayer, CoverageHeatmapLayer, GridOverlayLayer, RouteDashboard } from './components/Route'
+import { WeatherWidget, RainRadarLayer } from './components/Weather'
+import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
+import { CustomLayerMarkers } from './components/CustomLayers'
+import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal, LayerDashboard } from './components/CustomPoints'
 import { PasswordGate } from './components/Auth/PasswordGate'
 import { OfflineIndicator } from './components/UI/OfflineIndicator'
-import { AppBootstrap } from './app/AppBootstrap'
-import { AppControls } from './app/AppControls'
-import { AppDialogs } from './app/AppDialogs'
-import { MapOverlays } from './app/MapOverlays'
-import { useSettingsStore } from './store'
+import { MonumentSearch } from './components/UI/MonumentSearch'
+import { MonumentFilter } from './components/UI/MonumentFilter'
+import { WelcomeModal } from './components/UI/WelcomeModal'
+import { MeasureTool } from './components/UI/MeasureTool'
+import { DrawTool } from './components/UI/DrawTool'
+import { PrintTool } from './components/UI/PrintTool'
+import { AgentButton } from './components/Agent/AgentButton'
+import { AgentPanel } from './components/Agent/AgentPanel'
+import { useHeading } from './hooks/useHeading'
+import { useDynamicAHN } from './hooks/useDynamicAHN'
+import { useCloudSync } from './hooks/useCloudSync'
+import { useSettingsStore, useUIStore, useWeatherStore, useGPSStore } from './store'
+import { AnimatePresence } from 'framer-motion'
+import { useEffect, useState } from 'react'
 
 function App() {
+  // Initialize hooks
+  useHeading()
+  useDynamicAHN()
+  useCloudSync() // Sync data to Firebase when logged in
+
+  // Fetch passive position once on app start (shows blue dot)
+  const fetchPassivePosition = useGPSStore(state => state.fetchPassivePosition)
+  useEffect(() => {
+    fetchPassivePosition()
+  }, [fetchPassivePosition])
+
+  // Get font scale setting (80-150%)
   const fontScale = useSettingsStore(state => state.fontScale)
-  const baseFontSize = (14 * fontScale) / 100
+  // Base size is 14px, scale it based on setting
+  const baseFontSize = 14 * fontScale / 100
+
+  // Vondst form state
+  const vondstFormOpen = useUIStore(state => state.vondstFormOpen)
+  const vondstFormLocation = useUIStore(state => state.vondstFormLocation)
+  const closeVondstForm = useUIStore(state => state.closeVondstForm)
+
+  // Route dashboard state
+  const routeDashboardOpen = useUIStore(state => state.routeDashboardOpen)
+  const toggleRouteDashboard = useUIStore(state => state.toggleRouteDashboard)
+
+  // Monument search state
+  const monumentSearchOpen = useUIStore(state => state.monumentSearchOpen)
+  const closeMonumentSearch = useUIStore(state => state.closeMonumentSearch)
+
+  // Rain radar state
+  const showBuienradar = useWeatherStore(state => state.showBuienradar)
+  const setShowBuienradar = useWeatherStore(state => state.setShowBuienradar)
+
+  // Welcome modal state
+  const hideWelcomeModal = useSettingsStore(state => state.hideWelcomeModal)
+  const [welcomeModalOpen, setWelcomeModalOpen] = useState(!hideWelcomeModal)
 
   return (
     <PasswordGate>
       <div style={{ fontSize: `${baseFontSize}px` }}>
-        <AppBootstrap />
         <OfflineIndicator />
         <MapContainer />
-        <MapOverlays />
-        <AppControls />
-        <AppDialogs />
+        <GpsMarker />
+        <LocalVondstMarkers />
+        <CustomLayerMarkers />
+        <CustomPointMarkers />
+        <RouteRecordingLayer />
+        <SavedRoutesLayer />
+        <CoverageHeatmapLayer />
+        <GridOverlayLayer />
+        <Popup />
+        <LongPressMenu />
+        <SearchBox />
+        <GpsButton />
+        <AddVondstButton />
+        <RouteRecordButton />
+        <ZoomButtons />
+        <LayerControlButton />
+        <ThemesPanel />
+        <OpacitySliders />
+        <HamburgerMenu />
+        <PresetButtons />
+        <MeasureTool />
+        <DrawTool />
+        <PrintTool />
+        <InfoButton />
+        <CompassButton />
+        <AgentButton />
+        <WeatherWidget />
+        <RainRadarLayer
+          isVisible={showBuienradar}
+          onClose={() => setShowBuienradar(false)}
+        />
+        <SettingsPanel />
+        <CreateLayerModal />
+        <AddPointModal />
+        <LayerManagerModal />
+        <LayerDashboard />
+        <RouteDashboard
+          isOpen={routeDashboardOpen}
+          onClose={toggleRouteDashboard}
+        />
+        <AnimatePresence>
+          {vondstFormOpen && (
+            <AddVondstForm
+              onClose={closeVondstForm}
+              initialLocation={vondstFormLocation || undefined}
+            />
+          )}
+        </AnimatePresence>
+        <MonumentSearch
+          isOpen={monumentSearchOpen}
+          onClose={closeMonumentSearch}
+        />
+        <MonumentFilter />
+        <AgentPanel />
+        <WelcomeModal
+          isOpen={welcomeModalOpen}
+          onClose={() => setWelcomeModalOpen(false)}
+        />
       </div>
     </PasswordGate>
   )

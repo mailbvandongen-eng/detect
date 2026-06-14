@@ -1,2 +1,0 @@
-import{V as r,G as s,a as t}from"./index-Cjjl26b7.js";import{L as a}from"./iconStyles-DtRi3lPP.js";async function f(){const e=await(await fetch("/detect/data/ruines_osm.geojson")).json(),o=new r({features:new s().readFeatures(e,{dataProjection:"EPSG:4326",featureProjection:"EPSG:3857"})});return new t({source:o,properties:{title:"Ruïnes"},visible:!1,zIndex:20,style:a.ruins()})}export{f as createRuinesLayerOL};
-//# sourceMappingURL=ruinesOL-LoSt8k9y.js.map
