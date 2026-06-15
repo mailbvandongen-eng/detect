@@ -101,17 +101,42 @@ interface PresetState {
   // Actions
   applyPreset: (id: string) => void
   createPreset: (name: string, icon: string) => void
-  updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers'>>) => void
+  updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer'>>) => void
   deletePreset: (id: string) => void
   saveAsDefaults: () => void  // Save current presets as user's defaults
   resetToDefaults: () => void  // Reset to user's defaults (or BUILT_IN if no custom)
   resetToBuiltIn: () => void  // Reset to original BUILT_IN_PRESETS
 }
 
+const BASE_LAYER_NAMES = [
+  'CartoDB (licht)',
+  'OpenStreetMap',
+  'Luchtfoto',
+  'Satelliet (wereld)',
+  'TMK 1850',
+  'Bonnebladen 1900'
+]
+
+const BUILT_IN_PRESET_MAP = new Map(BUILT_IN_PRESETS.map((preset) => [preset.id, preset]))
+
+function normalizePreset(preset: Preset): Preset {
+  const builtInPreset = BUILT_IN_PRESET_MAP.get(preset.id)
+
+  if (!builtInPreset) {
+    return preset
+  }
+
+  return {
+    ...builtInPreset,
+    ...preset,
+    baseLayer: preset.baseLayer ?? builtInPreset.baseLayer,
+    layerOpacities: preset.layerOpacities ?? builtInPreset.layerOpacities
+  }
+}
+
 // All overlay layer names for clearing - must match PresetButtons.tsx
 const ALL_OVERLAYS = [
-  // Base layer overlays
-  'Labels Overlay', 'TMK 1850', 'Bonnebladen 1900',
+  'Labels Overlay',
   // Steentijd
   'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
   // Archeologie
@@ -152,10 +177,16 @@ export const usePresetStore = create<PresetState>()(
       customDefaults: null,
 
       applyPreset: (id: string) => {
-        const preset = get().presets.find(p => p.id === id)
-        if (!preset) return
+        const rawPreset = get().presets.find(p => p.id === id)
+        if (!rawPreset) return
+
+        const preset = normalizePreset(rawPreset)
 
         const layerStore = useLayerStore.getState()
+        const currentBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
+        const nextBaseLayer = BASE_LAYER_NAMES.includes(preset.baseLayer || '')
+          ? preset.baseLayer!
+          : currentBaseLayer || 'CartoDB (licht)'
 
         // Turn off all overlays
         ALL_OVERLAYS.forEach(layer => layerStore.setLayerVisibility(layer, false))
@@ -170,19 +201,17 @@ export const usePresetStore = create<PresetState>()(
           })
         }
 
-        // Set base layer if specified
-        if (preset.baseLayer) {
-          const baseLayerNames = ['CartoDB (licht)', 'OpenStreetMap', 'Luchtfoto', 'TMK 1850', 'Bonnebladen 1900']
-          baseLayerNames.forEach(layerName => {
-            layerStore.setLayerVisibility(layerName, layerName === preset.baseLayer)
-          })
-        }
+        // Always leave exactly one base layer active so a preset can never blank the map.
+        BASE_LAYER_NAMES.forEach((layerName) => {
+          layerStore.setLayerVisibility(layerName, layerName === nextBaseLayer)
+        })
 
-        console.log(`🎨 Preset toegepast: ${preset.name}${preset.baseLayer ? ` (${preset.baseLayer})` : ''}`)
+        console.log(`🎨 Preset toegepast: ${preset.name} (${nextBaseLayer})`)
       },
 
       createPreset: (name: string, icon: string) => {
         const layerStore = useLayerStore.getState()
+        const activeBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
 
         // Get currently visible layers
         const visibleLayers = Object.entries(layerStore.visible)
@@ -194,6 +223,7 @@ export const usePresetStore = create<PresetState>()(
           name,
           icon,
           layers: visibleLayers,
+          baseLayer: activeBaseLayer || 'CartoDB (licht)',
           isBuiltIn: false
         }
 
@@ -204,7 +234,7 @@ export const usePresetStore = create<PresetState>()(
         console.log(`✨ Preset aangemaakt: ${name} met ${visibleLayers.length} lagen`)
       },
 
-      updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers'>>) => {
+      updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer'>>) => {
         set(state => ({
           presets: state.presets.map(p =>
             p.id === id ? { ...p, ...changes } : p
@@ -242,19 +272,38 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 13,
+      version: 14,
       migrate: (persistedState: unknown, version: number) => {
+        if (!persistedState || typeof persistedState !== 'object') {
+          return {
+            presets: [...BUILT_IN_PRESETS],
+            customDefaults: null
+          }
+        }
+
+        const state = persistedState as Partial<PresetState>
+
         // v13: Changed AMK opacity from 60% to 50% in Detectie preset
         // v12: Updated Detectie preset with specific opacities and added Kadastrale Grenzen
         // v11: Added Geomorfologie and AHN4 Hoogtekaart Kleur to Detectie preset with low opacity
         // v10: Removed non-existent 'Archeo Landschappen' from Terrein Analyse preset
+        // v14: Preserve base layers on presets and repair legacy built-in preset metadata
         if (version < 13) {
-          // Force reset all presets to new defaults
           return {
-            presets: [...BUILT_IN_PRESETS]
+            presets: [...BUILT_IN_PRESETS],
+            customDefaults: null
           }
         }
-        return persistedState as PresetState
+
+        return {
+          ...state,
+          presets: Array.isArray(state.presets)
+            ? state.presets.map(normalizePreset)
+            : [...BUILT_IN_PRESETS],
+          customDefaults: Array.isArray(state.customDefaults)
+            ? state.customDefaults.map(normalizePreset)
+            : null
+        }
       }
     }
   )

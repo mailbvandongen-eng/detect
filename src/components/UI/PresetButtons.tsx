@@ -45,8 +45,7 @@ const HOVER_COLORS: Record<string, string> = {
 const ALL_OVERLAYS = [
   // Mijn data
   'Mijn Vondsten',
-  // Base layer overlays
-  'Labels Overlay', 'TMK 1850', 'Bonnebladen 1900',
+  'Labels Overlay',
   // Steentijd
   'Hunebedden', 'FAMKE Steentijd', 'FAMKE IJzertijd', 'Grafheuvels', 'Terpen',
   // Archeologie
@@ -87,6 +86,7 @@ const BASE_LAYERS = [
   'CartoDB (licht)',
   'OpenStreetMap',
   'Luchtfoto',
+  'Satelliet (wereld)',
   'TMK 1850',
   'Bonnebladen 1900'
 ]
@@ -165,7 +165,11 @@ export function PresetButtons() {
     const currentLayers = Object.entries(visible)
       .filter(([layerName, isVisible]) => isVisible && ALL_OVERLAYS.includes(layerName))
       .map(([layerName]) => layerName)
-    updatePreset(presetId, { layers: currentLayers })
+    const currentBaseLayer = BASE_LAYERS.find((layerName) => visible[layerName])
+    updatePreset(presetId, {
+      layers: currentLayers,
+      baseLayer: currentBaseLayer || 'CartoDB (licht)'
+    })
 
     // Show feedback
     setSavedPresetId(presetId)
