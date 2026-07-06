@@ -22,7 +22,6 @@ import { WeatherWidget, RainRadarLayer } from './components/Weather'
 import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
 import { CustomLayerMarkers } from './components/CustomLayers'
 import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal, LayerDashboard } from './components/CustomPoints'
-import { PasswordGate } from './components/Auth/PasswordGate'
 import { OfflineIndicator } from './components/UI/OfflineIndicator'
 import { MonumentSearch } from './components/UI/MonumentSearch'
 import { MonumentFilter } from './components/UI/MonumentFilter'
@@ -78,70 +77,68 @@ function App() {
   const [welcomeModalOpen, setWelcomeModalOpen] = useState(!hideWelcomeModal)
 
   return (
-    <PasswordGate>
-      <div style={{ fontSize: `${baseFontSize}px` }}>
-        <OfflineIndicator />
-        <MapContainer />
-        <GpsMarker />
-        <LocalVondstMarkers />
-        <CustomLayerMarkers />
-        <CustomPointMarkers />
-        <RouteRecordingLayer />
-        <SavedRoutesLayer />
-        <CoverageHeatmapLayer />
-        <GridOverlayLayer />
-        <Popup />
-        <LongPressMenu />
-        <SearchBox />
-        <GpsButton />
-        <AddVondstButton />
-        <RouteRecordButton />
-        <ZoomButtons />
-        <LayerControlButton />
-        <ThemesPanel />
-        <OpacitySliders />
-        <HamburgerMenu />
-        <PresetButtons />
-        <MeasureTool />
-        <DrawTool />
-        <PrintTool />
-        <InfoButton />
-        <CompassButton />
-        <AgentButton />
-        <WeatherWidget />
-        <RainRadarLayer
-          isVisible={showBuienradar}
-          onClose={() => setShowBuienradar(false)}
-        />
-        <SettingsPanel />
-        <CreateLayerModal />
-        <AddPointModal />
-        <LayerManagerModal />
-        <LayerDashboard />
-        <RouteDashboard
-          isOpen={routeDashboardOpen}
-          onClose={toggleRouteDashboard}
-        />
-        <AnimatePresence>
-          {vondstFormOpen && (
-            <AddVondstForm
-              onClose={closeVondstForm}
-              initialLocation={vondstFormLocation || undefined}
-            />
-          )}
-        </AnimatePresence>
-        <MonumentSearch
-          isOpen={monumentSearchOpen}
-          onClose={closeMonumentSearch}
-        />
-        <MonumentFilter />
-        <AgentPanel />
-        <WelcomeModal
-          isOpen={welcomeModalOpen}
-          onClose={() => setWelcomeModalOpen(false)}
-        />
-      </div>
-    </PasswordGate>
+    <div style={{ fontSize: `${baseFontSize}px` }}>
+      <OfflineIndicator />
+      <MapContainer />
+      <GpsMarker />
+      <LocalVondstMarkers />
+      <CustomLayerMarkers />
+      <CustomPointMarkers />
+      <RouteRecordingLayer />
+      <SavedRoutesLayer />
+      <CoverageHeatmapLayer />
+      <GridOverlayLayer />
+      <Popup />
+      <LongPressMenu />
+      <SearchBox />
+      <GpsButton />
+      <AddVondstButton />
+      <RouteRecordButton />
+      <ZoomButtons />
+      <LayerControlButton />
+      <ThemesPanel />
+      <OpacitySliders />
+      <HamburgerMenu />
+      <PresetButtons />
+      <MeasureTool />
+      <DrawTool />
+      <PrintTool />
+      <InfoButton />
+      <CompassButton />
+      <AgentButton />
+      <WeatherWidget />
+      <RainRadarLayer
+        isVisible={showBuienradar}
+        onClose={() => setShowBuienradar(false)}
+      />
+      <SettingsPanel />
+      <CreateLayerModal />
+      <AddPointModal />
+      <LayerManagerModal />
+      <LayerDashboard />
+      <RouteDashboard
+        isOpen={routeDashboardOpen}
+        onClose={toggleRouteDashboard}
+      />
+      <AnimatePresence>
+        {vondstFormOpen && (
+          <AddVondstForm
+            onClose={closeVondstForm}
+            initialLocation={vondstFormLocation || undefined}
+          />
+        )}
+      </AnimatePresence>
+      <MonumentSearch
+        isOpen={monumentSearchOpen}
+        onClose={closeMonumentSearch}
+      />
+      <MonumentFilter />
+      <AgentPanel />
+      <WelcomeModal
+        isOpen={welcomeModalOpen}
+        onClose={() => setWelcomeModalOpen(false)}
+      />
+    </div>
   )
 }
 

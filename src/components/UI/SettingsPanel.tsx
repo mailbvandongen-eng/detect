@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, LogOut, BarChart3, Pencil, Upload, Bug, Code, User, Sliders, Volume2, Cloud } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, BarChart3, Pencil, Upload, Bug, Code, User, Sliders, Volume2, Cloud } from 'lucide-react'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
@@ -8,7 +8,6 @@ import { useUIStore, useSettingsStore, usePresetStore, useSubscriptionStore } fr
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
 import { useCustomLayerStore } from '../../store/customLayerStore'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
-import { clearPasswordAuth } from '../Auth/PasswordGate'
 import { VondstenDashboard } from '../Vondst/VondstenDashboard'
 import { ImportLayerModal, CustomLayerItem } from '../CustomLayers'
 import { GoogleSignInButton } from '../Auth/GoogleSignInButton'
@@ -478,14 +477,6 @@ export function SettingsPanel() {
                 <Bug size={16} />
                 <span>Meld een bug</span>
               </a>
-              <button
-                onClick={clearPasswordAuth}
-                className="flex items-center justify-center gap-2 w-full px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border-0 outline-none"
-                style={{ fontSize: '0.9em' }}
-              >
-                <LogOut size={16} />
-                <span>Uitloggen</span>
-              </button>
               <p className="text-gray-400 text-center" style={{ fontSize: '0.75em' }}>
                 Instellingen worden lokaal opgeslagen
               </p>
