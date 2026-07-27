@@ -344,6 +344,11 @@ export function Popup() {
       return html
     }
 
+    const isAMKFeature = (props: Record<string, any>): boolean => {
+      return typeof props.kwaliteitswaarde === 'string' &&
+        props.kwaliteitswaarde.includes('archeologische waarde')
+    }
+
     // Query WMS layers for feature info - returns array of all results
     const queryWMSLayers = async (coordinate: number[], viewResolution: number): Promise<string[]> => {
       const results: string[] = []
@@ -2039,17 +2044,35 @@ export function Popup() {
         return { type, coordinates: coords }
       }
 
-      // Query AHN height in parallel with feature lookup
-      const heightPromise = queryAHNHeight(evt.coordinate)
+      const requestId = ++popupRequestIdRef.current
 
-      // Collect ALL vector features at click location
+      // Collect ALL vector features at click location and handle AMK first.
       const features: any[] = []
       map.forEachFeatureAtPixel(evt.pixel, f => {
         features.push(f)
       })
 
+      const orderedFeatures = [...features].sort((a, b) => {
+        const { geometry: _aGeometry, ...aProps } = a.getProperties()
+        const { geometry: _bGeometry, ...bProps } = b.getProperties()
+        const aIsAMK = isAMKFeature(aProps)
+        const bIsAMK = isAMKFeature(bProps)
+
+        if (aIsAMK === bIsAMK) return 0
+        return aIsAMK ? -1 : 1
+      })
+
+      const totalAMKFeatures = orderedFeatures.reduce((count, feature) => {
+        const { geometry: _geometry, ...dataProps } = feature.getProperties()
+        return count + (isAMKFeature(dataProps) ? 1 : 0)
+      }, 0)
+
+      let remainingAMKFeatures = totalAMKFeatures
+      let priorityPopupShown = false
+      let priorityPopupContentCount = 0
+
       // Process each vector feature
-      for (const feature of features) {
+      for (const feature of orderedFeatures) {
         const properties = feature.getProperties()
 
         // Skip geometry property
@@ -2183,7 +2206,7 @@ export function Popup() {
         }
 
         // Check if this is an AMK feature - use local data (no WMS needed)
-        if (dataProps.kwaliteitswaarde && dataProps.kwaliteitswaarde.includes('archeologische waarde')) {
+        if (isAMKFeature(dataProps)) {
           const amkHtml = formatAMKPopup(dataProps)
           collectedContents.push(amkHtml)
           // Capture AMK geometry for adding to layers
@@ -2192,6 +2215,13 @@ export function Popup() {
             properties: dataProps,
             popupHtml: amkHtml
           })
+
+          remainingAMKFeatures -= 1
+          if (!priorityPopupShown && remainingAMKFeatures === 0) {
+            priorityPopupShown = true
+            priorityPopupContentCount = collectedContents.length
+            openPopup(evt.coordinate, [...collectedContents], [...collectedFeatureData])
+          }
           continue
         }
 
@@ -3593,20 +3623,23 @@ export function Popup() {
         })
       }
 
-      const requestId = ++popupRequestIdRef.current
       const hasImmediateContent = collectedContents.length > 0
       const baseContents = [...collectedContents]
       const baseFeatureData = [...collectedFeatureData]
 
-      if (hasImmediateContent) {
+      if (!priorityPopupShown && hasImmediateContent) {
         openPopup(evt.coordinate, baseContents, baseFeatureData)
       }
 
-      // Also query WMS layers (they may have info even with vector features)
+      if (priorityPopupShown && baseContents.length > priorityPopupContentCount) {
+        openPopup(evt.coordinate, baseContents, baseFeatureData)
+      }
+
+      // Only after local content is shown do we enrich with live layers.
       const viewResolution = map.getView().getResolution() || 1
       const [wmsResults, height] = await Promise.all([
         queryWMSLayers(evt.coordinate, viewResolution),
-        heightPromise
+        queryAHNHeight(evt.coordinate)
       ])
 
       if (popupRequestIdRef.current !== requestId) {
