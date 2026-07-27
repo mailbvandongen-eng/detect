@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:commercial": "vite --mode commercial",
     "build": "node scripts/build-pages.mjs",
-    "build:personal": "vite build --mode personal --outDir dist-personal",
+    "build:dist": "vite build --outDir dist",
     "preview": "vite preview"
   },
   "devDependencies": {

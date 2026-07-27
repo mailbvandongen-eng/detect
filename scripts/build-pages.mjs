@@ -35,7 +35,7 @@ if (existsSync(docsAssetsDir)) {
   cpSync(docsAssetsDir, backupDir, { recursive: true })
 }
 
-const result = spawnSync(process.execPath, [viteBin, 'build', '--mode', 'commercial'], {
+const result = spawnSync(process.execPath, [viteBin, 'build'], {
   stdio: 'inherit'
 })
 

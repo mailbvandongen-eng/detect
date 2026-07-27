@@ -8,7 +8,7 @@ import { useCustomLayerStore } from '../../store/customLayerStore'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
 import { CustomLayerItem } from '../CustomLayers/CustomLayerItem'
-import { isThemeVisible, isSpecialSectionVisible, BUILD_MODE } from '../../config/buildMode'
+import { isThemeVisible, isSpecialSectionVisible } from '../../config/buildMode'
 
 // Speciale archeologische 3D projecten - externe links
 const SPECIAL_PROJECTS = [
@@ -269,8 +269,8 @@ export function ThemesPanel() {
 
               {/* Terrain Layers */}
               {isThemeVisible('Terrein & Bodem') && (
-                <LayerGroup title="Terrein & Bodem" defaultExpanded={false} layerNames={BUILD_MODE === 'commercial' ? ['Geomorfologie', 'Bodemkaart', 'Essen'] : ['Veengebieden', 'Geomorfologie', 'Bodemkaart', 'Essen']}>
-                  {BUILD_MODE === 'personal' && <LayerItem name="Veengebieden" type="overlay" />}
+                <LayerGroup title="Terrein & Bodem" defaultExpanded={false} layerNames={['Veengebieden', 'Geomorfologie', 'Bodemkaart', 'Essen']}>
+                  <LayerItem name="Veengebieden" type="overlay" />
                   <LayerItem name="Geomorfologie" type="overlay" />
                   <LayerItem name="Bodemkaart" type="overlay" />
                   <LayerItem name="Essen" type="overlay" />
@@ -374,16 +374,8 @@ export function ThemesPanel() {
                 <LayerItem name="Maginotlinie" type="overlay" />
               </LayerGroup>
 
-              {/* Recreation - commercial has limited layers */}
-              {isThemeVisible('Recreatie') && BUILD_MODE === 'commercial' && (
-                <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Parken', 'Speeltuinen', 'Strandjes']}>
-                  <LayerItem name="Parken" type="overlay" />
-                  <LayerItem name="Speeltuinen" type="overlay" />
-                  <LayerItem name="Strandjes" type="overlay" displayName="Recreatie (strand)" />
-                </LayerGroup>
-              )}
-              {/* Recreation - personal has all layers */}
-              {isThemeVisible('Recreatie') && BUILD_MODE === 'personal' && (
+              {/* Recreation */}
+              {isThemeVisible('Recreatie') && (
                 <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Ruiterpaden', 'Laarzenpaden', 'Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Kringloopwinkels']}>
                   <LayerItem name="Ruiterpaden" type="overlay" />
                   <LayerItem name="Laarzenpaden" type="overlay" />

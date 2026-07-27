@@ -1,102 +1,52 @@
 /**
- * Build Mode Configuration
+ * Layer visibility configuration.
  *
- * Controls which features/themes are visible based on build type:
- * - 'commercial': Focused product for serious detectorists (monumenten, AHN, historisch)
- * - 'personal': Full version with all features including EU expansion
+ * The old commercial/personal split is retired. The app now exposes every
+ * configured theme, base layer and special section by default.
  */
 
-export type BuildMode = 'commercial' | 'personal'
+const visibleThemes = new Set<string>([
+  'Steentijd & Prehistorie',
+  'Paleokaarten',
+  'Archeologische lagen',
+  'Archeologische verwachtingen',
+  'Erfgoed & Monumenten',
+  'WOII & Militair',
+  'Hillshade & LiDAR',
+  'Terrein & Bodem',
+  'Percelen',
+  "Provinciale Thema's",
+  'Fossielen, Mineralen & Goud',
+  'Recreatie',
+])
 
-// Get build mode from environment variable, default to 'personal' for development
-export const BUILD_MODE: BuildMode =
-  (import.meta.env.VITE_BUILD_MODE as BuildMode) || 'personal'
+const visibleBaseLayers = new Set<string>([
+  'CartoDB (licht)',
+  'OpenStreetMap',
+  'Luchtfoto',
+  'Satelliet (wereld)',
+  'TMK 1850',
+  'Bonnebladen 1900',
+])
 
-/**
- * Theme groups that are visible in each build mode
- */
-export const VISIBLE_THEMES: Record<BuildMode, string[]> = {
-  commercial: [
-    // Kern - waar de app om draait
-    'Archeologische lagen',
-    'Archeologische verwachtingen',
-    'Erfgoed & Monumenten',
-    'WOII & Militair',
-    'Hillshade & LiDAR',
-    'Terrein & Bodem',
-    'Percelen',
-    'Fossielen, Mineralen & Goud',
-    'Recreatie',
-  ],
-  personal: [
-    // Alles
-    'Steentijd & Prehistorie',
-    'Paleokaarten',
-    'Archeologische lagen',
-    'Archeologische verwachtingen',
-    'Erfgoed & Monumenten',
-    'WOII & Militair',
-    'Hillshade & LiDAR',
-    'Terrein & Bodem',
-    'Percelen',
-    'Provinciale Thema\'s',
-    'Fossielen, Mineralen & Goud',
-    'Recreatie',
-  ]
-}
+const visibleSpecialSections = new Set<string>(['Specials (3D)'])
 
-/**
- * Base layers visible in each build mode
- */
-export const VISIBLE_BASE_LAYERS: Record<BuildMode, string[]> = {
-  commercial: [
-    'CartoDB (licht)',
-    'OpenStreetMap',
-    'Luchtfoto',
-    'TMK 1850',
-    'Bonnebladen 1900',
-  ],
-  personal: [
-    'CartoDB (licht)',
-    'OpenStreetMap',
-    'Luchtfoto',
-    'TMK 1850',
-    'Bonnebladen 1900',
-  ]
-}
+export const VISIBLE_THEMES = Array.from(visibleThemes)
+export const VISIBLE_BASE_LAYERS = Array.from(visibleBaseLayers)
+export const VISIBLE_SPECIAL_SECTIONS = Array.from(visibleSpecialSections)
 
-/**
- * Special sections visible in each build mode
- */
-export const VISIBLE_SPECIAL_SECTIONS: Record<BuildMode, string[]> = {
-  commercial: ['Specials (3D)'],
-  personal: ['Specials (3D)']
-}
-
-/**
- * Check if a theme group should be visible
- */
 export function isThemeVisible(themeName: string): boolean {
-  return VISIBLE_THEMES[BUILD_MODE].includes(themeName)
+  return visibleThemes.has(themeName)
 }
 
-/**
- * Check if a base layer should be visible
- */
 export function isBaseLayerVisible(layerName: string): boolean {
-  return VISIBLE_BASE_LAYERS[BUILD_MODE].includes(layerName)
+  return visibleBaseLayers.has(layerName)
 }
 
-/**
- * Check if a special section should be visible
- */
 export function isSpecialSectionVisible(sectionName: string): boolean {
-  return VISIBLE_SPECIAL_SECTIONS[BUILD_MODE].includes(sectionName)
+  return visibleSpecialSections.has(sectionName)
 }
 
-/**
- * Get current build mode label for UI
- */
 export function getBuildModeLabel(): string {
-  return BUILD_MODE === 'commercial' ? 'DetectorApp NL' : 'DetectorApp NL (Full)'
+  return 'DetectorApp NL'
 }
