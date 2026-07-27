@@ -25,6 +25,7 @@ export const VISIBLE_THEMES: Record<BuildMode, string[]> = {
     'Hillshade & LiDAR',
     'Terrein & Bodem',
     'Percelen',
+    'Fossielen, Mineralen & Goud',
     'Recreatie',
   ],
   personal: [
