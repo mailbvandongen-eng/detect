@@ -8,6 +8,10 @@ interface SettingsState {
   defaultBackground: DefaultBackground
   showScaleBar: boolean
 
+  // Veld
+  fieldModeEnabled: boolean
+  fieldModeOfflineLabels: boolean
+
   // GPS
   gpsAutoStart: boolean
   showAccuracyCircle: boolean
@@ -56,6 +60,8 @@ interface SettingsState {
   // Actions
   setDefaultBackground: (bg: DefaultBackground) => void
   setShowScaleBar: (value: boolean) => void
+  setFieldModeEnabled: (value: boolean) => void
+  setFieldModeOfflineLabels: (value: boolean) => void
   setGpsAutoStart: (value: boolean) => void
   setShowAccuracyCircle: (value: boolean) => void
   setHapticFeedback: (value: boolean) => void
@@ -85,6 +91,8 @@ export const useSettingsStore = create<SettingsState>()(
       // Defaults
       defaultBackground: 'CartoDB (licht)',
       showScaleBar: true,
+      fieldModeEnabled: false,
+      fieldModeOfflineLabels: true,
       gpsAutoStart: false,
       showAccuracyCircle: true,
       hapticFeedback: true,
@@ -110,6 +118,8 @@ export const useSettingsStore = create<SettingsState>()(
       // Actions
       setDefaultBackground: (defaultBackground) => set({ defaultBackground }),
       setShowScaleBar: (showScaleBar) => set({ showScaleBar }),
+      setFieldModeEnabled: (fieldModeEnabled) => set({ fieldModeEnabled }),
+      setFieldModeOfflineLabels: (fieldModeOfflineLabels) => set({ fieldModeOfflineLabels }),
       setGpsAutoStart: (gpsAutoStart) => set({ gpsAutoStart }),
       setShowAccuracyCircle: (showAccuracyCircle) => set({ showAccuracyCircle }),
       setHapticFeedback: (hapticFeedback) => set({ hapticFeedback }),
@@ -134,15 +144,26 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'detectorapp-settings',
-      version: 2,
+      version: 3,
       migrate: (persistedState: any, version: number) => {
         // Migrate from older versions without showScaleBar
         if (version < 2) {
           return {
             ...persistedState,
-            showScaleBar: true  // Ensure scale bar is visible by default
+            showScaleBar: true,  // Ensure scale bar is visible by default
+            fieldModeEnabled: false,
+            fieldModeOfflineLabels: true
           }
         }
+
+        if (version < 3) {
+          return {
+            ...persistedState,
+            fieldModeEnabled: false,
+            fieldModeOfflineLabels: true
+          }
+        }
+
         return persistedState
       }
     }

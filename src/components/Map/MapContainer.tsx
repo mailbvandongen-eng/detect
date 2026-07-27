@@ -14,15 +14,26 @@ const BASE_LAYERS = [
   'Bonnebladen 1900'
 ]
 
+const FIELD_LABEL_BASE_LAYERS = [
+  'Luchtfoto',
+  'Satelliet (wereld)',
+  'TMK 1850',
+  'Bonnebladen 1900'
+]
+
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
   const initialBgApplied = useRef(false)
+  const lastFieldModeBaseRef = useRef<string | null>(null)
 
   useMap({ target: 'map' })
   const map = useMapStore(state => state.map)
   const registerLayer = useLayerStore(state => state.registerLayer)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
+  const visibleLayers = useLayerStore(state => state.visible)
   const defaultBackground = useSettingsStore(state => state.defaultBackground)
+  const fieldModeEnabled = useSettingsStore(state => state.fieldModeEnabled)
+  const fieldModeOfflineLabels = useSettingsStore(state => state.fieldModeOfflineLabels)
 
   useEffect(() => {
     if (!map) {
@@ -142,6 +153,31 @@ export function MapContainer() {
 
     return () => clearTimeout(timer)
   }, [map, defaultBackground, setLayerVisibility])
+
+  const activeBaseLayer = BASE_LAYERS.find(layerName => visibleLayers[layerName]) ?? 'CartoDB (licht)'
+
+  useEffect(() => {
+    if (!map) {
+      return
+    }
+
+    if (!fieldModeEnabled || !fieldModeOfflineLabels) {
+      lastFieldModeBaseRef.current = null
+      return
+    }
+
+    if (lastFieldModeBaseRef.current === activeBaseLayer) {
+      return
+    }
+
+    if (FIELD_LABEL_BASE_LAYERS.includes(activeBaseLayer)) {
+      setLayerVisibility('Labels Overlay', true)
+    } else if (activeBaseLayer === 'CartoDB (licht)' || activeBaseLayer === 'OpenStreetMap') {
+      setLayerVisibility('Labels Overlay', false)
+    }
+
+    lastFieldModeBaseRef.current = activeBaseLayer
+  }, [activeBaseLayer, fieldModeEnabled, fieldModeOfflineLabels, map, setLayerVisibility])
 
   const gpsAutoStart = useSettingsStore(state => state.gpsAutoStart)
   const startTracking = useGPSStore(state => state.startTracking)

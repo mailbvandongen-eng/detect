@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { WifiOff, X } from 'lucide-react'
+import { useSettingsStore } from '../../store'
 
 export function OfflineIndicator() {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
   const [isDismissed, setIsDismissed] = useState(false)
+  const fieldModeEnabled = useSettingsStore(state => state.fieldModeEnabled)
 
   useEffect(() => {
     const handleOnline = () => {
@@ -40,7 +42,9 @@ export function OfflineIndicator() {
           <div className="flex items-center gap-2">
             <WifiOff size={18} />
             <span className="text-sm font-medium">
-              Offline modus - Kaart werkt met gecachede data
+              {fieldModeEnabled
+                ? 'Offline veldmodus - kaart en labels werken uit cache'
+                : 'Offline modus - kaart werkt met gecachede data'}
             </span>
           </div>
           <button

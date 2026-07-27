@@ -33,6 +33,21 @@ export default defineConfig({
         // Claim clients immediately
         clientsClaim: true,
         runtimeCaching: [
+          // CARTO basemap + labels overlay
+          {
+            urlPattern: /^https:\/\/[a-d]\.basemaps\.cartocdn\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'carto-tiles',
+              expiration: {
+                maxEntries: 600,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
           // OpenStreetMap tiles
           {
             urlPattern: /^https:\/\/tile\.openstreetmap\.org\/.*/i,

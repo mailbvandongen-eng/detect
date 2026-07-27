@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, BarChart3, Pencil, Upload, Bug, Code, User, Sliders, Volume2, Cloud } from 'lucide-react'
+import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, BarChart3, Pencil, Upload, Bug, Code, User, Sliders, Volume2, Cloud, WifiOff } from 'lucide-react'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
@@ -171,6 +171,25 @@ export function SettingsPanel() {
                       checked={settings.showScaleBar}
                       onChange={settings.setShowScaleBar}
                     />
+                  </Section>
+
+                  <Section title="Veldmodus" icon={<WifiOff size={16} />}>
+                    <ToggleRow
+                      label="Veldmodus actief"
+                      checked={settings.fieldModeEnabled}
+                      onChange={settings.setFieldModeEnabled}
+                    />
+                    <ToggleRow
+                      label="Offline labels op luchtfoto"
+                      checked={settings.fieldModeOfflineLabels}
+                      onChange={settings.setFieldModeOfflineLabels}
+                      disabled={!settings.fieldModeEnabled}
+                    />
+                    <p className="text-gray-500 mt-1" style={{ fontSize: '0.75em' }}>
+                      {settings.fieldModeEnabled
+                        ? 'Schakel online even door je werkgebied. Kaarttegels en plaatsnamen worden daarna lokaal hergebruikt op luchtfoto, satelliet en historische kaarten.'
+                        : 'Veldmodus zet offline labels klaar voor luchtfoto en historische kaarten, zonder lagen vooraf op te starten.'}
+                    </p>
                   </Section>
 
                   {/* GPS */}
@@ -527,15 +546,20 @@ function OptionRow({ label, children }: { label: string; children: React.ReactNo
 }
 
 // Toggle switch row - uses em-based font sizes
-function ToggleRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
+function ToggleRow({ label, checked, onChange, disabled = false }: { label: string; checked: boolean; onChange: (value: boolean) => void; disabled?: boolean }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-gray-600" style={{ fontSize: '0.9em' }}>{label}</span>
+      <span className={`${disabled ? 'text-gray-400' : 'text-gray-600'}`} style={{ fontSize: '0.9em' }}>{label}</span>
       <button
-        onClick={() => onChange(!checked)}
+        onClick={() => {
+          if (!disabled) {
+            onChange(!checked)
+          }
+        }}
+        disabled={disabled}
         className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
           checked ? 'bg-gradient-to-r from-blue-500 to-blue-600' : 'bg-gray-300'
-        }`}
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <span
           className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
