@@ -15,8 +15,8 @@ export interface LayerDefinition {
 }
 
 // Layer registry - NL only version
-// WMS layers are marked as immediateLoad because tiles load on-demand anyway
-// Vector layers are lazy loaded to improve startup time
+// WMS/tile layers keep immediateLoad metadata for classification only.
+// The app creates all non-base layers on demand to improve startup time.
 
 export const layerRegistry: Record<string, LayerDefinition> = {
   // ============================================
@@ -545,64 +545,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: false
   },
 
-  // Recreation layers
-  'Speeltuinen': {
-    name: 'Speeltuinen',
-    factory: async () => {
-      const { createSpeeltuinenLayerOL } = await import('./speeltuinenOL')
-      return createSpeeltuinenLayerOL()
-    },
-    immediateLoad: false
-  },
-  'Musea': {
-    name: 'Musea',
-    factory: async () => {
-      const { createMuseaLayerOL } = await import('./museaOL')
-      return createMuseaLayerOL()
-    },
-    immediateLoad: false
-  },
-  'Strandjes': {
-    name: 'Strandjes',
-    factory: async () => {
-      const { createStrandjesLayerOL } = await import('./strandjesOL')
-      return createStrandjesLayerOL()
-    },
-    immediateLoad: false
-  },
-  'Parken': {
-    name: 'Parken',
-    factory: async () => {
-      const { createParkenLayerOL } = await import('./parkenOL')
-      return createParkenLayerOL()
-    },
-    immediateLoad: false
-  },
-  'Kringloopwinkels': {
-    name: 'Kringloopwinkels',
-    factory: async () => {
-      const { createKringloopwinkelsLayerOL } = await import('./kringloopwinkelsOL')
-      return createKringloopwinkelsLayerOL()
-    },
-    immediateLoad: false
-  },
-  'Ruiterpaden': {
-    name: 'Ruiterpaden',
-    factory: async () => {
-      const { createRuiterpadenLayerOL } = await import('./ruiterpadenOL')
-      return createRuiterpadenLayerOL()
-    },
-    immediateLoad: false
-  },
-  'Laarzenpaden': {
-    name: 'Laarzenpaden',
-    factory: async () => {
-      const { createLaarzenpadenLayerOL } = await import('./laarzenpadenOL')
-      return createLaarzenpadenLayerOL()
-    },
-    immediateLoad: false
-  },
-
   // Fossil layers - PBDB data
   'Fossielen Nederland': {
     name: 'Fossielen Nederland',
@@ -975,14 +917,4 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     regions: ['fr']
   },
 
-}
-
-// Helper to get all immediate load layers (OpenLayers only - ArcGIS layers are handled separately)
-export function getImmediateLoadLayers(): LayerDefinition[] {
-  return Object.values(layerRegistry).filter(def => def.immediateLoad && def.platform !== 'arcgis')
-}
-
-// Helper to get all lazy load layers
-export function getLazyLoadLayers(): LayerDefinition[] {
-  return Object.values(layerRegistry).filter(def => !def.immediateLoad)
 }

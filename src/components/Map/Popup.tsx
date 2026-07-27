@@ -2265,7 +2265,7 @@ export function Popup() {
                    dataProps.NAAM || dataProps.NAME || dataProps.label ||
                    dataProps.route_name || dataProps.road_name
 
-        // Better fallback for OSM recreation data (Parken, Speeltuinen, Musea, Strandjes)
+        // Better fallback for generic OSM leisure data
         if (!name) {
           if (dataProps.leisure === 'playground') {
             name = 'Speeltuin'
@@ -2358,7 +2358,7 @@ export function Popup() {
           html += `<br/><span class="text-sm text-gray-700">${dataProps.Beschrijvi}</span>`
         }
 
-        // Parken (OSM data) - uitgebreide info met groene kop
+        // Park / green area (OSM data) - uitgebreide info met groene kop
         if (dataProps.leisure === 'park') {
           isSpecificHandled = true
           const parkNaam = dataProps.name || 'Park'
@@ -2391,7 +2391,7 @@ export function Popup() {
 
           // Tip voor detectoristen
           html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Tip voor detectie</span></div>`
-          html += `<div class="text-sm text-gray-700">Parken zijn populair bij detectoristen. Mensen verliezen hier munten en sieraden. Vraag eerst toestemming aan de gemeente of beheerder.</div>`
+          html += `<div class="text-sm text-gray-700">Groene verblijfsplekken zijn populair bij detectoristen. Mensen verliezen hier munten en sieraden. Vraag eerst toestemming aan de gemeente of beheerder.</div>`
 
           // Website link
           if (dataProps.website) {
@@ -2399,7 +2399,7 @@ export function Popup() {
             html += `<div class="mt-2"><a href="${dataProps.website}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline text-sm">${domain}</a></div>`
           }
         }
-        // Speeltuinen (OSM data) - aparte behandeling
+        // Playground (OSM data) - aparte behandeling
         else if (dataProps.leisure === 'playground') {
           isSpecificHandled = true
           const speeltuinNaam = dataProps.name || 'Speeltuin'
@@ -2410,7 +2410,7 @@ export function Popup() {
             html += `<div class="mt-2 text-sm text-gray-700">${dataProps.description}</div>`
           }
         }
-        // Musea (OSM data) - uitgebreide info met paarse kop
+        // Museum (OSM data) - uitgebreide info met paarse kop
         if ((dataProps.tourism === 'museum' || dataProps.museum)) {
           isSpecificHandled = true
           const museumNaam = dataProps.name || 'Museum'
@@ -2480,7 +2480,7 @@ export function Popup() {
             html += `</div>`
           }
         }
-        // Strandjes/Zwemplekken (OSM data) - uitgebreide info
+        // Swimming area / beach (OSM data) - uitgebreide info
         if (dataProps.leisure === 'swimming_area' || dataProps.sport === 'swimming' || dataProps.natural === 'beach') {
           isSpecificHandled = true
           const strandNaam = dataProps.name || 'Zwemplek'
@@ -2520,7 +2520,7 @@ export function Popup() {
           html += `<div class="mt-3"><span class="text-sm font-semibold text-gray-800">Tip voor detectie</span></div>`
           html += `<div class="text-sm text-gray-700">Zwemplekken kunnen interessant zijn voor detectie. Mensen verliezen hier sieraden en munten. Let op: niet overal is detecteren toegestaan.</div>`
         }
-        // Kringloopwinkels (OSM data)
+        // Retail amenity (OSM data)
         if (dataProps.osm_id && dataProps.address !== undefined) {
           html += `<br/><span class="text-sm text-lime-700">Kringloopwinkel</span>`
           if (dataProps.address) {

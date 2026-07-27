@@ -123,13 +123,6 @@ export function LayerControlPanel() {
                 <LayerItem name="Fossielen Frankrijk" type="overlay" />
               </LayerGroup>
 
-              {/* Recreation */}
-              <LayerGroup title="Recreatie" defaultExpanded={false}>
-                <LayerItem name="Parken" type="overlay" />
-                <LayerItem name="Speeltuinen" type="overlay" />
-                <LayerItem name="Musea" type="overlay" />
-                <LayerItem name="Strandjes" type="overlay" />
-              </LayerGroup>
             </div>
         </motion.div>
       )}

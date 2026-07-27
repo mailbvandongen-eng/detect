@@ -118,17 +118,30 @@ const BASE_LAYER_NAMES = [
 ]
 
 const BUILT_IN_PRESET_MAP = new Map(BUILT_IN_PRESETS.map((preset) => [preset.id, preset]))
+const REMOVED_LAYERS = new Set([
+  'Kringloopwinkels',
+  'Ruiterpaden',
+  'Laarzenpaden',
+  'Parken',
+  'Speeltuinen',
+  'Musea',
+  'Strandjes'
+])
 
 function normalizePreset(preset: Preset): Preset {
   const builtInPreset = BUILT_IN_PRESET_MAP.get(preset.id)
 
   if (!builtInPreset) {
-    return preset
+    return {
+      ...preset,
+      layers: preset.layers.filter((layer) => !REMOVED_LAYERS.has(layer))
+    }
   }
 
   return {
     ...builtInPreset,
     ...preset,
+    layers: (preset.layers ?? builtInPreset.layers).filter((layer) => !REMOVED_LAYERS.has(layer)),
     baseLayer: preset.baseLayer ?? builtInPreset.baseLayer,
     layerOpacities: preset.layerOpacities ?? builtInPreset.layerOpacities
   }
@@ -158,8 +171,6 @@ const ALL_OVERLAYS = [
   'Veengebieden', 'Geomorfologie', 'Bodemkaart',
   // Fossielen
   'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
-  // Recreatie
-  'Parken', 'Speeltuinen', 'Musea', 'Strandjes', 'Kringloopwinkels',
   // Percelen
   'Gewaspercelen', 'Kadastrale Grenzen',
   // Provinciale Waardenkaarten - Zuid-Holland
@@ -272,7 +283,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 14,
+      version: 16,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {
@@ -288,6 +299,8 @@ export const usePresetStore = create<PresetState>()(
         // v11: Added Geomorfologie and AHN4 Hoogtekaart Kleur to Detectie preset with low opacity
         // v10: Removed non-existent 'Archeo Landschappen' from Terrein Analyse preset
         // v14: Preserve base layers on presets and repair legacy built-in preset metadata
+        // v15: Strip removed live Overpass recreation layers from persisted presets
+        // v16: Strip remaining live Overpass recreation layers from persisted presets
         if (version < 13) {
           return {
             presets: [...BUILT_IN_PRESETS],

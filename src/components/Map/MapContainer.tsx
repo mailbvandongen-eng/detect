@@ -4,7 +4,6 @@ import { Tile as TileLayer } from 'ol/layer'
 import { OSM, XYZ } from 'ol/source'
 import { useMap } from '../../hooks/useMap'
 import { useLayerStore, useMapStore, useSettingsStore, useGPSStore } from '../../store'
-import { getImmediateLoadLayers } from '../../layers/layerRegistry'
 
 const BASE_LAYERS = [
   'CartoDB (licht)',
@@ -27,11 +26,11 @@ export function MapContainer() {
 
   useEffect(() => {
     if (!map) {
-      console.warn('âš ï¸ Map not initialized yet')
+      console.warn('Ã¢Å¡Â Ã¯Â¸Â Map not initialized yet')
       return
     }
 
-    console.log('ðŸ—ºï¸ Initializing map layers...')
+    console.log('Ã°Å¸â€”ÂºÃ¯Â¸Â Initializing map layers...')
 
     const osmLayer = new TileLayer({
       properties: { title: 'OpenStreetMap', type: 'base' },
@@ -44,7 +43,7 @@ export function MapContainer() {
       visible: true,
       source: new XYZ({
         url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-        attributions: 'Â© OpenStreetMap contributors Â© CARTO'
+        attributions: 'Ã‚Â© OpenStreetMap contributors Ã‚Â© CARTO'
       })
     })
 
@@ -53,7 +52,7 @@ export function MapContainer() {
       visible: false,
       source: new XYZ({
         url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
-        attributions: 'Â© Kadaster / PDOK Luchtfoto',
+        attributions: 'Ã‚Â© Kadaster / PDOK Luchtfoto',
         maxZoom: 19
       })
     })
@@ -63,7 +62,7 @@ export function MapContainer() {
       visible: false,
       source: new XYZ({
         url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        attributions: 'Â© Esri, Maxar, Earthstar Geographics',
+        attributions: 'Ã‚Â© Esri, Maxar, Earthstar Geographics',
         maxZoom: 19,
         crossOrigin: 'anonymous'
       })
@@ -74,7 +73,7 @@ export function MapContainer() {
       visible: false,
       source: new XYZ({
         url: 'https://{a-d}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png',
-        attributions: 'Â© OpenStreetMap contributors Â© CARTO',
+        attributions: 'Ã‚Â© OpenStreetMap contributors Ã‚Â© CARTO',
         maxZoom: 20
       }),
       zIndex: 100
@@ -85,7 +84,7 @@ export function MapContainer() {
       visible: false,
       source: new XYZ({
         url: 'https://s.map5.nl/map/gast/tiles/tmk_1850/EPSG3857/{z}/{x}/{y}.png',
-        attributions: 'Â© Kadaster / Map5.nl',
+        attributions: 'Ã‚Â© Kadaster / Map5.nl',
         crossOrigin: 'anonymous',
         maxZoom: 14
       })
@@ -96,7 +95,7 @@ export function MapContainer() {
       visible: false,
       source: new XYZ({
         url: 'https://s.map5.nl/map/gast/tiles/bonne_1900/EPSG3857/{z}/{x}/{y}.png',
-        attributions: 'Â© Kadaster / Map5.nl',
+        attributions: 'Ã‚Â© Kadaster / Map5.nl',
         crossOrigin: 'anonymous',
         maxZoom: 14
       })
@@ -119,41 +118,7 @@ export function MapContainer() {
     registerLayer('Bonnebladen 1900', bonne1900Layer)
 
     map.updateSize()
-    void loadImmediateLayers()
   }, [map, registerLayer])
-
-  async function loadImmediateLayers() {
-    if (!map) {
-      console.error('âŒ Cannot load layers: map is null')
-      return
-    }
-
-    const immediateLoadLayers = getImmediateLoadLayers()
-    console.log(`ðŸ“¦ Loading ${immediateLoadLayers.length} immediate-load layers (WMS/Tile)...`)
-
-    const results = await Promise.allSettled(
-      immediateLoadLayers.map(async (layerDef) => {
-        try {
-          const layer = await layerDef.factory()
-          if (layer) {
-            return { name: layerDef.name, layer }
-          }
-          return null
-        } catch (error) {
-          console.warn(`âš ï¸ Failed to create ${layerDef.name}:`, error)
-          return null
-        }
-      })
-    )
-
-    results.forEach((result) => {
-      if (result.status === 'fulfilled' && result.value) {
-        const { name, layer } = result.value
-        map.addLayer(layer)
-        registerLayer(name, layer)
-      }
-    })
-  }
 
   useEffect(() => {
     if (!map || initialBgApplied.current) return
@@ -172,7 +137,7 @@ export function MapContainer() {
       }
 
       initialBgApplied.current = true
-      console.log(`ðŸ—ºï¸ Default background: ${bgToApply}`)
+      console.log(`Ã°Å¸â€”ÂºÃ¯Â¸Â Default background: ${bgToApply}`)
     }, 100)
 
     return () => clearTimeout(timer)
@@ -189,7 +154,7 @@ export function MapContainer() {
       const timer = setTimeout(() => {
         startTracking()
         gpsStarted.current = true
-        console.log('ðŸ“ GPS autostart enabled - tracking started')
+        console.log('Ã°Å¸â€œÂ GPS autostart enabled - tracking started')
       }, 500)
       return () => clearTimeout(timer)
     }
