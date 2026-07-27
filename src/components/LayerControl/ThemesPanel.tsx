@@ -374,6 +374,15 @@ export function ThemesPanel() {
                 <LayerItem name="Maginotlinie" type="overlay" />
               </LayerGroup>
 
+              {/* Recreation */}
+              {isThemeVisible('Recreatie') && (
+                <LayerGroup title="Recreatie" defaultExpanded={false} layerNames={['Parken', 'Speeltuinen', 'Strandjes']}>
+                  <LayerItem name="Parken" type="overlay" />
+                  <LayerItem name="Speeltuinen" type="overlay" />
+                  <LayerItem name="Strandjes" type="overlay" />
+                </LayerGroup>
+              )}
+
               {/* Specials (3D) - externe 3D archeologische sites */}
               {isSpecialSectionVisible('Specials (3D)') && (
                 <div className="mb-2">

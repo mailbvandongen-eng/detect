@@ -122,10 +122,7 @@ const REMOVED_LAYERS = new Set([
   'Kringloopwinkels',
   'Ruiterpaden',
   'Laarzenpaden',
-  'Parken',
-  'Speeltuinen',
   'Musea',
-  'Strandjes'
 ])
 
 function normalizePreset(preset: Preset): Preset {
@@ -171,6 +168,8 @@ const ALL_OVERLAYS = [
   'Veengebieden', 'Geomorfologie', 'Bodemkaart',
   // Fossielen
   'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
+  // Recreatie
+  'Parken', 'Speeltuinen', 'Strandjes',
   // Percelen
   'Gewaspercelen', 'Kadastrale Grenzen',
   // Provinciale Waardenkaarten - Zuid-Holland

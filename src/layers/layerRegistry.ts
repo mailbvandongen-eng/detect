@@ -545,6 +545,32 @@ export const layerRegistry: Record<string, LayerDefinition> = {
     immediateLoad: false
   },
 
+  // Recreation layers
+  'Parken': {
+    name: 'Parken',
+    factory: async () => {
+      const { createParkenLayerOL } = await import('./parkenOL')
+      return createParkenLayerOL()
+    },
+    immediateLoad: false
+  },
+  'Speeltuinen': {
+    name: 'Speeltuinen',
+    factory: async () => {
+      const { createSpeeltuinenLayerOL } = await import('./speeltuinenOL')
+      return createSpeeltuinenLayerOL()
+    },
+    immediateLoad: false
+  },
+  'Strandjes': {
+    name: 'Strandjes',
+    factory: async () => {
+      const { createStrandjesLayerOL } = await import('./strandjesOL')
+      return createStrandjesLayerOL()
+    },
+    immediateLoad: false
+  },
+
   // Fossil layers - PBDB data
   'Fossielen Nederland': {
     name: 'Fossielen Nederland',

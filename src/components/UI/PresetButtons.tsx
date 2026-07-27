@@ -68,6 +68,8 @@ const ALL_OVERLAYS = [
   // Fossielen, Mineralen & Goud
   'Fossiel Hotspots', 'Mineralen Hotspots', 'Goudrivieren',
   'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
+  // Recreatie
+  'Parken', 'Speeltuinen', 'Strandjes',
   // Percelen
   'Gewaspercelen', 'Kadastrale Grenzen',
   // Provinciale Waardenkaarten - Zuid-Holland

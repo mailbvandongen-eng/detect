@@ -125,7 +125,7 @@ function InfoTab() {
           <li>
             <strong>OpenStreetMap</strong> (ODbL)
             <br />
-            <span className="text-xs">Hunebedden, Grafheuvels, Bunkers, Kastelen, Terpen</span>
+            <span className="text-xs">Hunebedden, Grafheuvels, Bunkers, Kastelen, Terpen, Parken, Speeltuinen, Strandjes</span>
           </li>
           <li>
             <strong>Itiner-E / Wetenschappelijk</strong> (CC BY 4.0)
@@ -252,6 +252,7 @@ function FunctiesTab() {
           <li><strong>Militair:</strong> WWII Bunkers, Slagvelden, Vliegvelden, Verdedigingslinies</li>
           <li><strong>Erfgoed:</strong> Rijksmonumenten, Kastelen, Ruïnes, Religieus Erfgoed</li>
           <li><strong>Terrein:</strong> Veengebieden, Geomorfologie, Bodemkaart</li>
+          <li><strong>Recreatie:</strong> Parken, Speeltuinen, Strandjes</li>
           <li><strong>Percelen:</strong> Gewaspercelen (met bouwplantoelichting), Kadastrale Grenzen</li>
           <li><strong>Provinciaal:</strong> Relictenkaart, Scheepswrakken, Verdronken Dorpen</li>
           <li><strong>UIKAV:</strong> Uiterwaard data, Expert advies, Vlakken, Punten, Bufferlagen</li>
