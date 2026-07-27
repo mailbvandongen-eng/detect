@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import TileWMS from 'ol/source/TileWMS'
 import TileLayer from 'ol/layer/Tile'
@@ -11,6 +11,12 @@ import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondst
 import { useCustomPointLayerStore, type FeatureGeometry, type GeometryType } from '../../store/customPointLayerStore'
 import { ROMEINSE_FORTEN_INFO, GENERIEK_FORT_INFO, FORT_TYPE_LABELS } from '../../data/romeinseFortenInfo'
 import type { MapBrowserEvent } from 'ol'
+
+type PopupFeatureData = {
+  geometry?: FeatureGeometry
+  properties?: Record<string, unknown>
+  popupHtml?: string
+}
 
 // Register RD New projection
 proj4.defs('EPSG:28992', '+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs')
@@ -177,19 +183,11 @@ export function Popup() {
   const [addedToLayer, setAddedToLayer] = useState<string | null>(null)
   const [popupCoordinate, setPopupCoordinate] = useState<number[] | null>(null)
   // Store current feature's geometry and properties for "add to layer"
-  const [popupFeatureData, setPopupFeatureData] = useState<{
-    geometry?: FeatureGeometry
-    properties?: Record<string, unknown>
-    popupHtml?: string
-  } | null>(null)
+  const [popupFeatureData, setPopupFeatureData] = useState<PopupFeatureData | null>(null)
   const [showNewLayerInput, setShowNewLayerInput] = useState(false)
   const [newLayerName, setNewLayerName] = useState('')
   // Store feature data for each popup content (parallel to allContents)
-  const [allFeatureData, setAllFeatureData] = useState<Array<{
-    geometry?: FeatureGeometry
-    properties?: Record<string, unknown>
-    popupHtml?: string
-  } | null>>([])
+  const [allFeatureData, setAllFeatureData] = useState<Array<PopupFeatureData | null>>([])
   // Get current feature data based on index
   const currentFeatureData = allFeatureData[currentIndex] || null
   // Popup text scale: 100 = normal, 120 = 20% bigger, etc
@@ -199,6 +197,7 @@ export function Popup() {
   })
   // Popup height: 'half' (50vh) or 'full' (90vh)
   const [popupHeight, setPopupHeight] = useState<'half' | 'full'>('half')
+  const popupRequestIdRef = useRef(0)
 
   // Save text scale to localStorage
   const handleTextScaleChange = (value: number) => {
@@ -287,6 +286,37 @@ export function Popup() {
       clearParcelHighlight(map)
       setShowingHeightMap(false)
     }
+  }
+
+  const openPopup = (
+    coordinate: number[],
+    contents: string[],
+    featureData: Array<PopupFeatureData | null>,
+    resetIndex = true
+  ) => {
+    if (contents.length === 0) {
+      return
+    }
+
+    setAllContents(contents)
+    setAllFeatureData(featureData)
+    if (resetIndex) {
+      setCurrentIndex(0)
+    }
+
+    console.log(`📌 KLIK OPGESLAGEN: [${coordinate[0].toFixed(0)}, ${coordinate[1].toFixed(0)}]`)
+    setParcelCoordinate(coordinate)
+    setShowingHeightMap(false)
+    setShowLayerPicker(false)
+    setShowNewLayerInput(false)
+    setNewLayerName('')
+    setAddedToLayer(null)
+
+    const lonLat = toLonLat(coordinate)
+    setPopupCoordinate(lonLat)
+    setMapsUrl(`https://www.google.com/maps/dir/?api=1&destination=${lonLat[1]},${lonLat[0]}`)
+    setStreetViewUrl(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lonLat[1]},${lonLat[0]}`)
+    setVisible(true)
   }
 
   useEffect(() => {
@@ -1997,11 +2027,7 @@ export function Popup() {
       // Collect all popup contents from all sources
       const collectedContents: string[] = []
       // Parallel array for feature data (geometry + properties)
-      const collectedFeatureData: Array<{
-        geometry?: FeatureGeometry
-        properties?: Record<string, unknown>
-        popupHtml?: string
-      } | null> = []
+      const collectedFeatureData: Array<PopupFeatureData | null> = []
 
       // Helper to extract geometry from OpenLayers feature
       const extractGeometry = (olGeometry: any): FeatureGeometry | undefined => {
@@ -3567,53 +3593,59 @@ export function Popup() {
         })
       }
 
+      const requestId = ++popupRequestIdRef.current
+      const hasImmediateContent = collectedContents.length > 0
+      const baseContents = [...collectedContents]
+      const baseFeatureData = [...collectedFeatureData]
+
+      if (hasImmediateContent) {
+        openPopup(evt.coordinate, baseContents, baseFeatureData)
+      }
+
       // Also query WMS layers (they may have info even with vector features)
       const viewResolution = map.getView().getResolution() || 1
-      const wmsResults = await queryWMSLayers(evt.coordinate, viewResolution)
-      collectedContents.push(...wmsResults)
+      const [wmsResults, height] = await Promise.all([
+        queryWMSLayers(evt.coordinate, viewResolution),
+        heightPromise
+      ])
+
+      if (popupRequestIdRef.current !== requestId) {
+        return
+      }
+
+      const finalContents = [...baseContents]
+      const finalFeatureData = [...baseFeatureData]
+
+      finalContents.push(...wmsResults)
       // WMS results don't have local geometry (only point coordinate)
       for (const _wms of wmsResults) {
-        collectedFeatureData.push(null)
+        finalFeatureData.push(null)
       }
 
       // If no features found anywhere, check for just height info
-      const height = await heightPromise
-      if (collectedContents.length === 0 && height !== null) {
+      if (finalContents.length === 0 && height !== null) {
         const heightHtml = `<strong class="text-blue-800">Terrein</strong>
           <br/><div class="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1">
             <span class="text-xs text-gray-400">Hoogte:</span>
             <span class="text-sm font-medium text-blue-600">${height.toFixed(2)} m NAP</span>
           </div>`
-        collectedContents.push(heightHtml)
-        collectedFeatureData.push(null) // Height-only doesn't have geometry
+        finalContents.push(heightHtml)
+        finalFeatureData.push(null) // Height-only doesn't have geometry
       }
 
       // Add height info to first popup if we have features
-      if (collectedContents.length > 0 && height !== null) {
-        collectedContents[0] += `<br/><div class="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1">
+      if (finalContents.length > 0 && height !== null) {
+        finalContents[0] += `<br/><div class="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1">
           <span class="text-xs text-gray-400">Hoogte:</span>
           <span class="text-sm font-medium text-blue-600">${height.toFixed(2)} m NAP</span>
         </div>`
       }
 
-      // Show popup if we found any content
-      if (collectedContents.length > 0) {
-        setAllContents(collectedContents)
-        setAllFeatureData(collectedFeatureData) // Store feature geometries
-        setCurrentIndex(0)
-        console.log(`📌 KLIK OPGESLAGEN: [${evt.coordinate[0].toFixed(0)}, ${evt.coordinate[1].toFixed(0)}]`)
-        setParcelCoordinate(evt.coordinate) // Store coordinate for height map
-        setShowingHeightMap(false) // Reset height map state
-        setShowLayerPicker(false) // Reset layer picker
-        setShowNewLayerInput(false) // Reset new layer input
-        setNewLayerName('') // Clear new layer name
-        setAddedToLayer(null) // Reset added to layer confirmation
-        // Generate Google Maps URL for navigation
-        const lonLat = toLonLat(evt.coordinate)
-        setPopupCoordinate(lonLat) // Store lon/lat for adding to layer
-        setMapsUrl(`https://www.google.com/maps/dir/?api=1&destination=${lonLat[1]},${lonLat[0]}`)
-        setStreetViewUrl(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lonLat[1]},${lonLat[0]}`)
-        setVisible(true)
+      // Refresh popup only when there is deferred live info,
+      // or when we had no local content to show immediately.
+      const hasDeferredInfo = wmsResults.length > 0 || height !== null
+      if (finalContents.length > 0 && (!hasImmediateContent || hasDeferredInfo)) {
+        openPopup(evt.coordinate, finalContents, finalFeatureData, !hasImmediateContent)
       }
     }
 
@@ -3625,6 +3657,7 @@ export function Popup() {
   }, [map])
 
   const handleClose = () => {
+    popupRequestIdRef.current += 1
     setVisible(false)
     setPopupHeight('half') // Reset to half height for next popup
     // Clear height map when closing popup
