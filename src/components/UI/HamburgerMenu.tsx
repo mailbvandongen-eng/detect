@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw, Bot } from 'lucide-react'
+import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useCloudSync } from '../../hooks/useCloudSync'
-import { AgentGuideModal } from './AgentGuideModal'
 import { version } from '../../../package.json'
 
 // Google logo SVG component
@@ -35,7 +34,6 @@ function GoogleLogo({ size = 18 }: { size?: number }) {
 
 export function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false)
-  const [showAgentGuide, setShowAgentGuide] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const [syncResult, setSyncResult] = useState<{
     success: boolean
@@ -86,11 +84,6 @@ export function HamburgerMenu() {
   const handleMonumentSearchClick = () => {
     closeMenu()
     toggleMonumentSearch()
-  }
-
-  const handleAgentGuideClick = () => {
-    closeMenu()
-    setShowAgentGuide(true)
   }
 
   const handleLogin = () => {
@@ -296,15 +289,6 @@ export function HamburgerMenu() {
                 </button>
 
                 <button
-                  onClick={handleAgentGuideClick}
-                  className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-emerald-50"
-                  style={{ fontSize: '0.95em' }}
-                >
-                  <Bot size={18} className="text-emerald-600" />
-                  <span>Detect Agent</span>
-                </button>
-
-                <button
                   onClick={handleMonumentSearchClick}
                   className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-purple-50"
                   style={{ fontSize: '0.95em' }}
@@ -498,10 +482,6 @@ export function HamburgerMenu() {
         )}
       </AnimatePresence>
 
-      <AgentGuideModal
-        isOpen={showAgentGuide}
-        onClose={() => setShowAgentGuide(false)}
-      />
     </>
   )
 }

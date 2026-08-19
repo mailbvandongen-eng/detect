@@ -13,7 +13,6 @@ export type { SubscriptionTier, Region, LayerTier, LayerTierInfo } from './subsc
 export { useParkingStore } from './parkingStore'
 export { useStepCounterStore } from './stepCounterStore'
 export { useHillshadeStore } from './hillshadeStore'
-export { useAgentStore } from './agentStore'
 export type { ColorRamp } from './hillshadeStore'
 export { useWeatherStore, weatherCodeDescriptions, windDirectionToText } from './weatherStore'
 export type { WeatherData, SavedLocation, HourlyForecast, DailyForecast, WeatherCode, PrecipitationForecast, PollenData } from './weatherStore'
