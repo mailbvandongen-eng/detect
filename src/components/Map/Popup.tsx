@@ -49,6 +49,24 @@ function translateOpeningHours(hours: string): string {
   return result
 }
 
+const POPUP_REQUEST_TIMEOUT_MS = 5000
+const MOBILE_HIT_TOLERANCE_PX = 10
+
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit = {},
+  timeoutMs = POPUP_REQUEST_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController()
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal })
+  } finally {
+    window.clearTimeout(timeoutId)
+  }
+}
+
 // AHN hoogte query - direct via WMS GetFeatureInfo
 async function queryAHNHeight(coordinate: number[]): Promise<number | null> {
   try {
@@ -65,7 +83,7 @@ async function queryAHNHeight(coordinate: number[]): Promise<number | null> {
 
     const url = `https://service.pdok.nl/rws/ahn/wms/v1_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=dtm_05m&QUERY_LAYERS=dtm_05m&INFO_FORMAT=application/json&CRS=EPSG:28992&BBOX=${bbox}&WIDTH=1&HEIGHT=1&I=0&J=0`
 
-    const response = await fetch(url)
+    const response = await fetchWithTimeout(url)
     const data = await response.json()
 
     if (data.features && data.features.length > 0) {
@@ -322,6 +340,10 @@ export function Popup() {
   useEffect(() => {
     if (!map) return
 
+    // Keep a slow or unavailable map service from blocking every popup.
+    const fetch = (input: RequestInfo | URL, init?: RequestInit) =>
+      fetchWithTimeout(input, init)
+
     // Format AMK popup from local data (no WMS query needed)
     const formatAMKPopup = (props: Record<string, any>): string => {
       let html = `<strong class="text-purple-800">AMK Monument</strong>`
@@ -351,7 +373,6 @@ export function Popup() {
 
     // Query WMS layers for feature info - returns array of all results
     const queryWMSLayers = async (coordinate: number[], viewResolution: number): Promise<string[]> => {
-      const results: string[] = []
       const wmsLayers = map.getLayers().getArray().filter(layer => {
         if (layer instanceof TileLayer && layer.getVisible()) {
           const source = layer.getSource()
@@ -360,7 +381,13 @@ export function Popup() {
         return false
       }) as TileLayer<TileWMS>[]
 
-      for (const layer of wmsLayers) {
+      // Query visible services concurrently. On mobile connections, a single
+      // slow service must not delay all other popup results.
+      const layerResults = await Promise.all(wmsLayers.map(async wmsLayer => {
+        const results: string[] = []
+
+        // Retain the existing early `continue` flow for each individual layer.
+        for (const layer of [wmsLayer]) {
         const source = layer.getSource()
         if (!source) continue
 
@@ -1939,11 +1966,12 @@ export function Popup() {
               let hasContent = false
 
               // Actual property names from PDOK BRO Geomorfologie WMS
-              const landformType = props.landform_subgroup_description
-              const reliefKlasse = props.relief_klasse
-              const reliefSubklasse = props.relief_subklasse
-              const genese = props.genese_description
-              const activeProcess = props.active_process
+              const landformType = props.landformSubgroupDescription ?? props.landform_subgroup_description
+              const reliefKlasse = props.reliefKlasse ?? props.relief_klasse
+              const reliefSubklasse = props.reliefSubklasse ?? props.relief_subklasse
+              const slope = props.helling ?? props.slope
+              const genese = props.geneseDescription ?? props.genese_description
+              const activeProcess = props.activeProcess ?? props.active_process
 
               // Main landform type (e.g. "Dekzandruggen en -koppen")
               if (landformType) {
@@ -1956,6 +1984,10 @@ export function Popup() {
                   ? `${reliefKlasse} (${reliefSubklasse})`
                   : reliefKlasse
                 html += `<br/><span class="text-xs text-gray-600">Relief: ${reliefText}</span>`
+                hasContent = true
+              }
+              if (slope) {
+                html += `<br/><span class="text-xs text-gray-600">Helling: ${slope}</span>`
                 hasContent = true
               }
               // Genesis (origin, e.g. "eolisch")
@@ -2020,8 +2052,12 @@ export function Popup() {
         } catch (error) {
           console.warn('WMS GetFeatureInfo failed:', error)
         }
-      }
-      return results
+        }
+
+        return results
+      }))
+
+      return layerResults.flat()
     }
 
     // Handle map clicks
@@ -2048,9 +2084,13 @@ export function Popup() {
 
       // Collect ALL vector features at click location and handle AMK first.
       const features: any[] = []
-      map.forEachFeatureAtPixel(evt.pixel, f => {
-        features.push(f)
-      })
+      map.forEachFeatureAtPixel(
+        evt.pixel,
+        f => {
+          features.push(f)
+        },
+        { hitTolerance: MOBILE_HIT_TOLERANCE_PX }
+      )
 
       const orderedFeatures = [...features].sort((a, b) => {
         const { geometry: _aGeometry, ...aProps } = a.getProperties()
@@ -2365,6 +2405,37 @@ export function Popup() {
         }
         if (dataProps.route && dataProps.route !== name) {
           html += `<br/><span class="text-sm text-gray-600">${dataProps.route}</span>`
+        }
+
+        // Itiner-E Romeinse wegen use a different property schema. Without
+        // this formatter, segments such as "Kromme Rijngebied" only had a
+        // title, which became an empty popup body after title extraction.
+        const isRomanRoad = dataProps.segmentCertainty !== undefined &&
+          (dataProps.type === 'Main Road' || dataProps.type === 'Secondary Road')
+
+        if (isRomanRoad) {
+          const roadType = dataProps.type === 'Main Road'
+            ? 'Romeinse hoofdweg'
+            : 'Secundaire Romeinse weg'
+          const certaintyLabels: Record<string, string> = {
+            Certain: 'zeker tracé',
+            Conjectured: 'vermoedelijk tracé',
+            Hypothetical: 'hypothetisch tracé'
+          }
+          const certainty = certaintyLabels[String(dataProps.segmentCertainty)] || String(dataProps.segmentCertainty)
+
+          html += `<br/><span class="text-sm font-medium text-red-700">${roadType}</span>`
+          html += `<br/><span class="text-xs text-gray-600">Ligging: ${certainty}</span>`
+
+          if (typeof dataProps._lengthInKm === 'number') {
+            html += `<br/><span class="text-xs text-gray-600">Lengte segment: ${dataProps._lengthInKm.toFixed(2)} km</span>`
+          }
+          if (dataProps.itinerary) {
+            html += `<br/><span class="text-xs text-gray-600">Routebron: ${dataProps.itinerary}</span>`
+          }
+          if (dataProps.bibliography) {
+            html += `<br/><span class="text-xs text-gray-500">Bron: ${dataProps.bibliography}</span>`
+          }
         }
 
         // UIKAV Archeo Punten: Show archaeological details
@@ -3627,6 +3698,12 @@ export function Popup() {
       const baseContents = [...collectedContents]
       const baseFeatureData = [...collectedFeatureData]
 
+      if (!hasImmediateContent) {
+        const loadingHtml = `<strong class="text-blue-800">Kaartinformatie</strong>
+          <br/><span class="text-sm text-gray-600">Informatie ophalen…</span>`
+        openPopup(evt.coordinate, [loadingHtml], [null])
+      }
+
       if (!priorityPopupShown && hasImmediateContent) {
         openPopup(evt.coordinate, baseContents, baseFeatureData)
       }
@@ -3679,6 +3756,10 @@ export function Popup() {
       const hasDeferredInfo = wmsResults.length > 0 || height !== null
       if (finalContents.length > 0 && (!hasImmediateContent || hasDeferredInfo)) {
         openPopup(evt.coordinate, finalContents, finalFeatureData, !hasImmediateContent)
+      } else if (!hasImmediateContent) {
+        const noInfoHtml = `<strong class="text-gray-700">Kaartinformatie</strong>
+          <br/><span class="text-sm text-gray-500">Op deze plek is geen informatie gevonden.</span>`
+        openPopup(evt.coordinate, [noInfoHtml], [null], false)
       }
     }
 
