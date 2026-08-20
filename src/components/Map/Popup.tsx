@@ -3806,13 +3806,15 @@ export function Popup() {
     <AnimatePresence>
       {visible && (
         <>
-          {/* Backdrop - tap to close */}
+          {/* Close on a new pointer gesture. Using click here makes the
+              compatibility click from the map tap fall through onto this
+              newly mounted backdrop and immediately close the popup. */}
           <motion.div
             className="fixed inset-0 z-[1500]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={handleClose}
+            onPointerDown={handleClose}
           />
 
           {/* Bottom Sheet */}
