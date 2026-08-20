@@ -59,8 +59,8 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 {/* Intro */}
                 <section>
                   <p className="text-sm text-gray-600">
-                    DetectorApp.nl is dé gratis kaartapplicatie voor metaaldetectoristen, fossielen- en mineralenzoekers en amateur-archeologen.
-                    Met <strong>70+ kaartlagen</strong>, GPS tracking, cloud sync en uitgebreid vondstenbeheer.
+                    DetectorApp NL is een kaartapp voor metaaldetectoristen, fossielen- en mineralenzoekers en amateur-archeologen.
+                    De app combineert <strong>100+ kaartlagen</strong> met GPS, routes, eigen lagen, kaartimports en uitgebreid vondstenbeheer.
                   </p>
                 </section>
 
@@ -72,13 +72,14 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
 
                   <div className="space-y-3">
                     <LocationGroup title="Linksboven" items={[
-                      { icon: <Cloud size={14} />, name: "Weerwidget", desc: "Actueel weer en buienradar" },
-                      { icon: <Ruler size={14} />, name: "Meten", desc: "Afstanden meten op de kaart" },
+                      { icon: <Cloud size={14} />, name: "Weerwidget", desc: "Optioneel: actueel weer en buienradar" },
+                      { icon: <Ruler size={14} />, name: "Meten", desc: "Afstanden meten; via Menu aan/uit" },
                       { icon: <Pencil size={14} />, name: "Tekenen", desc: "Punten, lijnen en vlakken tekenen" },
-                      { icon: <Printer size={14} />, name: "Exporteren", desc: "Kaart opslaan als afbeelding" },
+                      { icon: <Printer size={14} />, name: "Exporteren", desc: "Kaart downloaden of printen" },
                     ]} />
 
                     <LocationGroup title="Rechtsboven" items={[
+                      { icon: <Search size={14} />, name: "Zoeken", desc: "Zoek adressen en plaatsen" },
                       { icon: <Menu size={14} />, name: "Menu", desc: "Instellingen en opties" },
                       { icon: <Compass size={14} />, name: "Kompas", desc: "Verschijnt bij gedraaide kaart" },
                       { icon: <Map size={14} />, name: "Kaartlagen", desc: "Lagen aan/uit zetten" },
@@ -87,11 +88,18 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     <LocationGroup title="Rechtsonder" items={[
                       { icon: <Navigation size={14} />, name: "GPS", desc: "Je locatie volgen" },
                       { icon: <Plus size={14} />, name: "Zoom", desc: "In- en uitzoomen" },
+                      { icon: <SlidersHorizontal size={14} />, name: "Transparantie", desc: "Dekking van actieve lagen aanpassen" },
                     ]} />
 
-                    <LocationGroup title="Onderkant" items={[
-                      { icon: <Search size={14} />, name: "Zoekbalk", desc: "Zoek locaties en adressen" },
-                      { icon: <Layers size={14} />, name: "Legenda", desc: "Actieve lagen bekijken" },
+                    <LocationGroup title="Linksonder" items={[
+                      { icon: <RotateCcw size={14} />, name: "Reset", desc: "Kaart en lagen terugzetten" },
+                      { icon: <Star size={14} />, name: "Presets", desc: "Snel een lagencombinatie kiezen" },
+                      { icon: <Filter size={14} />, name: "Monumentfilter", desc: "AMK-monumenten op periode filteren" },
+                    ]} />
+
+                    <LocationGroup title="Optioneel onderaan" items={[
+                      { icon: <MapPin size={14} />, name: "Vondst knop", desc: "Verschijnt wanneer ingeschakeld in Menu" },
+                      { icon: <Route size={14} />, name: "Route knop", desc: "GPS-route opnemen en beheren" },
                     ]} />
                   </div>
                 </Section>
@@ -103,9 +111,10 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                   </p>
 
                   <div className="bg-gray-50 rounded-xl p-3 space-y-2">
-                    <MenuItem icon={<Settings size={14} />} name="Instellingen" desc="App configuratie aanpassen" />
-                    <MenuItem icon={<Search size={14} />} name="Monument zoeken" desc="Zoek specifieke monumenten" />
-                    <MenuItem icon={<Star size={14} />} name="Info" desc="Over de app" />
+                    <MenuItem icon={<Cloud size={14} />} name="Google-account" desc="Inloggen en handmatig synchroniseren" />
+                    <MenuItem icon={<Star size={14} />} name="Info & handleiding" desc="App-informatie en deze handleiding" />
+                    <MenuItem icon={<Search size={14} />} name="Zoek in monumenten" desc="Zoek specifieke monumenten" />
+                    <MenuItem icon={<Settings size={14} />} name="Instellingen" desc="Kaart, lagen, presets en vondsten beheren" />
                   </div>
 
                   <div className="mt-3 p-3 bg-blue-50 rounded-xl">
@@ -117,10 +126,12 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                       In het menu kun je knoppen tonen of verbergen om je scherm overzichtelijk te houden:
                     </p>
                     <ul className="text-xs text-blue-700 space-y-1 ml-4 list-disc">
-                      <li><strong>Vondst registreren</strong> - Knop voor vondsten vastleggen</li>
-                      <li><strong>Route opnemen</strong> - Knop voor routes vastleggen</li>
-                      <li><strong>Eigen lagen</strong> - Knop voor aangepaste puntenlagen</li>
-                      <li><strong>Weer</strong> - Weerwidget linksboven</li>
+                      <li><strong>Vondst knop</strong> - Knop voor vondsten vastleggen</li>
+                      <li><strong>Route knop</strong> - Knop voor routes opnemen en beheren</li>
+                      <li><strong>Weerwidget</strong> - Actueel weer linksboven</li>
+                      <li><strong>Mijn lagen</strong> - Eigen kaartobjecten tonen of verbergen</li>
+                      <li><strong>Meten, Tekenen en Exporteren</strong> - Gereedschappen linksboven</li>
+                      <li><strong>Tekstgrootte</strong> - Schuifregelaars in panelen tonen</li>
                     </ul>
                   </div>
                 </Section>
@@ -162,22 +173,39 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 </Section>
 
                 {/* Kaartlagen */}
-                <Section title="Kaartlagen (70+)">
+                <Section title="Kaartlagen (100+)">
                   <p className="text-xs text-gray-600 mb-2">
-                    De app bevat uitgebreide informatielagen:
+                    Open Kaartlagen rechtsboven en kies een basiskaart, thema of land. Lagen worden pas geladen wanneer je ze inschakelt.
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    <LayerCategory name="Archeologie" items={["AMK per periode", "IKAW", "Archeo Onderzoeken", "Essen"]} />
+                    <LayerCategory name="Archeologie" items={["AMK per periode", "IKAW", "Onderzoeken", "Kansenkaart"]} />
                     <LayerCategory name="Prehistorie" items={["Hunebedden", "Grafheuvels", "Terpen", "Paleokaarten"]} />
-                    <LayerCategory name="Romeins" items={["Romeinse wegen", "Forten", "Limesweg"]} />
+                    <LayerCategory name="Romeins" items={["Romeinse wegen", "Forten", "AMK Romeins"]} />
                     <LayerCategory name="WOII & Militair" items={["Bunkers", "Slagvelden", "Vliegvelden", "Linies"]} />
-                    <LayerCategory name="Hoogtekaarten" items={["AHN Hillshade", "Multi-Hillshade", "Hoogtekaart Kleur"]} />
-                    <LayerCategory name="Bodem & Terrein" items={["Bodemkaart", "Geomorfologie", "Veengebieden"]} />
-                    <LayerCategory name="Fossielen" items={["Fossiel hotspots", "Mineralen", "Goudrivieren"]} />
-                    <LayerCategory name="Erfgoed" items={["Rijksmonumenten", "Kastelen", "Ruïnes", "Kerken"]} />
+                    <LayerCategory name="Hoogte & Terrein" items={["AHN", "Hillshade", "Bodemkaart", "Geomorfologie"]} />
+                    <LayerCategory name="Erfgoed" items={["Rijksmonumenten", "Kastelen", "Ruïnes", "Religieus erfgoed"]} />
+                    <LayerCategory name="Fossielen & Goud" items={["Hotspots", "Mineralen", "Goudrivieren", "Fossieldata"]} />
+                    <LayerCategory name="Buitenland" items={["België", "Duitsland", "Frankrijk", "Regionale datasets"]} />
                   </div>
                   <p className="text-xs text-gray-500 mt-2 italic">
-                    Tip: Klik op de kaart om popup-informatie te zien over lagen op die locatie.
+                    Tip: tik op de kaart om de informatie van alle actieve lagen op die locatie te bekijken.
+                  </p>
+                </Section>
+
+                {/* Popups */}
+                <Section title="Kaartinformatie en popups" icon={<MapPin size={16} />}>
+                  <p className="text-xs text-gray-600 mb-2">
+                    Tik kort op de kaart of op een zichtbaar object. De popup toont direct lokale informatie en vult die zo nodig aan met live kaartservices.
+                  </p>
+                  <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
+                    <li>Gebruik de pijlen in de blauwe kop wanneer meerdere lagen informatie geven.</li>
+                    <li>Gebruik <strong>+</strong> om het object aan een bestaande of nieuwe laag in Mijn Lagen toe te voegen.</li>
+                    <li>Open de locatie in Google Maps of Street View via de pictogrammen in de kop.</li>
+                    <li>Pas de tekstgrootte aan met de schuifregelaar onderaan de popup.</li>
+                    <li>Bij geschikte percelen kan de popup ook een hoogtekaart tonen.</li>
+                  </ul>
+                  <p className="text-xs text-gray-500 mt-2 italic">
+                    Een long-press opent het locatiemenu; dit is een andere actie dan de gewone kaartpopup.
                   </p>
                 </Section>
 
@@ -219,15 +247,15 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     Presets zijn vooraf ingestelde combinaties van kaartlagen. Ideaal om snel te wisselen tussen:
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
-                    <li><strong>Detectie</strong> - AMK, IKAW, Archeo Onderzoeken, Gewaspercelen</li>
-                    <li><strong>Steentijd</strong> - Hunebedden, Grafheuvels, Paleokaarten</li>
-                    <li><strong>Romeins</strong> - Romeinse wegen, Forten, AMK Romeins</li>
-                    <li><strong>WOII</strong> - Bunkers, Slagvelden, Vliegvelden</li>
-                    <li><strong>Fossielen</strong> - Fossiel hotspots, PBDB data</li>
-                    <li><strong>Mineralen</strong> - Mineralen hotspots, Goudrivieren</li>
+                    <li><strong>Detectie</strong> - AMK, percelen, geomorfologie, hoogte en kadaster</li>
+                    <li><strong>Steentijd</strong> - Hunebedden, grafheuvels, terpen, FAMKE/AMK en hillshade</li>
+                    <li><strong>Romeins - Mid vroeg</strong> - Romeinse wegen en forten, AMK en percelen</li>
+                    <li><strong>Mid laat - Nieuwe tijd</strong> - Kastelen, essen, monumenten en oude kernen</li>
+                    <li><strong>WOII & Militair</strong> - Bunkers, slagvelden, vliegvelden, linies en inundaties</li>
+                    <li><strong>Terrein Analyse</strong> - IKAW, bodem, geomorfologie en AHN</li>
                   </ul>
                   <p className="text-xs text-gray-500 mt-2 italic">
-                    Tip: Overschrijf een preset met je eigen lagen via het diskette-icoon.
+                    Gebruik het opslaan-icoon naast een preset om de huidige lagen erin vast te leggen. Via Instellingen → Lagen kun je presets maken, hernoemen of verwijderen.
                   </p>
                 </Section>
 
@@ -238,7 +266,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                   </p>
                   <ol className="text-xs text-gray-600 space-y-1 ml-4 list-decimal">
                     <li>Tik op een object op de kaart (monument, bunker, etc.)</li>
-                    <li>Tik op de <strong>oranje +</strong> knop in de popup</li>
+                    <li>Tik op <strong>+</strong> in de blauwe kop van de popup</li>
                     <li>Kies een bestaande laag of maak een nieuwe aan</li>
                   </ol>
                   <div className="mt-2 p-2 bg-orange-50 rounded-lg">
@@ -246,6 +274,9 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                       <strong>Tip:</strong> De volledige vorm (polygoon) en popup-info worden mee opgeslagen!
                     </p>
                   </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Beheer namen en inhoud via Instellingen → Lagen → Mijn lagen. In dezelfde tab kun je GeoJSON-, KML- en GPX-bestanden als kaartlaag importeren.
+                  </p>
                 </Section>
 
                 {/* Vondsten */}
@@ -254,10 +285,26 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     Registreer je vondsten met locatie, foto's en details:
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
-                    <li><strong>Via GPS:</strong> Menu → Vondst toevoegen</li>
+                    <li><strong>Vondstknop:</strong> zet Menu → Vondst knop aan en gebruik de oranje knop onderaan</li>
                     <li><strong>Long-press:</strong> Houd vinger op kaart → "Vondst toevoegen"</li>
                     <li><strong>Velden:</strong> Type, materiaal, periode, diepte, conditie, gewicht</li>
                     <li><strong>Export:</strong> Excel, CSV, GeoJSON, GPX, KML</li>
+                  </ul>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Open Instellingen → Vondsten voor het dashboard en de exportknoppen. Vondsten worden altijd eerst lokaal op dit apparaat opgeslagen.
+                  </p>
+                </Section>
+
+                {/* Routes */}
+                <Section title="Routes Opnemen" icon={<Route size={16} />}>
+                  <p className="text-xs text-gray-600 mb-2">
+                    Zet Menu → Route knop aan om een GPS-route op te nemen.
+                  </p>
+                  <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
+                    <li>Tik op de groene routeknop om te starten; tik opnieuw om te pauzeren of hervatten.</li>
+                    <li>Bekijk tijdens de opname tijd, afstand en gemiddelde snelheid.</li>
+                    <li>Na stoppen geef je de route een naam en kun je hem direct als GPX exporteren.</li>
+                    <li>Open het routedashboard om opgeslagen routes te bekijken, importeren, exporteren of verwijderen.</li>
                   </ul>
                 </Section>
 
@@ -272,15 +319,31 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                         <strong>Wat wordt gesynchroniseerd:</strong><br/>
                         • Mijn Lagen (eigen punten)<br/>
                         • Vondsten registraties<br/>
-                        • Preset instellingen
+                        • Opgeslagen routes
                       </p>
                     </div>
                     <div className="p-2 bg-blue-50 rounded-lg">
                       <p className="text-xs text-blue-700">
-                        <strong>Privacy:</strong> Je data is alleen voor jou toegankelijk. GPS wordt niet opgeslagen.
+                        <strong>Locatiegegevens:</strong> De losse GPS-positie wordt niet als geschiedenis bewaard. Locaties van vondsten en opgenomen routes worden wél opgeslagen en bij ingelogde cloud-sync gesynchroniseerd.
                       </p>
                     </div>
                   </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Presets en algemene instellingen blijven lokaal op het apparaat. Gebruik Synchroniseren in het menu om de cloud-sync handmatig uit te voeren.
+                  </p>
+                </Section>
+
+                {/* Settings and field mode */}
+                <Section title="Instellingen en Veldmodus" icon={<Settings size={16} />}>
+                  <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
+                    <li><strong>Algemeen:</strong> kies de standaardkaart, schaalbalk, GPS-start, feedback en weerwidget.</li>
+                    <li><strong>Veldmodus:</strong> hergebruikt eerder geladen kaarttegels en kan plaatsnamen tonen op luchtfoto, satelliet en historische kaarten.</li>
+                    <li><strong>Lagen:</strong> beheer Mijn Lagen, importeer GeoJSON/KML/GPX en beheer presets.</li>
+                    <li><strong>Vondsten:</strong> open het dashboard en exporteer je registraties.</li>
+                  </ul>
+                  <p className="text-xs text-gray-500 mt-2 italic">
+                    Schakel vóór vertrek online door je werkgebied. Alleen gegevens die eerder zijn geladen, zijn later uit de lokale cache beschikbaar.
+                  </p>
                 </Section>
 
                 {/* Monster Filter */}
@@ -293,7 +356,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 {/* Exporteren */}
                 <Section title="Kaart Exporteren" icon={<Printer size={16} />}>
                   <p className="text-xs text-gray-600">
-                    Exporteer je huidige kaartweergave als afbeelding (PNG/JPEG) of print direct via PDF. Je kunt een titel toevoegen en de datum wordt automatisch toegevoegd.
+                    Exporteer je huidige kaartweergave als PNG of JPEG, of open het afdrukvenster om te printen of als PDF op te slaan. Je kunt een titel toevoegen; datum en tijd worden automatisch vermeld.
                   </p>
                 </Section>
 
@@ -319,7 +382,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <ChevronRight size={12} className="text-green-500 flex-shrink-0 mt-0.5" />
-                      <span><strong>Privacy:</strong> Alle functies werken ook zonder login (lokale opslag)</span>
+                      <span><strong>Zonder login:</strong> Kaartgebruik, Mijn Lagen, vondsten en routes werken lokaal; alleen cloud-sync vereist een Google-account</span>
                     </li>
                   </ul>
                 </section>
