@@ -6,6 +6,8 @@ import { ScaleLine } from 'ol/control'
 import { useMapStore, useSettingsStore } from '../store'
 import type { MapViewOptions } from '../types/map'
 
+const MAP_CLICK_MOVE_TOLERANCE_PX = 8
+
 interface UseMapOptions {
   target: string
   viewOptions?: Partial<MapViewOptions>
@@ -32,6 +34,9 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
       const map = new Map({
         target,
         controls: [], // Hide default zoom controls - using custom ZoomButtons
+        // A finger moves a few pixels during a normal tap. OpenLayers defaults
+        // to 1px, which makes mobile taps look like drags and suppresses clicks.
+        moveTolerance: MAP_CLICK_MOVE_TOLERANCE_PX,
         view: new View({
           center: fromLonLat(defaultView.center),
           zoom: defaultView.zoom,

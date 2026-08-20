@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef, useMemo } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import type { MapBrowserEvent } from 'ol'
 import { X, MapPin, Plus, ExternalLink, Layers, ChevronRight, Check, Camera, Settings2, Crosshair, PersonStanding } from 'lucide-react'
 import { toLonLat } from 'ol/proj'
 import { useMapStore } from '../../store'
@@ -34,6 +35,13 @@ export function LongPressMenu() {
 
   const longPressTimer = useRef<number | null>(null)
   const startPos = useRef<{ x: number; y: number } | null>(null)
+  const longPressTriggered = useRef(false)
+  const suppressionResetTimer = useRef<number | null>(null)
+  const visibleRef = useRef(false)
+
+  useEffect(() => {
+    visibleRef.current = visible
+  }, [visible])
 
   useEffect(() => {
     if (!map) {
@@ -51,6 +59,22 @@ export function LongPressMenu() {
 
     const LONG_PRESS_DURATION = 600 // ms
     const MOVE_THRESHOLD = 15 // pixels
+    const SUPPRESSION_RESET_DELAY = 1000 // Safety reset if no map pointerup arrives
+
+    const clearSuppressionReset = () => {
+      if (suppressionResetTimer.current !== null) {
+        clearTimeout(suppressionResetTimer.current)
+        suppressionResetTimer.current = null
+      }
+    }
+
+    const scheduleSuppressionReset = () => {
+      clearSuppressionReset()
+      suppressionResetTimer.current = window.setTimeout(() => {
+        longPressTriggered.current = false
+        suppressionResetTimer.current = null
+      }, SUPPRESSION_RESET_DELAY)
+    }
 
     const handleTouchStart = (e: TouchEvent) => {
       console.log('👆 Touch start, touches:', e.touches.length)
@@ -58,6 +82,8 @@ export function LongPressMenu() {
 
       const touch = e.touches[0]
       startPos.current = { x: touch.clientX, y: touch.clientY }
+      longPressTriggered.current = false
+      clearSuppressionReset()
       console.log('👆 Starting long press timer at:', startPos.current)
 
       // Clear any existing timer
@@ -66,6 +92,7 @@ export function LongPressMenu() {
       }
 
       longPressTimer.current = window.setTimeout(() => {
+        longPressTimer.current = null
         console.log('⏱️ Timer fired! startPos:', startPos.current)
         if (!startPos.current) return
 
@@ -87,9 +114,7 @@ export function LongPressMenu() {
         const coordinate = currentMap.getCoordinateFromPixel(pixel)
         if (coordinate) {
           const lonLat = toLonLat(coordinate) as [number, number]
-
-          // Prevent default context menu
-          e.preventDefault()
+          longPressTriggered.current = true
 
           setMenuLocation({
             pixel: [startPos.current.x, startPos.current.y],
@@ -134,11 +159,14 @@ export function LongPressMenu() {
         longPressTimer.current = null
       }
       startPos.current = null
+      if (longPressTriggered.current) {
+        scheduleSuppressionReset()
+      }
     }
 
     // Prevent default context menu on long press
     const handleContextMenu = (e: Event) => {
-      if (visible) {
+      if (longPressTriggered.current || visibleRef.current) {
         e.preventDefault()
       }
     }
@@ -148,12 +176,15 @@ export function LongPressMenu() {
       if (e.button !== 0) return // Only left click
       console.log('🖱️ Mouse down')
       startPos.current = { x: e.clientX, y: e.clientY }
+      longPressTriggered.current = false
+      clearSuppressionReset()
 
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current)
       }
 
       longPressTimer.current = window.setTimeout(() => {
+        longPressTimer.current = null
         console.log('⏱️ Mouse timer fired!')
         if (!startPos.current) return
 
@@ -178,6 +209,7 @@ export function LongPressMenu() {
         console.log('📍 Coordinate:', coordinate)
         if (coordinate) {
           const lonLat = toLonLat(coordinate) as [number, number]
+          longPressTriggered.current = true
 
           setMenuLocation({
             pixel: [startPos.current.x, startPos.current.y],
@@ -213,6 +245,20 @@ export function LongPressMenu() {
         longPressTimer.current = null
       }
       startPos.current = null
+      if (longPressTriggered.current) {
+        scheduleSuppressionReset()
+      }
+    }
+
+    // OpenLayers creates its click event after dispatching pointerup. Marking
+    // this pointerup as handled prevents a completed long press from also
+    // opening the regular feature popup when the user releases their finger.
+    const handleMapPointerUp = (evt: MapBrowserEvent<PointerEvent>) => {
+      if (!longPressTriggered.current) return
+
+      evt.preventDefault()
+      longPressTriggered.current = false
+      clearSuppressionReset()
     }
 
     // Add touch event listeners
@@ -227,6 +273,9 @@ export function LongPressMenu() {
     viewport.addEventListener('mousemove', handleMouseMove)
     viewport.addEventListener('mouseup', handleMouseUp)
     viewport.addEventListener('mouseleave', handleMouseUp)
+    // OpenLayers dispatches pointerup at runtime, but omits it from the public
+    // TypeScript event-name union in v10.7.
+    map.on('pointerup' as any, handleMapPointerUp as any)
 
     return () => {
       viewport.removeEventListener('touchstart', handleTouchStart)
@@ -238,12 +287,14 @@ export function LongPressMenu() {
       viewport.removeEventListener('mousemove', handleMouseMove)
       viewport.removeEventListener('mouseup', handleMouseUp)
       viewport.removeEventListener('mouseleave', handleMouseUp)
+      map.un('pointerup' as any, handleMapPointerUp as any)
 
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current)
       }
+      clearSuppressionReset()
     }
-  }, [map, visible])
+  }, [map])
 
   const handleClose = () => {
     if (!canClose) return // Prevent closing immediately after opening
