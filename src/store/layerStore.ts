@@ -22,11 +22,11 @@ interface LayerState {
 export const useLayerStore = create<LayerState>()(
   immer((set, get) => ({
     visible: {
-      'CartoDB (licht)': true,
+      'Esri (licht)': true,
       'OpenStreetMap': false,
       'Luchtfoto': false,
       'Satelliet (wereld)': false,
-      'Labels Overlay': false,
+      'Labels Overlay': true,
       'TMK 1850': false,
       'Bonnebladen 1900': false,
       'Hunebedden': false,

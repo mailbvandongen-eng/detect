@@ -6,7 +6,7 @@ import { useMap } from '../../hooks/useMap'
 import { useLayerStore, useMapStore, useSettingsStore, useGPSStore } from '../../store'
 
 const BASE_LAYERS = [
-  'CartoDB (licht)',
+  'Esri (licht)',
   'OpenStreetMap',
   'Luchtfoto',
   'Satelliet (wereld)',
@@ -24,7 +24,6 @@ const FIELD_LABEL_BASE_LAYERS = [
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
   const initialBgApplied = useRef(false)
-  const lastFieldModeBaseRef = useRef<string | null>(null)
 
   useMap({ target: 'map' })
   const map = useMapStore(state => state.map)
@@ -49,12 +48,14 @@ export function MapContainer() {
       source: new OSM()
     })
 
-    const cartoDBLayer = new TileLayer({
-      properties: { title: 'CartoDB (licht)', type: 'base' },
+    const lightGrayLayer = new TileLayer({
+      properties: { title: 'Esri (licht)', type: 'base' },
       visible: true,
       source: new XYZ({
-        url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-        attributions: 'Ã‚Â© OpenStreetMap contributors Ã‚Â© CARTO'
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+        attributions: '© Esri, HERE, Garmin, OpenStreetMap contributors en de GIS-community',
+        crossOrigin: 'anonymous',
+        maxZoom: 16
       })
     })
 
@@ -83,9 +84,10 @@ export function MapContainer() {
       properties: { title: 'Labels Overlay', type: 'overlay' },
       visible: false,
       source: new XYZ({
-        url: 'https://{a-d}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png',
-        attributions: 'Ã‚Â© OpenStreetMap contributors Ã‚Â© CARTO',
-        maxZoom: 20
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+        attributions: '© Esri, HERE, Garmin, OpenStreetMap contributors en de GIS-community',
+        crossOrigin: 'anonymous',
+        maxZoom: 16
       }),
       zIndex: 100
     })
@@ -113,7 +115,7 @@ export function MapContainer() {
     })
 
     map.addLayer(osmLayer)
-    map.addLayer(cartoDBLayer)
+    map.addLayer(lightGrayLayer)
     map.addLayer(satelliteLayer)
     map.addLayer(worldSatelliteLayer)
     map.addLayer(labelsLayer)
@@ -121,7 +123,7 @@ export function MapContainer() {
     map.addLayer(bonne1900Layer)
 
     registerLayer('OpenStreetMap', osmLayer)
-    registerLayer('CartoDB (licht)', cartoDBLayer)
+    registerLayer('Esri (licht)', lightGrayLayer)
     registerLayer('Luchtfoto', satelliteLayer)
     registerLayer('Satelliet (wereld)', worldSatelliteLayer)
     registerLayer('Labels Overlay', labelsLayer)
@@ -135,7 +137,7 @@ export function MapContainer() {
     if (!map || initialBgApplied.current) return
 
     const timer = setTimeout(() => {
-      const bgToApply = defaultBackground || 'CartoDB (licht)'
+      const bgToApply = defaultBackground || 'Esri (licht)'
 
       BASE_LAYERS.forEach(layer => {
         setLayerVisibility(layer, false)
@@ -144,7 +146,7 @@ export function MapContainer() {
       if (BASE_LAYERS.includes(bgToApply)) {
         setLayerVisibility(bgToApply, true)
       } else {
-        setLayerVisibility('CartoDB (licht)', true)
+        setLayerVisibility('Esri (licht)', true)
       }
 
       initialBgApplied.current = true
@@ -154,30 +156,14 @@ export function MapContainer() {
     return () => clearTimeout(timer)
   }, [map, defaultBackground, setLayerVisibility])
 
-  const activeBaseLayer = BASE_LAYERS.find(layerName => visibleLayers[layerName]) ?? 'CartoDB (licht)'
+  const activeBaseLayer = BASE_LAYERS.find(layerName => visibleLayers[layerName]) ?? 'Esri (licht)'
+  const labelsShouldBeVisible = activeBaseLayer === 'Esri (licht)'
+    || (fieldModeEnabled && fieldModeOfflineLabels && FIELD_LABEL_BASE_LAYERS.includes(activeBaseLayer))
 
   useEffect(() => {
-    if (!map) {
-      return
-    }
-
-    if (!fieldModeEnabled || !fieldModeOfflineLabels) {
-      lastFieldModeBaseRef.current = null
-      return
-    }
-
-    if (lastFieldModeBaseRef.current === activeBaseLayer) {
-      return
-    }
-
-    if (FIELD_LABEL_BASE_LAYERS.includes(activeBaseLayer)) {
-      setLayerVisibility('Labels Overlay', true)
-    } else if (activeBaseLayer === 'CartoDB (licht)' || activeBaseLayer === 'OpenStreetMap') {
-      setLayerVisibility('Labels Overlay', false)
-    }
-
-    lastFieldModeBaseRef.current = activeBaseLayer
-  }, [activeBaseLayer, fieldModeEnabled, fieldModeOfflineLabels, map, setLayerVisibility])
+    if (!map) return
+    setLayerVisibility('Labels Overlay', labelsShouldBeVisible)
+  }, [labelsShouldBeVisible, map, setLayerVisibility])
 
   const gpsAutoStart = useSettingsStore(state => state.gpsAutoStart)
   const startTracking = useGPSStore(state => state.startTracking)

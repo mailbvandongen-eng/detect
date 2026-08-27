@@ -33,12 +33,12 @@ export default defineConfig({
         // Claim clients immediately
         clientsClaim: true,
         runtimeCaching: [
-          // CARTO basemap + labels overlay
+          // Esri basemaps + labels overlay
           {
-            urlPattern: /^https:\/\/[a-d]\.basemaps\.cartocdn\.com\/.*/i,
+            urlPattern: /^https:\/\/server\.arcgisonline\.com\/ArcGIS\/rest\/services\/.*\/MapServer\/tile\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'carto-tiles',
+              cacheName: 'esri-basemap-tiles',
               expiration: {
                 maxEntries: 600,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days

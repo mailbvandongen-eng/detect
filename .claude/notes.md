@@ -1,6 +1,6 @@
 # Detect - Sessienotities
 
-## Huidige versie: 2.32.46
+## Huidige versie: 2.32.67
 
 ---
 

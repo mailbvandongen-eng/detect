@@ -25,7 +25,7 @@ const BUILT_IN_PRESETS: Preset[] = [
     name: 'Detectie',
     icon: 'Compass',
     layers: ['AMK Monumenten', 'Gewaspercelen', 'Geomorfologie', 'AHN4 Hoogtekaart Kleur', 'Kadastrale Grenzen'],
-    baseLayer: 'CartoDB (licht)',  // Explicit default base layer
+    baseLayer: 'Esri (licht)',  // Explicit default base layer
     layerOpacities: {
       'AMK Monumenten': 0.50,
       'Gewaspercelen': 0.25,
@@ -109,7 +109,7 @@ interface PresetState {
 }
 
 const BASE_LAYER_NAMES = [
-  'CartoDB (licht)',
+  'Esri (licht)',
   'OpenStreetMap',
   'Luchtfoto',
   'Satelliet (wereld)',
@@ -125,13 +125,18 @@ const REMOVED_LAYERS = new Set([
   'Musea',
 ])
 
+function migrateLegacyBaseLayer(baseLayer: string | undefined): string | undefined {
+  return baseLayer === 'CartoDB (licht)' ? 'Esri (licht)' : baseLayer
+}
+
 function normalizePreset(preset: Preset): Preset {
   const builtInPreset = BUILT_IN_PRESET_MAP.get(preset.id)
 
   if (!builtInPreset) {
     return {
       ...preset,
-      layers: preset.layers.filter((layer) => !REMOVED_LAYERS.has(layer))
+      layers: preset.layers.filter((layer) => !REMOVED_LAYERS.has(layer)),
+      baseLayer: migrateLegacyBaseLayer(preset.baseLayer)
     }
   }
 
@@ -139,7 +144,7 @@ function normalizePreset(preset: Preset): Preset {
     ...builtInPreset,
     ...preset,
     layers: (preset.layers ?? builtInPreset.layers).filter((layer) => !REMOVED_LAYERS.has(layer)),
-    baseLayer: preset.baseLayer ?? builtInPreset.baseLayer,
+    baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
     layerOpacities: preset.layerOpacities ?? builtInPreset.layerOpacities
   }
 }
@@ -196,7 +201,7 @@ export const usePresetStore = create<PresetState>()(
         const currentBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
         const nextBaseLayer = BASE_LAYER_NAMES.includes(preset.baseLayer || '')
           ? preset.baseLayer!
-          : currentBaseLayer || 'CartoDB (licht)'
+          : currentBaseLayer || 'Esri (licht)'
 
         // Turn off all overlays
         ALL_OVERLAYS.forEach(layer => layerStore.setLayerVisibility(layer, false))
@@ -215,6 +220,10 @@ export const usePresetStore = create<PresetState>()(
         BASE_LAYER_NAMES.forEach((layerName) => {
           layerStore.setLayerVisibility(layerName, layerName === nextBaseLayer)
         })
+        layerStore.setLayerVisibility(
+          'Labels Overlay',
+          nextBaseLayer === 'Esri (licht)' || preset.layers.includes('Labels Overlay')
+        )
 
         console.log(`🎨 Preset toegepast: ${preset.name} (${nextBaseLayer})`)
       },
@@ -233,7 +242,7 @@ export const usePresetStore = create<PresetState>()(
           name,
           icon,
           layers: visibleLayers,
-          baseLayer: activeBaseLayer || 'CartoDB (licht)',
+          baseLayer: activeBaseLayer || 'Esri (licht)',
           isBuiltIn: false
         }
 
@@ -282,7 +291,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 16,
+      version: 17,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {
@@ -300,6 +309,7 @@ export const usePresetStore = create<PresetState>()(
         // v14: Preserve base layers on presets and repair legacy built-in preset metadata
         // v15: Strip removed live Overpass recreation layers from persisted presets
         // v16: Strip remaining live Overpass recreation layers from persisted presets
+        // v17: Replace the retired CARTO light basemap in saved presets
         if (version < 13) {
           return {
             presets: [...BUILT_IN_PRESETS],

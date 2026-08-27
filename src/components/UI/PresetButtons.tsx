@@ -82,7 +82,7 @@ const ALL_OVERLAYS = [
 
 // Base layers
 const BASE_LAYERS = [
-  'CartoDB (licht)',
+  'Esri (licht)',
   'OpenStreetMap',
   'Luchtfoto',
   'Satelliet (wereld)',
@@ -123,10 +123,11 @@ export function PresetButtons() {
     // Turn off all overlay layers
     ALL_OVERLAYS.forEach(layer => setLayerVisibility(layer, false))
 
-    // Set CartoDB as active base layer
+    // Set the light worldwide map as active base layer
     BASE_LAYERS.forEach(layer => {
-      setLayerVisibility(layer, layer === 'CartoDB (licht)')
+      setLayerVisibility(layer, layer === 'Esri (licht)')
     })
+    setLayerVisibility('Labels Overlay', true)
 
     // Stop GPS tracking
     stopTracking()
@@ -144,7 +145,7 @@ export function PresetButtons() {
       })
     }
 
-    console.log('🔄 Reset: CartoDB, alle lagen uit, GPS uit, zoom naar Nederland')
+    console.log('🔄 Reset: lichtgrijs, alle lagen uit, GPS uit, zoom naar Nederland')
   }
 
   const handleApplyPreset = (id: string) => {
@@ -167,7 +168,7 @@ export function PresetButtons() {
     const currentBaseLayer = BASE_LAYERS.find((layerName) => visible[layerName])
     updatePreset(presetId, {
       layers: currentLayers,
-      baseLayer: currentBaseLayer || 'CartoDB (licht)'
+      baseLayer: currentBaseLayer || 'Esri (licht)'
     })
 
     // Show feedback
@@ -199,7 +200,7 @@ export function PresetButtons() {
         className="fixed bottom-2 left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        title="Reset - CartoDB, alle lagen uit, GPS uit"
+        title="Reset - lichtgrijze kaart, alle lagen uit, GPS uit"
       >
         <RotateCcw size={20} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>

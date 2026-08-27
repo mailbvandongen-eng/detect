@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type DefaultBackground = 'CartoDB (licht)' | 'Luchtfoto' | 'OpenStreetMap'
+export type DefaultBackground = 'Esri (licht)' | 'Luchtfoto' | 'OpenStreetMap'
 
 interface SettingsState {
   // Kaart
@@ -89,7 +89,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       // Defaults
-      defaultBackground: 'CartoDB (licht)',
+      defaultBackground: 'Esri (licht)',
       showScaleBar: true,
       fieldModeEnabled: false,
       fieldModeOfflineLabels: true,
@@ -144,27 +144,28 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'detectorapp-settings',
-      version: 3,
+      version: 4,
       migrate: (persistedState: any, version: number) => {
+        const migratedState = { ...persistedState }
+
         // Migrate from older versions without showScaleBar
         if (version < 2) {
-          return {
-            ...persistedState,
-            showScaleBar: true,  // Ensure scale bar is visible by default
-            fieldModeEnabled: false,
-            fieldModeOfflineLabels: true
-          }
+          migratedState.showScaleBar = true
+          migratedState.fieldModeEnabled = false
+          migratedState.fieldModeOfflineLabels = true
         }
 
         if (version < 3) {
-          return {
-            ...persistedState,
-            fieldModeEnabled: false,
-            fieldModeOfflineLabels: true
-          }
+          migratedState.fieldModeEnabled = false
+          migratedState.fieldModeOfflineLabels = true
         }
 
-        return persistedState
+        // v4: CARTO stopped serving the keyless light basemap.
+        if (version < 4 && migratedState.defaultBackground === 'CartoDB (licht)') {
+          migratedState.defaultBackground = 'Esri (licht)'
+        }
+
+        return migratedState
       }
     }
   )

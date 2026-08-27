@@ -76,7 +76,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
 
                   <div className="space-y-2">
                     <ToolItem icon={<Layers size={16} />} title="Kaartlagen" description="Selecteer welke lagen je wilt zien" />
-                    <ToolItem icon={<Search size={16} />} title="Zoeken" description="Zoek naar een adres of plaatsnaam" />
+                    <ToolItem icon={<Search size={16} />} title="Zoeken" description="Zoek naar een adres of plaatsnaam in heel Europa" />
                     <ToolItem icon={<MapPin size={16} />} title="GPS Locatie" description="Volg je positie op de kaart" />
                     <ToolItem icon={<Compass size={16} />} title="Presets" description="Snel wisselen tussen kaartlagen" />
                     <ToolItem icon={<Filter size={16} />} title="Monument Filter" description="Filter monumenten op periode" />

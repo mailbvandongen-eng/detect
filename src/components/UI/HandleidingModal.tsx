@@ -79,7 +79,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     ]} />
 
                     <LocationGroup title="Rechtsboven" items={[
-                      { icon: <Search size={14} />, name: "Zoeken", desc: "Zoek adressen en plaatsen" },
+                      { icon: <Search size={14} />, name: "Zoeken", desc: "Zoek adressen en plaatsen in heel Europa" },
                       { icon: <Menu size={14} />, name: "Menu", desc: "Instellingen en opties" },
                       { icon: <Compass size={14} />, name: "Kompas", desc: "Verschijnt bij gedraaide kaart" },
                       { icon: <Map size={14} />, name: "Kaartlagen", desc: "Lagen aan/uit zetten" },

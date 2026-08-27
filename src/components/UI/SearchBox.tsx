@@ -5,11 +5,19 @@ import { fromLonLat } from 'ol/proj'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface SearchResult {
-  id: string
-  weergavenaam: string
-  type: string
-  centroide_ll?: string // "POINT(lng lat)"
+  text: string
+  magicKey: string
+  isCollection: boolean
 }
+
+interface GeocodeCandidate {
+  location?: {
+    x: number
+    y: number
+  }
+}
+
+const WORLD_GEOCODER_URL = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer'
 
 export function SearchBox() {
   const map = useMapStore(state => state.map)
@@ -20,9 +28,11 @@ export function SearchBox() {
   const [results, setResults] = useState<SearchResult[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [searching, setSearching] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<number>()
+  const requestRef = useRef<AbortController | null>(null)
 
   // Focus input when expanded
   useEffect(() => {
@@ -65,35 +75,64 @@ export function SearchBox() {
       clearTimeout(debounceRef.current)
     }
 
-    if (query.length < 2) {
+    const trimmedQuery = query.trim()
+
+    requestRef.current?.abort()
+
+    if (trimmedQuery.length < 2) {
       setResults([])
+      setSearching(false)
+      setSearchError(null)
       return
     }
 
+    setResults([])
+    setSearching(true)
+    setSearchError(null)
+
     debounceRef.current = window.setTimeout(async () => {
-      setSearching(true)
+      const controller = new AbortController()
+      requestRef.current = controller
+
       try {
-        // PDOK Locatieserver - Nederlandse adressen
-        const response = await fetch(
-          `https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest?q=${encodeURIComponent(query)}&rows=7`
-        )
+        const params = new URLSearchParams({
+          text: trimmedQuery,
+          f: 'json',
+          maxSuggestions: '7'
+        })
+        const response = await fetch(`${WORLD_GEOCODER_URL}/suggest?${params}`, {
+          signal: controller.signal
+        })
+
+        if (!response.ok) {
+          throw new Error(`Zoekdienst gaf status ${response.status}`)
+        }
+
         const data = await response.json()
 
-        if (data.response?.docs) {
-          setResults(data.response.docs)
+        if (data.error) {
+          throw new Error(data.error.message || 'Zoekdienst niet beschikbaar')
         }
+
+        setResults(Array.isArray(data.suggestions) ? data.suggestions : [])
       } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
         console.error('Search error:', error)
         setResults([])
+        setSearchError('Zoeken lukt nu niet. Probeer het opnieuw.')
       } finally {
-        setSearching(false)
+        if (requestRef.current === controller) {
+          requestRef.current = null
+          setSearching(false)
+        }
       }
-    }, 300)
+    }, 350)
 
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current)
       }
+      requestRef.current?.abort()
     }
   }, [query])
 
@@ -102,23 +141,34 @@ export function SearchBox() {
     setQuery('')
     setResults([])
     setIsOpen(false)
+    setSearching(false)
+    setSearchError(null)
+    requestRef.current?.abort()
   }
 
-  const getCoordinates = async (resultId: string): Promise<{lng: number, lat: number} | null> => {
+  const getCoordinates = async (result: SearchResult): Promise<{lng: number, lat: number} | null> => {
     try {
-      const response = await fetch(
-        `https://api.pdok.nl/bzk/locatieserver/search/v3_1/lookup?id=${encodeURIComponent(resultId)}`
-      )
-      const data = await response.json()
+      const params = new URLSearchParams({
+        SingleLine: result.text,
+        magicKey: result.magicKey,
+        f: 'json',
+        maxLocations: '1',
+        outFields: 'Match_addr,Addr_type,Country',
+        forStorage: 'false'
+      })
+      const response = await fetch(`${WORLD_GEOCODER_URL}/findAddressCandidates?${params}`)
 
-      if (data.response?.docs?.[0]?.centroide_ll) {
-        const centroid = data.response.docs[0].centroide_ll
-        const match = centroid.match(/POINT\(([^ ]+) ([^)]+)\)/)
-        if (match) {
-          return {
-            lng: parseFloat(match[1]),
-            lat: parseFloat(match[2])
-          }
+      if (!response.ok) {
+        throw new Error(`Zoekdienst gaf status ${response.status}`)
+      }
+
+      const data = await response.json()
+      const candidate = data.candidates?.[0] as GeocodeCandidate | undefined
+
+      if (candidate?.location) {
+        return {
+          lng: candidate.location.x,
+          lat: candidate.location.y
         }
       }
     } catch (error) {
@@ -130,7 +180,7 @@ export function SearchBox() {
   const handleSelect = async (result: SearchResult) => {
     if (!map) return
 
-    const coords = await getCoordinates(result.id)
+    const coords = await getCoordinates(result)
     if (coords) {
       // Zoom to location
       const view = map.getView()
@@ -139,23 +189,23 @@ export function SearchBox() {
         zoom: 16,
         duration: 1000
       })
+      collapse()
+    } else {
+      setSearchError('Deze locatie kon niet worden geopend.')
     }
-
-    // Collapse after selection
-    collapse()
   }
 
   const handleOpenGoogleMaps = async (result: SearchResult, e: React.MouseEvent) => {
     e.stopPropagation() // Don't trigger handleSelect
 
-    const coords = await getCoordinates(result.id)
+    const coords = await getCoordinates(result)
     if (coords) {
       const url = `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
       window.open(url, '_blank')
+      collapse()
+    } else {
+      setSearchError('Deze locatie kon niet worden geopend.')
     }
-
-    // Collapse after action
-    collapse()
   }
 
   // Safe top position for mobile browsers (accounts for notch/status bar)
@@ -170,7 +220,7 @@ export function SearchBox() {
         onClick={() => setIsExpanded(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        title="Zoeken"
+        title="Zoeken in Europa"
       >
         <Search size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>
@@ -178,13 +228,11 @@ export function SearchBox() {
   }
 
   // Expanded state: full search bar (leave space for hamburger icon and weather widget)
-  const leftPosition = showWeatherButton ? '220px' : '52px'
-
   return (
     <div
       ref={containerRef}
-      className="fixed right-14 z-[850]"
-      style={{ ...safeTopStyle, left: leftPosition }}
+      className={`fixed right-14 z-[1150] left-2 ${showWeatherButton ? 'sm:left-[220px]' : 'sm:left-[52px]'}`}
+      style={safeTopStyle}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -202,7 +250,7 @@ export function SearchBox() {
             setIsOpen(true)
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Zoek adres of plaats..."
+          placeholder="Zoek adres of plaats in Europa..."
           className="search-input"
         />
         <button
@@ -224,7 +272,7 @@ export function SearchBox() {
           >
             {results.map((result) => (
               <li
-                key={result.id}
+                key={result.magicKey}
                 className="search-result-item"
               >
                 <div
@@ -232,7 +280,7 @@ export function SearchBox() {
                   onClick={() => handleSelect(result)}
                 >
                   <span className="search-result-text">
-                    {result.weergavenaam}
+                    {result.text}
                   </span>
                 </div>
                 <button
@@ -250,6 +298,14 @@ export function SearchBox() {
 
       {isOpen && searching && (
         <div className="search-loading">Zoeken...</div>
+      )}
+
+      {isOpen && !searching && searchError && (
+        <div className="search-loading search-error">{searchError}</div>
+      )}
+
+      {isOpen && !searching && !searchError && query.trim().length >= 2 && results.length === 0 && (
+        <div className="search-loading">Geen locaties gevonden</div>
       )}
     </div>
   )

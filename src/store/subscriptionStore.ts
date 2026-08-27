@@ -34,7 +34,7 @@ interface SubscriptionState {
 // Dit is een voorlopige lijst - we bespreken dit per laag later
 export const FREE_LAYERS = [
   // Achtergronden
-  'CartoDB (licht)',
+  'Esri (licht)',
   'OpenStreetMap',
   'Luchtfoto',
   'Labels Overlay',

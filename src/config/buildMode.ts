@@ -21,7 +21,7 @@ const visibleThemes = new Set<string>([
 ])
 
 const visibleBaseLayers = new Set<string>([
-  'CartoDB (licht)',
+  'Esri (licht)',
   'OpenStreetMap',
   'Luchtfoto',
   'Satelliet (wereld)',

@@ -161,7 +161,7 @@ export function SettingsPanel() {
                         className="px-2 py-1 bg-gray-100 rounded border-0 outline-none"
                         style={{ fontSize: '0.9em' }}
                       >
-                        <option value="CartoDB (licht)">Licht</option>
+                        <option value="Esri (licht)">Lichtgrijs (wereld)</option>
                         <option value="OpenStreetMap">OSM</option>
                         <option value="Luchtfoto">Luchtfoto</option>
                       </select>

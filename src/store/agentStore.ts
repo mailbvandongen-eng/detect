@@ -39,7 +39,7 @@ const DEFAULT_PERIODS: AgentPeriodId[] = [
 ]
 
 const NON_ANALYSIS_LAYERS = new Set([
-  'CartoDB (licht)',
+  'Esri (licht)',
   'OpenStreetMap',
   'Luchtfoto',
   'Satelliet (wereld)',
