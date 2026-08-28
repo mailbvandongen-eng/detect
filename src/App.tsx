@@ -26,22 +26,22 @@ import { OfflineIndicator } from './components/UI/OfflineIndicator'
 import { MonumentSearch } from './components/UI/MonumentSearch'
 import { MonumentFilter } from './components/UI/MonumentFilter'
 import { WelcomeModal } from './components/UI/WelcomeModal'
+import { ChangeLogModal } from './components/UI/ChangeLogModal'
 import { MeasureTool } from './components/UI/MeasureTool'
 import { DrawTool } from './components/UI/DrawTool'
 import { PrintTool } from './components/UI/PrintTool'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
-import { useCloudSync } from './hooks/useCloudSync'
 import { useSettingsStore, useUIStore, useWeatherStore, useGPSStore } from './store'
 import { AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { version } from '../package.json'
+import { hasSeenChangeLog } from './data/changelog'
 
 function App() {
   // Initialize hooks
   useHeading()
   useDynamicAHN()
-  useCloudSync() // Sync data to Firebase when logged in
-
   // Fetch passive position once on app start (shows blue dot)
   const fetchPassivePosition = useGPSStore(state => state.fetchPassivePosition)
   useEffect(() => {
@@ -73,6 +73,17 @@ function App() {
   // Welcome modal state
   const hideWelcomeModal = useSettingsStore(state => state.hideWelcomeModal)
   const [welcomeModalOpen, setWelcomeModalOpen] = useState(!hideWelcomeModal)
+
+  // Change log state - shown once after each version, after the welcome screen.
+  const changeLogOpen = useUIStore(state => state.changeLogOpen)
+  const openChangeLog = useUIStore(state => state.openChangeLog)
+  const closeChangeLog = useUIStore(state => state.closeChangeLog)
+
+  useEffect(() => {
+    if (!welcomeModalOpen && !hasSeenChangeLog(version)) {
+      openChangeLog()
+    }
+  }, [welcomeModalOpen, openChangeLog])
 
   return (
     <div style={{ fontSize: `${baseFontSize}px` }}>
@@ -133,6 +144,10 @@ function App() {
       <WelcomeModal
         isOpen={welcomeModalOpen}
         onClose={() => setWelcomeModalOpen(false)}
+      />
+      <ChangeLogModal
+        isOpen={changeLogOpen}
+        onClose={closeChangeLog}
       />
     </div>
   )

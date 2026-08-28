@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 
 export type DefaultBackground = 'Esri (licht)' | 'Luchtfoto' | 'OpenStreetMap'
 
-interface SettingsState {
+export interface SettingsState {
   // Kaart
   defaultBackground: DefaultBackground
   showScaleBar: boolean
@@ -83,6 +83,52 @@ interface SettingsState {
   setShowMeasureTool: (value: boolean) => void
   setShowDrawTool: (value: boolean) => void
   setShowPrintTool: (value: boolean) => void
+}
+
+export const CLOUD_SETTINGS_KEYS = [
+  'defaultBackground',
+  'showScaleBar',
+  'fieldModeEnabled',
+  'fieldModeOfflineLabels',
+  'gpsAutoStart',
+  'showAccuracyCircle',
+  'hapticFeedback',
+  'vondstenLocalOnly',
+  'showVondstButton',
+  'showRouteRecordButton',
+  'showLocalVondsten',
+  'showCustomPointLayers',
+  'fontScale',
+  'layerPanelFontScale',
+  'presetPanelFontScale',
+  'menuFontScale',
+  'weatherFontScale',
+  'voiceFeedbackEnabled',
+  'showStepCounter',
+  'showFontSliders',
+  'showWeatherButton',
+  'hideWelcomeModal',
+  'showMeasureTool',
+  'showDrawTool',
+  'showPrintTool'
+] as const
+
+export type CloudSettings = Pick<SettingsState, typeof CLOUD_SETTINGS_KEYS[number]>
+
+export function getCloudSettings(state: SettingsState = useSettingsStore.getState()): CloudSettings {
+  return Object.fromEntries(
+    CLOUD_SETTINGS_KEYS.map((key) => [key, state[key]])
+  ) as CloudSettings
+}
+
+export function applyCloudSettings(settings: Partial<CloudSettings>): void {
+  const allowedValues = Object.fromEntries(
+    CLOUD_SETTINGS_KEYS
+      .filter((key) => Object.prototype.hasOwnProperty.call(settings, key))
+      .map((key) => [key, settings[key]])
+  ) as Partial<CloudSettings>
+
+  useSettingsStore.setState(allowedValues)
 }
 
 export const useSettingsStore = create<SettingsState>()(

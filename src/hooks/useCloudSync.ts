@@ -1,37 +1,107 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
-import {
-  collection,
-  doc,
-  setDoc,
-  getDoc,
-  onSnapshot,
-  serverTimestamp,
-  writeBatch
-} from 'firebase/firestore'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuthStore } from '../store/authStore'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../store/customPointLayerStore'
 import { useLocalVondstenStore, type LocalVondst } from '../store/localVondstenStore'
 import { useRouteRecordingStore, type RecordedRoute } from '../store/routeRecordingStore'
+import {
+  applyCloudSettings,
+  getCloudSettings,
+  useSettingsStore,
+  type CloudSettings
+} from '../store/settingsStore'
+import {
+  normalizePresetCollection,
+  usePresetStore,
+  type Preset
+} from '../store/presetStore'
 
-// Debounce time for syncing (ms)
 const SYNC_DEBOUNCE = 2000
 
-// Wait for all stores to hydrate from localStorage
+type SyncStatus = 'signed-out' | 'connecting' | 'synced' | 'error'
+
+interface CloudPresetState {
+  presets: Preset[]
+  customDefaults: Preset[] | null
+}
+
+interface SyncCounts {
+  layers: number
+  vondsten: number
+  routes: number
+}
+
+export interface CloudSyncResult {
+  success: boolean
+  uploaded: SyncCounts
+  downloaded: SyncCounts
+  error?: string
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function getPresetCloudState(): CloudPresetState {
+  const { presets, customDefaults } = usePresetStore.getState()
+
+  // Strip optional undefined values because Firestore only accepts JSON-like data.
+  return JSON.parse(JSON.stringify({ presets, customDefaults })) as CloudPresetState
+}
+
+function applyPresetCloudState(value: unknown): boolean {
+  if (!isRecord(value) || !Array.isArray(value.presets)) return false
+
+  const presets = normalizePresetCollection(value.presets as Preset[])
+  const customDefaults = Array.isArray(value.customDefaults)
+    ? normalizePresetCollection(value.customDefaults as Preset[])
+    : null
+
+  usePresetStore.setState({ presets, customDefaults })
+  return true
+}
+
+function getFriendlySyncError(error: unknown): string {
+  const code = isRecord(error) && typeof error.code === 'string' ? error.code : ''
+
+  if (code === 'permission-denied' || code === 'firestore/permission-denied') {
+    return 'Cloudtoegang geweigerd. De Firestore-beveiligingsregels moeten worden bijgewerkt.'
+  }
+
+  if (code === 'unavailable' || code === 'firestore/unavailable') {
+    return 'Cloud tijdelijk niet bereikbaar. Je lokale gegevens blijven bewaard.'
+  }
+
+  return error instanceof Error ? error.message : 'Synchronisatie mislukt'
+}
+
+function mergeById<T extends { id: string }>(cloudItems: T[], localItems: T[]) {
+  const cloudIds = new Set(cloudItems.map((item) => item.id))
+  const localIds = new Set(localItems.map((item) => item.id))
+  const newLocalItems = localItems.filter((item) => !cloudIds.has(item.id))
+  const newCloudItems = cloudItems.filter((item) => !localIds.has(item.id))
+
+  return {
+    merged: [...cloudItems, ...newLocalItems],
+    newLocalItems,
+    newCloudItems
+  }
+}
+
 async function waitForHydration(): Promise<void> {
   const stores = [
     useCustomPointLayerStore,
     useLocalVondstenStore,
-    useRouteRecordingStore
+    useRouteRecordingStore,
+    useSettingsStore,
+    usePresetStore
   ]
 
-  await Promise.all(stores.map(store => {
-    // If already hydrated, resolve immediately
-    if (store.persist.hasHydrated()) {
-      return Promise.resolve()
-    }
-    // Otherwise wait for hydration
-    return new Promise<void>(resolve => {
+  await Promise.all(stores.map((store) => {
+    if (store.persist.hasHydrated()) return Promise.resolve()
+
+    return new Promise<void>((resolve) => {
       const unsubscribe = store.persist.onFinishHydration(() => {
         unsubscribe()
         resolve()
@@ -42,18 +112,40 @@ async function waitForHydration(): Promise<void> {
 
 export function useCloudSync() {
   const user = useAuthStore(state => state.user)
-  const { layers, clearAll: clearLayers } = useCustomPointLayerStore()
-  const { vondsten, clearAll: clearVondsten } = useLocalVondstenStore()
-  const { savedRoutes } = useRouteRecordingStore()
+  const layers = useCustomPointLayerStore(state => state.layers)
+  const vondsten = useLocalVondstenStore(state => state.vondsten)
+  const savedRoutes = useRouteRecordingStore(state => state.savedRoutes)
+  const settingsState = useSettingsStore()
+  const presetState = usePresetStore()
 
-  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const layerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const vondstTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const routeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const settingsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const presetsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isInitialLoadRef = useRef(true)
-  const lastSyncedLayersRef = useRef<string>('')
-  const lastSyncedVondstenRef = useRef<string>('')
-  const lastSyncedRoutesRef = useRef<string>('')
+  const lastSyncedLayersRef = useRef('')
+  const lastSyncedVondstenRef = useRef('')
+  const lastSyncedRoutesRef = useRef('')
+  const lastSyncedSettingsRef = useRef('')
+  const lastSyncedPresetsRef = useRef('')
   const [isHydrated, setIsHydrated] = useState(false)
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('signed-out')
+  const [syncError, setSyncError] = useState<string | null>(null)
 
-  // Wait for hydration on mount
+  const reportSyncError = useCallback((error: unknown, label: string) => {
+    const message = getFriendlySyncError(error)
+    setSyncStatus('error')
+    setSyncError(message)
+    console.error(`❌ Fout bij synchroniseren ${label}:`, error)
+    return message
+  }, [])
+
+  const markSynced = useCallback(() => {
+    setSyncStatus('synced')
+    setSyncError(null)
+  }, [])
+
   useEffect(() => {
     waitForHydration().then(() => {
       setIsHydrated(true)
@@ -61,257 +153,281 @@ export function useCloudSync() {
     })
   }, [])
 
-  // Sync layers to Firestore
   const syncLayersToCloud = useCallback(async (layersData: CustomPointLayer[]) => {
-    if (!user) return
+    if (!user) return false
 
     try {
-      const userDocRef = doc(db, 'users', user.uid)
-      await setDoc(userDocRef, {
+      await setDoc(doc(db, 'users', user.uid), {
         layers: layersData,
         layersUpdatedAt: serverTimestamp()
       }, { merge: true })
-
+      markSynced()
       console.log('☁️ Lagen gesynchroniseerd naar cloud')
+      return true
     } catch (error) {
-      console.error('❌ Fout bij synchroniseren lagen:', error)
+      reportSyncError(error, 'lagen')
+      return false
     }
-  }, [user])
+  }, [user, markSynced, reportSyncError])
 
-  // Sync vondsten to Firestore
   const syncVondstenToCloud = useCallback(async (vondstenData: LocalVondst[]) => {
-    if (!user) return
+    if (!user) return false
 
     try {
-      const userDocRef = doc(db, 'users', user.uid)
-      await setDoc(userDocRef, {
+      await setDoc(doc(db, 'users', user.uid), {
         vondsten: vondstenData,
         vondstenUpdatedAt: serverTimestamp()
       }, { merge: true })
-
+      markSynced()
       console.log('☁️ Vondsten gesynchroniseerd naar cloud')
+      return true
     } catch (error) {
-      console.error('❌ Fout bij synchroniseren vondsten:', error)
+      reportSyncError(error, 'vondsten')
+      return false
     }
-  }, [user])
+  }, [user, markSynced, reportSyncError])
 
-  // Sync routes to Firestore
   const syncRoutesToCloud = useCallback(async (routesData: RecordedRoute[]) => {
-    if (!user) return
+    if (!user) return false
 
     try {
-      const userDocRef = doc(db, 'users', user.uid)
-      await setDoc(userDocRef, {
+      await setDoc(doc(db, 'users', user.uid), {
         routes: routesData,
         routesUpdatedAt: serverTimestamp()
       }, { merge: true })
-
+      markSynced()
       console.log('☁️ Routes gesynchroniseerd naar cloud')
+      return true
     } catch (error) {
-      console.error('❌ Fout bij synchroniseren routes:', error)
+      reportSyncError(error, 'routes')
+      return false
     }
-  }, [user])
+  }, [user, markSynced, reportSyncError])
 
-  // Load data from cloud on login
+  const syncSettingsToCloud = useCallback(async (settings: CloudSettings) => {
+    if (!user) return false
+
+    try {
+      await setDoc(doc(db, 'users', user.uid), {
+        settings,
+        settingsUpdatedAt: serverTimestamp()
+      }, { merge: true })
+      markSynced()
+      console.log('☁️ Instellingen gesynchroniseerd naar cloud')
+      return true
+    } catch (error) {
+      reportSyncError(error, 'instellingen')
+      return false
+    }
+  }, [user, markSynced, reportSyncError])
+
+  const syncPresetsToCloud = useCallback(async (presets: CloudPresetState) => {
+    if (!user) return false
+
+    try {
+      await setDoc(doc(db, 'users', user.uid), {
+        presetSettings: presets,
+        presetsUpdatedAt: serverTimestamp()
+      }, { merge: true })
+      markSynced()
+      console.log('☁️ Presets gesynchroniseerd naar cloud')
+      return true
+    } catch (error) {
+      reportSyncError(error, 'presets')
+      return false
+    }
+  }, [user, markSynced, reportSyncError])
+
   const loadFromCloud = useCallback(async () => {
     if (!user) return
+
+    setSyncStatus('connecting')
+    setSyncError(null)
 
     try {
       const userDocRef = doc(db, 'users', user.uid)
       const docSnap = await getDoc(userDocRef)
+      const localLayers = useCustomPointLayerStore.getState().layers
+      const localVondsten = useLocalVondstenStore.getState().vondsten
+      const localRoutes = useRouteRecordingStore.getState().savedRoutes
+      const missingCloudData: Record<string, unknown> = {}
 
       if (docSnap.exists()) {
         const data = docSnap.data()
 
-        // Load layers from cloud
-        if (data.layers && Array.isArray(data.layers)) {
-          const cloudLayers = data.layers as CustomPointLayer[]
-          const localLayers = useCustomPointLayerStore.getState().layers
-
-          // Merge: keep local layers that aren't in cloud, add cloud layers
-          const mergedLayers = [...cloudLayers]
-
-          // Add local layers that don't exist in cloud (by id)
-          const cloudLayerIds = new Set(cloudLayers.map(l => l.id))
-          localLayers.forEach(localLayer => {
-            if (!cloudLayerIds.has(localLayer.id)) {
-              mergedLayers.push(localLayer)
-            }
-          })
-
-          // Update store with merged data
-          useCustomPointLayerStore.setState({ layers: mergedLayers })
-          lastSyncedLayersRef.current = JSON.stringify(mergedLayers)
-
-          console.log(`☁️ ${cloudLayers.length} lagen geladen uit cloud`)
+        if (Array.isArray(data.layers)) {
+          const merged = mergeById(data.layers as CustomPointLayer[], localLayers).merged
+          useCustomPointLayerStore.setState({ layers: merged })
+          console.log(`☁️ ${data.layers.length} lagen geladen uit cloud`)
+        } else {
+          missingCloudData.layers = localLayers
+          missingCloudData.layersUpdatedAt = serverTimestamp()
         }
 
-        // Load vondsten from cloud
-        if (data.vondsten && Array.isArray(data.vondsten)) {
-          const cloudVondsten = data.vondsten as LocalVondst[]
-          const localVondsten = useLocalVondstenStore.getState().vondsten
-
-          // Merge: keep local vondsten that aren't in cloud
-          const mergedVondsten = [...cloudVondsten]
-
-          const cloudVondstIds = new Set(cloudVondsten.map(v => v.id))
-          localVondsten.forEach(localVondst => {
-            if (!cloudVondstIds.has(localVondst.id)) {
-              mergedVondsten.push(localVondst)
-            }
-          })
-
-          useLocalVondstenStore.setState({ vondsten: mergedVondsten })
-          lastSyncedVondstenRef.current = JSON.stringify(mergedVondsten)
-
-          console.log(`☁️ ${cloudVondsten.length} vondsten geladen uit cloud`)
+        if (Array.isArray(data.vondsten)) {
+          const merged = mergeById(data.vondsten as LocalVondst[], localVondsten).merged
+          useLocalVondstenStore.setState({ vondsten: merged })
+          console.log(`☁️ ${data.vondsten.length} vondsten geladen uit cloud`)
+        } else {
+          missingCloudData.vondsten = localVondsten
+          missingCloudData.vondstenUpdatedAt = serverTimestamp()
         }
 
-        // Load routes from cloud
-        if (data.routes && Array.isArray(data.routes)) {
-          const cloudRoutes = data.routes as RecordedRoute[]
-          const localRoutes = useRouteRecordingStore.getState().savedRoutes
-
-          // Merge: keep local routes that aren't in cloud
-          const mergedRoutes = [...cloudRoutes]
-
-          const cloudRouteIds = new Set(cloudRoutes.map(r => r.id))
-          localRoutes.forEach(localRoute => {
-            if (!cloudRouteIds.has(localRoute.id)) {
-              mergedRoutes.push(localRoute)
-            }
-          })
-
-          // Make all routes visible by default
-          const allRouteIds = new Set(mergedRoutes.map(r => r.id))
-
+        if (Array.isArray(data.routes)) {
+          const merged = mergeById(data.routes as RecordedRoute[], localRoutes).merged
           useRouteRecordingStore.setState({
-            savedRoutes: mergedRoutes,
-            visibleRouteIds: allRouteIds
+            savedRoutes: merged,
+            visibleRouteIds: new Set(merged.map((route) => route.id))
           })
-          lastSyncedRoutesRef.current = JSON.stringify(mergedRoutes)
+          console.log(`☁️ ${data.routes.length} routes geladen uit cloud`)
+        } else {
+          missingCloudData.routes = localRoutes
+          missingCloudData.routesUpdatedAt = serverTimestamp()
+        }
 
-          console.log(`☁️ ${cloudRoutes.length} routes geladen uit cloud`)
+        if (isRecord(data.settings)) {
+          applyCloudSettings(data.settings as Partial<CloudSettings>)
+          console.log('☁️ Instellingen geladen uit cloud')
+        } else {
+          missingCloudData.settings = getCloudSettings()
+          missingCloudData.settingsUpdatedAt = serverTimestamp()
+        }
+
+        if (applyPresetCloudState(data.presetSettings)) {
+          console.log('☁️ Presets geladen uit cloud')
+        } else {
+          missingCloudData.presetSettings = getPresetCloudState()
+          missingCloudData.presetsUpdatedAt = serverTimestamp()
+        }
+
+        if (Object.keys(missingCloudData).length > 0) {
+          await setDoc(userDocRef, missingCloudData, { merge: true })
         }
       } else {
-        // No cloud data yet, sync local data to cloud
-        console.log('☁️ Geen cloud data gevonden, lokale data wordt gesynchroniseerd...')
-        await syncLayersToCloud(layers)
-        await syncVondstenToCloud(vondsten)
-        await syncRoutesToCloud(savedRoutes)
+        await setDoc(userDocRef, {
+          layers: localLayers,
+          vondsten: localVondsten,
+          routes: localRoutes,
+          settings: getCloudSettings(),
+          presetSettings: getPresetCloudState(),
+          layersUpdatedAt: serverTimestamp(),
+          vondstenUpdatedAt: serverTimestamp(),
+          routesUpdatedAt: serverTimestamp(),
+          settingsUpdatedAt: serverTimestamp(),
+          presetsUpdatedAt: serverTimestamp()
+        })
+        console.log('☁️ Eerste cloudkopie aangemaakt')
       }
 
-      isInitialLoadRef.current = false
+      lastSyncedLayersRef.current = JSON.stringify(useCustomPointLayerStore.getState().layers)
+      lastSyncedVondstenRef.current = JSON.stringify(useLocalVondstenStore.getState().vondsten)
+      lastSyncedRoutesRef.current = JSON.stringify(useRouteRecordingStore.getState().savedRoutes)
+      lastSyncedSettingsRef.current = JSON.stringify(getCloudSettings())
+      lastSyncedPresetsRef.current = JSON.stringify(getPresetCloudState())
+      markSynced()
     } catch (error) {
-      console.error('❌ Fout bij laden uit cloud:', error)
+      reportSyncError(error, 'cloudgegevens')
+    } finally {
       isInitialLoadRef.current = false
     }
-  }, [user, layers, vondsten, savedRoutes, syncLayersToCloud, syncVondstenToCloud, syncRoutesToCloud])
+  }, [user, markSynced, reportSyncError])
 
-  // Load from cloud when user logs in (after hydration)
   useEffect(() => {
-    if (!isHydrated) return // Wait for localStorage hydration first
+    if (!isHydrated) return
 
     if (user) {
       isInitialLoadRef.current = true
       loadFromCloud()
     } else {
-      // Reset refs when user logs out
       isInitialLoadRef.current = true
       lastSyncedLayersRef.current = ''
       lastSyncedVondstenRef.current = ''
       lastSyncedRoutesRef.current = ''
+      lastSyncedSettingsRef.current = ''
+      lastSyncedPresetsRef.current = ''
+      setSyncStatus('signed-out')
+      setSyncError(null)
     }
-  }, [user?.uid, isHydrated]) // Trigger on user change AND when hydration completes
+  }, [user?.uid, isHydrated, loadFromCloud])
 
-  // Sync layers when they change (debounced)
   useEffect(() => {
     if (!user || !isHydrated || isInitialLoadRef.current) return
+    const serialized = JSON.stringify(layers)
+    if (serialized === lastSyncedLayersRef.current) return
 
-    const layersJson = JSON.stringify(layers)
-
-    // Skip if data hasn't actually changed
-    if (layersJson === lastSyncedLayersRef.current) return
-
-    // Clear existing timeout
-    if (syncTimeoutRef.current) {
-      clearTimeout(syncTimeoutRef.current)
-    }
-
-    // Debounce sync
-    syncTimeoutRef.current = setTimeout(() => {
-      lastSyncedLayersRef.current = layersJson
-      syncLayersToCloud(layers)
+    if (layerTimeoutRef.current) clearTimeout(layerTimeoutRef.current)
+    layerTimeoutRef.current = setTimeout(async () => {
+      if (await syncLayersToCloud(layers)) lastSyncedLayersRef.current = serialized
     }, SYNC_DEBOUNCE)
 
     return () => {
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current)
-      }
+      if (layerTimeoutRef.current) clearTimeout(layerTimeoutRef.current)
     }
-  }, [user, layers, syncLayersToCloud])
+  }, [user, isHydrated, layers, syncLayersToCloud])
 
-  // Sync vondsten when they change (debounced)
   useEffect(() => {
     if (!user || !isHydrated || isInitialLoadRef.current) return
+    const serialized = JSON.stringify(vondsten)
+    if (serialized === lastSyncedVondstenRef.current) return
 
-    const vondstenJson = JSON.stringify(vondsten)
-
-    // Skip if data hasn't actually changed
-    if (vondstenJson === lastSyncedVondstenRef.current) return
-
-    // Clear existing timeout
-    if (syncTimeoutRef.current) {
-      clearTimeout(syncTimeoutRef.current)
-    }
-
-    // Debounce sync
-    syncTimeoutRef.current = setTimeout(() => {
-      lastSyncedVondstenRef.current = vondstenJson
-      syncVondstenToCloud(vondsten)
+    if (vondstTimeoutRef.current) clearTimeout(vondstTimeoutRef.current)
+    vondstTimeoutRef.current = setTimeout(async () => {
+      if (await syncVondstenToCloud(vondsten)) lastSyncedVondstenRef.current = serialized
     }, SYNC_DEBOUNCE)
 
     return () => {
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current)
-      }
+      if (vondstTimeoutRef.current) clearTimeout(vondstTimeoutRef.current)
     }
-  }, [user, vondsten, syncVondstenToCloud])
+  }, [user, isHydrated, vondsten, syncVondstenToCloud])
 
-  // Sync routes when they change (debounced)
   useEffect(() => {
     if (!user || !isHydrated || isInitialLoadRef.current) return
+    const serialized = JSON.stringify(savedRoutes)
+    if (serialized === lastSyncedRoutesRef.current) return
 
-    const routesJson = JSON.stringify(savedRoutes)
-
-    // Skip if data hasn't actually changed
-    if (routesJson === lastSyncedRoutesRef.current) return
-
-    // Clear existing timeout
-    if (syncTimeoutRef.current) {
-      clearTimeout(syncTimeoutRef.current)
-    }
-
-    // Debounce sync
-    syncTimeoutRef.current = setTimeout(() => {
-      lastSyncedRoutesRef.current = routesJson
-      syncRoutesToCloud(savedRoutes)
+    if (routeTimeoutRef.current) clearTimeout(routeTimeoutRef.current)
+    routeTimeoutRef.current = setTimeout(async () => {
+      if (await syncRoutesToCloud(savedRoutes)) lastSyncedRoutesRef.current = serialized
     }, SYNC_DEBOUNCE)
 
     return () => {
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current)
-      }
+      if (routeTimeoutRef.current) clearTimeout(routeTimeoutRef.current)
     }
-  }, [user, savedRoutes, syncRoutesToCloud])
+  }, [user, isHydrated, savedRoutes, syncRoutesToCloud])
 
-  // Manual sync function - forces immediate sync of all data
-  const syncNow = useCallback(async (): Promise<{
-    success: boolean
-    uploaded: { layers: number; vondsten: number; routes: number }
-    downloaded: { layers: number; vondsten: number; routes: number }
-    error?: string
-  }> => {
+  useEffect(() => {
+    if (!user || !isHydrated || isInitialLoadRef.current) return
+    const settings = getCloudSettings()
+    const serialized = JSON.stringify(settings)
+    if (serialized === lastSyncedSettingsRef.current) return
+
+    if (settingsTimeoutRef.current) clearTimeout(settingsTimeoutRef.current)
+    settingsTimeoutRef.current = setTimeout(async () => {
+      if (await syncSettingsToCloud(settings)) lastSyncedSettingsRef.current = serialized
+    }, SYNC_DEBOUNCE)
+
+    return () => {
+      if (settingsTimeoutRef.current) clearTimeout(settingsTimeoutRef.current)
+    }
+  }, [user, isHydrated, settingsState, syncSettingsToCloud])
+
+  useEffect(() => {
+    if (!user || !isHydrated || isInitialLoadRef.current) return
+    const presets = getPresetCloudState()
+    const serialized = JSON.stringify(presets)
+    if (serialized === lastSyncedPresetsRef.current) return
+
+    if (presetsTimeoutRef.current) clearTimeout(presetsTimeoutRef.current)
+    presetsTimeoutRef.current = setTimeout(async () => {
+      if (await syncPresetsToCloud(presets)) lastSyncedPresetsRef.current = serialized
+    }, SYNC_DEBOUNCE)
+
+    return () => {
+      if (presetsTimeoutRef.current) clearTimeout(presetsTimeoutRef.current)
+    }
+  }, [user, isHydrated, presetState, syncPresetsToCloud])
+
+  const syncNow = useCallback(async (): Promise<CloudSyncResult> => {
     if (!user) {
       return {
         success: false,
@@ -321,93 +437,91 @@ export function useCloudSync() {
       }
     }
 
+    setSyncStatus('connecting')
+    setSyncError(null)
+
     try {
-      // Get current local data
       const currentLayers = useCustomPointLayerStore.getState().layers
       const currentVondsten = useLocalVondstenStore.getState().vondsten
       const currentRoutes = useRouteRecordingStore.getState().savedRoutes
-
-      // Get cloud data
+      const currentSettings = getCloudSettings()
+      const currentPresets = getPresetCloudState()
       const userDocRef = doc(db, 'users', user.uid)
       const docSnap = await getDoc(userDocRef)
       const cloudData = docSnap.exists() ? docSnap.data() : {}
 
-      const cloudLayers = (cloudData.layers || []) as CustomPointLayer[]
-      const cloudVondsten = (cloudData.vondsten || []) as LocalVondst[]
-      const cloudRoutes = (cloudData.routes || []) as RecordedRoute[]
+      const layerMerge = mergeById((cloudData.layers || []) as CustomPointLayer[], currentLayers)
+      const vondstMerge = mergeById((cloudData.vondsten || []) as LocalVondst[], currentVondsten)
+      const routeMerge = mergeById((cloudData.routes || []) as RecordedRoute[], currentRoutes)
 
-      // Merge layers
-      const cloudLayerIds = new Set(cloudLayers.map(l => l.id))
-      const localLayerIds = new Set(currentLayers.map(l => l.id))
-      const newLocalLayers = currentLayers.filter(l => !cloudLayerIds.has(l.id))
-      const newCloudLayers = cloudLayers.filter(l => !localLayerIds.has(l.id))
-      const mergedLayers = [...cloudLayers, ...newLocalLayers]
-
-      // Merge vondsten
-      const cloudVondstIds = new Set(cloudVondsten.map(v => v.id))
-      const localVondstIds = new Set(currentVondsten.map(v => v.id))
-      const newLocalVondsten = currentVondsten.filter(v => !cloudVondstIds.has(v.id))
-      const newCloudVondsten = cloudVondsten.filter(v => !localVondstIds.has(v.id))
-      const mergedVondsten = [...cloudVondsten, ...newLocalVondsten]
-
-      // Merge routes
-      const cloudRouteIds = new Set(cloudRoutes.map(r => r.id))
-      const localRouteIds = new Set(currentRoutes.map(r => r.id))
-      const newLocalRoutes = currentRoutes.filter(r => !cloudRouteIds.has(r.id))
-      const newCloudRoutes = cloudRoutes.filter(r => !localRouteIds.has(r.id))
-      const mergedRoutes = [...cloudRoutes, ...newLocalRoutes]
-
-      // Update local stores with merged data
-      useCustomPointLayerStore.setState({ layers: mergedLayers })
-      useLocalVondstenStore.setState({ vondsten: mergedVondsten })
+      useCustomPointLayerStore.setState({ layers: layerMerge.merged })
+      useLocalVondstenStore.setState({ vondsten: vondstMerge.merged })
       useRouteRecordingStore.setState({
-        savedRoutes: mergedRoutes,
-        visibleRouteIds: new Set(mergedRoutes.map(r => r.id))
+        savedRoutes: routeMerge.merged,
+        visibleRouteIds: new Set(routeMerge.merged.map((route) => route.id))
       })
 
-      // Update refs
-      lastSyncedLayersRef.current = JSON.stringify(mergedLayers)
-      lastSyncedVondstenRef.current = JSON.stringify(mergedVondsten)
-      lastSyncedRoutesRef.current = JSON.stringify(mergedRoutes)
+      const localSettingsChanged = lastSyncedSettingsRef.current === '' ||
+        JSON.stringify(currentSettings) !== lastSyncedSettingsRef.current
+      if (!localSettingsChanged && isRecord(cloudData.settings)) {
+        applyCloudSettings(cloudData.settings as Partial<CloudSettings>)
+      }
 
-      // Upload merged data to cloud
+      const localPresetsChanged = lastSyncedPresetsRef.current === '' ||
+        JSON.stringify(currentPresets) !== lastSyncedPresetsRef.current
+      if (!localPresetsChanged) applyPresetCloudState(cloudData.presetSettings)
+
+      const settingsToSync = getCloudSettings()
+      const presetsToSync = getPresetCloudState()
+
       await setDoc(userDocRef, {
-        layers: mergedLayers,
-        vondsten: mergedVondsten,
-        routes: mergedRoutes,
+        layers: layerMerge.merged,
+        vondsten: vondstMerge.merged,
+        routes: routeMerge.merged,
+        settings: settingsToSync,
+        presetSettings: presetsToSync,
         layersUpdatedAt: serverTimestamp(),
         vondstenUpdatedAt: serverTimestamp(),
-        routesUpdatedAt: serverTimestamp()
+        routesUpdatedAt: serverTimestamp(),
+        settingsUpdatedAt: serverTimestamp(),
+        presetsUpdatedAt: serverTimestamp()
       }, { merge: true })
 
-      console.log('☁️ Handmatige sync voltooid')
+      lastSyncedLayersRef.current = JSON.stringify(layerMerge.merged)
+      lastSyncedVondstenRef.current = JSON.stringify(vondstMerge.merged)
+      lastSyncedRoutesRef.current = JSON.stringify(routeMerge.merged)
+      lastSyncedSettingsRef.current = JSON.stringify(settingsToSync)
+      lastSyncedPresetsRef.current = JSON.stringify(presetsToSync)
+      markSynced()
+      console.log('☁️ Handmatige sync voltooid, inclusief instellingen en presets')
 
       return {
         success: true,
         uploaded: {
-          layers: newLocalLayers.length,
-          vondsten: newLocalVondsten.length,
-          routes: newLocalRoutes.length
+          layers: layerMerge.newLocalItems.length,
+          vondsten: vondstMerge.newLocalItems.length,
+          routes: routeMerge.newLocalItems.length
         },
         downloaded: {
-          layers: newCloudLayers.length,
-          vondsten: newCloudVondsten.length,
-          routes: newCloudRoutes.length
+          layers: layerMerge.newCloudItems.length,
+          vondsten: vondstMerge.newCloudItems.length,
+          routes: routeMerge.newCloudItems.length
         }
       }
     } catch (error) {
-      console.error('❌ Sync fout:', error)
       return {
         success: false,
         uploaded: { layers: 0, vondsten: 0, routes: 0 },
         downloaded: { layers: 0, vondsten: 0, routes: 0 },
-        error: error instanceof Error ? error.message : 'Sync mislukt'
+        error: reportSyncError(error, 'handmatige synchronisatie')
       }
     }
-  }, [user])
+  }, [user, markSynced, reportSyncError])
 
   return {
     isLoggedIn: !!user,
+    syncStatus,
+    syncError,
     syncLayersToCloud,
     syncVondstenToCloud,
     syncRoutesToCloud,

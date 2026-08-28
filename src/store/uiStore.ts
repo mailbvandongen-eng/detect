@@ -10,6 +10,7 @@ interface UIState {
   settingsPanelOpen: boolean
   infoPanelOpen: boolean
   presetsPanelOpen: boolean
+  changeLogOpen: boolean
   monumentSearchOpen: boolean
   monumentFilterOpen: boolean
 
@@ -46,6 +47,8 @@ interface UIState {
   toggleSettingsPanel: () => void
   toggleInfoPanel: () => void
   togglePresetsPanel: () => void
+  openChangeLog: () => void
+  closeChangeLog: () => void
   toggleCategory: (category: string) => void
   setLayerControlOpen: (open: boolean) => void
   setLegendOpen: (open: boolean) => void
@@ -87,6 +90,7 @@ export const useUIStore = create<UIState>()(
     settingsPanelOpen: false,
     infoPanelOpen: false,
     presetsPanelOpen: false,
+    changeLogOpen: false,
     monumentSearchOpen: false,
     monumentFilterOpen: false,
     vondstFormOpen: false,
@@ -199,6 +203,18 @@ export const useUIStore = create<UIState>()(
         state.monumentFilterOpen = false
         // Toggle this one
         if (!wasOpen) state.presetsPanelOpen = true
+      })
+    },
+
+    openChangeLog: () => {
+      set(state => {
+        state.changeLogOpen = true
+      })
+    },
+
+    closeChangeLog: () => {
+      set(state => {
+        state.changeLogOpen = false
       })
     },
 

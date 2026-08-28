@@ -1,6 +1,6 @@
 # Detect - Sessienotities
 
-## Huidige versie: 2.32.67
+## Huidige versie: 2.32.68
 
 ---
 
@@ -20,6 +20,7 @@
 - [x] `.env` file aangemaakt met Firebase credentials
 - [x] Authentication (Google Sign-In) enabled
 - [x] Firestore Database aangemaakt (eur3, test mode tot 21 maart 2026)
+- [ ] **Firestore-regels publiceren** - `firestore.rules` staat klaar; de verlopen testregels veroorzaken `Missing or insufficient permissions`
 - [ ] **Storage enablen** - Vereist Blaze plan upgrade (voor foto uploads)
 - [ ] Functies uit webapp importeren (te bepalen)
 
@@ -35,6 +36,12 @@
 ---
 
 ## FIREBASE SETUP
+
+Vanaf v2.32.68 synchroniseert het gebruikersdocument `users/{uid}` ook instellingen en presets. De beveiligingsregels laten uitsluitend de ingelogde eigenaar bij het eigen document. Publiceer ze vanuit de Firebase Console of met:
+
+```bash
+firebase deploy --only firestore:rules --project detect-personal
+```
 
 ### Stappen:
 1. Ga naar [Firebase Console](https://console.firebase.google.com/)

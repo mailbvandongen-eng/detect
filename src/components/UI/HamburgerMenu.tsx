@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw } from 'lucide-react'
+import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw, History } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
@@ -43,8 +43,8 @@ export function HamburgerMenu() {
   } | null>(null)
 
   const { user, loading, signInWithGoogle, logout } = useAuthStore()
-  const { toggleInfoPanel, toggleSettingsPanel, toggleMonumentSearch } = useUIStore()
-  const { syncNow } = useCloudSync()
+  const { toggleInfoPanel, toggleSettingsPanel, toggleMonumentSearch, openChangeLog } = useUIStore()
+  const { syncNow, syncStatus, syncError } = useCloudSync()
 
   // Settings for font scale
   const menuFontScale = useSettingsStore(state => state.menuFontScale)
@@ -84,6 +84,11 @@ export function HamburgerMenu() {
   const handleMonumentSearchClick = () => {
     closeMenu()
     toggleMonumentSearch()
+  }
+
+  const handleChangeLogClick = () => {
+    closeMenu()
+    openChangeLog()
   }
 
   const handleLogin = () => {
@@ -214,8 +219,17 @@ export function HamburgerMenu() {
                       <div className="font-medium text-gray-800 truncate" style={{ fontSize: '0.85em' }}>
                         {user.displayName || 'Gebruiker'}
                       </div>
-                      <div className="text-green-600" style={{ fontSize: '0.7em' }}>
-                        Cloud sync actief
+                      <div
+                        className={syncStatus === 'error' ? 'text-red-600' : syncStatus === 'synced' ? 'text-green-600' : 'text-blue-600'}
+                        style={{ fontSize: '0.7em' }}
+                      >
+                        {syncStatus === 'error'
+                          ? 'Cloud niet beschikbaar'
+                          : syncStatus === 'synced'
+                            ? 'Cloud synchronisatie gereed'
+                            : syncStatus === 'connecting'
+                              ? 'Cloud verbinden...'
+                              : 'Google-login actief'}
                       </div>
                     </div>
                     <button
@@ -238,6 +252,12 @@ export function HamburgerMenu() {
                       {isSyncing ? 'Synchroniseren...' : 'Synchroniseren'}
                     </span>
                   </button>
+
+                  {syncError && !syncResult && (
+                    <div className="mt-2 p-2 rounded-lg bg-red-50 text-red-700" style={{ fontSize: '0.75em' }}>
+                      {syncError}
+                    </div>
+                  )}
 
                   {/* Sync result */}
                   {syncResult && (
@@ -286,6 +306,18 @@ export function HamburgerMenu() {
                 >
                   <Info size={18} className="text-blue-500" />
                   <span>Info & handleiding</span>
+                </button>
+
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    handleChangeLogClick()
+                  }}
+                  className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-blue-50"
+                  style={{ fontSize: '0.95em' }}
+                >
+                  <History size={18} className="text-blue-500" />
+                  <span>Wijzigingen</span>
                 </button>
 
                 <button

@@ -35,6 +35,45 @@ const BUILT_IN_PRESETS: Preset[] = [
     isBuiltIn: false  // Now editable like other presets
   },
   {
+    id: 'lidar-hoogte',
+    name: 'LiDAR & hoogte',
+    icon: 'Mountain',
+    layers: ['AHN4 Multi-Hillshade NL', 'AHN4 Hoogtekaart Kleur'],
+    baseLayer: 'Esri (licht)',
+    layerOpacities: {
+      'AHN4 Multi-Hillshade NL': 0.70,
+      'AHN4 Hoogtekaart Kleur': 0.35
+    },
+    isBuiltIn: false
+  },
+  {
+    id: 'bodem-landschap',
+    name: 'Bodem & landschap',
+    icon: 'Layers',
+    layers: ['Geomorfologie', 'Bodemkaart', 'Veengebieden'],
+    baseLayer: 'Esri (licht)',
+    layerOpacities: {
+      'Geomorfologie': 0.55,
+      'Bodemkaart': 0.35,
+      'Veengebieden': 0.45
+    },
+    isBuiltIn: false
+  },
+  {
+    id: 'percelen-historie',
+    name: 'Percelen & historie',
+    icon: 'Grid',
+    layers: ['Gewaspercelen', 'Kadastrale Grenzen', 'Oude Kernen', 'Essen'],
+    baseLayer: 'Luchtfoto',
+    layerOpacities: {
+      'Gewaspercelen': 0.35,
+      'Kadastrale Grenzen': 0.75,
+      'Oude Kernen': 0.50,
+      'Essen': 0.45
+    },
+    isBuiltIn: false
+  },
+  {
     id: 'steentijd',
     name: 'Steentijd',
     icon: 'Mountain',
@@ -118,6 +157,7 @@ const BASE_LAYER_NAMES = [
 ]
 
 const BUILT_IN_PRESET_MAP = new Map(BUILT_IN_PRESETS.map((preset) => [preset.id, preset]))
+const NEW_RESEARCH_PRESET_IDS = new Set(['lidar-hoogte', 'bodem-landschap', 'percelen-historie'])
 const REMOVED_LAYERS = new Set([
   'Kringloopwinkels',
   'Ruiterpaden',
@@ -147,6 +187,20 @@ function normalizePreset(preset: Preset): Preset {
     baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
     layerOpacities: preset.layerOpacities ?? builtInPreset.layerOpacities
   }
+}
+
+export function normalizePresetCollection(presets: Preset[]): Preset[] {
+  return presets.map(normalizePreset)
+}
+
+function addMissingResearchPresets(presets: Preset[]): Preset[] {
+  const normalized = normalizePresetCollection(presets)
+  const existingIds = new Set(normalized.map((preset) => preset.id))
+  const additions = BUILT_IN_PRESETS.filter(
+    (preset) => NEW_RESEARCH_PRESET_IDS.has(preset.id) && !existingIds.has(preset.id)
+  )
+
+  return [...normalized, ...additions]
 }
 
 // All overlay layer names for clearing - must match PresetButtons.tsx
@@ -291,7 +345,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 17,
+      version: 18,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {
@@ -310,6 +364,7 @@ export const usePresetStore = create<PresetState>()(
         // v15: Strip removed live Overpass recreation layers from persisted presets
         // v16: Strip remaining live Overpass recreation layers from persisted presets
         // v17: Replace the retired CARTO light basemap in saved presets
+        // v18: Add three practical research presets without changing existing presets
         if (version < 13) {
           return {
             presets: [...BUILT_IN_PRESETS],
@@ -320,10 +375,14 @@ export const usePresetStore = create<PresetState>()(
         return {
           ...state,
           presets: Array.isArray(state.presets)
-            ? state.presets.map(normalizePreset)
+            ? version < 18
+              ? addMissingResearchPresets(state.presets)
+              : normalizePresetCollection(state.presets)
             : [...BUILT_IN_PRESETS],
           customDefaults: Array.isArray(state.customDefaults)
-            ? state.customDefaults.map(normalizePreset)
+            ? version < 18
+              ? addMissingResearchPresets(state.customDefaults)
+              : normalizePresetCollection(state.customDefaults)
             : null
         }
       }
