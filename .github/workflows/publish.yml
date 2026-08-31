@@ -1,0 +1,48 @@
+name: Publiceer Detect
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: detect-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Broncode ophalen
+        uses: actions/checkout@v4
+
+      - name: Node installeren
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Afhankelijkheden installeren
+        run: npm ci
+
+      - name: Productieversie bouwen
+        run: npm run build
+
+      - name: GitHub Pages-bestanden publiceren
+        run: |
+          if git diff --quiet -- docs; then
+            echo "Geen wijzigingen in de publicatie."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          git commit -m "build: publiceer Detect ${GITHUB_SHA::7} [skip ci]"
+          git push

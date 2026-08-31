@@ -1,12 +1,25 @@
 # Detect - Sessienotities
 
-## Huidige versie: 2.32.68
+## Huidige versie: 2.32.70
 
 ---
 
 ## PROJECT STATUS
 
-**Detect** is de persoonlijke versie van de DetectorApp, gecloned van `detectorapp-nl`.
+**Detect** is uitsluitend Bobs persoonlijke onderzoeksapp. Commerciële plannen, abonnementen, premiumlagen en betaalmuren zijn definitief vervallen.
+
+### Vaste onderzoeksrichting
+- Metaaldetectie en toestemmingsterreinen
+- Steentijd en archeologie
+- Geomorfologie, bodem en bodemgebruik
+- Hoogtekaart, hillshade en LiDAR
+- Historische percelen, eigen notities en vondsten
+- Zie `ROADMAP.md` voor de actuele ontwikkelvolgorde
+
+### Publicatie
+- Broncode gaat naar GitHub `main`.
+- `.github/workflows/publish.yml` bouwt en publiceert `docs/` automatisch.
+- De build bewaart de bestaande publieke Firebase-webconfig, zodat Bob niet van een lokale pc afhankelijk is.
 
 ### Migratie voltooid (feb 2026):
 - [x] Base path gewijzigd: `/detectorapp-nl/` -> `/detect/`
@@ -59,18 +72,6 @@ VITE_FIREBASE_STORAGE_BUCKET=detect-personal.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=xxx
 VITE_FIREBASE_APP_ID=xxx
 ```
-
----
-
-## WEBAPP FUNCTIES (te importeren)
-
-Locatie: `C:\VSCode\webapp`
-
-Mogelijke functies om te importeren:
-- Internationale lagen (BE/DE/FR)
-- Andere features uit webapp
-
-*Te bepalen in volgende sessie*
 
 ---
 

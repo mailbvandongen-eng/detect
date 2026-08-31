@@ -76,8 +76,6 @@
       "Bash(unzip:*)",
       "Bash(npx tsc:*)",
       "Bash(del \"C:\\VSCode\\detectorapp-nl\\.git\\index.lock\")",
-      "Bash(npm run build:commercial:*)",
-      "Bash(npm run dev:commercial:*)",
       "WebFetch(domain:www.atlasleefomgeving.nl)",
       "Bash(gh api:*)",
       "WebFetch(domain:mailbvandongen-eng.github.io)",

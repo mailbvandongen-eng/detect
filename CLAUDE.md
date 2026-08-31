@@ -1,14 +1,17 @@
 # Project Notes voor Claude
 
 ## PROJECT IDENTIFICATIE
-**Dit is: DETECT** - Persoonlijke versie
+**Dit is: DETECT** - Bobs persoonlijke onderzoeksapp
 - GitHub repo: `detect`
 - Vite base path: `/detect/`
-- Directory: `C:\VSCode\detect`
 
-**Let op:** Er bestaan ook:
-- `detectorapp-nl` - Commerciele Nederlandse versie
-- `webapp` (detectorapp-v3) - Internationale versie met NL/BE/DE/FR
+## VASTE PRODUCTKOERS
+- Geen commercieel product, abonnementen, premiumlagen of betaalmuren.
+- Alle aanwezige lagen en functies zijn direct beschikbaar.
+- Focus: metaaldetectie, steentijd, archeologie, geomorfologie, bodemgebruik, hoogte en LiDAR.
+- Werk uitsluitend aan deze repository; andere detectorprojecten horen niet bij Detect.
+- Laat goed werkende bestaande functies ongemoeid.
+- Lees `ROADMAP.md` voor de actuele ontwikkelvolgorde.
 
 ## EERSTE ACTIE BIJ NIEUWE SESSIE
 **Lees ALTIJD eerst `.claude/notes.md` voor lopende taken, plannen en context uit vorige sessies!**
@@ -24,19 +27,20 @@ Alle versies komen nu uit `package.json`:
 - `src/components/UI/HamburgerMenu.tsx` -> `import { version } from '../../../package.json'`
 - `src/components/UI/InfoButton.tsx` -> `import { version } from '../../../package.json'`
 
-**Na versie bump: build en push!**
+**Na versie bump: build, commit en push!**
 ```bash
 npm run build && git add -A && git commit -m "vX.X.X: beschrijving" && git push
 ```
 
 ## Belangrijke Regels
 - **ALTIJD pushen naar GitHub na elke wijziging + versie bump**
-- Screenshots staan in: `C:\VSCode\_Screenshots`
+- Een push met broncode naar `main` laat GitHub Actions automatisch `docs/` bouwen en publiceren.
+- Iedere gebruikerswijziging krijgt een vermelding in `src/data/changelog.ts` in gewone taal.
 - Vite base path is `/detect/` - alle data paden moeten `/detect/data/...` zijn
 
 ## Firebase Setup
-Dit project heeft een eigen Firebase project nodig (detect-personal of vergelijkbaar).
-- `.env` file moet aangemaakt worden met Firebase credentials
+Dit project gebruikt het Firebase-project `detect-personal`.
+- De publieke webconfig komt uit build-omgevingsvariabelen of wordt bij de GitHub-build behouden uit de bestaande publicatie.
 - Zie `.env.example` voor het template
 
 ## Dutch RD Shapefiles (EPSG:28992)

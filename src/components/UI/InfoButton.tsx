@@ -268,7 +268,7 @@ function FunctiesTab() {
           <li><strong>Mineralen hotspots:</strong> Vindplaatsen uit Mindat.org met mineralenlijst</li>
           <li><strong>Goudrivieren:</strong> Bekende locaties voor goud zoeken</li>
           <li><strong>Fossiel hotspots:</strong> Vindplaatsen met fossieltypen en periodes</li>
-          <li><strong>Premium lagen:</strong> Gedetailleerde data (beschikbaar met account)</li>
+          <li><strong>Alle lagen:</strong> Direct beschikbaar binnen Detect</li>
         </ul>
       </section>
 

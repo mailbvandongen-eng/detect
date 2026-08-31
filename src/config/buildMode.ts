@@ -48,5 +48,5 @@ export function isSpecialSectionVisible(sectionName: string): boolean {
 }
 
 export function getBuildModeLabel(): string {
-  return 'DetectorApp NL'
+  return 'Detect'
 }

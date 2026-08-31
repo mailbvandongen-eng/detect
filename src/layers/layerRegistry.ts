@@ -1,6 +1,7 @@
 import type { Layer } from 'ol/layer'
 import type ImageryLayer from '@arcgis/core/layers/ImageryLayer'
-import type { LayerTier, Region } from '../store/subscriptionStore'
+
+export type Region = 'nl' | 'be' | 'de' | 'fr'
 
 export type MapPlatform = 'ol' | 'arcgis'
 
@@ -8,9 +9,7 @@ export interface LayerDefinition {
   name: string
   factory: () => Promise<Layer | ImageryLayer | null>
   immediateLoad: boolean  // true for WMS (tiles load on-demand), false for vector
-  // Subscription/monetization fields (optional - defaults to free/nl for backwards compatibility)
-  tier?: LayerTier        // 'free' | 'premium' | 'pro' - which subscription tier is required
-  regions?: Region[]      // ['nl' | 'be' | 'de' | 'fr'] - which regions this layer belongs to
+  regions?: Region[]      // Geographic coverage metadata
   platform?: MapPlatform  // 'ol' (default) or 'arcgis' - which map engine handles this layer
 }
 
@@ -29,8 +28,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createKansenkaartLayerOL } = await import('./kansenkaartOL')
       return createKansenkaartLayerOL()
     },
-    immediateLoad: false,  // Lazy load - lots of data to combine
-    tier: 'premium'
+    immediateLoad: false  // Lazy load - lots of data to combine
   },
 
   // ============================================
@@ -39,14 +37,12 @@ export const layerRegistry: Record<string, LayerDefinition> = {
   'TMK 1850': {
     name: 'TMK 1850',
     factory: async () => null,  // Created in MapContainer
-    immediateLoad: true,
-    tier: 'premium'
+    immediateLoad: true
   },
   'Bonnebladen 1900': {
     name: 'Bonnebladen 1900',
     factory: async () => null,  // Created in MapContainer
-    immediateLoad: true,
-    tier: 'premium'
+    immediateLoad: true
   },
 
   // ============================================
@@ -145,8 +141,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createTerpenLayerOL } = await import('./terpenOL')
       return createTerpenLayerOL()
     },
-    immediateLoad: true,
-    tier: 'premium'
+    immediateLoad: true
   },
 
   // RCE Verdedigingswerken (Linies en Stellingen)
@@ -250,8 +245,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAHN4ColorElevationLayerOL } = await import('./hillshadeLayers')
       return createAHN4ColorElevationLayerOL()
     },
-    immediateLoad: true,
-    tier: 'premium'
+    immediateLoad: true
   },
   'AHN4 Hillshade NL': {
     name: 'AHN4 Hillshade NL',
@@ -259,8 +253,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAHN4HillshadeLayerOL } = await import('./hillshadeLayers')
       return createAHN4HillshadeLayerOL()
     },
-    immediateLoad: true,
-    tier: 'premium'
+    immediateLoad: true
   },
   'AHN4 Multi-Hillshade NL': {
     name: 'AHN4 Multi-Hillshade NL',
@@ -268,8 +261,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAHN4MultiHillshadeLayerOL } = await import('./hillshadeLayers')
       return createAHN4MultiHillshadeLayerOL()
     },
-    immediateLoad: true,
-    tier: 'premium'
+    immediateLoad: true
   },
   'AHN4 Hillshade Kleur': {
     name: 'AHN4 Hillshade Kleur',
@@ -277,8 +269,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAHN4ShadedReliefLayerOL } = await import('./hillshadeLayers')
       return createAHN4ShadedReliefLayerOL()
     },
-    immediateLoad: true,
-    tier: 'premium'
+    immediateLoad: true
   },
 
   // World Hillshade VERWIJDERD - Esri commercieel, geen toestemming
@@ -290,8 +281,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createGewaspercelenLayerOL } = await import('./pdokWMSLayers')
       return createGewaspercelenLayerOL()
     },
-    immediateLoad: true,
-    tier: 'premium'
+    immediateLoad: true
   },
   'Kadastrale Grenzen': {
     name: 'Kadastrale Grenzen',
@@ -402,8 +392,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKLayerOL } = await import('./amkOL')
       return createAMKLayerOL()
     },
-    immediateLoad: false,
-    tier: 'premium'
+    immediateLoad: false
   },
   'AMK Romeins': {
     name: 'AMK Romeins',
@@ -411,8 +400,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKRomeinsLayerOL } = await import('./amkOL')
       return createAMKRomeinsLayerOL()
     },
-    immediateLoad: false,
-    tier: 'premium'
+    immediateLoad: false
   },
   'AMK Steentijd': {
     name: 'AMK Steentijd',
@@ -420,8 +408,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKSteentijdLayerOL } = await import('./amkOL')
       return createAMKSteentijdLayerOL()
     },
-    immediateLoad: false,
-    tier: 'premium'
+    immediateLoad: false
   },
   'AMK Vroege ME': {
     name: 'AMK Vroege ME',
@@ -429,8 +416,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKVroegeMELayerOL } = await import('./amkOL')
       return createAMKVroegeMELayerOL()
     },
-    immediateLoad: false,
-    tier: 'premium'
+    immediateLoad: false
   },
   'AMK Late ME': {
     name: 'AMK Late ME',
@@ -438,8 +424,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKLateMELayerOL } = await import('./amkOL')
       return createAMKLateMELayerOL()
     },
-    immediateLoad: false,
-    tier: 'premium'
+    immediateLoad: false
   },
   'AMK Overig': {
     name: 'AMK Overig',
@@ -447,8 +432,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createAMKOverigLayerOL } = await import('./amkOL')
       return createAMKOverigLayerOL()
     },
-    immediateLoad: false,
-    tier: 'premium'
+    immediateLoad: false
   },
   'Romeinse wegen (regio)': {
     name: 'Romeinse wegen (regio)',
@@ -465,7 +449,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       return createRomeinseWegenWereldLayerOL()
     },
     immediateLoad: false,
-    tier: 'premium',
     regions: ['nl', 'be', 'de', 'fr']  // Internationale laag
   },
   'Kastelen': {
@@ -509,8 +492,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createUIKAVArcheoPuntenLayerOL } = await import('./uikavArcheoPuntenOL')
       return createUIKAVArcheoPuntenLayerOL()
     },
-    immediateLoad: false,
-    tier: 'premium'
+    immediateLoad: false
   },
   'UIKAV Vlakken': {
     name: 'UIKAV Vlakken',
@@ -578,8 +560,7 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       const { createFossielenLayerOL } = await import('./fossielenOL')
       return createFossielenLayerOL()
     },
-    immediateLoad: false,
-    tier: 'premium'
+    immediateLoad: false
   },
   'Fossielen België': {
     name: 'Fossielen België',
@@ -588,7 +569,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       return createFossielenBelgieLayerOL()
     },
     immediateLoad: false,
-    tier: 'premium',
     regions: ['be']
   },
   'Fossielen Duitsland': {
@@ -598,7 +578,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       return createFossielenDuitslandLayerOL()
     },
     immediateLoad: false,
-    tier: 'premium',
     regions: ['de']
   },
   'Fossielen Frankrijk': {
@@ -608,7 +587,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       return createFossielenFrankrijkLayerOL()
     },
     immediateLoad: false,
-    tier: 'premium',
     regions: ['fr']
   },
   'Fossiel Hotspots': {
@@ -618,7 +596,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       return createFossielHotspotsLayerOL()
     },
     immediateLoad: false,
-    tier: 'premium',
     regions: ['nl', 'be', 'de', 'fr']
   },
   'Mineralen Hotspots': {
@@ -628,7 +605,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       return createMineralenHotspotsLayerOL()
     },
     immediateLoad: false,
-    tier: 'premium',
     regions: ['nl', 'be', 'de', 'fr']  // Nu ook NL locaties
   },
   'Goudrivieren': {
@@ -638,7 +614,6 @@ export const layerRegistry: Record<string, LayerDefinition> = {
       return createGoudrivierenLayerOL()
     },
     immediateLoad: false,
-    tier: 'premium',
     regions: ['nl', 'be', 'de', 'fr']  // Internationale laag
   },
 
