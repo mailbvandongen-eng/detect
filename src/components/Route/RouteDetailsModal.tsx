@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Image, Plus, Trash2, FileText, Ruler, Clock, Calendar, MapPin, Camera } from 'lucide-react'
+import { Plus, Trash2, FileText, Ruler, Clock, Calendar, MapPin, Camera } from 'lucide-react'
 import { useRouteRecordingStore } from '../../store/routeRecordingStore'
-import type { RecordedRoute, RoutePhoto } from '../../store/routeRecordingStore'
+import type { RecordedRoute } from '../../store/routeRecordingStore'
+import { AppWindow } from '../UI/AppWindow'
 
 interface RouteDetailsModalProps {
   route: RecordedRoute
@@ -73,77 +73,45 @@ export function RouteDetailsModal({ route, onClose }: RouteDetailsModalProps) {
   ) || route
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[1700] flex items-center justify-center p-4"
-    >
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
-      <motion.div
-        initial={{ scale: 0.95, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.95, y: 20 }}
-        className="relative bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-md max-h-[85vh] flex flex-col"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-purple-500 text-white">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium truncate">{currentRoute.name}</h3>
-            <p className="text-xs text-purple-200">{formatDate(currentRoute.createdAt)}</p>
+    <AppWindow
+      isOpen
+      title={currentRoute.name}
+      icon={<MapPin size={18} />}
+      placement="modal"
+      onClose={onClose}
+      onBack={onClose}
+      subHeader={
+        <>
+          <p className="px-4 py-1.5 text-xs text-gray-500">{formatDate(currentRoute.createdAt)}</p>
+          <div className="flex border-t border-gray-100">
+            <button
+              onClick={() => setActiveTab('info')}
+              className={`flex-1 py-2 text-sm font-medium border-0 outline-none transition-colors ${
+                activeTab === 'info' ? 'text-purple-600 border-b-2 border-purple-500' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <MapPin size={16} className="inline mr-1" /> Info
+            </button>
+            <button
+              onClick={() => setActiveTab('photos')}
+              className={`flex-1 py-2 text-sm font-medium border-0 outline-none transition-colors ${
+                activeTab === 'photos' ? 'text-purple-600 border-b-2 border-purple-500' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Camera size={16} className="inline mr-1" /> Foto's ({currentRoute.photos?.length || 0})
+            </button>
+            <button
+              onClick={() => setActiveTab('notes')}
+              className={`flex-1 py-2 text-sm font-medium border-0 outline-none transition-colors ${
+                activeTab === 'notes' ? 'text-purple-600 border-b-2 border-purple-500' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <FileText size={16} className="inline mr-1" /> Notities
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded bg-purple-400/50 hover:bg-purple-400 transition-colors border-0 outline-none ml-2"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab('info')}
-            className={`flex-1 py-2 text-sm font-medium border-0 outline-none transition-colors ${
-              activeTab === 'info'
-                ? 'text-purple-600 border-b-2 border-purple-500'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <MapPin size={16} className="inline mr-1" />
-            Info
-          </button>
-          <button
-            onClick={() => setActiveTab('photos')}
-            className={`flex-1 py-2 text-sm font-medium border-0 outline-none transition-colors ${
-              activeTab === 'photos'
-                ? 'text-purple-600 border-b-2 border-purple-500'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <Camera size={16} className="inline mr-1" />
-            Foto's ({currentRoute.photos?.length || 0})
-          </button>
-          <button
-            onClick={() => setActiveTab('notes')}
-            className={`flex-1 py-2 text-sm font-medium border-0 outline-none transition-colors ${
-              activeTab === 'notes'
-                ? 'text-purple-600 border-b-2 border-purple-500'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <FileText size={16} className="inline mr-1" />
-            Notities
-          </button>
-        </div>
-
-        {/* Content */}
+        </>
+      }
+    >
         <div className="flex-1 overflow-y-auto p-4">
           {activeTab === 'info' && (
             <div className="space-y-4">
@@ -254,7 +222,6 @@ export function RouteDetailsModal({ route, onClose }: RouteDetailsModalProps) {
             </div>
           )}
         </div>
-      </motion.div>
-    </motion.div>
+    </AppWindow>
   )
 }

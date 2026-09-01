@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { Info, X, FileText, BookOpen, Map, Navigation, MapPin, Layers, MousePointer, Bug, ExternalLink, Cloud, Upload, FolderPlus, Mountain, Gem, Skull, Shield, Maximize2 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Info, FileText, BookOpen, Map, Navigation, MapPin, Layers, MousePointer, Bug, ExternalLink, Cloud, FolderPlus, Gem, Shield } from 'lucide-react'
 import { useUIStore } from '../../store'
 import { version } from '../../../package.json'
-import { HandleidingModal } from './HandleidingModal'
+import { AppWindow } from './AppWindow'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
@@ -11,7 +10,8 @@ const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
 type TabType = 'info' | 'functies' | 'handleiding'
 
 export function InfoButton() {
-  const { infoPanelOpen, toggleInfoPanel } = useUIStore()
+  const infoPanelOpen = useUIStore(state => state.activeWindow === 'info')
+  const toggleInfoPanel = useUIStore(state => state.toggleInfoPanel)
   const [activeTab, setActiveTab] = useState<TabType>('info')
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
@@ -21,38 +21,14 @@ export function InfoButton() {
   ]
 
   return (
-    <AnimatePresence>
-        {infoPanelOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              className="fixed inset-0 z-[1600] bg-black/50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={toggleInfoPanel}
-            />
-
-            {/* Modal Content */}
-            <motion.div
-              className="fixed inset-4 z-[1601] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-w-lg mx-auto my-auto max-h-[90vh]"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-            >
-              {/* Header - blue bg, white text */}
-              <div className="flex items-center justify-between px-4 py-3 bg-blue-500">
-                <span className="font-medium text-white">DetectorApp NL v{version}</span>
-                <button
-                  onClick={toggleInfoPanel}
-                  className="p-1 rounded bg-blue-400/50 hover:bg-blue-400 transition-colors border-0 outline-none"
-                >
-                  <X size={18} className="text-white" strokeWidth={2.5} />
-                </button>
-              </div>
-
-              {/* Tabs */}
-              <div className="flex border-b border-gray-200">
+    <AppWindow
+      isOpen={infoPanelOpen}
+      title={`Detect v${version}`}
+      icon={<Info size={18} />}
+      placement="modal"
+      onClose={toggleInfoPanel}
+      subHeader={
+        <div className="flex">
                 {tabs.map(tab => (
                   <button
                     key={tab.id}
@@ -67,34 +43,31 @@ export function InfoButton() {
                     {tab.label}
                   </button>
                 ))}
-              </div>
-
-              {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 text-sm">
-                {activeTab === 'info' && <InfoTab />}
-                {activeTab === 'functies' && <FunctiesTab />}
-                {activeTab === 'handleiding' && <HandleidingTab />}
-
-                {/* Bug report & Version */}
-                <section className="pt-2 border-t border-gray-200 space-y-2">
-                  <a
-                    href={BUG_REPORT_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full px-3 py-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                  >
-                    <Bug size={14} />
-                    <span className="text-sm">Meld een bug of geef feedback</span>
-                  </a>
-                  <p className="text-xs text-gray-400 text-center">
-                    DetectorApp NL v{version} - Gratis en zonder tracking
-                  </p>
-                </section>
-              </div>
-            </motion.div>
-          </>
-        )}
-    </AnimatePresence>
+        </div>
+      }
+      footer={
+        <div className="space-y-1">
+          <a
+            href={BUG_REPORT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="detect-window-secondary-button flex w-full items-center justify-center gap-2"
+          >
+            <Bug size={14} />
+            <span>Meld een bug of geef feedback</span>
+          </a>
+          <p className="text-xs text-gray-400 text-center">
+            Detect v{version} · gratis en zonder tracking
+          </p>
+        </div>
+      }
+    >
+      <div className="p-4 space-y-4 text-sm">
+        {activeTab === 'info' && <InfoTab />}
+        {activeTab === 'functies' && <FunctiesTab />}
+        {activeTab === 'handleiding' && <HandleidingTab />}
+      </div>
+    </AppWindow>
   )
 }
 
@@ -104,7 +77,7 @@ function InfoTab() {
       <section>
         <h3 className="font-semibold text-gray-800 mb-2">Over deze app</h3>
         <p className="text-gray-600">
-          DetectorApp NL is dé gratis kaartapplicatie voor metaaldetectie, fossielen zoeken en archeologische verkenning in Nederland.
+          Detect is dé gratis kaartapplicatie voor metaaldetectie, fossielen zoeken en archeologische verkenning in Nederland.
           Met 70+ kaartlagen, GPS tracking met richtingspijl, eigen lagen, cloud sync en uitgebreid vondstenbeheer.
         </p>
       </section>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Ruler, X, Trash2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Ruler, Trash2 } from 'lucide-react'
 import { useMapStore, useUIStore, useSettingsStore } from '../../store'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
@@ -10,13 +10,17 @@ import { getLength } from 'ol/sphere'
 import { Style, Stroke, Fill, Circle as CircleStyle, Text } from 'ol/style'
 import { unByKey } from 'ol/Observable'
 import type Feature from 'ol/Feature'
+import type { FeatureLike } from 'ol/Feature'
 import type { EventsKey } from 'ol/events'
+import { AppWindow } from './AppWindow'
 
 export function MeasureTool() {
   const map = useMapStore(state => state.map)
   const setDrawingMode = useUIStore(state => state.setDrawingMode)
+  const isActive = useUIStore(state => state.activeWindow === 'measure')
+  const openWindow = useUIStore(state => state.openWindow)
+  const closeWindow = useUIStore(state => state.closeWindow)
   const showMeasureTool = useSettingsStore(state => state.showMeasureTool)
-  const [isActive, setIsActive] = useState(false)
   const [currentDistance, setCurrentDistance] = useState<string | null>(null)
   const [totalMeasurements, setTotalMeasurements] = useState(0)
 
@@ -123,9 +127,11 @@ export function MeasureTool() {
   }, [map, isActive])
 
   const toggleMeasure = () => {
-    setIsActive(!isActive)
     if (isActive) {
+      closeWindow()
       setCurrentDistance(null)
+    } else {
+      openWindow('measure')
     }
   }
 
@@ -155,28 +161,22 @@ export function MeasureTool() {
         <Ruler size={20} className={isActive ? 'text-white' : 'text-blue-500 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]'} />
       </motion.button>
 
-      {/* Measurement panel */}
-      <AnimatePresence>
-        {isActive && (
-          <motion.div
-            initial={{ opacity: 0, x: -10, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -10, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="fixed top-[90px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden min-w-[180px]"
+      <AppWindow
+        isOpen={isActive}
+        title="Meten"
+        icon={<Ruler size={18} />}
+        placement="left"
+        onClose={toggleMeasure}
+        footer={totalMeasurements > 0 ? (
+          <button
+            onClick={clearMeasurements}
+            className="detect-window-secondary-button w-full text-red-600"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-3 py-1.5 bg-blue-500">
-              <span className="font-medium text-white text-xs">Meten</span>
-              <button
-                onClick={toggleMeasure}
-                className="p-0.5 rounded hover:bg-white/20 transition-colors border-0 outline-none"
-              >
-                <X size={14} className="text-white" />
-              </button>
-            </div>
-
-            {/* Content */}
+            <Trash2 size={14} />
+            Wis metingen ({totalMeasurements})
+          </button>
+        ) : undefined}
+      >
             <div className="p-3 space-y-2">
               <p className="text-xs text-gray-500">
                 Klik om te meten. Dubbelklik om te stoppen.
@@ -188,20 +188,8 @@ export function MeasureTool() {
                   <div className="text-lg font-bold text-blue-700">{currentDistance}</div>
                 </div>
               )}
-
-              {totalMeasurements > 0 && (
-                <button
-                  onClick={clearMeasurements}
-                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors border-0 outline-none"
-                >
-                  <Trash2 size={12} />
-                  Wis metingen ({totalMeasurements})
-                </button>
-              )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </AppWindow>
     </>
   )
 }
@@ -215,7 +203,7 @@ function formatLength(length: number): string {
 }
 
 // Style for completed measurements
-function createStyle(feature: Feature): Style {
+function createStyle(feature: FeatureLike): Style {
   const distance = feature.get('distance') as string | undefined
 
   return new Style({

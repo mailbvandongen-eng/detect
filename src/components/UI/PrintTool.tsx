@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Printer, X, Download, FileImage, Loader2 } from 'lucide-react'
-import { useMapStore, useSettingsStore } from '../../store'
+import { motion } from 'framer-motion'
+import { Printer, Download, FileImage, Loader2 } from 'lucide-react'
+import { useMapStore, useSettingsStore, useUIStore } from '../../store'
+import { AppWindow } from './AppWindow'
 
 type PrintFormat = 'png' | 'jpeg' | 'pdf'
 
@@ -10,7 +11,9 @@ export function PrintTool() {
   const showPrintTool = useSettingsStore(state => state.showPrintTool)
   const showMeasureTool = useSettingsStore(state => state.showMeasureTool)
   const showDrawTool = useSettingsStore(state => state.showDrawTool)
-  const [isOpen, setIsOpen] = useState(false)
+  const isOpen = useUIStore(state => state.activeWindow === 'print')
+  const toggleWindow = useUIStore(state => state.toggleWindow)
+  const closeWindow = useUIStore(state => state.closeWindow)
   const [isExporting, setIsExporting] = useState(false)
   const [format, setFormat] = useState<PrintFormat>('png')
   const [includeTitle, setIncludeTitle] = useState(true)
@@ -68,7 +71,7 @@ export function PrintTool() {
 
       // Add attribution
       ctx.textAlign = 'left'
-      ctx.fillText('DetectorApp.nl', 10, exportCanvas.height - 10)
+      ctx.fillText('Detect', 10, exportCanvas.height - 10)
 
       // Export based on format
       const filename = `kaart-${new Date().toISOString().split('T')[0]}`
@@ -131,7 +134,7 @@ export function PrintTool() {
         }, mimeType, quality)
       }
 
-      setIsOpen(false)
+      closeWindow()
     } catch (error) {
       console.error('Export failed:', error)
       alert('Kon de kaart niet exporteren. Probeer het opnieuw.')
@@ -153,7 +156,7 @@ export function PrintTool() {
     <>
       {/* Print button - left side, dynamic position */}
       <motion.button
-        onClick={() => setIsOpen(true)}
+        onClick={() => toggleWindow('print')}
         className="fixed left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         style={{ top: `${topPosition}px` }}
         whileHover={{ scale: 1.05 }}
@@ -163,39 +166,32 @@ export function PrintTool() {
         <Printer size={20} className="text-indigo-500 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>
 
-      {/* Print modal */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              className="fixed inset-0 bg-black/40 z-[1700]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
-            />
-
-            {/* Modal */}
-            <motion.div
-              className="fixed inset-4 z-[1701] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-w-sm mx-auto my-auto max-h-[85vh]"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.15 }}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-green-500 to-green-600">
-                <span className="font-medium text-white">Kaart Exporteren</span>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none"
-                >
-                  <X size={18} className="text-white" />
-                </button>
-              </div>
-
-              {/* Content */}
+      <AppWindow
+        isOpen={isOpen}
+        title="Kaart exporteren"
+        icon={<Printer size={18} />}
+        placement="modal"
+        onClose={closeWindow}
+        footer={
+          <button
+            onClick={handleExport}
+            disabled={isExporting}
+            className="detect-window-primary-button w-full disabled:opacity-50"
+          >
+            {isExporting ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                <span>Exporteren...</span>
+              </>
+            ) : (
+              <>
+                <Download size={18} />
+                <span>{format === 'pdf' ? 'Printen' : 'Downloaden'}</span>
+              </>
+            )}
+          </button>
+        }
+      >
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {/* Title option */}
                 <div>
@@ -226,21 +222,18 @@ export function PrintTool() {
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     <FormatButton
-                      format="png"
                       selected={format === 'png'}
                       onClick={() => setFormat('png')}
                       icon={<FileImage size={16} />}
                       label="PNG"
                     />
                     <FormatButton
-                      format="jpeg"
                       selected={format === 'jpeg'}
                       onClick={() => setFormat('jpeg')}
                       icon={<FileImage size={16} />}
                       label="JPEG"
                     />
                     <FormatButton
-                      format="pdf"
                       selected={format === 'pdf'}
                       onClick={() => setFormat('pdf')}
                       icon={<Printer size={16} />}
@@ -249,41 +242,18 @@ export function PrintTool() {
                   </div>
                 </div>
 
-                {/* Export button */}
-                <button
-                  onClick={handleExport}
-                  disabled={isExporting}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors border-0 outline-none disabled:opacity-50"
-                >
-                  {isExporting ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />
-                      <span>Exporteren...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Download size={18} />
-                      <span>{format === 'pdf' ? 'Printen' : 'Downloaden'}</span>
-                    </>
-                  )}
-                </button>
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      </AppWindow>
     </>
   )
 }
 
 function FormatButton({
-  format,
   selected,
   onClick,
   icon,
   label
 }: {
-  format: PrintFormat
   selected: boolean
   onClick: () => void
   icon: React.ReactNode

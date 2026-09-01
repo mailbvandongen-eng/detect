@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Navigation, Crosshair, Camera, X, Trash2, ChevronDown, Edit3, Route } from 'lucide-react'
+import { Navigation, Crosshair, Camera, Trash2, ChevronDown, Edit3, MapPin } from 'lucide-react'
 import { toLonLat } from 'ol/proj'
 import { useGPSStore } from '../../store/gpsStore'
 import { useMapStore } from '../../store/mapStore'
@@ -9,7 +9,8 @@ import { useCustomPointLayerStore, DEFAULT_VONDSTEN_LAYER_ID } from '../../store
 import { useRouteRecordingStore } from '../../store/routeRecordingStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { announceVondst } from '../../utils/voiceFeedback'
-import { savePhoto, getThumbnailUrl, getPhoto } from '../../lib/photoStorage'
+import { savePhoto } from '../../lib/photoStorage'
+import { AppWindow } from '../UI/AppWindow'
 
 interface Props {
   onClose: () => void
@@ -134,13 +135,11 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
   const vondstFormPhoto = useUIStore(state => state.vondstFormPhoto)
   const customLayers = useCustomPointLayerStore(state => state.layers)
   const addPointToLayer = useCustomPointLayerStore(state => state.addPoint)
-  const addPhotoToPoint = useCustomPointLayerStore(state => state.addPhotoToPoint)
   const voiceFeedbackEnabled = useSettingsStore(state => state.voiceFeedbackEnabled)
 
   // Get active route info for linking
   const routeState = useRouteRecordingStore(state => state.state)
   const routeStartTime = useRouteRecordingStore(state => state.startTime)
-  const savedRoutes = useRouteRecordingStore(state => state.savedRoutes)
 
   // Generate a temporary route name for active recording
   const getActiveRouteName = () => {
@@ -243,8 +242,6 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
   }
 
   const handleRemovePhoto = () => setPhoto(null)
-
-  const isValidObjectType = !!objectType
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -378,31 +375,29 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
   }
 
   return (
-    <motion.div
-      className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col"
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.9, y: 20 }}
-      >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-4 flex justify-between items-center flex-shrink-0">
-          <h2 className="text-lg font-semibold">Nieuwe Vondst</h2>
+    <AppWindow
+      isOpen
+      title="Nieuwe vondst"
+      icon={<MapPin size={18} />}
+      placement="modal"
+      onClose={onClose}
+      footer={
+        <div className="flex gap-3">
+          <button type="button" onClick={onClose} className="detect-window-secondary-button flex-1">
+            Annuleren
+          </button>
           <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors border-0 outline-none"
+            type="submit"
+            form="detect-vondst-form"
+            disabled={saving || !effectiveLocation || pickingLocation || !objectType}
+            className="detect-window-primary-button flex-1 disabled:opacity-50"
           >
-            <X size={20} />
+            {saving ? 'Opslaan...' : 'Opslaan'}
           </button>
         </div>
-
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+      }
+    >
+        <form id="detect-vondst-form" onSubmit={handleSubmit}>
           <div className="p-5 space-y-4">
 
             {/* Photo section */}
@@ -597,25 +592,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
             </div>
           </div>
 
-          {/* Footer buttons */}
-          <div className="p-5 pt-0 flex gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium border-0 outline-none"
-            >
-              Annuleren
-            </button>
-            <button
-              type="submit"
-              disabled={saving || !effectiveLocation || pickingLocation || !objectType}
-              className="flex-1 px-4 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium border-0 outline-none"
-            >
-              {saving ? 'Opslaan...' : 'Opslaan'}
-            </button>
-          </div>
         </form>
-      </motion.div>
-    </motion.div>
+    </AppWindow>
   )
 }

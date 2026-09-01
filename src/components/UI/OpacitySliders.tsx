@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { SlidersHorizontal, ChevronDown, ChevronUp } from 'lucide-react'
 import { useLayerStore } from '../../store/layerStore'
+import { useUIStore } from '../../store/uiStore'
+import { AppWindow } from './AppWindow'
 
 // All layers that should have opacity sliders - vlak/overlay lagen, geen punten
 const OPACITY_LAYERS = [
@@ -59,14 +61,20 @@ const COLOR_CLASSES: Record<string, string> = {
 }
 
 export function OpacitySliders() {
-  const [isOpen, setIsOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
+  const isOpen = useUIStore(state => state.activeWindow === 'opacity')
+  const toggleWindow = useUIStore(state => state.toggleWindow)
+  const closeWindow = useUIStore(state => state.closeWindow)
   const visibleLayers = useLayerStore(state => state.visible)
   const opacities = useLayerStore(state => state.opacity)
   const setLayerOpacity = useLayerStore(state => state.setLayerOpacity)
 
   // Filter to only visible layers
   const activeSliders = OPACITY_LAYERS.filter(layer => visibleLayers[layer.name])
+
+  useEffect(() => {
+    if (isOpen && activeSliders.length === 0) closeWindow()
+  }, [activeSliders.length, closeWindow, isOpen])
 
   // Only show if at least one layer is visible
   if (activeSliders.length === 0) return null
@@ -79,7 +87,7 @@ export function OpacitySliders() {
     <div className="fixed bottom-[56px] right-2 z-[900]">
       {/* Toggle button */}
       <motion.button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => toggleWindow('opacity')}
         className="w-11 h-11 bg-white/80 rounded-xl backdrop-blur-sm shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none hover:bg-white/90 transition-colors"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -94,30 +102,23 @@ export function OpacitySliders() {
         )}
       </motion.button>
 
-      {/* Sliders panel */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Invisible backdrop - click to close */}
-            <motion.div
-              className="fixed inset-0 z-[-1]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, x: 20, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 20, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-              className="absolute bottom-0 right-14 bg-white/95 rounded-xl shadow-lg overflow-hidden min-w-[220px] max-h-[60vh] flex flex-col"
-            >
-              {/* Header */}
-              <div className="px-3 py-1.5 bg-blue-500">
-                <span className="font-medium text-white text-xs">Transparantie</span>
-              </div>
-            <div className="p-3 overflow-y-auto flex-1">
+      <AppWindow
+        isOpen={isOpen}
+        title="Transparantie"
+        icon={<SlidersHorizontal size={18} />}
+        placement="right"
+        onClose={closeWindow}
+        footer={hasMore ? (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="detect-window-secondary-button w-full"
+          >
+            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {isExpanded ? 'Minder tonen' : `${activeSliders.length - 3} meer tonen`}
+          </button>
+        ) : undefined}
+      >
+            <div className="p-4">
             <div className="space-y-3">
               {displayedSliders.map(layer => {
                 const opacity = opacities[layer.name] ?? layer.default
@@ -144,30 +145,8 @@ export function OpacitySliders() {
               })}
             </div>
 
-            {/* Expand/collapse button */}
-            {hasMore && (
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="w-full mt-3 pt-2 border-t border-gray-200 flex items-center justify-center gap-1 text-xs text-gray-500 hover:text-gray-700"
-              >
-                {isExpanded ? (
-                  <>
-                    <ChevronUp size={14} />
-                    Minder tonen
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown size={14} />
-                    {activeSliders.length - 3} meer...
-                  </>
-                )}
-              </button>
-            )}
             </div>
-          </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      </AppWindow>
     </div>
   )
 }

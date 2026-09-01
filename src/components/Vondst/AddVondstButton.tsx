@@ -9,7 +9,7 @@ export function AddVondstButton() {
   const { isAuthenticated, loginAnonymous } = useAuth()
   const vondstenLocalOnly = useSettingsStore(state => state.vondstenLocalOnly)
   const showVondstButton = useSettingsStore(state => state.showVondstButton)
-  const vondstFormOpen = useUIStore(state => state.vondstFormOpen)
+  const vondstFormOpen = useUIStore(state => state.activeWindow === 'vondstForm')
   const vondstFormLocation = useUIStore(state => state.vondstFormLocation)
   const openVondstForm = useUIStore(state => state.openVondstForm)
   const closeVondstForm = useUIStore(state => state.closeVondstForm)

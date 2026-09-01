@@ -1,20 +1,17 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, Trash2, Layers } from 'lucide-react'
-import { useUIStore, useSettingsStore } from '../../store'
+import { Plus, Trash2, Layers } from 'lucide-react'
+import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, DEFAULT_CATEGORIES } from '../../store/customPointLayerStore'
+import { AppWindow } from '../UI/AppWindow'
 
 export function CreateLayerModal() {
-  const { createLayerModalOpen, closeCreateLayerModal } = useUIStore()
+  const createLayerModalOpen = useUIStore(state => state.activeWindow === 'createLayer')
+  const backWindow = useUIStore(state => state.backWindow)
   const { addLayer } = useCustomPointLayerStore()
-  const settings = useSettingsStore()
 
   const [name, setName] = useState('')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([...DEFAULT_CATEGORIES])
   const [newCategory, setNewCategory] = useState('')
-
-  // Calculate font size based on fontScale setting
-  const baseFontSize = 14 * settings.fontScale / 100
 
   const handleAddCategory = () => {
     const trimmed = newCategory.trim()
@@ -45,67 +42,40 @@ export function CreateLayerModal() {
     setName('')
     setSelectedCategories([...DEFAULT_CATEGORIES])
     setNewCategory('')
-    closeCreateLayerModal()
+    backWindow()
   }
 
   const handleClose = () => {
     setName('')
     setSelectedCategories([...DEFAULT_CATEGORIES])
     setNewCategory('')
-    closeCreateLayerModal()
+    backWindow()
   }
 
   return (
-    <AnimatePresence>
-      {createLayerModalOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 z-[1700] bg-black/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleClose}
-          />
-
-          {/* Modal */}
-          <motion.div
-            className="fixed inset-4 z-[1701] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-w-sm mx-auto my-auto max-h-[85vh]"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+    <AppWindow
+      isOpen={createLayerModalOpen}
+      title="Nieuwe laag"
+      icon={<Layers size={18} />}
+      placement="modal"
+      onClose={handleClose}
+      onBack={handleClose}
+      footer={
+        <div className="flex gap-3">
+          <button onClick={handleClose} className="detect-window-secondary-button flex-1">
+            Annuleren
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!name.trim()}
+            className="detect-window-primary-button flex-1 disabled:opacity-50"
           >
-            {/* Header - oranje voor eigen lagen */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-              <div className="flex items-center gap-2">
-                <Layers size={18} />
-                <span className="font-medium">Nieuwe laag</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Font size slider */}
-                <span className="text-[10px] opacity-70">T</span>
-                <input
-                  type="range"
-                  min="80"
-                  max="150"
-                  step="10"
-                  value={settings.fontScale}
-                  onChange={(e) => settings.setFontScale(parseInt(e.target.value))}
-                  className="header-slider w-16 opacity-70 hover:opacity-100 transition-opacity"
-                  title={`Tekstgrootte: ${settings.fontScale}%`}
-                />
-                <span className="text-xs opacity-70">T</span>
-                <button
-                  onClick={handleClose}
-                  className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none ml-1"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-            </div>
-
-            {/* Content - met font scaling */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ fontSize: `${baseFontSize}px` }}>
+            Aanmaken
+          </button>
+        </div>
+      }
+    >
+            <div className="p-4 space-y-4">
               {/* Layer name */}
               <div>
                 <label className="block font-medium text-gray-700 mb-1" style={{ fontSize: '0.9em' }}>
@@ -201,28 +171,6 @@ export function CreateLayerModal() {
                 </div>
               </div>
             </div>
-
-            {/* Footer */}
-            <div className="p-4 flex gap-3" style={{ fontSize: `${baseFontSize}px` }}>
-              <button
-                onClick={handleClose}
-                className="flex-1 px-4 py-2 bg-white hover:bg-blue-50 rounded-lg transition-colors border-0 outline-none text-gray-600"
-                style={{ fontSize: '1em' }}
-              >
-                Annuleren
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={!name.trim()}
-                className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors border-0 outline-none"
-                style={{ fontSize: '1em' }}
-              >
-                Aanmaken
-              </button>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+    </AppWindow>
   )
 }

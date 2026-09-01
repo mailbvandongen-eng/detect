@@ -4,7 +4,8 @@ import { useUIStore } from '../../store'
 import { LayerItem } from './LayerItem'
 
 export function BackgroundsPanel() {
-  const { backgroundsPanelOpen, toggleBackgroundsPanel } = useUIStore()
+  const backgroundsPanelOpen = useUIStore(state => state.activeWindow === 'backgrounds')
+  const toggleBackgroundsPanel = useUIStore(state => state.toggleBackgroundsPanel)
 
   return (
     <AnimatePresence>

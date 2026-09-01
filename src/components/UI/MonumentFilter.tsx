@@ -6,9 +6,10 @@
 
 import { useEffect, useRef } from 'react'
 import { Filter } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
 import { useLayerStore, useUIStore } from '../../store'
+import { AppWindow } from './AppWindow'
 
 // AMK layers that trigger filter visibility
 const AMK_LAYERS = [
@@ -34,7 +35,7 @@ export function MonumentFilter() {
   } = useMonumentFilterStore()
 
   // Use UIStore for panel state (closes other panels)
-  const isExpanded = useUIStore(state => state.monumentFilterOpen)
+  const isExpanded = useUIStore(state => state.activeWindow === 'monumentFilter')
   const toggleMonumentFilter = useUIStore(state => state.toggleMonumentFilter)
   const closeMonumentFilter = useUIStore(state => state.closeMonumentFilter)
 
@@ -88,30 +89,19 @@ export function MonumentFilter() {
         <Filter size={20} />
       </motion.button>
 
-      {/* Expanded panel - compact design */}
-      <AnimatePresence>
-        {isExpanded && (
-          <>
-            {/* Invisible backdrop */}
-            <motion.div
-              className="fixed inset-0 z-[800]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={closeMonumentFilter}
-            />
-            <motion.div
-              initial={{ opacity: 0, x: -10, scale: 0.95 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -10, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="fixed bottom-[116px] left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden"
-            >
-              {/* Header */}
-              <div className="px-3 py-1.5 bg-purple-500">
-                <span className="font-medium text-white text-xs">Monument Filter</span>
-              </div>
-              <div className="p-2 space-y-1.5">
+      <AppWindow
+        isOpen={isExpanded}
+        title="Monumentfilter"
+        icon={<Filter size={18} />}
+        placement="left"
+        onClose={closeMonumentFilter}
+        footer={hasKeyword ? (
+          <button onClick={handleClear} className="detect-window-secondary-button w-full">
+            Filter wissen
+          </button>
+        ) : undefined}
+      >
+              <div className="p-3 space-y-3">
                 {/* Search + toggle row */}
                 <div className="flex items-center gap-2">
                   {/* Search input */}
@@ -156,10 +146,7 @@ export function MonumentFilter() {
                   </div>
                 )}
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      </AppWindow>
     </div>
   )
 }

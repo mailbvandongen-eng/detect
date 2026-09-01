@@ -1,17 +1,15 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Layers, Search, MapPin, Compass, SlidersHorizontal, Filter, Menu, RotateCcw, BookOpen } from 'lucide-react'
+import { Layers, Search, MapPin, Compass, SlidersHorizontal, Filter, Menu, RotateCcw, BookOpen } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
-import { HandleidingModal } from './HandleidingModal'
+import { AppWindow } from './AppWindow'
 
 interface WelcomeModalProps {
   isOpen: boolean
   onClose: () => void
+  onOpenManual: () => void
 }
 
-export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
+export function WelcomeModal({ isOpen, onClose, onOpenManual }: WelcomeModalProps) {
   const setHideWelcomeModal = useSettingsStore(state => state.setHideWelcomeModal)
-  const [showHandleiding, setShowHandleiding] = useState(false)
 
   const handleClose = () => {
     onClose()
@@ -23,52 +21,34 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
   }
 
   const handleShowHandleiding = () => {
-    onClose() // Close welcome modal
-    setShowHandleiding(true) // Open handleiding
+    onOpenManual()
   }
 
   return (
-    <>
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop - click to close */}
-          <motion.div
-            className="fixed inset-0 bg-black/40 z-[2000]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleClose}
-          />
-
-          {/* Floating popup */}
-          <motion.div
-            className="fixed inset-x-4 top-4 bottom-4 z-[2001] flex items-center justify-center pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+    <AppWindow
+      isOpen={isOpen}
+      title="Hoe werkt Detect?"
+      icon={<BookOpen size={18} />}
+      placement="modal"
+      onClose={handleClose}
+      footer={
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={handleDontShowAgain}
+            className="detect-window-secondary-button"
           >
-            <motion.div
-              className="bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col w-full max-w-md max-h-full pointer-events-auto"
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ duration: 0.2 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
-                <h2 className="text-lg font-semibold text-gray-800">Hoe werkt de app?</h2>
-                <button
-                  onClick={handleClose}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors border-0 outline-none"
-                >
-                  <X size={20} className="text-gray-500" />
-                </button>
-              </div>
-
-              {/* Content - scrollable */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            Toon niet meer
+          </button>
+          <button
+            onClick={handleClose}
+            className="detect-window-primary-button"
+          >
+            Begrepen
+          </button>
+        </div>
+      }
+    >
+              <div className="p-4 space-y-4">
                 {/* Tools section */}
                 <section>
                   <h3 className="text-sm font-semibold text-gray-700 mb-2">Knoppen op de kaart</h3>
@@ -108,31 +88,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                   </div>
                 </button>
               </div>
-
-              {/* Footer */}
-              <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-gray-100 bg-gray-50 flex-shrink-0">
-                <button
-                  onClick={handleDontShowAgain}
-                  className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none"
-                >
-                  Toon niet meer
-                </button>
-                <button
-                  onClick={handleClose}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors border-0 outline-none"
-                >
-                  Begrepen
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-
-      {/* Handleiding Modal - renders outside of welcome modal */}
-      <HandleidingModal isOpen={showHandleiding} onClose={() => setShowHandleiding(false)} />
-    </>
+    </AppWindow>
   )
 }
 

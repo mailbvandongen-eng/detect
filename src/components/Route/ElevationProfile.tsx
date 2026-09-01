@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
-import { X, Mountain, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Mountain, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import type { RecordedRoute } from '../../store/routeRecordingStore'
+import { AppWindow } from '../UI/AppWindow'
 
 interface ElevationProfileProps {
   route: RecordedRoute
@@ -171,32 +171,25 @@ export function ElevationProfile({ route, onClose }: ElevationProfileProps) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      className="fixed inset-4 z-[1700] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-w-lg mx-auto my-auto max-h-[70vh]"
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-purple-500 text-white">
-        <div className="flex items-center gap-2">
-          <Mountain size={20} />
-          <span className="font-medium">Hoogteprofiel</span>
+    <AppWindow
+      isOpen
+      title="Hoogteprofiel"
+      icon={<Mountain size={18} />}
+      placement="modal"
+      onClose={onClose}
+      onBack={onClose}
+      subHeader={
+        <div className="px-4 py-2 bg-purple-50">
+          <h3 className="font-medium text-gray-800 truncate">{route.name}</h3>
+          <p className="text-xs text-gray-500">{formatDistance(route.totalDistance)}</p>
         </div>
-        <button
-          onClick={onClose}
-          className="p-1 rounded bg-purple-400/50 hover:bg-purple-400 transition-colors border-0 outline-none"
-        >
-          <X size={18} />
-        </button>
-      </div>
-
-      {/* Route name */}
-      <div className="px-4 py-2 bg-purple-50 border-b border-purple-100">
-        <h3 className="font-medium text-gray-800 truncate">{route.name}</h3>
-        <p className="text-xs text-gray-500">{formatDistance(route.totalDistance)}</p>
-      </div>
-
+      }
+      footer={
+        <p className="text-xs text-yellow-700">
+          <strong>Let op:</strong> dit zijn gesimuleerde hoogtewaarden. Koppeling met AHN-data volgt later.
+        </p>
+      }
+    >
       {/* Stats */}
       <div className="grid grid-cols-4 gap-2 p-3 border-b border-gray-100">
         <div className="text-center">
@@ -239,12 +232,6 @@ export function ElevationProfile({ route, onClose }: ElevationProfileProps) {
         />
       </div>
 
-      {/* Note */}
-      <div className="px-4 py-2 bg-yellow-50 border-t border-yellow-100">
-        <p className="text-xs text-yellow-700">
-          <strong>Let op:</strong> Dit zijn gesimuleerde hoogtewaarden. Koppeling met AHN-data komt binnenkort.
-        </p>
-      </div>
-    </motion.div>
+    </AppWindow>
   )
 }

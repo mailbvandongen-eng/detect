@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Pencil, X, Trash2, MapPin, Spline, Pentagon, Move, Save } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Pencil, Trash2, MapPin, Spline, Pentagon, Move, Save } from 'lucide-react'
 import { useMapStore, useUIStore, useSettingsStore } from '../../store'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import VectorLayer from 'ol/layer/Vector'
@@ -10,9 +10,9 @@ import { LineString, Polygon, Point } from 'ol/geom'
 import { getLength, getArea } from 'ol/sphere'
 import { Style, Stroke, Fill, Circle as CircleStyle, Text } from 'ol/style'
 import { toLonLat } from 'ol/proj'
-import type Feature from 'ol/Feature'
-import type { Geometry } from 'ol/geom'
+import type { FeatureLike } from 'ol/Feature'
 import type { FeatureGeometry, GeometryType } from '../../store/customPointLayerStore'
+import { AppWindow } from './AppWindow'
 
 type DrawMode = 'select' | 'point' | 'line' | 'polygon'
 
@@ -22,14 +22,16 @@ const DRAWINGS_LAYER_NAME = 'Mijn Tekeningen'
 export function DrawTool() {
   const map = useMapStore(state => state.map)
   const setDrawingMode = useUIStore(state => state.setDrawingMode)
+  const isActive = useUIStore(state => state.activeWindow === 'draw')
+  const openWindow = useUIStore(state => state.openWindow)
+  const closeWindow = useUIStore(state => state.closeWindow)
   const showDrawTool = useSettingsStore(state => state.showDrawTool)
   const showMeasureTool = useSettingsStore(state => state.showMeasureTool)
-  const [isActive, setIsActive] = useState(false)
   const [drawMode, setDrawMode] = useState<DrawMode>('select')
   const [featureCount, setFeatureCount] = useState(0)
   const [currentMeasurement, setCurrentMeasurement] = useState<string | null>(null)
 
-  const { layers, addLayer, addPoint, getLayer } = useCustomPointLayerStore()
+  const { layers, addPoint } = useCustomPointLayerStore()
 
   const layerRef = useRef<VectorLayer<VectorSource> | null>(null)
   const sourceRef = useRef<VectorSource | null>(null)
@@ -186,8 +188,10 @@ export function DrawTool() {
         return
       }
       clearDrawings()
+      closeWindow()
+    } else {
+      openWindow('draw')
     }
-    setIsActive(!isActive)
     setDrawMode('select')
     setCurrentMeasurement(null)
   }
@@ -278,7 +282,7 @@ export function DrawTool() {
 
     alert(`${savedCount} tekening(en) opgeslagen naar "${DRAWINGS_LAYER_NAME}"`)
     clearDrawings()
-    setIsActive(false)
+    closeWindow()
   }
 
   // Don't render if hidden
@@ -304,29 +308,33 @@ export function DrawTool() {
         <Pencil size={20} className={isActive ? 'text-white' : 'text-orange-500 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]'} />
       </motion.button>
 
-      {/* Drawing panel */}
-      <AnimatePresence>
-        {isActive && (
-          <motion.div
-            initial={{ opacity: 0, x: -10, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -10, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="fixed left-[56px] z-[801] bg-white/95 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden min-w-[200px]"
-            style={{ top: `${topPosition}px` }}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-3 py-1.5 bg-orange-500">
-              <span className="font-medium text-white text-xs">Tekenen</span>
-              <button
-                onClick={toggleDraw}
-                className="p-0.5 rounded hover:bg-white/20 transition-colors border-0 outline-none"
-              >
-                <X size={14} className="text-white" />
-              </button>
-            </div>
-
-            {/* Content */}
+      <AppWindow
+        isOpen={isActive}
+        title="Tekenen"
+        icon={<Pencil size={18} />}
+        placement="left"
+        onClose={toggleDraw}
+        footer={featureCount > 0 ? (
+          <div className="flex gap-2">
+            <button
+              onClick={saveDrawings}
+              className="detect-window-primary-button flex-1"
+            >
+              <Save size={14} />
+              Opslaan ({featureCount})
+            </button>
+            <button
+              onClick={() => {
+                if (confirm('Alle tekeningen verwijderen?')) clearDrawings()
+              }}
+              className="detect-window-icon-button text-red-600"
+              aria-label="Alle tekeningen verwijderen"
+            >
+              <Trash2 size={15} />
+            </button>
+          </div>
+        ) : undefined}
+      >
             <div className="p-3 space-y-3">
               {/* Drawing tools */}
               <div className="flex gap-1">
@@ -373,31 +381,8 @@ export function DrawTool() {
                 </div>
               )}
 
-              {featureCount > 0 && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={saveDrawings}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors border-0 outline-none"
-                  >
-                    <Save size={12} />
-                    Opslaan ({featureCount})
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm('Alle tekeningen verwijderen?')) {
-                        clearDrawings()
-                      }
-                    }}
-                    className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors border-0 outline-none"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </AppWindow>
     </>
   )
 }
@@ -445,7 +430,7 @@ function formatArea(area: number): string {
 }
 
 // Style for completed drawings
-function createStyle(feature: Feature<Geometry>): Style {
+function createStyle(feature: FeatureLike): Style {
   const measurement = feature.get('measurement') as string | undefined
   const drawType = feature.get('drawType') as DrawMode
 

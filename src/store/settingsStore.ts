@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export type DefaultBackground = 'Esri (licht)' | 'Luchtfoto' | 'OpenStreetMap'
+export type DetectTheme = 'blue' | 'forest' | 'earth' | 'purple'
 
 export interface SettingsState {
   // Kaart
@@ -32,6 +33,7 @@ export interface SettingsState {
 
   // Weergave
   fontScale: number  // 80-150, percentage scale for app text
+  uiTheme: DetectTheme  // Gedeeld kleurenschema voor alle vensters
   layerPanelFontScale: number  // 80-150, for Kaartlagen panel
   presetPanelFontScale: number  // 80-150, for Presets panel
   menuFontScale: number  // 80-130, for Hamburger menu
@@ -71,6 +73,7 @@ export interface SettingsState {
   setShowLocalVondsten: (value: boolean) => void
   setShowCustomPointLayers: (value: boolean) => void
   setFontScale: (value: number) => void
+  setUiTheme: (value: DetectTheme) => void
   setLayerPanelFontScale: (value: number) => void
   setPresetPanelFontScale: (value: number) => void
   setMenuFontScale: (value: number) => void
@@ -99,6 +102,7 @@ export const CLOUD_SETTINGS_KEYS = [
   'showLocalVondsten',
   'showCustomPointLayers',
   'fontScale',
+  'uiTheme',
   'layerPanelFontScale',
   'presetPanelFontScale',
   'menuFontScale',
@@ -148,6 +152,7 @@ export const useSettingsStore = create<SettingsState>()(
       showLocalVondsten: true,  // Show vondsten markers by default
       showCustomPointLayers: true,  // Show custom point layers by default
       fontScale: 100,           // Default 100% = 14px base
+      uiTheme: 'blue',          // Rustige Detect-huisstijl
       layerPanelFontScale: 100, // Default 100%
       presetPanelFontScale: 100, // Default 100%
       menuFontScale: 100,       // Default 100%
@@ -175,6 +180,7 @@ export const useSettingsStore = create<SettingsState>()(
       setShowLocalVondsten: (showLocalVondsten) => set({ showLocalVondsten }),
       setShowCustomPointLayers: (showCustomPointLayers) => set({ showCustomPointLayers }),
       setFontScale: (fontScale) => set({ fontScale }),
+      setUiTheme: (uiTheme) => set({ uiTheme }),
       setLayerPanelFontScale: (layerPanelFontScale) => set({ layerPanelFontScale }),
       setPresetPanelFontScale: (presetPanelFontScale) => set({ presetPanelFontScale }),
       setMenuFontScale: (menuFontScale) => set({ menuFontScale }),
@@ -190,7 +196,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'detectorapp-settings',
-      version: 4,
+      version: 5,
       migrate: (persistedState: any, version: number) => {
         const migratedState = { ...persistedState }
 
@@ -209,6 +215,11 @@ export const useSettingsStore = create<SettingsState>()(
         // v4: CARTO stopped serving the keyless light basemap.
         if (version < 4 && migratedState.defaultBackground === 'CartoDB (licht)') {
           migratedState.defaultBackground = 'Esri (licht)'
+        }
+
+        // v5: één vensterhuisstijl met een gedeeld kleurenschema.
+        if (version < 5) {
+          migratedState.uiTheme = 'blue'
         }
 
         return migratedState

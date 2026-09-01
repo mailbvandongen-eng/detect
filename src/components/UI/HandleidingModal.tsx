@@ -1,9 +1,9 @@
-import { motion, AnimatePresence } from 'framer-motion'
 import {
-  X, Layers, Search, MapPin, Compass, SlidersHorizontal, Filter, Menu, RotateCcw,
-  Cloud, Ruler, Pencil, Printer, Plus, Minus, Navigation, Map,
-  ChevronRight, Settings, Route, Star, Eye, EyeOff
+  Search, MapPin, Compass, SlidersHorizontal, Filter, Menu, RotateCcw,
+  Cloud, Ruler, Pencil, Printer, Plus, Navigation, Map,
+  ChevronRight, Settings, Route, Star, Eye
 } from 'lucide-react'
+import { AppWindow } from './AppWindow'
 
 interface HandleidingModalProps {
   isOpen: boolean
@@ -12,54 +12,27 @@ interface HandleidingModalProps {
 
 export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 bg-black/40 z-[2002]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
-
-          {/* Modal */}
-          <motion.div
-            className="fixed inset-x-4 top-4 bottom-4 z-[2003] flex items-center justify-center pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col w-full max-w-lg max-h-full pointer-events-auto"
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ duration: 0.2 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <Map size={18} className="text-white" />
-                  <span className="font-medium text-white">Handleiding</span>
-                </div>
-                <button
-                  onClick={onClose}
-                  className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none"
-                >
-                  <X size={18} className="text-white" />
-                </button>
-              </div>
-
-              {/* Content - scrollable */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+    <AppWindow
+      isOpen={isOpen}
+      title="Handleiding"
+      icon={<Map size={18} />}
+      placement="modal"
+      onClose={onClose}
+      footer={
+        <button
+          onClick={onClose}
+          className="detect-window-primary-button w-full"
+        >
+          Sluiten
+        </button>
+      }
+    >
+              <div className="p-4 space-y-6">
 
                 {/* Intro */}
                 <section>
                   <p className="text-sm text-gray-600">
-                    DetectorApp NL is een kaartapp voor metaaldetectoristen, fossielen- en mineralenzoekers en amateur-archeologen.
+                    Detect is een kaartapp voor metaaldetectoristen, fossielen- en mineralenzoekers en amateur-archeologen.
                     De app combineert <strong>100+ kaartlagen</strong> met GPS, routes, eigen lagen, kaartimports en uitgebreid vondstenbeheer.
                   </p>
                 </section>
@@ -388,21 +361,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 </section>
 
               </div>
-
-              {/* Footer */}
-              <div className="flex items-center justify-center px-4 py-3 border-t border-gray-100 bg-gray-50 flex-shrink-0">
-                <button
-                  onClick={onClose}
-                  className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors border-0 outline-none"
-                >
-                  Sluiten
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+    </AppWindow>
   )
 }
 

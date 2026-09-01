@@ -7,6 +7,18 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.0',
+    date: '1 september 2026',
+    title: 'Eén huisstijl en nog maar één venster tegelijk',
+    changes: [
+      'Menu, kaartlagen, presets, instellingen, handleiding, wijzigingen en gereedschappen gebruiken voortaan hetzelfde venstersjabloon.',
+      'Een nieuw venster sluit automatisch het venster dat al openstond; menu en kaartlagen kunnen dus niet meer over elkaar heen staan.',
+      'Kop en voet blijven vast staan en alleen het middendeel scrolt, zodat knoppen en versienummer bereikbaar blijven.',
+      'De algemene tekstgrootte schaalt nu ook regelafstand en verticale ruimte mee in alle nieuwe vensters.',
+      'In Instellingen kun je een blauw, groen, aarde- of paars kleurenschema voor alle vensters kiezen.'
+    ]
+  },
+  {
     version: '2.32.71',
     date: '1 september 2026',
     title: 'Hamburgermenu werkt weer op kleinere schermen',

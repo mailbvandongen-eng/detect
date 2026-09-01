@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Layers, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw, History } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useCloudSync } from '../../hooks/useCloudSync'
 import { version } from '../../../package.json'
+import { AppWindow } from './AppWindow'
 
 // Google logo SVG component
 function GoogleLogo({ size = 18 }: { size?: number }) {
@@ -33,7 +34,6 @@ function GoogleLogo({ size = 18 }: { size?: number }) {
 
 
 export function HamburgerMenu() {
-  const [isOpen, setIsOpen] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const [syncResult, setSyncResult] = useState<{
     success: boolean
@@ -43,12 +43,14 @@ export function HamburgerMenu() {
   } | null>(null)
 
   const { user, loading, signInWithGoogle, logout } = useAuthStore()
-  const { toggleInfoPanel, toggleSettingsPanel, toggleMonumentSearch, openChangeLog } = useUIStore()
+  const isOpen = useUIStore(state => state.activeWindow === 'menu')
+  const openWindow = useUIStore(state => state.openWindow)
+  const toggleWindow = useUIStore(state => state.toggleWindow)
+  const closeWindow = useUIStore(state => state.closeWindow)
   const { syncNow, syncStatus, syncError } = useCloudSync()
 
   // Settings for font scale
-  const menuFontScale = useSettingsStore(state => state.menuFontScale)
-  const setMenuFontScale = useSettingsStore(state => state.setMenuFontScale)
+  const fontScale = useSettingsStore(state => state.fontScale)
   const showFontSliders = useSettingsStore(state => state.showFontSliders)
   const setShowFontSliders = useSettingsStore(state => state.setShowFontSliders)
   const showVondstButton = useSettingsStore(state => state.showVondstButton)
@@ -69,26 +71,22 @@ export function HamburgerMenu() {
   // Safe top position for mobile browsers (accounts for notch/status bar)
   const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
 
-  const closeMenu = () => setIsOpen(false)
+  const closeMenu = closeWindow
 
   const handleInfoClick = () => {
-    closeMenu()
-    toggleInfoPanel()
+    openWindow('info')
   }
 
   const handleSettingsClick = () => {
-    closeMenu()
-    toggleSettingsPanel()
+    openWindow('settings')
   }
 
   const handleMonumentSearchClick = () => {
-    closeMenu()
-    toggleMonumentSearch()
+    openWindow('monumentSearch')
   }
 
   const handleChangeLogClick = () => {
-    closeMenu()
-    openChangeLog()
+    openWindow('changeLog')
   }
 
   const handleLogin = () => {
@@ -124,9 +122,8 @@ export function HamburgerMenu() {
     }
   }
 
-  // Calculate font size based on menuFontScale
-  const baseFontSize = 13 * menuFontScale / 100
-  const spacingScale = menuFontScale / 100
+  // Eén globale schaal vergroot zowel tekst als verticale ruimte.
+  const spacingScale = fontScale / 100
   const menuItemStyle = {
     fontSize: '0.95em',
     lineHeight: 1.35,
@@ -149,7 +146,7 @@ export function HamburgerMenu() {
             : 'bg-white/90 hover:bg-white'
         }`}
         style={safeTopStyle}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => toggleWindow('menu')}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Menu"
@@ -161,62 +158,27 @@ export function HamburgerMenu() {
         )}
       </motion.button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              className="fixed inset-0 z-[799]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={closeMenu}
-            />
-
-            {/* Menu Panel - positioned to the left of the hamburger button */}
-            <motion.div
-              initial={{ opacity: 0, x: 50, scale: 0.95 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 50, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="fixed right-[56px] z-[801] w-64 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[80vh]"
-              style={{
-                top: 'calc(max(0.5rem, env(safe-area-inset-top, 0.5rem)))',
-                maxHeight: '80dvh',
-                fontSize: `${baseFontSize}px`,
-                lineHeight: 1.35
-              }}
+      <AppWindow
+        isOpen={isOpen}
+        title="Menu"
+        placement="right"
+        onClose={closeMenu}
+        footer={(
+          <div className="space-y-1">
+            <button
+              onClick={handleSettingsClick}
+              className="w-full text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-gray-100 rounded-lg px-2"
+              style={menuItemStyle}
             >
-              {/* Header with title and font size slider - blue bg, white text */}
-              <div className="shrink-0 flex items-center justify-between gap-2 px-3 py-1.5 bg-blue-500">
-                <span className="font-medium text-white" style={{ fontSize: `${baseFontSize}px` }}>Menu</span>
-                {showFontSliders && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-[9px] text-blue-200">T</span>
-                    <input
-                      type="range"
-                      min="80"
-                      max="130"
-                      step="10"
-                      value={menuFontScale}
-                      onInput={(e) => setMenuFontScale(parseInt((e.target as HTMLInputElement).value))}
-                      onChange={(e) => setMenuFontScale(parseInt(e.target.value))}
-                      className="w-16 opacity-70 hover:opacity-100 transition-opacity"
-                      title={`Tekstgrootte: ${menuFontScale}%`}
-                    />
-                    <span className="text-[11px] text-blue-200">T</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Alleen dit middendeel scrollt; kop en voet blijven altijd zichtbaar. */}
-              <div
-                className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain"
-                style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-                role="region"
-                aria-label="Menu-opties"
-                tabIndex={0}
-              >
+              <Settings size={18} className="text-gray-500" />
+              <span>Instellingen</span>
+            </button>
+            <div className="text-center text-gray-400" style={{ fontSize: '0.68em' }}>
+              Detect v{version}
+            </div>
+          </div>
+        )}
+      >
               {/* Google Login / Profile Section - NO border when logged out */}
               {loading ? (
                 <div className="px-3 py-4 flex items-center justify-center">
@@ -514,28 +476,7 @@ export function HamburgerMenu() {
                   </button>
                 </div>
               </div>
-              </div>
-
-              {/* Settings always at bottom */}
-              <div className="shrink-0 border-t border-gray-100 bg-white">
-                <button
-                  onClick={handleSettingsClick}
-                  className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-gray-50"
-                  style={menuItemStyle}
-                >
-                  <Settings size={18} className="text-gray-500" />
-                  <span>Instellingen</span>
-                </button>
-              </div>
-
-              {/* Version Footer */}
-              <div className="shrink-0 px-3 py-1.5 bg-gray-50 text-center text-gray-400" style={{ fontSize: '0.65em' }}>
-                Detect v{version}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      </AppWindow>
 
     </>
   )

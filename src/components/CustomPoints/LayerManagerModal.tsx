@@ -1,16 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, Trash2, Download, Eye, EyeOff, ChevronDown, ChevronRight, Upload, Layers, Archive, ArchiveRestore, List, Pencil, Check } from 'lucide-react'
-import { useUIStore, useSettingsStore } from '../../store'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Plus, Trash2, Download, Eye, EyeOff, ChevronDown, ChevronRight, Upload, Layers, Archive, ArchiveRestore, List, Pencil, Check } from 'lucide-react'
+import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
+import { AppWindow } from '../UI/AppWindow'
 
 export function LayerManagerModal() {
-  const { layerManagerModalOpen, closeLayerManagerModal, openCreateLayerModal, openLayerDashboard } = useUIStore()
+  const layerManagerModalOpen = useUIStore(state => state.activeWindow === 'layerManager')
+  const backWindow = useUIStore(state => state.backWindow)
+  const openWindow = useUIStore(state => state.openWindow)
+  const openLayerDashboard = useUIStore(state => state.openLayerDashboard)
   const { layers, removeLayer, toggleVisibility, toggleArchived, exportLayerAsGeoJSON, importLayerFromGeoJSON } = useCustomPointLayerStore()
-  const settings = useSettingsStore()
-
-  // Calculate font size based on fontScale setting
-  const baseFontSize = 14 * settings.fontScale / 100
 
   const [expandedLayerId, setExpandedLayerId] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
@@ -63,7 +63,7 @@ export function LayerManagerModal() {
     setConfirmDelete(null)
     setImportError(null)
     setShowArchived(false)
-    closeLayerManagerModal()
+    backWindow()
   }
 
   const handleOpenDashboard = (layerId: string) => {
@@ -71,61 +71,23 @@ export function LayerManagerModal() {
   }
 
   const handleNewLayer = () => {
-    handleClose()
-    openCreateLayerModal()
+    setExpandedLayerId(null)
+    setConfirmDelete(null)
+    setImportError(null)
+    setShowArchived(false)
+    openWindow('createLayer', 'layerManager')
   }
 
   return (
-    <AnimatePresence>
-      {layerManagerModalOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 z-[1700] bg-black/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleClose}
-          />
-
-          {/* Modal */}
-          <motion.div
-            className="fixed inset-4 z-[1701] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-w-lg mx-auto my-auto max-h-[85vh]"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-          >
-            {/* Header - oranje voor eigen lagen */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-              <div className="flex items-center gap-2">
-                <Layers size={18} />
-                <span className="font-medium">Mijn Lagen beheren</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Font size slider */}
-                <span className="text-[10px] opacity-70">T</span>
-                <input
-                  type="range"
-                  min="80"
-                  max="150"
-                  step="10"
-                  value={settings.fontScale}
-                  onChange={(e) => settings.setFontScale(parseInt(e.target.value))}
-                  className="header-slider w-16 opacity-70 hover:opacity-100 transition-opacity"
-                  title={`Tekstgrootte: ${settings.fontScale}%`}
-                />
-                <span className="text-xs opacity-70">T</span>
-                <button
-                  onClick={handleClose}
-                  className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none ml-1"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-            </div>
-
-            {/* Tabs: Actief / Gearchiveerd */}
-            <div className="flex border-b border-gray-100">
+    <AppWindow
+      isOpen={layerManagerModalOpen}
+      title="Mijn lagen beheren"
+      icon={<Layers size={18} />}
+      placement="modal"
+      onClose={handleClose}
+      onBack={handleClose}
+      subHeader={
+        <div className="flex">
               <button
                 onClick={() => setShowArchived(false)}
                 className={`flex-1 px-3 py-2 text-sm transition-colors border-0 outline-none ${
@@ -147,10 +109,28 @@ export function LayerManagerModal() {
                 <Archive size={14} />
                 Archief ({archivedLayers.length})
               </button>
-            </div>
-
-            {/* Content - met font scaling */}
-            <div className="flex-1 overflow-y-auto" style={{ fontSize: `${baseFontSize}px` }}>
+        </div>
+      }
+      footer={
+        <div className="flex gap-3">
+          <label className="detect-window-secondary-button flex-1 cursor-pointer">
+            <Upload size={16} />
+            <span>Importeren</span>
+            <input
+              type="file"
+              accept=".geojson,.json"
+              onChange={handleImport}
+              className="hidden"
+            />
+          </label>
+          <button onClick={handleNewLayer} className="detect-window-primary-button flex-1">
+            <Plus size={16} />
+            <span>Nieuwe laag</span>
+          </button>
+        </div>
+      }
+    >
+            <div>
               {displayedLayers.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
                   {showArchived ? (
@@ -197,35 +177,7 @@ export function LayerManagerModal() {
                 </div>
               )}
             </div>
-
-            {/* Footer - geen border-t */}
-            <div className="p-4 flex gap-3" style={{ fontSize: `${baseFontSize}px` }}>
-              {/* Import button */}
-              <label className="flex-1 px-4 py-2 bg-white hover:bg-blue-50 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 border-0 outline-none text-gray-600">
-                <Upload size={16} />
-                <span style={{ fontSize: '1em' }}>Importeren</span>
-                <input
-                  type="file"
-                  accept=".geojson,.json"
-                  onChange={handleImport}
-                  className="hidden"
-                />
-              </label>
-
-              {/* New layer button */}
-              <button
-                onClick={handleNewLayer}
-                className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors border-0 outline-none flex items-center justify-center gap-2"
-                style={{ fontSize: '1em' }}
-              >
-                <Plus size={16} />
-                <span>Nieuwe laag</span>
-              </button>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+    </AppWindow>
   )
 }
 

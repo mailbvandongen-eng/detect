@@ -1,9 +1,9 @@
 import { useState, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Upload, FileText, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import { Upload, FileText, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 import { useCustomLayerStore } from '../../store/customLayerStore'
 import { parseFile, validateFile, getAcceptedExtensions, getSupportedFormatsText, detectFileType } from '../../utils/fileImport'
 import type { ParseResult } from '../../utils/fileImport'
+import { AppWindow } from '../UI/AppWindow'
 
 interface Props {
   isOpen: boolean
@@ -125,40 +125,28 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
   }, [parseResult, layerName, selectedFile, addLayer, handleClose])
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 z-[1700] bg-black/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleClose}
-          />
-
-          {/* Modal */}
-          <motion.div
-            className="fixed inset-4 z-[1701] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-w-md mx-auto my-auto max-h-[80vh]"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+    <AppWindow
+      isOpen={isOpen}
+      title="Laag importeren"
+      icon={<Upload size={18} />}
+      placement="modal"
+      onClose={handleClose}
+      onBack={handleClose}
+      footer={importState === 'preview' ? (
+        <div className="flex gap-2">
+          <button onClick={resetState} className="detect-window-secondary-button flex-1">
+            Annuleren
+          </button>
+          <button
+            onClick={handleImport}
+            disabled={!layerName.trim()}
+            className="detect-window-primary-button flex-1 disabled:opacity-50"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-              <div className="flex items-center gap-2">
-                <Upload size={18} />
-                <span className="font-medium">Laag Importeren</span>
-              </div>
-              <button
-                onClick={handleClose}
-                className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Content */}
+            Importeren
+          </button>
+        </div>
+      ) : undefined}
+    >
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {/* Idle state - File drop zone */}
               {importState === 'idle' && (
@@ -282,28 +270,6 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
                 </div>
               )}
             </div>
-
-            {/* Footer */}
-            {importState === 'preview' && (
-              <div className="px-4 py-3 border-t border-gray-100 flex gap-2">
-                <button
-                  onClick={resetState}
-                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors border-0 outline-none"
-                >
-                  Annuleren
-                </button>
-                <button
-                  onClick={handleImport}
-                  disabled={!layerName.trim()}
-                  className="flex-1 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors border-0 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Importeren
-                </button>
-              </div>
-            )}
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+    </AppWindow>
   )
 }

@@ -4,7 +4,7 @@ import { useUIStore, useMapStore } from '../../store'
 import { useEffect, useState } from 'react'
 
 export function KaartlagenButton() {
-  const themesPanelOpen = useUIStore(state => state.themesPanelOpen)
+  const themesPanelOpen = useUIStore(state => state.activeWindow === 'layers')
   const toggleThemesPanel = useUIStore(state => state.toggleThemesPanel)
   const map = useMapStore(state => state.map)
   const [compassVisible, setCompassVisible] = useState(false)

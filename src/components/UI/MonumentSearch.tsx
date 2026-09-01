@@ -5,14 +5,14 @@
  */
 
 import { useState, useRef, useEffect } from 'react'
-import { Search, X, Landmark, ZoomIn, ChevronDown, ChevronUp, GripHorizontal, MapIcon, Loader2 } from 'lucide-react'
-import { motion, AnimatePresence, PanInfo } from 'framer-motion'
-import { useMapStore, useSettingsStore } from '../../store'
+import { Search, X, Landmark, ZoomIn, ChevronDown, ChevronUp, MapIcon, Loader2 } from 'lucide-react'
+import { useMapStore } from '../../store'
 import { searchMonuments, getMonumentFeature, getMonumentFeatures, PROVINCES, type MonumentSearchResult } from '../../utils/monumentSearch'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Style, Fill, Stroke } from 'ol/style'
 import { buffer, extend, createEmpty } from 'ol/extent'
+import { AppWindow } from './AppWindow'
 
 interface MonumentSearchProps {
   isOpen: boolean
@@ -71,7 +71,6 @@ async function highlightMonument(map: any, monumentnummer: number) {
 
 export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
   const map = useMapStore(state => state.map)
-  const settings = useSettingsStore()
 
   const [query, setQuery] = useState('')
   const [province, setProvince] = useState('all')
@@ -81,49 +80,16 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [maxResults, setMaxResults] = useState(50)
-  const [isExpanded, setIsExpanded] = useState(false) // false = 35%, true = fullscreen
   const [showingAll, setShowingAll] = useState(false)
   const [loadingAll, setLoadingAll] = useState(false)
 
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<number>()
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  const baseFontSize = 13 * settings.fontScale / 100
 
   // Focus input when opened
   useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100)
-    }
-  }, [isOpen])
-
-  // Click outside to close
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        onClose()
-      }
-    }
-
-    // Add listener with slight delay to avoid immediate close
-    const timer = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside)
-    }, 100)
-
-    return () => {
-      clearTimeout(timer)
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isOpen, onClose])
-
-  // Reset search state when closed, but NOT the highlight
-  useEffect(() => {
-    if (!isOpen) {
-      // Don't clear highlight - keep it visible!
-      setIsExpanded(false)
     }
   }, [isOpen])
 
@@ -258,26 +224,6 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
     onClose()
   }
 
-  // Handle drag gesture for swipe up/down
-  const handleDragEnd = (_: any, info: PanInfo) => {
-    const velocity = info.velocity.y
-    const offset = info.offset.y
-
-    if (!isExpanded) {
-      // Currently at 38vh
-      if (offset < -50 || velocity < -500) {
-        setIsExpanded(true) // Swipe up → expand to 85vh
-      } else if (offset > 100 || velocity > 500) {
-        handleClose() // Strong swipe down → close
-      }
-    } else {
-      // Currently at 85vh (expanded)
-      if (offset > 50 || velocity > 300) {
-        setIsExpanded(false) // Swipe down → back to 38vh
-      }
-    }
-  }
-
   // Highlight matched words in text
   const highlightMatches = (text: string) => {
     if (!query || query.length < 2) return text
@@ -291,42 +237,15 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
     return result
   }
 
-  if (!isOpen) return null
-
   return (
-    <AnimatePresence>
-      <motion.div
-        ref={containerRef}
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="fixed bottom-0 left-0 right-0 z-[1701] bg-white rounded-t-2xl shadow-2xl overflow-hidden flex flex-col"
-        style={{ height: isExpanded ? '85vh' : '38vh' }}
-      >
-        {/* Header - click to toggle size */}
-        <div
-          className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white cursor-pointer select-none"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <div className="flex items-center gap-2">
-            <Landmark size={16} />
-            <span className="font-medium text-sm">Zoek monumenten</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {/* Drag handle indicator */}
-            <GripHorizontal size={20} className="opacity-70" />
-            <button
-              onClick={(e) => { e.stopPropagation(); handleClose(); }}
-              className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none ml-2"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
-
-        {/* Search input + province */}
-        <div className="p-2 border-b border-gray-100 space-y-2">
+    <AppWindow
+      isOpen={isOpen}
+      title="Zoek in monumenten"
+      icon={<Landmark size={18} />}
+      placement="bottom"
+      onClose={handleClose}
+      subHeader={
+        <div className="p-2">
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -358,9 +277,17 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
             </select>
           </div>
         </div>
-
-        {/* Results */}
-        <div className="flex-1 overflow-y-auto" style={{ fontSize: `${baseFontSize}px` }}>
+      }
+      footer={(selectedId || query) ? (
+        <button
+          onClick={handleClearAndClose}
+          className="detect-window-secondary-button w-full"
+        >
+          Wis zoekopdracht en markering
+        </button>
+      ) : undefined}
+    >
+        <div>
           {searching && (
             <div className="p-3 text-center text-gray-500 text-sm">
               Zoeken...
@@ -471,19 +398,6 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
             </div>
           )}
         </div>
-
-        {/* Footer with clear button */}
-        {(selectedId || query) && (
-          <div className="p-2 border-t border-gray-100">
-            <button
-              onClick={handleClearAndClose}
-              className="w-full py-2 text-sm text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none"
-            >
-              Wis zoekopdracht en highlight
-            </button>
-          </div>
-        )}
-      </motion.div>
-    </AnimatePresence>
+    </AppWindow>
   )
 }

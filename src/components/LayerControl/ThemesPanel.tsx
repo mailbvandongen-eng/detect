@@ -1,7 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { useRef, useEffect } from 'react'
-import { X, Layers, Check, Upload, ExternalLink, Globe, ChevronDown, ChevronRight } from 'lucide-react'
 import { useState } from 'react'
+import { Layers, Check, Upload, ExternalLink, Globe, ChevronDown, ChevronRight } from 'lucide-react'
 import { useUIStore, useSettingsStore } from '../../store'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import { useCustomLayerStore } from '../../store/customLayerStore'
@@ -9,6 +7,7 @@ import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
 import { CustomLayerItem } from '../CustomLayers/CustomLayerItem'
 import { isThemeVisible, isSpecialSectionVisible } from '../../config/buildMode'
+import { AppWindow } from '../UI/AppWindow'
 
 // Speciale archeologische 3D projecten - externe links
 const SPECIAL_PROJECTS = [
@@ -26,81 +25,26 @@ const HERITAGE_PLATFORMS = [
 ]
 
 export function ThemesPanel() {
-  const { themesPanelOpen, toggleThemesPanel, toggleSettingsPanel } = useUIStore()
+  const themesPanelOpen = useUIStore(state => state.activeWindow === 'layers')
+  const toggleThemesPanel = useUIStore(state => state.toggleThemesPanel)
+  const toggleSettingsPanel = useUIStore(state => state.toggleSettingsPanel)
   const { layers: customLayers, toggleVisibility } = useCustomPointLayerStore()
   const importedLayers = useCustomLayerStore(state => state.layers)
-  const panelRef = useRef<HTMLDivElement>(null)
 
-  // Explicit selectors to ensure re-render on state change
-  const layerPanelFontScale = useSettingsStore(state => state.layerPanelFontScale)
-  const setLayerPanelFontScale = useSettingsStore(state => state.setLayerPanelFontScale)
-  const showFontSliders = useSettingsStore(state => state.showFontSliders)
   const showCustomPointLayers = useSettingsStore(state => state.showCustomPointLayers)
-
-  // Calculate font size based on panel-specific fontScale
-  const baseFontSize = 13 * layerPanelFontScale / 100
 
   // State for special projects section
   const [specialProjectsOpen, setSpecialProjectsOpen] = useState(false)
 
-  // Close on click outside
-  useEffect(() => {
-    if (!themesPanelOpen) return
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        toggleThemesPanel()
-      }
-    }
-
-    // Small delay to prevent immediate close
-    const timer = setTimeout(() => {
-      document.addEventListener('click', handleClickOutside)
-    }, 100)
-
-    return () => {
-      clearTimeout(timer)
-      document.removeEventListener('click', handleClickOutside)
-    }
-  }, [themesPanelOpen, toggleThemesPanel])
-
   return (
-    <AnimatePresence>
-      {themesPanelOpen && (
-          <motion.div
-            ref={panelRef}
-            className="fixed right-[56px] z-[1101] bg-white rounded-lg shadow-lg overflow-hidden w-[300px] max-h-[calc(100vh-100px)] flex flex-col"
-            style={{ top: 'calc(max(0.5rem, env(safe-area-inset-top, 0.5rem)) + 52px)' }}
-            initial={{ opacity: 0, x: 50, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 50, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-          >
-            {/* Header with title and font size slider - blue bg, white text, scales with slider */}
-            <div className="flex items-center justify-between px-3 py-1.5 bg-blue-500" style={{ fontSize: `${baseFontSize}px` }}>
-              <span className="font-medium text-white">Kaartlagen</span>
-              {/* Font size slider - only if boomer mode enabled */}
-              {showFontSliders && (
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-blue-200">T</span>
-                  <input
-                    type="range"
-                    min="80"
-                    max="130"
-                    step="10"
-                    value={layerPanelFontScale}
-                    onInput={(e) => {
-                      setLayerPanelFontScale(parseInt((e.target as HTMLInputElement).value))
-                    }}
-                    onChange={(e) => setLayerPanelFontScale(parseInt(e.target.value))}
-                    className="w-16 opacity-70 hover:opacity-100 transition-opacity"
-                    title={`Tekstgrootte: ${layerPanelFontScale}%`}
-                  />
-                  <span className="text-xs text-blue-200">T</span>
-                </div>
-              )}
-            </div>
-          <div className="p-2 overflow-y-auto flex-1" style={{ fontSize: `${baseFontSize}px` }}>
+    <AppWindow
+      isOpen={themesPanelOpen}
+      title="Kaartlagen"
+      icon={<Layers size={18} />}
+      placement="right"
+      onClose={toggleThemesPanel}
+    >
+      <div className="p-2">
             {/* Mijn lagen - custom point layers with orange header */}
             {showCustomPointLayers && customLayers.filter(l => !l.archived).length > 0 && (
               <div className="mb-2 pb-1 border-b border-gray-100">
@@ -447,9 +391,7 @@ export function ThemesPanel() {
                 </div>
               )}
             </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </AppWindow>
   )
 }

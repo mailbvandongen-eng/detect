@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Check, Circle, Ban, Edit2, MapPin, ExternalLink, Trash2 } from 'lucide-react'
-import { useUIStore, useSettingsStore } from '../../store'
-import { useCustomPointLayerStore, type PointStatus, type CustomPoint } from '../../store/customPointLayerStore'
+import { Check, Ban, Edit2, MapPin, ExternalLink, Trash2 } from 'lucide-react'
+import { useUIStore } from '../../store'
+import { useCustomPointLayerStore, type PointStatus } from '../../store/customPointLayerStore'
+import { AppWindow } from '../UI/AppWindow'
 
 type FilterType = 'all' | 'todo' | 'completed' | 'skipped'
 
 export function LayerDashboard() {
-  const { layerDashboardOpen, layerDashboardLayerId, closeLayerDashboard } = useUIStore()
+  const layerDashboardOpen = useUIStore(state => state.activeWindow === 'layerDashboard')
+  const layerDashboardLayerId = useUIStore(state => state.layerDashboardLayerId)
+  const backWindow = useUIStore(state => state.backWindow)
   const { getLayer, setPointStatus, updatePoint, removePoint } = useCustomPointLayerStore()
-  const settings = useSettingsStore()
 
   const [filter, setFilter] = useState<FilterType>('all')
   const [editingNotes, setEditingNotes] = useState<string | null>(null)
@@ -17,8 +18,6 @@ export function LayerDashboard() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const layer = layerDashboardLayerId ? getLayer(layerDashboardLayerId) : null
-
-  const baseFontSize = 14 * settings.fontScale / 100
 
   if (!layer) return null
 
@@ -57,82 +56,25 @@ export function LayerDashboard() {
   const handleClose = () => {
     setEditingNotes(null)
     setConfirmDelete(null)
-    closeLayerDashboard()
-  }
-
-  const getStatusIcon = (status: PointStatus) => {
-    switch (status) {
-      case 'completed':
-        return <Check size={16} className="text-green-500" />
-      case 'skipped':
-        return <Ban size={16} className="text-gray-400" />
-      default:
-        return <Circle size={16} className="text-orange-400" />
-    }
-  }
-
-  const getStatusLabel = (status: PointStatus) => {
-    switch (status) {
-      case 'completed': return 'Voltooid'
-      case 'skipped': return 'Overgeslagen'
-      default: return 'Te doen'
-    }
+    backWindow()
   }
 
   return (
-    <AnimatePresence>
-      {layerDashboardOpen && (
+    <AppWindow
+      isOpen={layerDashboardOpen}
+      title={layer.name}
+      icon={
+        <span
+          className="block h-4 w-4 rounded-full border-2 border-white/50"
+          style={{ backgroundColor: layer.color }}
+        />
+      }
+      placement="modal"
+      onClose={handleClose}
+      onBack={handleClose}
+      subHeader={
         <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 z-[1700] bg-black/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleClose}
-          />
-
-          {/* Modal */}
-          <motion.div
-            className="fixed inset-4 z-[1701] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-w-lg mx-auto my-auto max-h-[90vh]"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-          >
-            {/* Header - oranje voor eigen lagen */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-4 h-4 rounded-full border-2 border-white/50"
-                  style={{ backgroundColor: layer.color }}
-                />
-                <span className="font-medium truncate">{layer.name}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Font size slider */}
-                <span className="text-[10px] opacity-70">T</span>
-                <input
-                  type="range"
-                  min="80"
-                  max="150"
-                  step="10"
-                  value={settings.fontScale}
-                  onChange={(e) => settings.setFontScale(parseInt(e.target.value))}
-                  className="header-slider w-16 opacity-70 hover:opacity-100 transition-opacity"
-                  title={`Tekstgrootte: ${settings.fontScale}%`}
-                />
-                <span className="text-xs opacity-70">T</span>
-                <button
-                  onClick={handleClose}
-                  className="p-1 rounded hover:bg-white/20 transition-colors border-0 outline-none ml-1"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-            </div>
-
-            {/* Stats bar */}
-            <div className="px-4 py-2 bg-orange-50 flex items-center justify-between text-sm">
+          <div className="px-4 py-2 bg-orange-50 flex items-center justify-between text-sm">
               <span className="text-orange-800 font-medium">
                 {completedCount}/{totalPoints} voltooid
               </span>
@@ -144,7 +86,6 @@ export function LayerDashboard() {
               </div>
             </div>
 
-            {/* Filter tabs */}
             <div className="flex border-b border-gray-100">
               {(['all', 'todo', 'completed', 'skipped'] as FilterType[]).map(f => (
                 <button
@@ -163,9 +104,10 @@ export function LayerDashboard() {
                 </button>
               ))}
             </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto" style={{ fontSize: `${baseFontSize}px` }}>
+        </>
+      }
+    >
+            <div>
               {filteredPoints.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
                   <p>Geen punten gevonden</p>
@@ -318,9 +260,6 @@ export function LayerDashboard() {
                 </div>
               )}
             </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+    </AppWindow>
   )
 }

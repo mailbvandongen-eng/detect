@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Route, Trash2, Download, Pencil, Eye, EyeOff, Calendar, Ruler, Clock, MapPin, Flame, Grid3x3, Crosshair, Timer, Upload, Mountain, Info, Share2 } from 'lucide-react'
+import { Route, Trash2, Download, Pencil, Eye, EyeOff, Calendar, Ruler, Clock, MapPin, Flame, Grid3x3, Crosshair, Timer, Upload, Mountain, Info, Share2 } from 'lucide-react'
 import { useRouteRecordingStore, exportRouteAsGPX } from '../../store/routeRecordingStore'
 import type { RecordedRoute } from '../../store/routeRecordingStore'
 import { ElevationProfile } from './ElevationProfile'
 import { RouteDetailsModal } from './RouteDetailsModal'
+import { AppWindow } from '../UI/AppWindow'
 
 // Mini map preview using canvas
 function RoutePreview({ route, size = 80 }: { route: RecordedRoute; size?: number }) {
@@ -168,7 +169,7 @@ export function RouteDashboard({ isOpen, onClose, onViewRoute }: RouteDashboardP
 📍 ${route.points.length} GPS punten
 📅 ${formatDate(route.createdAt)}
 
-Opgenomen met DetectorApp NL`
+Opgenomen met Detect`
 
     // Try Web Share API first (mobile)
     if (navigator.share) {
@@ -260,39 +261,39 @@ Opgenomen met DetectorApp NL`
 
   return (
     <>
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 z-[1600] bg-black/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
+    <AppWindow
+      isOpen={isOpen && !elevationRoute && !detailsRoute}
+      title={`Mijn routes (${savedRoutes.length})`}
+      icon={<Route size={18} />}
+      placement="modal"
+      onClose={onClose}
+      footer={
+        <div className="space-y-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".gpx"
+            onChange={handleImportGPX}
+            className="hidden"
           />
-
-          {/* Panel */}
-          <motion.div
-            className="fixed inset-4 z-[1601] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-w-md mx-auto my-auto max-h-[85vh]"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="detect-window-secondary-button w-full"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-purple-500 text-white">
-              <div className="flex items-center gap-2">
-                <Route size={20} />
-                <span className="font-medium">Mijn Routes</span>
-                <span className="text-purple-200 text-sm">({savedRoutes.length})</span>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-1 rounded bg-purple-400/50 hover:bg-purple-400 transition-colors border-0 outline-none"
-              >
-                <X size={18} />
-              </button>
-            </div>
+            <Upload size={16} />
+            GPX-bestand importeren
+          </button>
+          {savedRoutes.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="w-full py-1 text-red-600"
+            >
+              Alle routes verwijderen
+            </button>
+          )}
+        </div>
+      }
+    >
 
             {/* Stats summary */}
             {savedRoutes.length > 0 && (
@@ -587,39 +588,7 @@ Opgenomen met DetectorApp NL`
               )}
             </div>
 
-            {/* Footer */}
-            <div className="px-4 py-3 border-t border-gray-100 space-y-2">
-              {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".gpx"
-                onChange={handleImportGPX}
-                className="hidden"
-              />
-
-              {/* Import button */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full px-3 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors border-0 outline-none text-sm flex items-center justify-center gap-2"
-              >
-                <Upload size={16} />
-                GPX bestand importeren
-              </button>
-
-              {savedRoutes.length > 0 && (
-                <button
-                  onClick={handleClearAll}
-                  className="w-full px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border-0 outline-none text-sm"
-                >
-                  Alle routes verwijderen
-                </button>
-              )}
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+    </AppWindow>
 
       {/* Elevation Profile Modal */}
       <AnimatePresence>

@@ -5,7 +5,8 @@ import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
 
 export function LayerControlPanel() {
-  const { layerControlOpen, toggleLayerControl } = useUIStore()
+  const layerControlOpen = useUIStore(state => state.activeWindow === 'layerControl')
+  const toggleLayerControl = useUIStore(state => state.toggleLayerControl)
 
   return (
     <AnimatePresence>

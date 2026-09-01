@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { X, Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, BarChart3, Pencil, Upload, Bug, User, Sliders, Volume2, Cloud, WifiOff } from 'lucide-react'
+import { Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, BarChart3, Pencil, Upload, Bug, User, Sliders, Volume2, Cloud, WifiOff, Palette } from 'lucide-react'
 
 // Bug report form URL
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useUIStore, useSettingsStore, usePresetStore } from '../../store'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
 import { useCustomLayerStore } from '../../store/customLayerStore'
@@ -11,12 +10,25 @@ import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import { VondstenDashboard } from '../Vondst/VondstenDashboard'
 import { ImportLayerModal, CustomLayerItem } from '../CustomLayers'
 import { GoogleSignInButton } from '../Auth/GoogleSignInButton'
-import type { DefaultBackground } from '../../store/settingsStore'
+import type { DefaultBackground, DetectTheme } from '../../store/settingsStore'
+import { AppWindow } from './AppWindow'
 
 type TabType = 'algemeen' | 'lagen' | 'vondsten'
 
+const DETECT_THEMES: { id: DetectTheme; label: string; color: string }[] = [
+  { id: 'blue', label: 'Detect-blauw', color: '#3b82f6' },
+  { id: 'forest', label: 'Bosgroen', color: '#228b5a' },
+  { id: 'earth', label: 'Aardetint', color: '#b86632' },
+  { id: 'purple', label: 'Paars', color: '#7c4dca' }
+]
+
 export function SettingsPanel() {
-  const { settingsPanelOpen, toggleSettingsPanel, vondstDashboardOpen, toggleVondstDashboard, openLayerManagerModal } = useUIStore()
+  const settingsPanelOpen = useUIStore(state => state.activeWindow === 'settings')
+  const vondstDashboardOpen = useUIStore(state => state.activeWindow === 'vondstDashboard')
+  const importModalOpen = useUIStore(state => state.activeWindow === 'importLayer')
+  const toggleSettingsPanel = useUIStore(state => state.toggleSettingsPanel)
+  const openWindow = useUIStore(state => state.openWindow)
+  const backWindow = useUIStore(state => state.backWindow)
   const settings = useSettingsStore()
   const { presets, createPreset, deletePreset, updatePreset } = usePresetStore()
   const vondsten = useLocalVondstenStore(state => state.vondsten)
@@ -24,15 +36,11 @@ export function SettingsPanel() {
   const { layers: customPointLayers, updateLayer: updateCustomPointLayer } = useCustomPointLayerStore()
   const [newPresetName, setNewPresetName] = useState('')
   const [showNewPresetInput, setShowNewPresetInput] = useState(false)
-  const [importModalOpen, setImportModalOpen] = useState(false)
   const [renamingPresetId, setRenamingPresetId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [renamingLayerId, setRenamingLayerId] = useState<string | null>(null)
   const [renameLayerValue, setRenameLayerValue] = useState('')
   const [activeTab, setActiveTab] = useState<TabType>('algemeen')
-
-  // Calculate font size based on fontScale setting
-  const baseFontSize = 14 * settings.fontScale / 100
 
   const handleCreatePreset = () => {
     if (newPresetName.trim()) {
@@ -69,63 +77,14 @@ export function SettingsPanel() {
 
   return (
     <>
-    <AnimatePresence>
-      {settingsPanelOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 z-[1600] bg-black/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={toggleSettingsPanel}
-          />
-
-          {/* Panel */}
-          <motion.div
-            className="fixed inset-4 z-[1601] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-w-sm mx-auto my-auto max-h-[85vh]"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-          >
-            {/* Header - blue bg, white text, scales with slider */}
-            <div className="flex items-center justify-between px-4 py-3 bg-blue-500" style={{ fontSize: `${baseFontSize}px` }}>
-              <div className="flex items-center gap-2">
-                <Settings size={18} className="text-white" />
-                <span className="font-medium text-white">Instellingen</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Font size slider in header - only if boomer mode enabled */}
-                {settings.showFontSliders && (
-                  <>
-                    <span className="text-[10px] text-blue-200">T</span>
-                    <input
-                      type="range"
-                      min="80"
-                      max="150"
-                      step="10"
-                      value={settings.fontScale}
-                      onInput={(e) => {
-                        settings.setFontScale(parseInt((e.target as HTMLInputElement).value))
-                      }}
-                      onChange={(e) => settings.setFontScale(parseInt(e.target.value))}
-                      className="w-20 opacity-70 hover:opacity-100 transition-opacity"
-                      title={`Tekstgrootte: ${settings.fontScale}%`}
-                    />
-                    <span className="text-xs text-blue-200">T</span>
-                  </>
-                )}
-                <button
-                  onClick={toggleSettingsPanel}
-                  className="p-1 rounded bg-blue-400/50 hover:bg-blue-400 transition-colors border-0 outline-none ml-1"
-                >
-                  <X size={18} className="text-white" strokeWidth={2.5} />
-                </button>
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex border-b border-gray-200">
+      <AppWindow
+        isOpen={settingsPanelOpen}
+        title="Instellingen"
+        icon={<Settings size={18} />}
+        placement="modal"
+        onClose={toggleSettingsPanel}
+        subHeader={
+          <div className="flex">
               {tabs.map(tab => (
                 <button
                   key={tab.id}
@@ -140,15 +99,63 @@ export function SettingsPanel() {
                   {tab.label}
                 </button>
               ))}
-            </div>
-
-            {/* Content - apply font scaling directly */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-5" style={{ fontSize: `${baseFontSize}px` }}>
+          </div>
+        }
+        footer={
+          <div className="space-y-1">
+            <a
+              href={BUG_REPORT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="detect-window-secondary-button flex w-full items-center justify-center gap-2"
+            >
+              <Bug size={16} />
+              <span>Meld een bug</span>
+            </a>
+            <p className="text-center text-gray-400" style={{ fontSize: '0.75em' }}>
+              Instellingen worden lokaal opgeslagen
+            </p>
+          </div>
+        }
+      >
+            <div className="p-4 space-y-5">
               {activeTab === 'algemeen' && (
                 <>
                   {/* Account / Cloud Sync */}
                   <Section title="Account" icon={<User size={16} />}>
                     <GoogleSignInButton />
+                  </Section>
+
+                  <Section title="Huisstijl" icon={<Palette size={16} />}>
+                    <div className="grid grid-cols-2 gap-2">
+                      {DETECT_THEMES.map(theme => {
+                        const selected = settings.uiTheme === theme.id
+                        return (
+                          <button
+                            key={theme.id}
+                            type="button"
+                            onClick={() => settings.setUiTheme(theme.id)}
+                            className={`flex min-w-0 items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-colors ${
+                              selected
+                                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                            }`}
+                            aria-pressed={selected}
+                          >
+                            <span
+                              className="h-4 w-4 flex-none rounded-full shadow-sm ring-1 ring-black/10"
+                              style={{ backgroundColor: theme.color }}
+                            />
+                            <span className="min-w-0 truncate" style={{ fontSize: '0.82em' }}>
+                              {theme.label}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <p className="text-gray-500" style={{ fontSize: '0.75em' }}>
+                      De gekozen accentkleur geldt voor alle vensters.
+                    </p>
                   </Section>
 
                   {/* Kaart */}
@@ -296,10 +303,7 @@ export function SettingsPanel() {
                         ))
                       )}
                       <button
-                        onClick={() => {
-                          openLayerManagerModal()
-                          toggleSettingsPanel()
-                        }}
+                        onClick={() => openWindow('layerManager', 'settings')}
                         className="flex items-center gap-2 mt-2 px-2 py-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors border-0 outline-none w-full"
                         style={{ fontSize: '0.9em' }}
                       >
@@ -321,7 +325,7 @@ export function SettingsPanel() {
                         </>
                       )}
                       <button
-                        onClick={() => setImportModalOpen(true)}
+                        onClick={() => openWindow('importLayer', 'settings')}
                         className="flex items-center gap-2 px-2 py-1.5 text-cyan-600 hover:bg-cyan-50 rounded transition-colors border-0 outline-none w-full"
                         style={{ fontSize: '0.9em' }}
                       >
@@ -458,7 +462,7 @@ export function SettingsPanel() {
                     </p>
                     {/* Dashboard button */}
                     <button
-                      onClick={toggleVondstDashboard}
+                      onClick={() => openWindow('vondstDashboard', 'settings')}
                       className="flex items-center gap-2 mt-2 px-2 py-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors border-0 outline-none w-full"
                       style={{ fontSize: '0.9em' }}
                     >
@@ -470,38 +474,18 @@ export function SettingsPanel() {
                 </>
               )}
             </div>
-
-            {/* Footer */}
-            <div className="px-4 py-3 border-t border-gray-100 space-y-2" style={{ fontSize: `${baseFontSize}px` }}>
-              <a
-                href={BUG_REPORT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full px-3 py-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors border-0 outline-none"
-                style={{ fontSize: '0.9em' }}
-              >
-                <Bug size={16} />
-                <span>Meld een bug</span>
-              </a>
-              <p className="text-gray-400 text-center" style={{ fontSize: '0.75em' }}>
-                Instellingen worden lokaal opgeslagen
-              </p>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+      </AppWindow>
 
     {/* Vondsten Dashboard */}
     <VondstenDashboard
       isOpen={vondstDashboardOpen}
-      onClose={toggleVondstDashboard}
+      onClose={backWindow}
     />
 
     {/* Import Layer Modal */}
     <ImportLayerModal
       isOpen={importModalOpen}
-      onClose={() => setImportModalOpen(false)}
+      onClose={backWindow}
     />
     </>
   )

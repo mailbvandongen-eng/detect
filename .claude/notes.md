@@ -1,6 +1,6 @@
 # Detect - Sessienotities
 
-## Huidige versie: 2.32.71
+## Huidige versie: 2.33.0
 
 ---
 
@@ -20,6 +20,12 @@
 - Broncode gaat naar GitHub `main`.
 - `.github/workflows/publish.yml` bouwt en publiceert `docs/` automatisch.
 - De build bewaart de bestaande publieke Firebase-webconfig, zodat Bob niet van een lokale pc afhankelijk is.
+
+### Venstersysteem (v2.33.0)
+- `src/store/uiStore.ts` beheert één actief hoofdvenster; een tweede venster vervangt altijd het eerste.
+- `src/components/UI/AppWindow.tsx` is het gedeelde sjabloon met vaste kop, scrollbaar midden en vaste voet.
+- `fontScale` stuurt tekst, regelafstand en verticale ruimte centraal aan.
+- `uiTheme` biedt vier rustige accentkleuren en wordt lokaal en via cloud-sync bewaard.
 
 ### Migratie voltooid (feb 2026):
 - [x] Base path gewijzigd: `/detectorapp-nl/` -> `/detect/`

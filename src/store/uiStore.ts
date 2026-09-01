@@ -1,45 +1,58 @@
 import { create } from 'zustand'
-import { immer } from 'zustand/middleware/immer'
+
+export type UIWindowId =
+  | 'menu'
+  | 'layers'
+  | 'layerControl'
+  | 'legend'
+  | 'backgrounds'
+  | 'settings'
+  | 'info'
+  | 'manual'
+  | 'welcome'
+  | 'presets'
+  | 'changeLog'
+  | 'monumentSearch'
+  | 'monumentFilter'
+  | 'vondstForm'
+  | 'vondstDashboard'
+  | 'createLayer'
+  | 'addPoint'
+  | 'layerManager'
+  | 'layerDashboard'
+  | 'routeDashboard'
+  | 'importLayer'
+  | 'print'
+  | 'opacity'
+  | 'measure'
+  | 'draw'
 
 interface UIState {
-  // Panel states
-  layerControlOpen: boolean
-  legendOpen: boolean
-  backgroundsPanelOpen: boolean
-  themesPanelOpen: boolean
-  settingsPanelOpen: boolean
-  infoPanelOpen: boolean
-  presetsPanelOpen: boolean
-  changeLogOpen: boolean
-  monumentSearchOpen: boolean
-  monumentFilterOpen: boolean
+  // Eén bron van waarheid: er kan maar één hoofdvenster zichtbaar zijn.
+  activeWindow: UIWindowId | null
+  returnWindow: UIWindowId | null
 
-  // Vondst form state
-  vondstFormOpen: boolean
+  // Context voor vensters die gegevens meekrijgen.
   vondstFormLocation: { lat: number; lng: number } | null
   vondstFormPhoto: File | null
-  vondstDashboardOpen: boolean
-
-  // Custom point layer state
-  createLayerModalOpen: boolean
-  addPointModalOpen: boolean
   addPointModalLayerId: string | null
   addPointModalLocation: { lat: number; lng: number } | null
-  layerManagerModalOpen: boolean
-  layerDashboardOpen: boolean
   layerDashboardLayerId: string | null
 
-  // Route dashboard state
-  routeDashboardOpen: boolean
-
-  // Drawing/measuring mode - blocks popups
+  // Drawing/measuring mode - blocks popups, maar is zelf geen venster.
   isDrawingMode: boolean
 
   // Collapsed categories
   collapsedCategories: Set<string>
 
-  // Actions
+  // Centrale vensteracties
+  openWindow: (window: UIWindowId, returnTo?: UIWindowId | null) => void
+  toggleWindow: (window: UIWindowId) => void
+  closeWindow: () => void
+  backWindow: () => void
   closeAllPanels: () => void
+
+  // Compatibele domeinacties
   toggleLayerControl: () => void
   toggleLegend: () => void
   toggleBackgroundsPanel: () => void
@@ -55,8 +68,6 @@ interface UIState {
   openVondstForm: (location?: { lat: number; lng: number }, photo?: File) => void
   closeVondstForm: () => void
   toggleVondstDashboard: () => void
-
-  // Custom point layer actions
   openCreateLayerModal: () => void
   closeCreateLayerModal: () => void
   openAddPointModal: (layerId: string, location: { lat: number; lng: number }) => void
@@ -65,329 +76,156 @@ interface UIState {
   closeLayerManagerModal: () => void
   openLayerDashboard: (layerId: string) => void
   closeLayerDashboard: () => void
-
-  // Route dashboard actions
   toggleRouteDashboard: () => void
-
-  // Monument search actions
   toggleMonumentSearch: () => void
   closeMonumentSearch: () => void
-
-  // Monument filter actions
   toggleMonumentFilter: () => void
   closeMonumentFilter: () => void
-
-  // Drawing mode actions
   setDrawingMode: (active: boolean) => void
 }
 
-export const useUIStore = create<UIState>()(
-  immer((set, get) => ({
-    layerControlOpen: false,
-    legendOpen: false,
-    backgroundsPanelOpen: false,
-    themesPanelOpen: false,
-    settingsPanelOpen: false,
-    infoPanelOpen: false,
-    presetsPanelOpen: false,
-    changeLogOpen: false,
-    monumentSearchOpen: false,
-    monumentFilterOpen: false,
-    vondstFormOpen: false,
-    vondstFormLocation: null,
-    vondstFormPhoto: null,
-    vondstDashboardOpen: false,
-    createLayerModalOpen: false,
-    addPointModalOpen: false,
-    addPointModalLayerId: null,
-    addPointModalLocation: null,
-    layerManagerModalOpen: false,
-    layerDashboardOpen: false,
-    layerDashboardLayerId: null,
-    routeDashboardOpen: false,
-    isDrawingMode: false,
-    collapsedCategories: new Set<string>(),
+const closeWindowState = {
+  activeWindow: null,
+  returnWindow: null
+} as const
 
-    closeAllPanels: () => {
-      set(state => {
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-      })
-    },
+export const useUIStore = create<UIState>()((set, get) => ({
+  activeWindow: null,
+  returnWindow: null,
+  vondstFormLocation: null,
+  vondstFormPhoto: null,
+  addPointModalLayerId: null,
+  addPointModalLocation: null,
+  layerDashboardLayerId: null,
+  isDrawingMode: false,
+  collapsedCategories: new Set<string>(),
 
-    toggleLayerControl: () => {
-      set(state => {
-        state.layerControlOpen = !state.layerControlOpen
-      })
-    },
+  openWindow: (activeWindow, returnWindow = null) => {
+    set({ activeWindow, returnWindow })
+  },
 
-    toggleLegend: () => {
-      set(state => {
-        state.legendOpen = !state.legendOpen
-      })
-    },
+  toggleWindow: (window) => {
+    set(state => state.activeWindow === window
+      ? closeWindowState
+      : { activeWindow: window, returnWindow: null }
+    )
+  },
 
-    toggleBackgroundsPanel: () => {
-      set(state => {
-        const wasOpen = state.backgroundsPanelOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.backgroundsPanelOpen = true
-      })
-    },
+  closeWindow: () => set(closeWindowState),
 
-    toggleThemesPanel: () => {
-      set(state => {
-        const wasOpen = state.themesPanelOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.themesPanelOpen = true
-      })
-    },
+  backWindow: () => {
+    const returnWindow = get().returnWindow
+    set(returnWindow
+      ? { activeWindow: returnWindow, returnWindow: null }
+      : closeWindowState
+    )
+  },
 
-    toggleSettingsPanel: () => {
-      set(state => {
-        const wasOpen = state.settingsPanelOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.settingsPanelOpen = true
-      })
-    },
+  closeAllPanels: () => set(closeWindowState),
 
-    toggleInfoPanel: () => {
-      set(state => {
-        const wasOpen = state.infoPanelOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.infoPanelOpen = true
-      })
-    },
+  toggleLayerControl: () => get().toggleWindow('layerControl'),
+  toggleLegend: () => get().toggleWindow('legend'),
+  toggleBackgroundsPanel: () => get().toggleWindow('backgrounds'),
+  toggleThemesPanel: () => get().toggleWindow('layers'),
+  toggleSettingsPanel: () => get().toggleWindow('settings'),
+  toggleInfoPanel: () => get().toggleWindow('info'),
+  togglePresetsPanel: () => get().toggleWindow('presets'),
+  openChangeLog: () => get().openWindow('changeLog'),
+  closeChangeLog: () => {
+    if (get().activeWindow === 'changeLog') get().closeWindow()
+  },
 
-    togglePresetsPanel: () => {
-      set(state => {
-        const wasOpen = state.presetsPanelOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.presetsPanelOpen = true
-      })
-    },
+  toggleCategory: (category) => {
+    set(state => {
+      const collapsedCategories = new Set(state.collapsedCategories)
+      if (collapsedCategories.has(category)) {
+        collapsedCategories.delete(category)
+      } else {
+        collapsedCategories.add(category)
+      }
+      return { collapsedCategories }
+    })
+  },
 
-    openChangeLog: () => {
-      set(state => {
-        state.changeLogOpen = true
-      })
-    },
+  setLayerControlOpen: (open) => {
+    if (open) get().openWindow('layerControl')
+    else if (get().activeWindow === 'layerControl') get().closeWindow()
+  },
 
-    closeChangeLog: () => {
-      set(state => {
-        state.changeLogOpen = false
-      })
-    },
+  setLegendOpen: (open) => {
+    if (open) get().openWindow('legend')
+    else if (get().activeWindow === 'legend') get().closeWindow()
+  },
 
-    toggleCategory: (category: string) => {
-      set(state => {
-        if (state.collapsedCategories.has(category)) {
-          state.collapsedCategories.delete(category)
-        } else {
-          state.collapsedCategories.add(category)
-        }
-      })
-    },
+  openVondstForm: (location, photo) => {
+    set({
+      activeWindow: 'vondstForm',
+      returnWindow: null,
+      vondstFormLocation: location || null,
+      vondstFormPhoto: photo || null
+    })
+  },
 
-    setLayerControlOpen: (open: boolean) => {
-      set(state => {
-        state.layerControlOpen = open
-      })
-    },
+  closeVondstForm: () => {
+    set(state => ({
+      ...(state.activeWindow === 'vondstForm' ? closeWindowState : {}),
+      vondstFormLocation: null,
+      vondstFormPhoto: null
+    }))
+  },
 
-    setLegendOpen: (open: boolean) => {
-      set(state => {
-        state.legendOpen = open
-      })
-    },
+  toggleVondstDashboard: () => get().toggleWindow('vondstDashboard'),
 
-    openVondstForm: (location, photo) => {
-      set(state => {
-        // Close all panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        // Open vondst form
-        state.vondstFormOpen = true
-        state.vondstFormLocation = location || null
-        state.vondstFormPhoto = photo || null
-      })
-    },
+  openCreateLayerModal: () => get().openWindow('createLayer'),
+  closeCreateLayerModal: () => {
+    if (get().activeWindow === 'createLayer') get().closeWindow()
+  },
 
-    closeVondstForm: () => {
-      set(state => {
-        state.vondstFormOpen = false
-        state.vondstFormLocation = null
-        state.vondstFormPhoto = null
-      })
-    },
+  openAddPointModal: (layerId, location) => {
+    set({
+      activeWindow: 'addPoint',
+      returnWindow: null,
+      addPointModalLayerId: layerId,
+      addPointModalLocation: location
+    })
+  },
 
-    toggleVondstDashboard: () => {
-      set(state => {
-        const wasOpen = state.vondstDashboardOpen
-        // Close all panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        // Toggle dashboard
-        state.vondstDashboardOpen = !wasOpen
-      })
-    },
+  closeAddPointModal: () => {
+    set(state => ({
+      ...(state.activeWindow === 'addPoint' ? closeWindowState : {}),
+      addPointModalLayerId: null,
+      addPointModalLocation: null
+    }))
+  },
 
-    // Custom point layer actions
-    openCreateLayerModal: () => {
-      set(state => {
-        state.createLayerModalOpen = true
-      })
-    },
+  openLayerManagerModal: () => get().openWindow('layerManager'),
+  closeLayerManagerModal: () => {
+    if (get().activeWindow === 'layerManager') get().closeWindow()
+  },
 
-    closeCreateLayerModal: () => {
-      set(state => {
-        state.createLayerModalOpen = false
-      })
-    },
+  openLayerDashboard: (layerId) => {
+    set({
+      activeWindow: 'layerDashboard',
+      returnWindow: 'layerManager',
+      layerDashboardLayerId: layerId
+    })
+  },
 
-    openAddPointModal: (layerId, location) => {
-      set(state => {
-        state.addPointModalOpen = true
-        state.addPointModalLayerId = layerId
-        state.addPointModalLocation = location
-      })
-    },
+  closeLayerDashboard: () => {
+    set(state => ({
+      ...(state.activeWindow === 'layerDashboard' ? closeWindowState : {}),
+      layerDashboardLayerId: null
+    }))
+  },
 
-    closeAddPointModal: () => {
-      set(state => {
-        state.addPointModalOpen = false
-        state.addPointModalLayerId = null
-        state.addPointModalLocation = null
-      })
-    },
-
-    openLayerManagerModal: () => {
-      set(state => {
-        state.layerManagerModalOpen = true
-      })
-    },
-
-    closeLayerManagerModal: () => {
-      set(state => {
-        state.layerManagerModalOpen = false
-      })
-    },
-
-    openLayerDashboard: (layerId) => {
-      set(state => {
-        state.layerDashboardOpen = true
-        state.layerDashboardLayerId = layerId
-        state.layerManagerModalOpen = false // Close manager when opening dashboard
-      })
-    },
-
-    closeLayerDashboard: () => {
-      set(state => {
-        state.layerDashboardOpen = false
-        state.layerDashboardLayerId = null
-      })
-    },
-
-    // Route dashboard actions
-    toggleRouteDashboard: () => {
-      set(state => {
-        state.routeDashboardOpen = !state.routeDashboardOpen
-      })
-    },
-
-    // Monument search actions
-    toggleMonumentSearch: () => {
-      set(state => {
-        const wasOpen = state.monumentSearchOpen
-        // Close all panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        // Toggle monument search
-        state.monumentSearchOpen = !wasOpen
-      })
-    },
-
-    closeMonumentSearch: () => {
-      set(state => {
-        state.monumentSearchOpen = false
-      })
-    },
-
-    // Monument filter actions
-    toggleMonumentFilter: () => {
-      set(state => {
-        const wasOpen = state.monumentFilterOpen
-        // Close ALL panels first
-        state.backgroundsPanelOpen = false
-        state.themesPanelOpen = false
-        state.settingsPanelOpen = false
-        state.infoPanelOpen = false
-        state.presetsPanelOpen = false
-        state.monumentFilterOpen = false
-        // Toggle this one
-        if (!wasOpen) state.monumentFilterOpen = true
-      })
-    },
-
-    closeMonumentFilter: () => {
-      set(state => {
-        state.monumentFilterOpen = false
-      })
-    },
-
-    // Drawing mode actions
-    setDrawingMode: (active) => {
-      set(state => {
-        state.isDrawingMode = active
-      })
-    }
-  }))
-)
+  toggleRouteDashboard: () => get().toggleWindow('routeDashboard'),
+  toggleMonumentSearch: () => get().toggleWindow('monumentSearch'),
+  closeMonumentSearch: () => {
+    if (get().activeWindow === 'monumentSearch') get().closeWindow()
+  },
+  toggleMonumentFilter: () => get().toggleWindow('monumentFilter'),
+  closeMonumentFilter: () => {
+    if (get().activeWindow === 'monumentFilter') get().closeWindow()
+  },
+  setDrawingMode: (isDrawingMode) => set({ isDrawingMode })
+}))
