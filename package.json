@@ -1,7 +1,7 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.2",
+  "version": "2.33.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -27,6 +27,7 @@
     "exif-js": "^2.3.0",
     "firebase": "^12.7.0",
     "framer-motion": "^11.18.2",
-    "immer": "^10.2.0"
+    "immer": "^10.2.0",
+    "ol": "^10.6.1"
   }
 }
