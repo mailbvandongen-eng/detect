@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ArrowLeft, X } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
 
@@ -54,38 +54,36 @@ export function AppWindow({
 
   const isSideWindow = placement === 'right' || placement === 'left'
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.button
-            type="button"
-            className={`detect-window-backdrop ${isSideWindow ? 'detect-window-backdrop--clear' : ''}`}
-            aria-label={`${title} sluiten`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            onClick={onClose}
-          />
+  // Een vensterwissel moet atomair zijn. Een exit-animatie laat het oude
+  // venster nog even in de DOM staan terwijl het nieuwe al opent, waardoor
+  // beide vensters op tragere telefoons zichtbaar over elkaar kunnen liggen.
+  if (!isOpen) return null
 
-          <motion.section
-            className={`detect-window ${placementClasses[placement]} ${className}`}
-            style={windowStyle}
-            initial={isSideWindow
-              ? { opacity: 0, x: placement === 'right' ? 28 : -28, scale: 0.98 }
-              : { opacity: 0, y: placement === 'bottom' ? 36 : 12, scale: 0.98 }
-            }
-            animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-            exit={isSideWindow
-              ? { opacity: 0, x: placement === 'right' ? 28 : -28, scale: 0.98 }
-              : { opacity: 0, y: placement === 'bottom' ? 36 : 12, scale: 0.98 }
-            }
-            transition={{ duration: 0.16, ease: 'easeOut' }}
-            role="dialog"
-            aria-modal="true"
-            aria-label={ariaLabel || title}
-          >
+  return (
+    <>
+      <motion.button
+        type="button"
+        className={`detect-window-backdrop ${isSideWindow ? 'detect-window-backdrop--clear' : ''}`}
+        aria-label={`${title} sluiten`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.15 }}
+        onClick={onClose}
+      />
+
+      <motion.section
+        className={`detect-window ${placementClasses[placement]} ${className}`}
+        style={windowStyle}
+        initial={isSideWindow
+          ? { opacity: 0, x: placement === 'right' ? 28 : -28, scale: 0.98 }
+          : { opacity: 0, y: placement === 'bottom' ? 36 : 12, scale: 0.98 }
+        }
+        animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+        transition={{ duration: 0.16, ease: 'easeOut' }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={ariaLabel || title}
+      >
             <header className="detect-window__header">
               <div className="detect-window__title">
                 {onBack && (
@@ -143,9 +141,7 @@ export function AppWindow({
             </div>
 
             {footer && <footer className="detect-window__footer">{footer}</footer>}
-          </motion.section>
-        </>
-      )}
-    </AnimatePresence>
+      </motion.section>
+    </>
   )
 }

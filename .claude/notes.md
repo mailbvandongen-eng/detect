@@ -1,6 +1,6 @@
 # Detect - Sessienotities
 
-## Huidige versie: 2.33.0
+## Huidige versie: 2.33.1
 
 ---
 
@@ -21,9 +21,10 @@
 - `.github/workflows/publish.yml` bouwt en publiceert `docs/` automatisch.
 - De build bewaart de bestaande publieke Firebase-webconfig, zodat Bob niet van een lokale pc afhankelijk is.
 
-### Venstersysteem (v2.33.0)
+### Venstersysteem (v2.33.1)
 - `src/store/uiStore.ts` beheert één actief hoofdvenster; een tweede venster vervangt altijd het eerste.
 - `src/components/UI/AppWindow.tsx` is het gedeelde sjabloon met vaste kop, scrollbaar midden en vaste voet.
+- Vensters worden bij een wissel direct ontkoppeld; alleen het nieuwe venster krijgt een korte openingsanimatie.
 - `fontScale` stuurt tekst, regelafstand en verticale ruimte centraal aan.
 - `uiTheme` biedt vier rustige accentkleuren en wordt lokaal en via cloud-sync bewaard.
 

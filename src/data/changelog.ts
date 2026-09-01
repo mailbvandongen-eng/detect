@@ -7,6 +7,14 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.1',
+    date: '1 september 2026',
+    title: 'Vensterwissel sluit het oude venster direct',
+    changes: [
+      'Bij het wisselen verdwijnt het oude venster nu vóór het nieuwe opent; ook op tragere telefoons kunnen menu en kaartlagen niet kort over elkaar heen staan.'
+    ]
+  },
+  {
     version: '2.33.0',
     date: '1 september 2026',
     title: 'Eén huisstijl en nog maar één venster tegelijk',
