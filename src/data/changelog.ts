@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.32.71',
+    date: '1 september 2026',
+    title: 'Hamburgermenu werkt weer op kleinere schermen',
+    changes: [
+      'De kop en onderkant van het menu blijven zichtbaar, terwijl de opties ertussen soepel kunnen scrollen.',
+      'Instellingen en het versienummer blijven altijd bereikbaar en de footer gebruikt nu de naam Detect.',
+      'De verticale ruimte tussen menu-opties groeit en krimpt voortaan mee met de gekozen tekstgrootte.'
+    ]
+  },
+  {
     version: '2.32.70',
     date: '31 augustus 2026',
     title: 'Detect is voortaan volledig persoonlijk',

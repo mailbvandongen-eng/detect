@@ -126,6 +126,18 @@ export function HamburgerMenu() {
 
   // Calculate font size based on menuFontScale
   const baseFontSize = 13 * menuFontScale / 100
+  const spacingScale = menuFontScale / 100
+  const menuItemStyle = {
+    fontSize: '0.95em',
+    lineHeight: 1.35,
+    paddingTop: `${10 * spacingScale}px`,
+    paddingBottom: `${10 * spacingScale}px`
+  }
+  const toggleRowStyle = {
+    lineHeight: 1.35,
+    paddingTop: `${8 * spacingScale}px`,
+    paddingBottom: `${8 * spacingScale}px`
+  }
 
   return (
     <>
@@ -170,11 +182,13 @@ export function HamburgerMenu() {
               className="fixed right-[56px] z-[801] w-64 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col max-h-[80vh]"
               style={{
                 top: 'calc(max(0.5rem, env(safe-area-inset-top, 0.5rem)))',
-                fontSize: `${baseFontSize}px`
+                maxHeight: '80dvh',
+                fontSize: `${baseFontSize}px`,
+                lineHeight: 1.35
               }}
             >
               {/* Header with title and font size slider - blue bg, white text */}
-              <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-blue-500">
+              <div className="shrink-0 flex items-center justify-between gap-2 px-3 py-1.5 bg-blue-500">
                 <span className="font-medium text-white" style={{ fontSize: `${baseFontSize}px` }}>Menu</span>
                 {showFontSliders && (
                   <div className="flex items-center gap-1">
@@ -195,6 +209,14 @@ export function HamburgerMenu() {
                 )}
               </div>
 
+              {/* Alleen dit middendeel scrollt; kop en voet blijven altijd zichtbaar. */}
+              <div
+                className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain"
+                style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+                role="region"
+                aria-label="Menu-opties"
+                tabIndex={0}
+              >
               {/* Google Login / Profile Section - NO border when logged out */}
               {loading ? (
                 <div className="px-3 py-4 flex items-center justify-center">
@@ -302,7 +324,7 @@ export function HamburgerMenu() {
                 <button
                   onClick={handleInfoClick}
                   className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-blue-50"
-                  style={{ fontSize: '0.95em' }}
+                  style={menuItemStyle}
                 >
                   <Info size={18} className="text-blue-500" />
                   <span>Info & handleiding</span>
@@ -314,7 +336,7 @@ export function HamburgerMenu() {
                     handleChangeLogClick()
                   }}
                   className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-blue-50"
-                  style={{ fontSize: '0.95em' }}
+                  style={menuItemStyle}
                 >
                   <History size={18} className="text-blue-500" />
                   <span>Wijzigingen</span>
@@ -323,7 +345,7 @@ export function HamburgerMenu() {
                 <button
                   onClick={handleMonumentSearchClick}
                   className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-purple-50"
-                  style={{ fontSize: '0.95em' }}
+                  style={menuItemStyle}
                 >
                   <Landmark size={18} className="text-purple-500" />
                   <span>Zoek in monumenten</span>
@@ -333,7 +355,7 @@ export function HamburgerMenu() {
               {/* Toggle Options */}
               <div className="py-1 border-t border-gray-100">
                 {/* Vondst knop toggle */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
                   <div className="flex items-center gap-3">
                     <MapPin size={18} className="text-orange-500" />
                     <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Vondst knop</span>
@@ -353,7 +375,7 @@ export function HamburgerMenu() {
                 </div>
 
                 {/* Route knop toggle */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
                   <div className="flex items-center gap-3">
                     <Route size={18} className="text-green-500" />
                     <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Route knop</span>
@@ -373,7 +395,7 @@ export function HamburgerMenu() {
                 </div>
 
                 {/* Weerwidget toggle */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
                   <div className="flex items-center gap-3">
                     <Cloud size={18} className="text-cyan-500" />
                     <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Weerwidget</span>
@@ -393,7 +415,7 @@ export function HamburgerMenu() {
                 </div>
 
                 {/* Mijn lagen toggle */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
                   <div className="flex items-center gap-3">
                     <Layers size={18} className="text-amber-500" />
                     <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Mijn lagen</span>
@@ -413,7 +435,7 @@ export function HamburgerMenu() {
                 </div>
 
                 {/* Meetgereedschap toggle */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
                   <div className="flex items-center gap-3">
                     <Ruler size={18} className="text-blue-500" />
                     <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Meten</span>
@@ -433,7 +455,7 @@ export function HamburgerMenu() {
                 </div>
 
                 {/* Tekengereedschap toggle */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
                   <div className="flex items-center gap-3">
                     <Pencil size={18} className="text-orange-500" />
                     <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Tekenen</span>
@@ -453,7 +475,7 @@ export function HamburgerMenu() {
                 </div>
 
                 {/* Exporteren toggle */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
                   <div className="flex items-center gap-3">
                     <Printer size={18} className="text-indigo-500" />
                     <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Exporteren</span>
@@ -473,7 +495,7 @@ export function HamburgerMenu() {
                 </div>
 
                 {/* Tekstgrootte schuifjes toggle */}
-                <div className="px-3 py-2 flex items-center justify-between">
+                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
                   <div className="flex items-center gap-3">
                     <Type size={18} className="text-purple-500" />
                     <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Tekstgrootte</span>
@@ -492,13 +514,14 @@ export function HamburgerMenu() {
                   </button>
                 </div>
               </div>
+              </div>
 
               {/* Settings always at bottom */}
-              <div className="mt-auto border-t border-gray-100">
+              <div className="shrink-0 border-t border-gray-100 bg-white">
                 <button
                   onClick={handleSettingsClick}
                   className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-gray-50"
-                  style={{ fontSize: '0.95em' }}
+                  style={menuItemStyle}
                 >
                   <Settings size={18} className="text-gray-500" />
                   <span>Instellingen</span>
@@ -506,8 +529,8 @@ export function HamburgerMenu() {
               </div>
 
               {/* Version Footer */}
-              <div className="px-3 py-1.5 bg-gray-50 text-center text-gray-400" style={{ fontSize: '0.65em' }}>
-                DetectorApp NL v{version}
+              <div className="shrink-0 px-3 py-1.5 bg-gray-50 text-center text-gray-400" style={{ fontSize: '0.65em' }}>
+                Detect v{version}
               </div>
             </motion.div>
           </>
