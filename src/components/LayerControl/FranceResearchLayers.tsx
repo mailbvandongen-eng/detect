@@ -4,9 +4,15 @@ import { useLayerStore, useMapStore } from '../../store'
 import { FRANCE_RESEARCH_FACTORIES } from '../../layers/franceResearchOL'
 
 const TERRAIN = [
-  ['LiDAR HD terrein FR', 0.78],
+  ['LiDAR HD terrein FR', 0.78]
+] as const
+
+const SOIL_GEOLOGY = [
   ['Bodem/geologie 1:50.000 FR', 0.68],
-  ['Geologie + reliëf FR', 0.66]
+  ['Geologie + reliëf FR', 0.66],
+  ['BRGM boringen · BSS', 1],
+  ['BRGM IDPR · infiltratie/afstroming', 0.55],
+  ['BRGM cavités · ondergrondse holtes', 1]
 ] as const
 
 const WATER_LANDSCAPE = [
@@ -22,7 +28,7 @@ const ARCHAEOLOGY = [
   ['ArcheOcc · archeologie Occitanie', 1]
 ] as const
 
-export const FRANCE_RESEARCH_LAYERS = [...TERRAIN, ...WATER_LANDSCAPE, ...HISTORICAL_LANDSCAPE, ...ARCHAEOLOGY] as const
+export const FRANCE_RESEARCH_LAYERS = [...TERRAIN, ...WATER_LANDSCAPE, ...SOIL_GEOLOGY, ...HISTORICAL_LANDSCAPE, ...ARCHAEOLOGY] as const
 
 function ensureLayer(name: string, opacity: number, map: any, registered: Record<string, any>, registerLayer: any, setLayerOpacity: any) {
   if (registered[name]) return
@@ -42,27 +48,15 @@ function ResearchFolder({ title, layers }: { title: string; layers: readonly (re
   const registerLayer = useLayerStore(state => state.registerLayer)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
   const setLayerOpacity = useLayerStore(state => state.setLayerOpacity)
-
-  const toggle = (name: string, opacity: number) => {
-    const next = !visible[name]
-    if (next) ensureLayer(name, opacity, map, registered, registerLayer, setLayerOpacity)
-    setLayerVisibility(name, next)
-  }
-
-  return <div className="mb-0.5">
-    <button onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }} className="w-full flex items-center gap-1 py-1 px-1 hover:bg-blue-50 transition-colors bg-transparent border-0 outline-none text-left" style={{ fontSize: 'inherit' }}>
-      <ChevronRight size={14} className={`text-gray-400 transition-transform ${expanded ? 'rotate-90' : ''}`} />
-      {expanded ? <FolderOpen size={15} className="text-blue-500" /> : <Folder size={15} className="text-blue-500" />}
-      <span className="text-gray-700 font-medium">{title}</span>
-    </button>
-    {expanded && <div className="ml-5">{layers.map(([name, opacity]) => <button key={name} onClick={(e) => { e.stopPropagation(); toggle(name, opacity) }} className={`w-full flex items-center justify-between py-1 pl-2 pr-1 border-0 outline-none transition-colors text-left ${visible[name] ? 'bg-blue-50' : 'bg-transparent hover:bg-blue-50'}`} style={{ fontSize: 'inherit' }}><span className="text-gray-600">{name}</span><span className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0" style={{ backgroundColor: visible[name] ? '#3b82f6' : 'white', border: '2px solid #60a5fa', color: 'white' }}>{visible[name] && <span style={{ fontSize: 11, lineHeight: 1 }}>✓</span>}</span></button>)}</div>}
-  </div>
+  const toggle = (name: string, opacity: number) => { const next = !visible[name]; if (next) ensureLayer(name, opacity, map, registered, registerLayer, setLayerOpacity); setLayerVisibility(name, next) }
+  return <div className="mb-0.5"><button onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }} className="w-full flex items-center gap-1 py-1 px-1 hover:bg-blue-50 transition-colors bg-transparent border-0 outline-none text-left" style={{ fontSize: 'inherit' }}><ChevronRight size={14} className={`text-gray-400 transition-transform ${expanded ? 'rotate-90' : ''}`} />{expanded ? <FolderOpen size={15} className="text-blue-500" /> : <Folder size={15} className="text-blue-500" />}<span className="text-gray-700 font-medium">{title}</span></button>{expanded && <div className="ml-5">{layers.map(([name, opacity]) => <button key={name} onClick={(e) => { e.stopPropagation(); toggle(name, opacity) }} className={`w-full flex items-center justify-between py-1 pl-2 pr-1 border-0 outline-none transition-colors text-left ${visible[name] ? 'bg-blue-50' : 'bg-transparent hover:bg-blue-50'}`} style={{ fontSize: 'inherit' }}><span className="text-gray-600">{name}</span><span className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0" style={{ backgroundColor: visible[name] ? '#3b82f6' : 'white', border: '2px solid #60a5fa', color: 'white' }}>{visible[name] && <span style={{ fontSize: 11, lineHeight: 1 }}>✓</span>}</span></button>)}</div>}</div>
 }
 
 export function FranceResearchLayers() {
   return <div className="mb-1 border-b border-gray-100 pb-1">
-    <ResearchFolder title="Frankrijk · reliëf, bodem & geologie" layers={TERRAIN} />
+    <ResearchFolder title="Frankrijk · terrein & reliëf" layers={TERRAIN} />
     <ResearchFolder title="Frankrijk · water & landschap" layers={WATER_LANDSCAPE} />
+    <ResearchFolder title="Frankrijk · bodem, geologie & ondergrond" layers={SOIL_GEOLOGY} />
     <ResearchFolder title="Frankrijk · historisch landschap" layers={HISTORICAL_LANDSCAPE} />
     <ResearchFolder title="Occitanie · archeologie" layers={ARCHAEOLOGY} />
   </div>
