@@ -11,7 +11,9 @@ import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 import { THEDIRAC_RESEARCH_SITES, type ThediracResearchSite } from '../data/thediracResearchSites'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
+const IGN_WMS = 'https://data.geopf.fr/wms-r/wms'
 const BRGM_GEOLOGY_WMS = 'https://geoservices.brgm.fr/geologie'
+const TOPAGE_2026_WMS = 'https://services.sandre.eaufrance.fr/geo/topage2026?'
 const ARCHEOCC_GEOJSON = 'https://data.laregion.fr/api/explore/v2.1/catalog/datasets/base_archeocc_opendata/exports/geojson?lang=fr&timezone=Europe%2FParis'
 
 function geologyLayer(title: string, layerName: string, opacity: number) {
@@ -24,6 +26,20 @@ function geologyLayer(title: string, layerName: string, opacity: number) {
       params: { LAYERS: layerName, TILED: true, FORMAT: 'image/png', TRANSPARENT: true },
       crossOrigin: 'anonymous',
       attributions: '© BRGM — InfoTerre'
+    })
+  })
+}
+
+function ignWmsLayer(title: string, layerName: string, opacity: number) {
+  return new TileLayer({
+    properties: { title, type: 'overlay' },
+    visible: false,
+    opacity,
+    source: new TileWMS({
+      url: IGN_WMS,
+      params: { LAYERS: layerName, TILED: true, FORMAT: 'image/png', TRANSPARENT: true },
+      crossOrigin: 'anonymous',
+      attributions: '© IGN — OCS GE'
     })
   })
 }
@@ -58,6 +74,28 @@ export function createFranceGeologyReliefLayerOL() {
   return geologyLayer('Geologie + reliëf FR', 'SCAN_H_RELIEF_GEOL50', 0.66)
 }
 
+export function createFranceTopageWatercoursesLayerOL() {
+  return new TileLayer({
+    properties: { title: 'Waterlopen BD TOPAGE 2026', type: 'overlay' },
+    visible: false,
+    opacity: 0.9,
+    source: new TileWMS({
+      url: TOPAGE_2026_WMS,
+      params: { LAYERS: 'CoursEau_FXX_Topage2026', TILED: true, FORMAT: 'image/png', TRANSPARENT: true },
+      crossOrigin: 'anonymous',
+      attributions: '© IGN / OFB / Sandre — BD TOPAGE® 2026'
+    })
+  })
+}
+
+export function createFranceOcsCoverageLayerOL() {
+  return ignWmsLayer('OCS GE landbedekking 2021-2023', 'OCSGE.COUVERTURE.2021-2023', 0.62)
+}
+
+export function createFranceOcsUsageLayerOL() {
+  return ignWmsLayer('OCS GE landgebruik 2021-2023', 'OCSGE.USAGE.2021-2023', 0.62)
+}
+
 export function createArcheOccLayerOL() {
   return new VectorLayer({
     properties: { title: 'ArcheOcc · archeologie Occitanie', type: 'overlay' },
@@ -87,6 +125,9 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
   'Bodem/geologie 1:50.000 FR': createFranceGeology50LayerOL,
   'Geologie + reliëf FR': createFranceGeologyReliefLayerOL,
+  'Waterlopen BD TOPAGE 2026': createFranceTopageWatercoursesLayerOL,
+  'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
+  'OCS GE landgebruik 2021-2023': createFranceOcsUsageLayerOL,
   'ArcheOcc · archeologie Occitanie': createArcheOccLayerOL,
   'Thédirac prehistorie & megalieten': createThediracPrehistoryLayerOL,
   'Thédirac Romeins & middeleeuws': createThediracHistoryLayerOL
