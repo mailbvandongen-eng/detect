@@ -14,11 +14,8 @@ Bij iedere wijziging gelden drie vaste regels:
 
 1. Gereed in 2.33.6 — hybride wereldkaart met duidelijke straat-, water-, plaats- en gebiedsnamen, plus luchtfoto-tijdreis: officiële PDOK-jaargangen vanaf 2016 in Nederland en Esri World Imagery Wayback vanaf 2014 wereldwijd.
 2. Gereed in 2.33.8 — Android-terug sluit Detect niet meer direct: een open venster sluit eerst en vanaf de kaart volgt een expliciete sluitvraag. Dezelfde bescherming geldt in de browser, met de browser-eigen waarschuwing bij sluiten, verversen of verlaten waar het platform dat toestaat.
-3. GPS-weergave vereenvoudigen:
-   - één tik: een duidelijke locatiepunt en inzoomen naar straatniveau;
-   - twee tikken: de bestaande groene richtingpijl en meedraaiende kaart;
-   - bij stilstand: koers en kaartrotatie bevriezen zodat het beeld niet nerveus springt.
-4. De fout oplossen waardoor opnieuw inzoomen na enkele wisselingen niet meer reageert.
+3. Gereed in 2.33.9 — GPS-weergave vereenvoudigd: één tik toont een locatiepunt en zoomt naar straatniveau; de tweede stand toont de richtingpijl en meedraaiende kaart; bij stilstand worden koers, rotatie en kaartvolging bevroren.
+4. Gereed in 2.33.9 — opnieuw starten van GPS wacht op de eerste nieuwe actieve GPS-fix en zoomt daarna iedere sessie opnieuw betrouwbaar naar straatniveau.
 
 ## Prioriteit 2 — onderzoeksgebieden
 

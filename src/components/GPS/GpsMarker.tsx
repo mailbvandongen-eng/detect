@@ -16,7 +16,7 @@ const ARROW_SVG = (() => {
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
 })()
 
-// Passive dot style - small blue circle (Google Maps style)
+// Passive/tracking dot style - small blue circle (Google Maps style)
 const DOT_STYLE = new Style({
   image: new CircleStyle({
     radius: 7,
@@ -32,6 +32,7 @@ export function GpsMarker() {
   const tracking = useGPSStore(state => state.tracking)
   const smoothHeading = useGPSStore(state => state.smoothHeading)
   const navigationMode = useGPSStore(state => state.navigationMode)
+  const navigationMoving = useGPSStore(state => state.navigationMoving)
   const showAccuracyCircle = useSettingsStore(state => state.showAccuracyCircle)
   const firstFix = useGPSStore(state => state.firstFix)
   const resetFirstFix = useGPSStore(state => state.resetFirstFix)
@@ -40,6 +41,9 @@ export function GpsMarker() {
   const markerRef = useRef<Feature | null>(null)
   const accuracyRef = useRef<Feature | null>(null)
   const layerRef = useRef<VectorLayer<VectorSource> | null>(null)
+  const previousPositionRef = useRef(position)
+
+  const isHeadingUp = tracking && navigationMode === 'headingUp'
 
   // Arrow style - rotates with heading to show direction on the MAP
   const createArrowStyle = useMemo(() => (rotation: number) => new Style({
@@ -57,12 +61,12 @@ export function GpsMarker() {
     if (!map || !position) return
 
     const coords = fromLonLat([position.lng, position.lat])
+    const initialRotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
 
     markerRef.current = new Feature({
       geometry: new Point(coords)
     })
-    // Start with dot or arrow depending on tracking state
-    markerRef.current.setStyle(tracking ? createArrowStyle(0) : DOT_STYLE)
+    markerRef.current.setStyle(isHeadingUp ? createArrowStyle(initialRotation) : DOT_STYLE)
 
     accuracyRef.current = new Feature({
       geometry: new Point(coords)
@@ -84,20 +88,23 @@ export function GpsMarker() {
     }
   }, [map, !!position, createArrowStyle]) // Only re-create layer when map loads or position first appears
 
-  // Switch between dot and arrow when tracking state changes
+  // First GPS state is always a dot; only heading-up mode shows the direction arrow.
   useEffect(() => {
     if (!markerRef.current) return
 
-    if (tracking) {
+    if (isHeadingUp) {
       const rotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
       markerRef.current.setStyle(createArrowStyle(rotation))
     } else {
       markerRef.current.setStyle(DOT_STYLE)
     }
-  }, [tracking, createArrowStyle, smoothHeading])
+  }, [isHeadingUp, createArrowStyle])
 
   // Update position and center map
   useEffect(() => {
+    const isFreshPosition = previousPositionRef.current !== position
+    previousPositionRef.current = position
+
     if (!map || !position || !markerRef.current || !accuracyRef.current) return
 
     const coords = fromLonLat([position.lng, position.lat])
@@ -122,52 +129,55 @@ export function GpsMarker() {
       accuracyRef.current.setStyle(new Style({}))
     }
 
-    // First GPS fix: jump to position
-    if (firstFix && tracking) {
+    // Every GPS session waits for its first NEW active fix before jumping to street level.
+    // This avoids consuming firstFix on an old/passive position left from the previous session.
+    if (firstFix && tracking && isFreshPosition) {
       map.getView().setCenter(coords)
       map.getView().setZoom(17)
       resetFirstFix()
       return
     }
 
-    // Center on user when tracking
-    if (tracking && centerOnUser && !firstFix) {
+    // Center on user while tracking. In heading-up mode, freeze the view while
+    // stationary so small GPS position drift does not make the screen nervous.
+    const shouldFollowPosition = navigationMode !== 'headingUp' || navigationMoving
+    if (tracking && centerOnUser && !firstFix && shouldFollowPosition) {
       map.getView().animate({
         center: coords,
         duration: 150
       })
     }
-  }, [map, tracking, position, accuracy, firstFix, resetFirstFix, centerOnUser, showAccuracyCircle])
+  }, [map, tracking, position, accuracy, firstFix, resetFirstFix, centerOnUser, showAccuracyCircle, navigationMode, navigationMoving])
 
-  // Update arrow rotation when tracking
+  // Update arrow rotation only while actually moving. When speed drops below
+  // the stop threshold the last reliable direction remains visible.
   useEffect(() => {
-    if (!markerRef.current || !tracking) return
+    if (!markerRef.current || !isHeadingUp || !navigationMoving) return
 
     const rotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
     markerRef.current.setStyle(createArrowStyle(rotation))
-  }, [smoothHeading, createArrowStyle, tracking])
+  }, [smoothHeading, createArrowStyle, isHeadingUp, navigationMoving])
 
-  // Heading-up mode: rotate map so heading direction is "up"
+  // Heading-up mode: rotate map so heading direction is "up" while moving.
+  // At standstill both course and rotation stay frozen.
   useEffect(() => {
-    if (!map || !tracking) return
+    if (!map || !isHeadingUp || !navigationMoving || smoothHeading === null) return
 
-    if (navigationMode === 'headingUp' && smoothHeading !== null) {
-      const targetRotation = -(smoothHeading * Math.PI) / 180
-      const view = map.getView()
-      const currentRotation = view.getRotation()
+    const targetRotation = -(smoothHeading * Math.PI) / 180
+    const view = map.getView()
+    const currentRotation = view.getRotation()
 
-      let diff = targetRotation - currentRotation
-      while (diff > Math.PI) diff -= 2 * Math.PI
-      while (diff < -Math.PI) diff += 2 * Math.PI
+    let diff = targetRotation - currentRotation
+    while (diff > Math.PI) diff -= 2 * Math.PI
+    while (diff < -Math.PI) diff += 2 * Math.PI
 
-      if (Math.abs(diff) > 0.01) {
-        view.animate({
-          rotation: currentRotation + diff,
-          duration: 200
-        })
-      }
+    if (Math.abs(diff) > 0.01) {
+      view.animate({
+        rotation: currentRotation + diff,
+        duration: 200
+      })
     }
-  }, [map, tracking, navigationMode, smoothHeading])
+  }, [map, isHeadingUp, navigationMoving, smoothHeading])
 
   // Reset map rotation when leaving heading-up mode
   useEffect(() => {

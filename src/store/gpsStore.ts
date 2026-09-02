@@ -21,6 +21,7 @@ interface GPSState {
   watchId: number | null
   firstFix: boolean
   navigationMode: NavigationMode
+  navigationMoving: boolean
 
   // Configuration
   config: {
@@ -39,6 +40,9 @@ interface GPSState {
   toggleNavigationMode: () => void
 }
 
+const NAVIGATION_STOP_SPEED = 0.4
+const NAVIGATION_START_SPEED = 0.8
+
 export const useGPSStore = create<GPSState>()(
   immer((set, get) => ({
     // Initial state
@@ -53,6 +57,7 @@ export const useGPSStore = create<GPSState>()(
     watchId: null,
     firstFix: true,
     navigationMode: 'free' as NavigationMode,
+    navigationMoving: false,
 
     config: {
       centerOnUser: true
@@ -84,6 +89,9 @@ export const useGPSStore = create<GPSState>()(
     startTracking: () => {
       set(state => {
         state.tracking = true
+        // Every new GPS session gets a fresh street-level jump on its first NEW fix.
+        state.firstFix = true
+        state.navigationMoving = false
       })
     },
 
@@ -102,6 +110,7 @@ export const useGPSStore = create<GPSState>()(
         state.rawGPSHeading = null
         state.watchId = null
         state.navigationMode = 'free'
+        state.navigationMoving = false
         // Position stays visible as a passive dot
       })
     },
@@ -118,7 +127,25 @@ export const useGPSStore = create<GPSState>()(
         // Store raw GPS heading for useHeading to process
         state.rawGPSHeading = pos.coords.heading
 
-        // Determine heading source based on GPS quality and speed
+        // In heading-up mode use hysteresis so GPS speed jitter around zero does
+        // not repeatedly start and stop map rotation while the phone is still.
+        if (state.navigationMode === 'headingUp') {
+          const currentSpeed = pos.coords.speed
+
+          if (currentSpeed === null) {
+            state.navigationMoving = false
+          } else if (state.navigationMoving) {
+            if (currentSpeed < NAVIGATION_STOP_SPEED) {
+              state.navigationMoving = false
+            }
+          } else if (currentSpeed > NAVIGATION_START_SPEED) {
+            state.navigationMoving = true
+          }
+        } else {
+          state.navigationMoving = false
+        }
+
+        // Determine heading source based on GPS quality and movement.
         const GPS_ACCURACY_THRESHOLD = 20
         const SPEED_THRESHOLD = 0.5 // ~1.8 km/h
 
@@ -129,6 +156,16 @@ export const useGPSStore = create<GPSState>()(
         if (!isGPSReliable) {
           // Poor GPS - no reliable heading source
           state.headingSource = null
+        } else if (state.navigationMode === 'headingUp') {
+          if (!state.navigationMoving) {
+            // Freeze the last reliable course while stationary.
+            state.headingSource = null
+          } else if (pos.coords.heading !== null) {
+            state.headingSource = 'gps'
+          } else {
+            // Moving but GPS bearing unavailable: compass is the fallback.
+            state.headingSource = 'compass'
+          }
         } else if (
           pos.coords.heading !== null &&
           pos.coords.speed !== null &&
@@ -137,7 +174,7 @@ export const useGPSStore = create<GPSState>()(
           // Moving with good GPS - use GPS bearing
           state.headingSource = 'gps'
         } else {
-          // Stationary with good GPS - use compass
+          // North-up tracking can keep the compass warm without affecting the map.
           state.headingSource = 'compass'
         }
       })
@@ -165,12 +202,31 @@ export const useGPSStore = create<GPSState>()(
     setNavigationMode: (mode: NavigationMode) => {
       set(state => {
         state.navigationMode = mode
+
+        if (mode === 'headingUp') {
+          state.navigationMoving = state.speed !== null && state.speed > NAVIGATION_START_SPEED
+          if (!state.navigationMoving) {
+            state.headingSource = null
+          }
+        } else {
+          state.navigationMoving = false
+        }
       })
     },
 
     toggleNavigationMode: () => {
       set(state => {
-        state.navigationMode = state.navigationMode === 'free' ? 'headingUp' : 'free'
+        const nextMode = state.navigationMode === 'free' ? 'headingUp' : 'free'
+        state.navigationMode = nextMode
+
+        if (nextMode === 'headingUp') {
+          state.navigationMoving = state.speed !== null && state.speed > NAVIGATION_START_SPEED
+          if (!state.navigationMoving) {
+            state.headingSource = null
+          }
+        } else {
+          state.navigationMoving = false
+        }
       })
     }
   }))

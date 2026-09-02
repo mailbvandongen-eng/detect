@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.9',
+    date: '2 september 2026',
+    title: 'GPS rustiger en opnieuw inzoomen hersteld',
+    changes: [
+      'De eerste GPS-stand toont voortaan alleen een duidelijke blauwe locatiepunt; de richtingpijl en meedraaiende kaart verschijnen pas in de tweede GPS-stand.',
+      'Na GPS uit- en weer aanzetten wacht Detect op de eerste nieuwe actieve GPS-meting en zoomt daarna opnieuw betrouwbaar naar straatniveau.',
+      'In de meedraaiende GPS-stand worden positie, koers en kaartrotatie bij stilstand bevroren. Met aparte stop- en startdrempels voorkomt Detect dat kleine snelheids- en GPS-schommelingen het scherm nerveus maken.'
+    ]
+  },
+  {
     version: '2.33.8',
     date: '2 september 2026',
     title: 'Terugknop en sluiten beveiligd',
