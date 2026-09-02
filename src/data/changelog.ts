@@ -7,12 +7,23 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.8',
+    date: '2 september 2026',
+    title: 'Terugknop en sluiten beveiligd',
+    changes: [
+      'De Android-terugknop sluit Detect niet meer direct: een open venster sluit eerst, en vanaf de kaart vraagt Detect daarna expliciet of je echt wilt afsluiten.',
+      'Dezelfde beveiliging werkt wanneer Detect gewoon in een browsertab draait; sluiten, verversen of de pagina verlaten krijgt waar de browser dat toestaat een extra waarschuwing.',
+      'Automatische herstarts na een Detect-update blijven zonder onnodige sluitwaarschuwing werken.'
+    ]
+  },
+  {
     version: '2.33.7',
     date: '2 september 2026',
-    title: 'Wayback hersteld en dubbele plaatsnamen opgelost',
+    title: 'Wayback en dubbele kaartlabels hersteld',
     changes: [
-      'Esri World Imagery Wayback gebruikt nu de officiële WMTS-capabilitiesroute met MapServer, zodat het wereldarchief weer geladen kan worden.',
-      'De rijke OpenFreeMap/Esri-referentielaag synchroniseert zijn zichtbaarheid opnieuw nadat de stijl asynchroon is geladen; op Esri Licht blijft hij uit zodat plaatsnamen niet dubbel worden getoond.'
+      'Esri World Imagery Wayback gebruikt nu de officiële WMTS-route met MapServer in het pad, zodat het wereldarchief weer bereikbaar is.',
+      'De rijke referentielaag wordt na het laden opnieuw met de actieve basiskaart gesynchroniseerd en kan daardoor niet meer op Esri licht blijven hangen.',
+      'Hybride wereld is expliciet opgenomen in de beginstatus van de laagwinkel, zodat schakelen tussen basiskaarten voorspelbaar blijft.'
     ]
   },
   {

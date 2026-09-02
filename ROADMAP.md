@@ -13,7 +13,7 @@ Bij iedere wijziging gelden drie vaste regels:
 ## Prioriteit 1 — veldgebruik betrouwbaar maken
 
 1. Gereed in 2.33.6 — hybride wereldkaart met duidelijke straat-, water-, plaats- en gebiedsnamen, plus luchtfoto-tijdreis: officiële PDOK-jaargangen vanaf 2016 in Nederland en Esri World Imagery Wayback vanaf 2014 wereldwijd.
-2. Op Android bij de terugknop eerst vragen of Detect echt gesloten moet worden.
+2. Gereed in 2.33.8 — Android-terug sluit Detect niet meer direct: een open venster sluit eerst en vanaf de kaart volgt een expliciete sluitvraag. Dezelfde bescherming geldt in de browser, met de browser-eigen waarschuwing bij sluiten, verversen of verlaten waar het platform dat toestaat.
 3. GPS-weergave vereenvoudigen:
    - één tik: een duidelijke locatiepunt en inzoomen naar straatniveau;
    - twee tikken: de bestaande groene richtingpijl en meedraaiende kaart;
