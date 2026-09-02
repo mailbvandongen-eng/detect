@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
-import { useLayerStore } from '../../store'
-import { FranceResearchLayers } from './FranceResearchLayers'
+import { useLayerStore, useMapStore } from '../../store'
+import { FranceResearchLayers, FRANCE_RESEARCH_LAYERS } from './FranceResearchLayers'
+import { FRANCE_RESEARCH_FACTORIES } from '../../layers/franceResearchOL'
 
 interface Props {
   title: string
@@ -13,9 +14,14 @@ interface Props {
 
 export function LayerGroup({ title, children, defaultExpanded = true, layerNames }: Props) {
   const [expanded, setExpanded] = useState(defaultExpanded)
+  const map = useMapStore(state => state.map)
   const visible = useLayerStore(state => state.visible)
+  const registered = useLayerStore(state => state.layers)
+  const registerLayer = useLayerStore(state => state.registerLayer)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
-  const groupLayers = layerNames ?? []
+  const setLayerOpacity = useLayerStore(state => state.setLayerOpacity)
+  const researchNames = title === 'Frankrijk' ? FRANCE_RESEARCH_LAYERS.map(([name]) => name) : []
+  const groupLayers = [...(layerNames ?? []), ...researchNames]
   const activeCount = groupLayers.filter(name => visible[name]).length
   const totalCount = groupLayers.length
   const allActive = totalCount > 0 && activeCount === totalCount
@@ -25,60 +31,34 @@ export function LayerGroup({ title, children, defaultExpanded = true, layerNames
     e.stopPropagation()
     if (groupLayers.length === 0) return
     const newState = !allActive
+    if (newState && title === 'Frankrijk') {
+      FRANCE_RESEARCH_LAYERS.forEach(([name, opacity]) => {
+        if (!registered[name] && map) {
+          const factory = FRANCE_RESEARCH_FACTORIES[name]
+          if (factory) {
+            const layer = factory()
+            map.addLayer(layer)
+            registerLayer(name, layer)
+            setLayerOpacity(name, opacity)
+          }
+        }
+      })
+    }
     groupLayers.forEach(name => setLayerVisibility(name, newState))
   }
 
   return (
     <div className="mb-0.5">
       <div className="flex items-center gap-1 py-1 px-1 hover:bg-blue-50 transition-colors">
-        <button
-          onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
-          className="flex-1 flex items-center gap-1 bg-transparent border-0 outline-none text-left"
-          style={{ fontSize: 'inherit' }}
-        >
-          <motion.span animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.15 }} className="text-gray-400">
-            <ChevronRight size={14} />
-          </motion.span>
+        <button onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }} className="flex-1 flex items-center gap-1 bg-transparent border-0 outline-none text-left" style={{ fontSize: 'inherit' }}>
+          <motion.span animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.15 }} className="text-gray-400"><ChevronRight size={14} /></motion.span>
           {expanded ? <FolderOpen size={16} className="text-blue-500" /> : <Folder size={16} className="text-blue-500" />}
           <span className="text-gray-700 font-medium" style={{ fontSize: '1em' }}>{title}</span>
-          {activeCount > 0 && (
-            <span className="ml-1 px-1.5 py-0.5 font-medium bg-blue-100 text-blue-600 rounded-full" style={{ fontSize: '0.7em' }}>{activeCount}</span>
-          )}
+          {activeCount > 0 && <span className="ml-1 px-1.5 py-0.5 font-medium bg-blue-100 text-blue-600 rounded-full" style={{ fontSize: '0.7em' }}>{activeCount}</span>}
         </button>
-        {layerNames && layerNames.length > 0 && (
-          <button
-            onClick={toggleAllLayers}
-            className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-100 flex-shrink-0"
-            style={{
-              backgroundColor: allActive ? '#3b82f6' : someActive ? '#93c5fd' : 'white',
-              border: allActive ? '2px solid #3b82f6' : someActive ? '2px solid #60a5fa' : '2px solid #60a5fa',
-              color: 'white'
-            }}
-          >
-            {(allActive || someActive) && (
-              <svg width="10" height="10" viewBox="0 0 10 10">
-                <path d="M2 5 L4 7 L8 3" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
-          </button>
-        )}
+        {groupLayers.length > 0 && <button onClick={toggleAllLayers} className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-100 flex-shrink-0" style={{ backgroundColor: allActive ? '#3b82f6' : someActive ? '#93c5fd' : 'white', border: '2px solid #60a5fa', color: 'white' }}>{(allActive || someActive) && <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5 L4 7 L8 3" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>}</button>}
       </div>
-
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            style={{ overflow: 'hidden' }}
-            className="ml-5"
-          >
-            {title === 'Frankrijk' && <FranceResearchLayers />}
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <AnimatePresence initial={false}>{expanded && <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }} className="ml-5">{title === 'Frankrijk' && <FranceResearchLayers />}{children}</motion.div>}</AnimatePresence>
     </div>
   )
 }
