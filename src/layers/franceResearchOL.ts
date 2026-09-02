@@ -15,8 +15,8 @@ const ARCHEOCC_GEOJSON = 'https://data.laregion.fr/api/explore/v2.1/catalog/data
 function geologyLayer(title: string, layerName: string, opacity: number) {
   return new TileLayer({ properties: { title, type: 'overlay' }, visible: false, opacity, source: new TileWMS({ url: BRGM_GEOLOGY_WMS, params: { LAYERS: layerName, TILED: true, FORMAT: 'image/png', TRANSPARENT: true }, crossOrigin: 'anonymous', attributions: '© BRGM — InfoTerre' }) })
 }
-function ignWmsLayer(title: string, layerName: string, opacity: number) {
-  return new TileLayer({ properties: { title, type: 'overlay' }, visible: false, opacity, source: new TileWMS({ url: IGN_WMS, params: { LAYERS: layerName, TILED: true, FORMAT: 'image/png', TRANSPARENT: true }, crossOrigin: 'anonymous', attributions: '© IGN — OCS GE' }) })
+function ignWmsLayer(title: string, layerName: string, opacity: number, attribution = '© IGN') {
+  return new TileLayer({ properties: { title, type: 'overlay' }, visible: false, opacity, source: new TileWMS({ url: IGN_WMS, params: { LAYERS: layerName, TILED: true, FORMAT: 'image/png', TRANSPARENT: true }, crossOrigin: 'anonymous', attributions: attribution }) })
 }
 const archeOccStyle = new Style({ image: new CircleStyle({ radius: 6, fill: new Fill({ color: '#dc2626' }), stroke: new Stroke({ color: '#fff', width: 1.5 }) }) })
 
@@ -24,7 +24,8 @@ export function createFranceLidarTerrainLayerOL() { return new TileLayer({ prope
 export function createFranceGeology50LayerOL() { return geologyLayer('Bodem/geologie 1:50.000 FR', 'SCAN_D_GEOL50', 0.68) }
 export function createFranceGeologyReliefLayerOL() { return geologyLayer('Geologie + reliëf FR', 'SCAN_H_RELIEF_GEOL50', 0.66) }
 export function createFranceTopageWatercoursesLayerOL() { return new TileLayer({ properties: { title: 'Waterlopen BD TOPAGE 2026', type: 'overlay' }, visible: false, opacity: 0.9, source: new TileWMS({ url: TOPAGE_2026_WMS, params: { LAYERS: 'CoursEau_FXX_Topage2026', TILED: true, FORMAT: 'image/png', TRANSPARENT: true }, crossOrigin: 'anonymous', attributions: '© IGN / OFB / Sandre — BD TOPAGE® 2026' }) }) }
-export function createFranceOcsCoverageLayerOL() { return ignWmsLayer('OCS GE landbedekking 2021-2023', 'OCSGE.COUVERTURE.2021-2023', 0.62) }
+export function createFranceOcsCoverageLayerOL() { return ignWmsLayer('OCS GE landbedekking 2021-2023', 'OCSGE.COUVERTURE.2021-2023', 0.62, '© IGN — OCS GE') }
+export function createFranceAncientForestsLayerOL() { return ignWmsLayer('Oude bossen · Forêts anciennes', 'IGNF_FORETS-ANCIENNES', 0.72, '© IGN — BD Forêts anciennes') }
 
 function firstText(...values: unknown[]) { for (const value of values) { if (typeof value === 'string' && value.trim()) return value.trim(); if (typeof value === 'number') return String(value) } return '' }
 function joinText(...values: unknown[]) { const seen = new Set<string>(); const out: string[] = []; for (const value of values) { const text = firstText(value); if (text && !seen.has(text)) { seen.add(text); out.push(text) } } return out.join(' · ') }
@@ -68,5 +69,6 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'Geologie + reliëf FR': createFranceGeologyReliefLayerOL,
   'Waterlopen BD TOPAGE 2026': createFranceTopageWatercoursesLayerOL,
   'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
+  'Oude bossen · Forêts anciennes': createFranceAncientForestsLayerOL,
   'ArcheOcc · archeologie Occitanie': createArcheOccLayerOL
 }
