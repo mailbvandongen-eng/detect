@@ -128,7 +128,7 @@ export function WeatherWidget() {
     <>
       {isExpanded && <div className="fixed inset-0 z-[1099]" onClick={() => setIsExpanded(false)} />}
       <motion.div
-        className="fixed left-2 z-[1100] bg-white shadow-lg border border-gray-200 select-none rounded-xl"
+        className={`fixed left-2 z-[1100] bg-white shadow-lg border border-gray-200 select-none rounded-xl ${isExpanded ? 'weather-widget-expanded' : 'weather-widget-compact'}`}
         style={{ top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))', width: isExpanded ? 'min(360px, calc(100vw - 16px))' : 'auto', maxWidth: 'calc(100vw - 16px)' }}
         initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} layout
       >
@@ -140,7 +140,7 @@ export function WeatherWidget() {
         ) : (
           <div className="p-2.5" style={{ fontSize: `${baseFontSize}px` }}>
             <button onClick={() => setIsExpanded(!isExpanded)} className="w-full border-0 outline-none bg-transparent p-0 text-left">
-              <div className="flex items-center gap-2">
+              <div className="weather-widget-summary flex items-center gap-2">
                 <WeatherIcon code={current.weatherCode} size={24} />
                 <span className="font-bold text-gray-800" style={{ fontSize: '1.5em' }}>{Math.round(current.temperature)}°</span>
                 <span className="text-gray-500">{rainText}</span>
@@ -149,7 +149,7 @@ export function WeatherWidget() {
                 {weather.isLoading && <RefreshCw size={12} className="animate-spin text-blue-500" />}
                 <span className="ml-auto">{isExpanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}</span>
               </div>
-              <div className="text-gray-500 mt-1" style={{ fontSize: '0.86em' }}>
+              <div className="weather-widget-subline text-gray-500 mt-1" style={{ fontSize: '0.86em' }}>
                 {weatherCodeDescriptions[current.weatherCode]} · voelt {Math.round(current.apparentTemperature)}° · {weather.weatherData?.location.name}
               </div>
             </button>
