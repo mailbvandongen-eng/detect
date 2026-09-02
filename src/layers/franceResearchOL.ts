@@ -37,33 +37,16 @@ export function createFranceLidarTerrainLayerOL() {
   })
 }
 
-export function createFranceGeology50LayerOL() {
-  return tileWms('Geologie 1:50.000 FR', BRGM_GEOLOGY_WMS, 'SCAN_GEOL50', 0.68, '© BRGM — carte géologique 1:50 000')
-}
-
-export function createFranceGeologyHarmonizedLayerOL() {
-  return tileWms('Geologie geharmoniseerd FR', BRGM_GEOLOGY_WMS, 'GEOL50_HARM', 0.62, '© BRGM — géologie harmonisée')
-}
-
-export function createLotHydrogeologyLayerOL() {
-  return tileWms('Hydrogeologie Lot (46)', OCCITANIE_HYDRO_WMS, 'Carte_hydro_46', 0.62, '© BRGM / SIGES Occitanie — carte hydrogéologique du Lot')
-}
-
-export function createFranceWatercoursesLayerOL() {
-  return tileWms('Waterlopen FR', SANDRE_HYDRO_WMS, 'CoursEau_Carthage2017', 0.82, '© Sandre / Eaufrance — réseau hydrographique')
-}
-
-export function createFranceBssLayerOL() {
-  return tileWms('Ondergrondboringen BRGM', BRGM_CATALOGUE_WMS, 'BSS_TOTAL', 0.9, '© BRGM — Banque du Sous-Sol')
-}
-
-export function createFranceCavitiesLayerOL() {
-  return tileWms('Karst & ondergrondse holtes', BRGM_RISKS_WMS, 'CAVITE_LOCALISEE', 0.9, '© BRGM — cavités souterraines')
-}
-
-export function createFranceIdprLayerOL() {
-  return tileWms('Infiltratie & afstroming (IDPR)', BRGM_GEOLOGY_WMS, 'IDPR', 0.5, '© BRGM — IDPR')
-}
+export function createFranceGeology50LayerOL() { return tileWms('Geologie 1:50.000 FR', BRGM_GEOLOGY_WMS, 'SCAN_GEOL50', 0.68, '© BRGM — carte géologique 1:50 000') }
+export function createFranceGeologyHarmonizedLayerOL() { return tileWms('Geologie geharmoniseerd FR', BRGM_GEOLOGY_WMS, 'GEOL50_HARM', 0.62, '© BRGM — géologie harmonisée') }
+export function createLotHydrogeologyLayerOL() { return tileWms('Hydrogeologie Lot (46)', OCCITANIE_HYDRO_WMS, 'Carte_hydro_46', 0.62, '© BRGM / SIGES Occitanie — carte hydrogéologique du Lot') }
+export function createFranceWatercoursesLayerOL() { return tileWms('Waterlopen FR', SANDRE_HYDRO_WMS, 'CoursEau_Carthage2017', 0.82, '© Sandre / Eaufrance — réseau hydrographique') }
+export function createFranceBssLayerOL() { return tileWms('Ondergrondboringen BRGM', BRGM_CATALOGUE_WMS, 'BSS_TOTAL', 0.9, '© BRGM — Banque du Sous-Sol') }
+export function createFranceCavitiesLayerOL() { return tileWms('Karst & ondergrondse holtes', BRGM_RISKS_WMS, 'CAVITE_LOCALISEE', 0.9, '© BRGM — cavités souterraines') }
+export function createFranceIdprLayerOL() { return tileWms('Infiltratie & afstroming (IDPR)', BRGM_GEOLOGY_WMS, 'IDPR', 0.5, '© BRGM — IDPR') }
+export function createFranceGroundwaterRiseLayerOL() { return tileWms('Grondwater / kwelrisico', BRGM_RISKS_WMS, 'REM_NAPPE_SEDIM', 0.5, '© BRGM — remontées de nappe') }
+export function createFranceTerrainMovementLayerOL() { return tileWms('Aardverschuivingen & terreinbeweging', BRGM_RISKS_WMS, 'MVT_LOCALISE', 0.88, '© BRGM — mouvements de terrain') }
+export function createFranceRecentFaultsLayerOL() { return tileWms('Breuken & paleoseismiek', BRGM_RISKS_WMS, 'NEOPAL_FAILLE', 0.8, '© BRGM — Néopal') }
 
 export const FRANCE_RESEARCH_FACTORIES: Record<string, () => TileLayer<any>> = {
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
@@ -73,5 +56,8 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => TileLayer<any>> = {
   'Waterlopen FR': createFranceWatercoursesLayerOL,
   'Ondergrondboringen BRGM': createFranceBssLayerOL,
   'Karst & ondergrondse holtes': createFranceCavitiesLayerOL,
-  'Infiltratie & afstroming (IDPR)': createFranceIdprLayerOL
+  'Infiltratie & afstroming (IDPR)': createFranceIdprLayerOL,
+  'Grondwater / kwelrisico': createFranceGroundwaterRiseLayerOL,
+  'Aardverschuivingen & terreinbeweging': createFranceTerrainMovementLayerOL,
+  'Breuken & paleoseismiek': createFranceRecentFaultsLayerOL
 }
