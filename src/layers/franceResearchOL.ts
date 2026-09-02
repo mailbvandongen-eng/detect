@@ -4,11 +4,7 @@ import TileWMS from 'ol/source/TileWMS'
 import VectorSource from 'ol/source/Vector'
 import XYZ from 'ol/source/XYZ'
 import GeoJSON from 'ol/format/GeoJSON'
-import Feature from 'ol/Feature'
-import Point from 'ol/geom/Point'
-import { fromLonLat } from 'ol/proj'
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
-import { THEDIRAC_RESEARCH_SITES, type ThediracResearchSite } from '../data/thediracResearchSites'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
 const IGN_WMS = 'https://data.geopf.fr/wms-r/wms'
@@ -44,13 +40,13 @@ function ignWmsLayer(title: string, layerName: string, opacity: number) {
   })
 }
 
-const researchStyles: Record<ThediracResearchSite['category'], Style> = {
-  prehistorie: new Style({ image: new CircleStyle({ radius: 8, fill: new Fill({ color: '#b45309' }), stroke: new Stroke({ color: '#fff', width: 2 }) }) }),
-  middeleeuwen: new Style({ image: new CircleStyle({ radius: 8, fill: new Fill({ color: '#7c3aed' }), stroke: new Stroke({ color: '#fff', width: 2 }) }) }),
-  romeins: new Style({ image: new CircleStyle({ radius: 8, fill: new Fill({ color: '#b91c1c' }), stroke: new Stroke({ color: '#fff', width: 2 }) }) })
-}
-
-const archeOccStyle = new Style({ image: new CircleStyle({ radius: 6, fill: new Fill({ color: '#dc2626' }), stroke: new Stroke({ color: '#fff', width: 1.5 }) }) })
+const archeOccStyle = new Style({
+  image: new CircleStyle({
+    radius: 6,
+    fill: new Fill({ color: '#dc2626' }),
+    stroke: new Stroke({ color: '#fff', width: 1.5 })
+  })
+})
 
 export function createFranceLidarTerrainLayerOL() {
   return new TileLayer({
@@ -92,34 +88,76 @@ export function createFranceOcsCoverageLayerOL() {
   return ignWmsLayer('OCS GE landbedekking 2021-2023', 'OCSGE.COUVERTURE.2021-2023', 0.62)
 }
 
-export function createFranceOcsUsageLayerOL() {
-  return ignWmsLayer('OCS GE landgebruik 2021-2023', 'OCSGE.USAGE.2021-2023', 0.62)
+function firstText(...values: unknown[]) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim()
+    if (typeof value === 'number') return String(value)
+  }
+  return ''
 }
 
 export function createArcheOccLayerOL() {
+  const source = new VectorSource({
+    url: ARCHEOCC_GEOJSON,
+    format: new GeoJSON(),
+    attributions: 'Région Occitanie — ArcheOcc · Licence Ouverte 2.0'
+  })
+
+  source.on('featuresloadend', event => {
+    for (const feature of event.features ?? []) {
+      const p = feature.getProperties()
+      const name = firstText(
+        p.nom_du_site_du_musee_ou_du_centre_d_interpretation,
+        p.sous_titre,
+        p.lieu_de_decouverte0,
+        p.phrase_d_accroche0,
+        p.commune,
+        'Archeologische locatie'
+      )
+      const period = firstText(p.periodes_objet_1, p.periodes_objet_2, p.periodes_objet_3)
+      const dating = firstText(p.datation_objet_1, p.datation_objet_2, p.datation_objet_3)
+      const description = firstText(
+        p.decription_courte0,
+        p.decription_longue_historique0,
+        p.phrase_d_accroche0,
+        p.informations_supplementaires
+      )
+      const discovery = firstText(p.lieu_de_decouverte0, p.lieu_de_decouverte1)
+      const occupation = firstText(p.type_d_occupation)
+      const municipality = firstText(p.commune)
+      const department = firstText(p.departement)
+      const notice = firstText(p.notice_liee)
+
+      for (const key of Object.keys(p)) {
+        if (key !== 'geometry') feature.unset(key, true)
+      }
+
+      feature.setProperties({
+        layerType: 'importedLayer',
+        layerName: 'ArcheOcc · Occitanie',
+        layerColor: '#dc2626',
+        name,
+        ...(municipality ? { Gemeente: municipality } : {}),
+        ...(department ? { Departement: department } : {}),
+        ...(occupation ? { 'Type locatie': occupation } : {}),
+        ...(period ? { Periode: period } : {}),
+        ...(dating ? { Datering: dating } : {}),
+        ...(discovery ? { 'Vindplaats / lieu de découverte': discovery } : {}),
+        ...(description ? { Omschrijving: description } : {}),
+        ...(notice ? { 'Bronverwijzing': notice } : {}),
+        Bron: 'Région Occitanie — ArcheOcc',
+        Licentie: 'Licence Ouverte 2.0'
+      }, true)
+    }
+  })
+
   return new VectorLayer({
     properties: { title: 'ArcheOcc · archeologie Occitanie', type: 'overlay' },
     visible: false,
-    source: new VectorSource({
-      url: ARCHEOCC_GEOJSON,
-      format: new GeoJSON(),
-      attributions: 'Région Occitanie — ArcheOcc · Licence Ouverte 2.0'
-    }),
+    source,
     style: archeOccStyle
   })
 }
-
-function createResearchVectorLayer(title: string, categories: ThediracResearchSite['category'][]) {
-  const features = THEDIRAC_RESEARCH_SITES.filter(site => categories.includes(site.category)).map(site => new Feature({
-    geometry: new Point(fromLonLat([site.lon, site.lat])),
-    layerType: 'thediracResearch',
-    ...site
-  }))
-  return new VectorLayer({ properties: { title, type: 'overlay' }, visible: false, source: new VectorSource({ features }), style: feature => researchStyles[feature.get('category') as ThediracResearchSite['category']] })
-}
-
-export function createThediracPrehistoryLayerOL() { return createResearchVectorLayer('Thédirac prehistorie & megalieten', ['prehistorie']) }
-export function createThediracHistoryLayerOL() { return createResearchVectorLayer('Thédirac Romeins & middeleeuws', ['romeins', 'middeleeuwen']) }
 
 export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
@@ -127,8 +165,5 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'Geologie + reliëf FR': createFranceGeologyReliefLayerOL,
   'Waterlopen BD TOPAGE 2026': createFranceTopageWatercoursesLayerOL,
   'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
-  'OCS GE landgebruik 2021-2023': createFranceOcsUsageLayerOL,
-  'ArcheOcc · archeologie Occitanie': createArcheOccLayerOL,
-  'Thédirac prehistorie & megalieten': createThediracPrehistoryLayerOL,
-  'Thédirac Romeins & middeleeuws': createThediracHistoryLayerOL
+  'ArcheOcc · archeologie Occitanie': createArcheOccLayerOL
 }
