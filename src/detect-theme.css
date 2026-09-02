@@ -1,0 +1,77 @@
+/* Detect: vierkleurige huisstijl bovenop bestaande Tailwind-kleuren. */
+
+[data-detect-theme] .detect-window .text-blue-400,
+[data-detect-theme] .detect-window .text-blue-500,
+[data-detect-theme] .detect-window .text-blue-600,
+[data-detect-theme] .detect-window .text-blue-700,
+[data-detect-theme] .detect-window .text-indigo-500,
+[data-detect-theme] .detect-window .text-indigo-600 {
+  color: var(--detect-accent-text) !important;
+}
+
+[data-detect-theme] .detect-window .border-blue-400,
+[data-detect-theme] .detect-window .border-blue-500,
+[data-detect-theme] .detect-window .border-blue-600,
+[data-detect-theme] .detect-window .border-indigo-500,
+[data-detect-theme] .detect-window .border-indigo-600 {
+  border-color: var(--detect-accent) !important;
+}
+
+[data-detect-theme] .detect-window .bg-blue-50,
+[data-detect-theme] .detect-window .bg-blue-50\/50,
+[data-detect-theme] .detect-window .bg-blue-100,
+[data-detect-theme] .detect-window .bg-indigo-50,
+[data-detect-theme] .detect-window .hover\:bg-blue-50:hover,
+[data-detect-theme] .detect-window .hover\:bg-blue-100:hover,
+[data-detect-theme] .detect-window .hover\:bg-indigo-50:hover {
+  background-color: var(--detect-accent-soft) !important;
+}
+
+[data-detect-theme] .detect-window .focus\:ring-blue-500:focus,
+[data-detect-theme] .detect-window .focus\:ring-green-500:focus,
+[data-detect-theme] .detect-window .focus\:ring-indigo-500:focus {
+  --tw-ring-color: var(--detect-accent) !important;
+}
+
+/* Kaartbediening gebruikt hetzelfde gekozen accent als de vensters. */
+[data-detect-theme] button[title="Menu"].bg-blue-500,
+[data-detect-theme] button[title="Afstanden meten"].bg-blue-500,
+[data-detect-theme] button[title="Tekenen op de kaart"].bg-orange-500 {
+  background: var(--detect-accent) !important;
+}
+
+[data-detect-theme] button[title="Kaartlagen"].from-blue-400 {
+  background: linear-gradient(135deg, var(--detect-accent), var(--detect-accent-hover)) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--detect-accent) 30%, transparent) !important;
+}
+
+[data-detect-theme] button[title="Menu"]:not(.bg-blue-500) svg,
+[data-detect-theme] button[title="Afstanden meten"]:not(.bg-blue-500) svg,
+[data-detect-theme] button[title="Tekenen op de kaart"]:not(.bg-orange-500) svg,
+[data-detect-theme] button[title="Kaart printen/exporteren"] svg {
+  color: var(--detect-accent) !important;
+}
+
+[data-detect-theme] button[title="Menu"].bg-blue-500 svg,
+[data-detect-theme] button[title="Afstanden meten"].bg-blue-500 svg,
+[data-detect-theme] button[title="Tekenen op de kaart"].bg-orange-500 svg,
+[data-detect-theme] button[title="Kaartlagen"].from-blue-400 svg {
+  color: #fff !important;
+}
+
+/* Instellingen, tabs en primaire acties volgen dezelfde vier kleurvarianten. */
+[data-detect-theme] .detect-window-primary-button {
+  background: var(--detect-accent) !important;
+  border-color: var(--detect-accent) !important;
+}
+
+[data-detect-theme] .detect-window-primary-button:hover {
+  background: var(--detect-accent-hover) !important;
+}
+
+[data-detect-theme] .detect-window-secondary-button:hover {
+  border-color: var(--detect-accent) !important;
+  color: var(--detect-accent-text) !important;
+  background: var(--detect-accent-soft) !important;
+}
