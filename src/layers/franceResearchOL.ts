@@ -9,20 +9,23 @@ import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
 const IGN_WMS = 'https://data.geopf.fr/wms-r/wms'
 const BRGM_GEOLOGY_WMS = 'https://geoservices.brgm.fr/geologie'
+const BRGM_RISKS_WMS = 'https://geoservices.brgm.fr/risques'
 const TOPAGE_2026_WMS = 'https://services.sandre.eaufrance.fr/geo/topage2026?'
 const ARCHEOCC_GEOJSON = 'https://data.laregion.fr/api/explore/v2.1/catalog/datasets/base_archeocc_opendata/exports/geojson?lang=fr&timezone=Europe%2FParis'
 
-function geologyLayer(title: string, layerName: string, opacity: number) {
-  return new TileLayer({ properties: { title, type: 'overlay' }, visible: false, opacity, source: new TileWMS({ url: BRGM_GEOLOGY_WMS, params: { LAYERS: layerName, TILED: true, FORMAT: 'image/png', TRANSPARENT: true }, crossOrigin: 'anonymous', attributions: '© BRGM — InfoTerre' }) })
+function queryableWmsLayer(title: string, url: string, layerName: string, opacity: number, attribution: string) {
+  return new TileLayer({ properties: { title, type: 'overlay', queryableWms: true, queryLayer: layerName, sourceLabel: attribution }, visible: false, opacity, source: new TileWMS({ url, params: { LAYERS: layerName, QUERY_LAYERS: layerName, INFO_FORMAT: 'application/json', TILED: true, FORMAT: 'image/png', TRANSPARENT: true }, crossOrigin: 'anonymous', attributions: attribution }) })
 }
-function ignWmsLayer(title: string, layerName: string, opacity: number, attribution = '© IGN') {
-  return new TileLayer({ properties: { title, type: 'overlay' }, visible: false, opacity, source: new TileWMS({ url: IGN_WMS, params: { LAYERS: layerName, TILED: true, FORMAT: 'image/png', TRANSPARENT: true }, crossOrigin: 'anonymous', attributions: attribution }) })
-}
+function geologyLayer(title: string, layerName: string, opacity: number) { return queryableWmsLayer(title, BRGM_GEOLOGY_WMS, layerName, opacity, '© BRGM — InfoTerre') }
+function ignWmsLayer(title: string, layerName: string, opacity: number, attribution = '© IGN') { return new TileLayer({ properties: { title, type: 'overlay' }, visible: false, opacity, source: new TileWMS({ url: IGN_WMS, params: { LAYERS: layerName, TILED: true, FORMAT: 'image/png', TRANSPARENT: true }, crossOrigin: 'anonymous', attributions: attribution }) }) }
 const archeOccStyle = new Style({ image: new CircleStyle({ radius: 6, fill: new Fill({ color: '#dc2626' }), stroke: new Stroke({ color: '#fff', width: 1.5 }) }) })
 
 export function createFranceLidarTerrainLayerOL() { return new TileLayer({ properties: { title: 'LiDAR HD terrein FR', type: 'overlay' }, visible: false, opacity: 0.78, source: new XYZ({ url: `${IGN_WMTS}?layer=IGNF_LIDAR-HD_MNT_ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW&style=normal&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/png`, maxZoom: 22, crossOrigin: 'anonymous', attributions: '© IGN — LiDAR HD MNT' }) }) }
 export function createFranceGeology50LayerOL() { return geologyLayer('Bodem/geologie 1:50.000 FR', 'SCAN_D_GEOL50', 0.68) }
 export function createFranceGeologyReliefLayerOL() { return geologyLayer('Geologie + reliëf FR', 'SCAN_H_RELIEF_GEOL50', 0.66) }
+export function createFranceBssLayerOL() { return queryableWmsLayer('BRGM boringen · BSS', BRGM_GEOLOGY_WMS, 'BSS', 1, '© BRGM — Banque du Sous-Sol') }
+export function createFranceIdprLayerOL() { return queryableWmsLayer('BRGM IDPR · infiltratie/afstroming', BRGM_GEOLOGY_WMS, 'IDPR', 0.55, '© BRGM — IDPR') }
+export function createFranceCavitiesLayerOL() { return queryableWmsLayer('BRGM cavités · ondergrondse holtes', BRGM_RISKS_WMS, 'CAVITE_LOCALISEE', 1, '© BRGM — Géorisques / cavités') }
 export function createFranceTopageWatercoursesLayerOL() { return new TileLayer({ properties: { title: 'Waterlopen BD TOPAGE 2026', type: 'overlay' }, visible: false, opacity: 0.9, source: new TileWMS({ url: TOPAGE_2026_WMS, params: { LAYERS: 'CoursEau_FXX_Topage2026', TILED: true, FORMAT: 'image/png', TRANSPARENT: true }, crossOrigin: 'anonymous', attributions: '© IGN / OFB / Sandre — BD TOPAGE® 2026' }) }) }
 export function createFranceOcsCoverageLayerOL() { return ignWmsLayer('OCS GE landbedekking 2021-2023', 'OCSGE.COUVERTURE.2021-2023', 0.62, '© IGN — OCS GE') }
 export function createFranceAncientForestsLayerOL() { return ignWmsLayer('Oude bossen · Forêts anciennes', 'IGNF_FORETS-ANCIENNES', 0.72, '© IGN — BD Forêts anciennes') }
@@ -50,14 +53,7 @@ export function createArcheOccLayerOL() {
       const protection = firstText(p.protections_et_labels)
       const property = firstText(p.statut_de_la_propriete)
       for (const key of Object.keys(p)) if (key !== 'geometry') feature.unset(key, true)
-      feature.setProperties({
-        layerType: 'importedLayer', layerName: 'ArcheOcc · Occitanie', layerColor: '#dc2626', name,
-        ...(description ? { Omschrijving: description } : {}), ...(period ? { Periode: period } : {}), ...(dating ? { Datering: dating } : {}),
-        ...(occupation ? { 'Type locatie': occupation } : {}), ...(discovery ? { Vindplaats: discovery } : {}), ...(remarkable ? { 'Bijzonderheden': remarkable } : {}),
-        ...(keywords ? { Trefwoorden: keywords } : {}), ...(municipality ? { Gemeente: municipality } : {}), ...(department ? { Departement: department } : {}),
-        ...(access ? { 'Publiek toegankelijk': access } : {}), ...(protection ? { Bescherming: protection } : {}), ...(property ? { Eigendom: property } : {}),
-        ...(references ? { Referenties: references } : {}), Bron: 'Région Occitanie — ArcheOcc', Licentie: 'Licence Ouverte 2.0'
-      }, true)
+      feature.setProperties({ layerType: 'importedLayer', layerName: 'ArcheOcc · Occitanie', layerColor: '#dc2626', name, ...(description ? { Omschrijving: description } : {}), ...(period ? { Periode: period } : {}), ...(dating ? { Datering: dating } : {}), ...(occupation ? { 'Type locatie': occupation } : {}), ...(discovery ? { Vindplaats: discovery } : {}), ...(remarkable ? { Bijzonderheden: remarkable } : {}), ...(keywords ? { Trefwoorden: keywords } : {}), ...(municipality ? { Gemeente: municipality } : {}), ...(department ? { Departement: department } : {}), ...(access ? { 'Publiek toegankelijk': access } : {}), ...(protection ? { Bescherming: protection } : {}), ...(property ? { Eigendom: property } : {}), ...(references ? { Referenties: references } : {}), Bron: 'Région Occitanie — ArcheOcc', Licentie: 'Licence Ouverte 2.0' }, true)
     }
   })
   return new VectorLayer({ properties: { title: 'ArcheOcc · archeologie Occitanie', type: 'overlay' }, visible: false, source, style: archeOccStyle })
@@ -67,6 +63,9 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
   'Bodem/geologie 1:50.000 FR': createFranceGeology50LayerOL,
   'Geologie + reliëf FR': createFranceGeologyReliefLayerOL,
+  'BRGM boringen · BSS': createFranceBssLayerOL,
+  'BRGM IDPR · infiltratie/afstroming': createFranceIdprLayerOL,
+  'BRGM cavités · ondergrondse holtes': createFranceCavitiesLayerOL,
   'Waterlopen BD TOPAGE 2026': createFranceTopageWatercoursesLayerOL,
   'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
   'Oude bossen · Forêts anciennes': createFranceAncientForestsLayerOL,
