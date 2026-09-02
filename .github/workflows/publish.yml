@@ -28,21 +28,23 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Afhankelijkheden installeren
-        run: npm ci
+      - name: Lockfile en afhankelijkheden bijwerken
+        run: |
+          npm install --package-lock-only --ignore-scripts
+          npm ci
 
       - name: Productieversie bouwen
         run: npm run build
 
       - name: GitHub Pages-bestanden publiceren
         run: |
-          if git diff --quiet -- docs; then
-            echo "Geen wijzigingen in de publicatie."
+          if git diff --quiet -- docs package-lock.json; then
+            echo "Geen wijzigingen in de publicatie of lockfile."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs
+          git add docs package-lock.json
           git commit -m "build: publiceer Detect ${GITHUB_SHA::7} [skip ci]"
           git push

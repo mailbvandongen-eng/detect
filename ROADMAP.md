@@ -12,7 +12,7 @@ Bij iedere wijziging gelden drie vaste regels:
 
 ## Prioriteit 1 — veldgebruik betrouwbaar maken
 
-1. Een stabiele hybride wereldkaart kiezen en toevoegen: lucht- of satellietfoto met automatisch passende straat-, plaats- en gebiedsnamen. Licentie en continuïteit gaan vóór een bekende merknaam.
+1. Gereed in 2.33.5 — hybride wereldkaart met Esri World Imagery en de actuele Hybrid Reference Layer voor automatisch passende wegen, plaats- en gebiedsnamen.
 2. Op Android bij de terugknop eerst vragen of Detect echt gesloten moet worden.
 3. GPS-weergave vereenvoudigen:
    - één tik: een duidelijke locatiepunt en inzoomen naar straatniveau;

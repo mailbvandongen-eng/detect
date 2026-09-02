@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.5',
+    date: '2 september 2026',
+    title: 'Hybride wereldkaart toegevoegd',
+    changes: [
+      'Nieuwe basislaag Hybride (wereld) combineert Esri World Imagery met de actuele Hybrid Reference Layer voor dynamische wegen, plaatsen en gebiedsnamen.',
+      'De bestaande Satelliet (wereld)-laag blijft apart beschikbaar voor een schoon satellietbeeld zonder automatische referentielaag.',
+      'Hybride (wereld) kan ook als standaardkaart worden gekozen in Instellingen.'
+    ]
+  },
+  {
     version: '2.33.4',
     date: '2 september 2026',
     title: 'Vierkleurige Detect-huisstijl en betrouwbare publicatie',
