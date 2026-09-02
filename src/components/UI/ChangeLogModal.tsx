@@ -9,13 +9,14 @@ interface ChangeLogModalProps {
 }
 
 const currentRelease = {
-  version: '2.33.11',
-  date: '2 september 2026',
-  title: 'Thédirac-lagen opgeschoond',
+  version: '2.33.14',
+  date: '3 september 2026',
+  title: 'Frankrijk-onderzoekslagen bijgewerkt',
   changes: [
-    'De experimentele Franse WMS-lagen die leeg bleven of geen bruikbare informatie gaven zijn verwijderd; Detect toont geen loze onderzoekslagen meer.',
-    'De lokale Thédirac-set is teruggebracht tot de controleerbare archeologie- en historielagen terwijl de nieuwe officiële onderzoeksdata verder wordt opgebouwd.',
-    'Het wijzigingenscherm verschijnt weer automatisch na deze versie-update.'
+    'De Frankrijk-hoofdschakelaar neemt nu ook de nieuwe onderzoekslagen mee, zodat de complete Frankrijk-set in één keer aan en uit kan.',
+    'LiDAR HD terrein, Bodem/geologie 1:50.000 en Geologie + reliëf zijn teruggezet onder Frankrijk.',
+    'ArcheOcc gebruikt nu de primaire gegevens van de officiële Occitanie-dataset voor bruikbare archeologische informatie in plaats van alleen de losse objectvelden.',
+    'Deze versie heeft een eigen wijzigingsmelding, zodat direct zichtbaar is dat Detect 2.33.14 werkelijk geladen is.'
   ]
 }
 
