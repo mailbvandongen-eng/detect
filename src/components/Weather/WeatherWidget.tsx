@@ -128,8 +128,8 @@ export function WeatherWidget() {
     <>
       {isExpanded && <div className="fixed inset-0 z-[1099]" onClick={() => setIsExpanded(false)} />}
       <motion.div
-        className={`fixed left-2 z-[1100] bg-white shadow-lg border border-gray-200 select-none rounded-xl ${isExpanded ? 'weather-widget-expanded' : 'weather-widget-compact'}`}
-        style={{ top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))', width: isExpanded ? 'min(360px, calc(100vw - 16px))' : 'auto', maxWidth: 'calc(100vw - 16px)' }}
+        className="fixed left-2 z-[1100] bg-white shadow-lg border border-gray-200 select-none rounded-xl"
+        style={{ top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))', width: isExpanded ? 'min(270px, calc(100vw - 112px))' : 'auto', maxWidth: isExpanded ? 'calc(100vw - 112px)' : 'calc(100vw - 112px)', maxHeight: isExpanded ? 'calc(100dvh - 88px)' : undefined, overflowY: isExpanded ? 'auto' : undefined }}
         initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} layout
       >
         {!current ? (
@@ -140,16 +140,16 @@ export function WeatherWidget() {
         ) : (
           <div className="p-2.5" style={{ fontSize: `${baseFontSize}px` }}>
             <button onClick={() => setIsExpanded(!isExpanded)} className="w-full border-0 outline-none bg-transparent p-0 text-left">
-              <div className="weather-widget-summary flex items-center gap-2">
+              <div className="flex items-center gap-1.5 overflow-hidden whitespace-nowrap">
                 <WeatherIcon code={current.weatherCode} size={24} />
-                <span className="font-bold text-gray-800" style={{ fontSize: '1.5em' }}>{Math.round(current.temperature)}°</span>
-                <span className="text-gray-500">{rainText}</span>
-                {sunshineNow > 0 && <span className="text-amber-600">☀ {sunshineNow}m/u</span>}
-                <span className="flex items-center gap-1 text-gray-600"><Wind size={13} />{Math.round(current.windSpeed)}<WindArrow degrees={current.windDirection} /></span>
-                {weather.isLoading && <RefreshCw size={12} className="animate-spin text-blue-500" />}
-                <span className="ml-auto">{isExpanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}</span>
+                <span className="font-bold text-gray-800 flex-shrink-0" style={{ fontSize: '1.5em' }}>{Math.round(current.temperature)}°</span>
+                <span className="text-gray-500 min-w-0 overflow-hidden text-ellipsis">{rainText}</span>
+                {sunshineNow > 0 && <span className="text-amber-600 flex-shrink-0">☀ {sunshineNow}m/u</span>}
+                <span className="flex items-center gap-1 text-gray-600 flex-shrink-0"><Wind size={13} />{Math.round(current.windSpeed)}<WindArrow degrees={current.windDirection} /></span>
+                {weather.isLoading && <RefreshCw size={12} className="animate-spin text-blue-500 flex-shrink-0" />}
+                <span className="ml-auto flex-shrink-0">{isExpanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}</span>
               </div>
-              <div className="weather-widget-subline text-gray-500 mt-1" style={{ fontSize: '0.86em' }}>
+              <div className="text-gray-500 mt-1 overflow-hidden text-ellipsis whitespace-nowrap" style={{ fontSize: '0.86em' }}>
                 {weatherCodeDescriptions[current.weatherCode]} · voelt {Math.round(current.apparentTemperature)}° · {weather.weatherData?.location.name}
               </div>
             </button>
@@ -163,16 +163,13 @@ export function WeatherWidget() {
                       <button onClick={fetchMapCenter} className="p-2 rounded-lg bg-gray-50 text-gray-700 border-0 flex items-center justify-center gap-1"><MapPin size={14} /> Kaartpunt</button>
                       <button onClick={() => weather.setShowBuienradar(!weather.showBuienradar)} className="p-2 rounded-lg bg-gray-50 text-gray-700 border-0 flex items-center justify-center gap-1"><CloudRain size={14} /> Radar</button>
                     </div>
-
                     <div className="rounded-lg bg-blue-50 px-2 py-1.5 text-blue-800 font-medium">{rainText}</div>
                     <HourlyFieldForecast hourly={hourly} />
-
                     <div className="grid grid-cols-3 gap-1.5 text-center">
                       <div className="bg-gray-50 rounded-lg p-2"><div className="text-gray-500" style={{ fontSize: '0.75em' }}>Windstoten</div><b>{Math.round(current.windGusts)} km/u</b></div>
                       <div className="bg-gray-50 rounded-lg p-2"><div className="text-gray-500" style={{ fontSize: '0.75em' }}>Wind</div><b>{windDirectionToText(current.windDirection)}</b></div>
                       <div className="bg-gray-50 rounded-lg p-2"><div className="text-gray-500" style={{ fontSize: '0.75em' }}>Bewolking</div><b>{current.cloudCover}%</b></div>
                     </div>
-
                     {weather.error && <div className="text-amber-700 bg-amber-50 rounded-lg p-2">Update mislukt; laatste gegevens blijven zichtbaar.</div>}
                     <div className="text-gray-400 text-center" style={{ fontSize: '0.75em' }}>Bijgewerkt {new Date(weather.weatherData!.lastUpdated).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</div>
                     {showFontSliders && <div className="flex items-center gap-2"><Type size={12} className="text-gray-400" /><input type="range" min="80" max="150" step="10" value={weatherFontScale} onChange={e => setWeatherFontScale(parseInt(e.target.value))} className="flex-1" /><span>{weatherFontScale}%</span></div>}
