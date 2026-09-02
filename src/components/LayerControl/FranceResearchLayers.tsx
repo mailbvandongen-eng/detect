@@ -6,11 +6,15 @@ import { FRANCE_RESEARCH_FACTORIES } from '../../layers/franceResearchOL'
 const NATIONAL = [
   ['LiDAR HD terrein FR', 0.72],
   ['Geologie 1:50.000 FR', 0.68],
-  ['Geologie geharmoniseerd FR', 0.62]
+  ['Geologie geharmoniseerd FR', 0.62],
+  ['Waterlopen FR', 0.82]
 ] as const
 
 const THEDIRAC = [
-  ['Hydrogeologie Lot (46)', 0.62]
+  ['Hydrogeologie Lot (46)', 0.62],
+  ['Ondergrondboringen BRGM', 0.9],
+  ['Karst & ondergrondse holtes', 0.9],
+  ['Infiltratie & afstroming (IDPR)', 0.5]
 ] as const
 
 function ResearchFolder({ title, layers }: { title: string; layers: readonly (readonly [string, number])[] }) {
@@ -74,7 +78,7 @@ export function FranceResearchLayers() {
   return (
     <div className="mb-1 border-b border-gray-100 pb-1">
       <ResearchFolder title="Reliëf, geologie & bodem" layers={NATIONAL} />
-      <ResearchFolder title="Thédirac / Lot" layers={THEDIRAC} />
+      <ResearchFolder title="Thédirac · terreinonderzoek" layers={THEDIRAC} />
     </div>
   )
 }
