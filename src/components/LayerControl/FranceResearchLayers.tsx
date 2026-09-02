@@ -3,7 +3,12 @@ import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
 import { useLayerStore, useMapStore } from '../../store'
 import { FRANCE_RESEARCH_FACTORIES } from '../../layers/franceResearchOL'
 
-const LOCAL_HISTORY = [
+const TERRAIN = [
+  ['LiDAR HD terrein FR', 0.78]
+] as const
+
+const ARCHAEOLOGY = [
+  ['ArcheOcc · archeologie Occitanie', 1],
   ['Thédirac prehistorie & megalieten', 1],
   ['Thédirac Romeins & middeleeuws', 1]
 ] as const
@@ -42,6 +47,7 @@ function ResearchFolder({ title, layers }: { title: string; layers: readonly (re
 
 export function FranceResearchLayers() {
   return <div className="mb-1 border-b border-gray-100 pb-1">
-    <ResearchFolder title="Thédirac · archeologie & historie" layers={LOCAL_HISTORY} />
+    <ResearchFolder title="Frankrijk · reliëf" layers={TERRAIN} />
+    <ResearchFolder title="Occitanie · archeologie" layers={ARCHAEOLOGY} />
   </div>
 }
