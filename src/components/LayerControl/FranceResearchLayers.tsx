@@ -14,11 +14,15 @@ const WATER_LANDSCAPE = [
   ['OCS GE landbedekking 2021-2023', 0.62]
 ] as const
 
+const HISTORICAL_LANDSCAPE = [
+  ['Oude bossen · Forêts anciennes', 0.72]
+] as const
+
 const ARCHAEOLOGY = [
   ['ArcheOcc · archeologie Occitanie', 1]
 ] as const
 
-export const FRANCE_RESEARCH_LAYERS = [...TERRAIN, ...WATER_LANDSCAPE, ...ARCHAEOLOGY] as const
+export const FRANCE_RESEARCH_LAYERS = [...TERRAIN, ...WATER_LANDSCAPE, ...HISTORICAL_LANDSCAPE, ...ARCHAEOLOGY] as const
 
 function ensureLayer(name: string, opacity: number, map: any, registered: Record<string, any>, registerLayer: any, setLayerOpacity: any) {
   if (registered[name]) return
@@ -59,6 +63,7 @@ export function FranceResearchLayers() {
   return <div className="mb-1 border-b border-gray-100 pb-1">
     <ResearchFolder title="Frankrijk · reliëf, bodem & geologie" layers={TERRAIN} />
     <ResearchFolder title="Frankrijk · water & landschap" layers={WATER_LANDSCAPE} />
+    <ResearchFolder title="Frankrijk · historisch landschap" layers={HISTORICAL_LANDSCAPE} />
     <ResearchFolder title="Occitanie · archeologie" layers={ARCHAEOLOGY} />
   </div>
 }
