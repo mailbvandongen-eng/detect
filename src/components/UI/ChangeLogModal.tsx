@@ -8,11 +8,24 @@ interface ChangeLogModalProps {
   onClose: () => void
 }
 
+const currentRelease = {
+  version: '2.33.11',
+  date: '2 september 2026',
+  title: 'Thédirac-lagen opgeschoond',
+  changes: [
+    'De experimentele Franse WMS-lagen die leeg bleven of geen bruikbare informatie gaven zijn verwijderd; Detect toont geen loze onderzoekslagen meer.',
+    'De lokale Thédirac-set is teruggebracht tot de controleerbare archeologie- en historielagen terwijl de nieuwe officiële onderzoeksdata verder wordt opgebouwd.',
+    'Het wijzigingenscherm verschijnt weer automatisch na deze versie-update.'
+  ]
+}
+
 export function ChangeLogModal({ isOpen, onClose }: ChangeLogModalProps) {
   const handleClose = () => {
     markChangeLogSeen(version)
     onClose()
   }
+
+  const entries = version === currentRelease.version ? [currentRelease, ...CHANGELOG] : CHANGELOG
 
   return (
     <AppWindow
@@ -21,51 +34,36 @@ export function ChangeLogModal({ isOpen, onClose }: ChangeLogModalProps) {
       icon={<History size={18} />}
       placement="modal"
       onClose={handleClose}
-      footer={
-        <button
-          onClick={handleClose}
-          className="detect-window-primary-button w-full"
-        >
-          Gezien
-        </button>
-      }
+      footer={<button onClick={handleClose} className="detect-window-primary-button w-full">Gezien</button>}
     >
-        <div className="p-4 space-y-4">
-          <p className="text-gray-600 leading-relaxed">
-            Dit is er aangepast. De nieuwste versie staat bovenaan; eerdere updates blijven hieronder terug te lezen.
-          </p>
+      <div className="p-4 space-y-4">
+        <p className="text-gray-600 leading-relaxed">
+          Dit is er aangepast. De nieuwste versie staat bovenaan; eerdere updates blijven hieronder terug te lezen.
+        </p>
 
-          {CHANGELOG.map((entry, index) => (
-            <article
-              key={entry.version}
-              className={`rounded-xl p-3 ${index === 0 ? 'bg-blue-50' : 'bg-gray-50'}`}
-            >
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-semibold text-gray-800">Versie {entry.version}</h2>
-                    {index === 0 && (
-                      <span className="px-1.5 py-0.5 rounded-full bg-blue-500 text-white" style={{ fontSize: '0.7em' }}>
-                        Nieuw
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-gray-500" style={{ fontSize: '0.78em' }}>{entry.date}</p>
+        {entries.map((entry, index) => (
+          <article key={entry.version} className={`rounded-xl p-3 ${index === 0 ? 'bg-blue-50' : 'bg-gray-50'}`}>
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-semibold text-gray-800">Versie {entry.version}</h2>
+                  {index === 0 && <span className="px-1.5 py-0.5 rounded-full bg-blue-500 text-white" style={{ fontSize: '0.7em' }}>Nieuw</span>}
                 </div>
+                <p className="text-gray-500" style={{ fontSize: '0.78em' }}>{entry.date}</p>
               </div>
-
-              <h3 className="font-medium text-gray-700 mb-2">{entry.title}</h3>
-              <ul className="space-y-2">
-                {entry.changes.map((change) => (
-                  <li key={change} className="flex items-start gap-2 text-gray-700 leading-relaxed">
-                    <Check size={15} className="text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>{change}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
+            </div>
+            <h3 className="font-medium text-gray-700 mb-2">{entry.title}</h3>
+            <ul className="space-y-2">
+              {entry.changes.map((change) => (
+                <li key={change} className="flex items-start gap-2 text-gray-700 leading-relaxed">
+                  <Check size={15} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>{change}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
     </AppWindow>
   )
 }
