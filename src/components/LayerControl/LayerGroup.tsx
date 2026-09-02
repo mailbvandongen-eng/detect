@@ -2,12 +2,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
 import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
 import { useLayerStore } from '../../store'
+import { FranceResearchLayers } from './FranceResearchLayers'
 
 interface Props {
   title: string
   children: React.ReactNode
   defaultExpanded?: boolean
-  layerNames?: string[]  // Optional: list of layer names in this group for active indicator
+  layerNames?: string[]
 }
 
 export function LayerGroup({ title, children, defaultExpanded = true, layerNames }: Props) {
@@ -23,11 +24,8 @@ export function LayerGroup({ title, children, defaultExpanded = true, layerNames
   const toggleAllLayers = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (groupLayers.length === 0) return
-
     const newState = !allActive
-    groupLayers.forEach(name => {
-      setLayerVisibility(name, newState)
-    })
+    groupLayers.forEach(name => setLayerVisibility(name, newState))
   }
 
   return (
@@ -38,27 +36,15 @@ export function LayerGroup({ title, children, defaultExpanded = true, layerNames
           className="flex-1 flex items-center gap-1 bg-transparent border-0 outline-none text-left"
           style={{ fontSize: 'inherit' }}
         >
-          <motion.span
-            animate={{ rotate: expanded ? 90 : 0 }}
-            transition={{ duration: 0.15 }}
-            className="text-gray-400"
-          >
+          <motion.span animate={{ rotate: expanded ? 90 : 0 }} transition={{ duration: 0.15 }} className="text-gray-400">
             <ChevronRight size={14} />
           </motion.span>
-          {expanded ? (
-            <FolderOpen size={16} className="text-blue-500" />
-          ) : (
-            <Folder size={16} className="text-blue-500" />
-          )}
+          {expanded ? <FolderOpen size={16} className="text-blue-500" /> : <Folder size={16} className="text-blue-500" />}
           <span className="text-gray-700 font-medium" style={{ fontSize: '1em' }}>{title}</span>
-          {/* Active layers count - always visible when has active layers */}
           {activeCount > 0 && (
-            <span className="ml-1 px-1.5 py-0.5 font-medium bg-blue-100 text-blue-600 rounded-full" style={{ fontSize: '0.7em' }}>
-              {activeCount}
-            </span>
+            <span className="ml-1 px-1.5 py-0.5 font-medium bg-blue-100 text-blue-600 rounded-full" style={{ fontSize: '0.7em' }}>{activeCount}</span>
           )}
         </button>
-        {/* Group checkbox - toggle all layers, right side, same style as LayerItem */}
         {layerNames && layerNames.length > 0 && (
           <button
             onClick={toggleAllLayers}
@@ -71,14 +57,7 @@ export function LayerGroup({ title, children, defaultExpanded = true, layerNames
           >
             {(allActive || someActive) && (
               <svg width="10" height="10" viewBox="0 0 10 10">
-                <path
-                  d="M2 5 L4 7 L8 3"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <path d="M2 5 L4 7 L8 3" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             )}
           </button>
@@ -95,6 +74,7 @@ export function LayerGroup({ title, children, defaultExpanded = true, layerNames
             style={{ overflow: 'hidden' }}
             className="ml-5"
           >
+            {title === 'Frankrijk' && <FranceResearchLayers />}
             {children}
           </motion.div>
         )}
