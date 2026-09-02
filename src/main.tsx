@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
+import './detect-theme.css'
 import { version } from '../package.json'
 import { registerSW } from 'virtual:pwa-register'
 
