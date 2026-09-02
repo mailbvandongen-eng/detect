@@ -1,5 +1,6 @@
 import TileLayer from 'ol/layer/Tile'
 import VectorLayer from 'ol/layer/Vector'
+import TileWMS from 'ol/source/TileWMS'
 import VectorSource from 'ol/source/Vector'
 import XYZ from 'ol/source/XYZ'
 import GeoJSON from 'ol/format/GeoJSON'
@@ -10,7 +11,22 @@ import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
 import { THEDIRAC_RESEARCH_SITES, type ThediracResearchSite } from '../data/thediracResearchSites'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
+const BRGM_GEOLOGY_WMS = 'https://geoservices.brgm.fr/geologie'
 const ARCHEOCC_GEOJSON = 'https://data.laregion.fr/api/explore/v2.1/catalog/datasets/base_archeocc_opendata/exports/geojson?lang=fr&timezone=Europe%2FParis'
+
+function geologyLayer(title: string, layerName: string, opacity: number) {
+  return new TileLayer({
+    properties: { title, type: 'overlay' },
+    visible: false,
+    opacity,
+    source: new TileWMS({
+      url: BRGM_GEOLOGY_WMS,
+      params: { LAYERS: layerName, TILED: true, FORMAT: 'image/png', TRANSPARENT: true },
+      crossOrigin: 'anonymous',
+      attributions: '© BRGM — InfoTerre'
+    })
+  })
+}
 
 const researchStyles: Record<ThediracResearchSite['category'], Style> = {
   prehistorie: new Style({ image: new CircleStyle({ radius: 8, fill: new Fill({ color: '#b45309' }), stroke: new Stroke({ color: '#fff', width: 2 }) }) }),
@@ -34,6 +50,14 @@ export function createFranceLidarTerrainLayerOL() {
   })
 }
 
+export function createFranceGeology50LayerOL() {
+  return geologyLayer('Bodem/geologie 1:50.000 FR', 'SCAN_D_GEOL50', 0.68)
+}
+
+export function createFranceGeologyReliefLayerOL() {
+  return geologyLayer('Geologie + reliëf FR', 'SCAN_H_RELIEF_GEOL50', 0.66)
+}
+
 export function createArcheOccLayerOL() {
   return new VectorLayer({
     properties: { title: 'ArcheOcc · archeologie Occitanie', type: 'overlay' },
@@ -53,25 +77,16 @@ function createResearchVectorLayer(title: string, categories: ThediracResearchSi
     layerType: 'thediracResearch',
     ...site
   }))
-
-  return new VectorLayer({
-    properties: { title, type: 'overlay' },
-    visible: false,
-    source: new VectorSource({ features }),
-    style: feature => researchStyles[feature.get('category') as ThediracResearchSite['category']]
-  })
+  return new VectorLayer({ properties: { title, type: 'overlay' }, visible: false, source: new VectorSource({ features }), style: feature => researchStyles[feature.get('category') as ThediracResearchSite['category']] })
 }
 
-export function createThediracPrehistoryLayerOL() {
-  return createResearchVectorLayer('Thédirac prehistorie & megalieten', ['prehistorie'])
-}
-
-export function createThediracHistoryLayerOL() {
-  return createResearchVectorLayer('Thédirac Romeins & middeleeuws', ['romeins', 'middeleeuwen'])
-}
+export function createThediracPrehistoryLayerOL() { return createResearchVectorLayer('Thédirac prehistorie & megalieten', ['prehistorie']) }
+export function createThediracHistoryLayerOL() { return createResearchVectorLayer('Thédirac Romeins & middeleeuws', ['romeins', 'middeleeuwen']) }
 
 export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
+  'Bodem/geologie 1:50.000 FR': createFranceGeology50LayerOL,
+  'Geologie + reliëf FR': createFranceGeologyReliefLayerOL,
   'ArcheOcc · archeologie Occitanie': createArcheOccLayerOL,
   'Thédirac prehistorie & megalieten': createThediracPrehistoryLayerOL,
   'Thédirac Romeins & middeleeuws': createThediracHistoryLayerOL
