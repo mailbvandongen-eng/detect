@@ -4,7 +4,7 @@
   "version": "2.33.11",
   "type": "module",
   "scripts": {
-    "dev": "vite build --outDir dist",
+    "dev": "vite",
     "build": "node scripts/build-pages.mjs",
     "build:dist": "vite build --outDir dist",
     "preview": "vite preview"
