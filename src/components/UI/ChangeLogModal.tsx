@@ -9,14 +9,14 @@ interface ChangeLogModalProps {
 }
 
 const currentRelease = {
-  version: '2.33.14',
+  version: '2.33.15',
   date: '3 september 2026',
-  title: 'Frankrijk-onderzoekslagen bijgewerkt',
+  title: 'Historisch landschap Frankrijk',
   changes: [
-    'De Frankrijk-hoofdschakelaar neemt nu ook de nieuwe onderzoekslagen mee, zodat de complete Frankrijk-set in één keer aan en uit kan.',
-    'LiDAR HD terrein, Bodem/geologie 1:50.000 en Geologie + reliëf zijn teruggezet onder Frankrijk.',
-    'ArcheOcc gebruikt nu de primaire gegevens van de officiële Occitanie-dataset voor bruikbare archeologische informatie in plaats van alleen de losse objectvelden.',
-    'Deze versie heeft een eigen wijzigingsmelding, zodat direct zichtbaar is dat Detect 2.33.14 werkelijk geladen is.'
+    'Nieuwe officiële IGN-laag Oude bossen · Forêts anciennes toegevoegd onder Frankrijk · historisch landschap.',
+    'De laag vergelijkt de bosbedekking van de 19e-eeuwse État-major-kaart met de moderne BD Forêt en maakt oude, recente en verdwenen bosgebieden zichtbaar.',
+    'De laag valt automatisch onder de hoofdschakelaar Frankrijk en onder dezelfde zichtbaarheid- en transparantieregeling als de andere onderzoekslagen.',
+    'Alleen de geverifieerde officiële IGN-bron is ingebouwd; État-major, Cassini en historische luchtfoto’s volgen pas nadat hun officiële kaartservices afzonderlijk zijn gecontroleerd.'
   ]
 }
 
