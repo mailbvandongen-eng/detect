@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.7',
+    date: '2 september 2026',
+    title: 'Wayback hersteld en dubbele plaatsnamen opgelost',
+    changes: [
+      'Esri World Imagery Wayback gebruikt nu de officiële WMTS-capabilitiesroute met MapServer, zodat het wereldarchief weer geladen kan worden.',
+      'De rijke OpenFreeMap/Esri-referentielaag synchroniseert zijn zichtbaarheid opnieuw nadat de stijl asynchroon is geladen; op Esri Licht blijft hij uit zodat plaatsnamen niet dubbel worden getoond.'
+    ]
+  },
+  {
     version: '2.33.6',
     date: '2 september 2026',
     title: 'Betere hybride kaart en luchtfoto-tijdreis',
