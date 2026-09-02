@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.4',
+    date: '2 september 2026',
+    title: 'Vierkleurige Detect-huisstijl en betrouwbare publicatie',
+    changes: [
+      'De gekozen Detect-kleur (blauw, bosgroen, aarde of paars) loopt nu ook door in venstertabs, primaire acties en de belangrijkste kaartknoppen.',
+      'De centrale vensterlogica blijft leidend: een nieuw appvenster vervangt het bestaande venster direct, zonder overlappende uitstapanimatie.',
+      'De ontbrekende runtime-afhankelijkheden zijn hersteld, zodat de echte productiebuild en GitHub Pages-publicatie weer volledig slagen.'
+    ]
+  },
+  {
     version: '2.33.1',
     date: '1 september 2026',
     title: 'Vensterwissel sluit het oude venster direct',
