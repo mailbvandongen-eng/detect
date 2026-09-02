@@ -14,7 +14,10 @@ const THEDIRAC = [
   ['Hydrogeologie Lot (46)', 0.62],
   ['Ondergrondboringen BRGM', 0.9],
   ['Karst & ondergrondse holtes', 0.9],
-  ['Infiltratie & afstroming (IDPR)', 0.5]
+  ['Infiltratie & afstroming (IDPR)', 0.5],
+  ['Grondwater / kwelrisico', 0.5],
+  ['Aardverschuivingen & terreinbeweging', 0.88],
+  ['Breuken & paleoseismiek', 0.8]
 ] as const
 
 function ResearchFolder({ title, layers }: { title: string; layers: readonly (readonly [string, number])[] }) {
@@ -41,44 +44,24 @@ function ResearchFolder({ title, layers }: { title: string; layers: readonly (re
 
   return (
     <div className="mb-0.5">
-      <button
-        onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
-        className="w-full flex items-center gap-1 py-1 px-1 hover:bg-blue-50 transition-colors bg-transparent border-0 outline-none text-left"
-        style={{ fontSize: 'inherit' }}
-      >
+      <button onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }} className="w-full flex items-center gap-1 py-1 px-1 hover:bg-blue-50 transition-colors bg-transparent border-0 outline-none text-left" style={{ fontSize: 'inherit' }}>
         <ChevronRight size={14} className={`text-gray-400 transition-transform ${expanded ? 'rotate-90' : ''}`} />
         {expanded ? <FolderOpen size={15} className="text-blue-500" /> : <Folder size={15} className="text-blue-500" />}
         <span className="text-gray-700 font-medium">{title}</span>
       </button>
-      {expanded && (
-        <div className="ml-5">
-          {layers.map(([name, opacity]) => (
-            <button
-              key={name}
-              onClick={(e) => { e.stopPropagation(); toggle(name, opacity) }}
-              className={`w-full flex items-center justify-between py-1 pl-2 pr-1 border-0 outline-none transition-colors text-left ${visible[name] ? 'bg-blue-50' : 'bg-transparent hover:bg-blue-50'}`}
-              style={{ fontSize: 'inherit' }}
-            >
-              <span className="text-gray-600">{name}</span>
-              <span
-                className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: visible[name] ? '#3b82f6' : 'white', border: '2px solid #60a5fa', color: 'white' }}
-              >
-                {visible[name] && <span style={{ fontSize: 11, lineHeight: 1 }}>✓</span>}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+      {expanded && <div className="ml-5">{layers.map(([name, opacity]) => (
+        <button key={name} onClick={(e) => { e.stopPropagation(); toggle(name, opacity) }} className={`w-full flex items-center justify-between py-1 pl-2 pr-1 border-0 outline-none transition-colors text-left ${visible[name] ? 'bg-blue-50' : 'bg-transparent hover:bg-blue-50'}`} style={{ fontSize: 'inherit' }}>
+          <span className="text-gray-600">{name}</span>
+          <span className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0" style={{ backgroundColor: visible[name] ? '#3b82f6' : 'white', border: '2px solid #60a5fa', color: 'white' }}>{visible[name] && <span style={{ fontSize: 11, lineHeight: 1 }}>✓</span>}</span>
+        </button>
+      ))}</div>}
     </div>
   )
 }
 
 export function FranceResearchLayers() {
-  return (
-    <div className="mb-1 border-b border-gray-100 pb-1">
-      <ResearchFolder title="Reliëf, geologie & bodem" layers={NATIONAL} />
-      <ResearchFolder title="Thédirac · terreinonderzoek" layers={THEDIRAC} />
-    </div>
-  )
+  return <div className="mb-1 border-b border-gray-100 pb-1">
+    <ResearchFolder title="Reliëf, geologie & bodem" layers={NATIONAL} />
+    <ResearchFolder title="Thédirac · terreinonderzoek" layers={THEDIRAC} />
+  </div>
 }
