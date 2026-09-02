@@ -1,6 +1,13 @@
 import TileLayer from 'ol/layer/Tile'
+import VectorLayer from 'ol/layer/Vector'
 import TileWMS from 'ol/source/TileWMS'
+import VectorSource from 'ol/source/Vector'
 import XYZ from 'ol/source/XYZ'
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point'
+import { fromLonLat } from 'ol/proj'
+import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
+import { THEDIRAC_RESEARCH_SITES, type ThediracResearchSite } from '../data/thediracResearchSites'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
 const BRGM_GEOLOGY_WMS = 'https://mapsref.brgm.fr/wxs/referentiel/geologie'
@@ -10,33 +17,10 @@ const OCCITANIE_HYDRO_WMS = 'https://ws.carmencarto.fr/WMS/151/Carte_hydrogeol.m
 const SANDRE_HYDRO_WMS = 'https://services.sandre.eaufrance.fr/geo/eth'
 
 function tileWms(title: string, url: string, layers: string, opacity: number, attribution: string) {
-  return new TileLayer({
-    properties: { title, type: 'overlay' },
-    visible: false,
-    opacity,
-    source: new TileWMS({
-      url,
-      params: { LAYERS: layers, TILED: true, FORMAT: 'image/png', TRANSPARENT: true },
-      crossOrigin: 'anonymous',
-      attributions: attribution
-    })
-  })
+  return new TileLayer({ properties: { title, type: 'overlay' }, visible: false, opacity, source: new TileWMS({ url, params: { LAYERS: layers, TILED: true, FORMAT: 'image/png', TRANSPARENT: true }, crossOrigin: 'anonymous', attributions: attribution }) })
 }
 
-export function createFranceLidarTerrainLayerOL() {
-  return new TileLayer({
-    properties: { title: 'LiDAR HD terrein FR', type: 'overlay' },
-    visible: false,
-    opacity: 0.72,
-    source: new XYZ({
-      url: `${IGN_WMTS}?layer=IGNF_LIDAR-HD_MNT_ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW&style=normal&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/png`,
-      maxZoom: 22,
-      crossOrigin: 'anonymous',
-      attributions: '© IGN — LiDAR HD MNT'
-    })
-  })
-}
-
+export function createFranceLidarTerrainLayerOL() { return new TileLayer({ properties: { title: 'LiDAR HD terrein FR', type: 'overlay' }, visible: false, opacity: 0.72, source: new XYZ({ url: `${IGN_WMTS}?layer=IGNF_LIDAR-HD_MNT_ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW&style=normal&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/png`, maxZoom: 22, crossOrigin: 'anonymous', attributions: '© IGN — LiDAR HD MNT' }) }) }
 export function createFranceGeology50LayerOL() { return tileWms('Geologie 1:50.000 FR', BRGM_GEOLOGY_WMS, 'SCAN_GEOL50', 0.68, '© BRGM — carte géologique 1:50 000') }
 export function createFranceGeologyHarmonizedLayerOL() { return tileWms('Geologie geharmoniseerd FR', BRGM_GEOLOGY_WMS, 'GEOL50_HARM', 0.62, '© BRGM — géologie harmonisée') }
 export function createLotHydrogeologyLayerOL() { return tileWms('Hydrogeologie Lot (46)', OCCITANIE_HYDRO_WMS, 'Carte_hydro_46', 0.62, '© BRGM / SIGES Occitanie — carte hydrogéologique du Lot') }
@@ -48,7 +32,25 @@ export function createFranceGroundwaterRiseLayerOL() { return tileWms('Grondwate
 export function createFranceTerrainMovementLayerOL() { return tileWms('Aardverschuivingen & terreinbeweging', BRGM_RISKS_WMS, 'MVT_LOCALISE', 0.88, '© BRGM — mouvements de terrain') }
 export function createFranceRecentFaultsLayerOL() { return tileWms('Breuken & paleoseismiek', BRGM_RISKS_WMS, 'NEOPAL_FAILLE', 0.8, '© BRGM — Néopal') }
 
-export const FRANCE_RESEARCH_FACTORIES: Record<string, () => TileLayer<any>> = {
+const researchStyles: Record<ThediracResearchSite['category'], Style> = {
+  prehistorie: new Style({ image: new CircleStyle({ radius: 7, fill: new Fill({ color: '#b45309' }), stroke: new Stroke({ color: '#fff', width: 2 }) }) }),
+  middeleeuwen: new Style({ image: new CircleStyle({ radius: 7, fill: new Fill({ color: '#7c3aed' }), stroke: new Stroke({ color: '#fff', width: 2 }) }) }),
+  romeins: new Style({ image: new CircleStyle({ radius: 7, fill: new Fill({ color: '#b91c1c' }), stroke: new Stroke({ color: '#fff', width: 2 }) }) })
+}
+
+function createResearchVectorLayer(title: string, categories: ThediracResearchSite['category'][]) {
+  const features = THEDIRAC_RESEARCH_SITES.filter(site => categories.includes(site.category)).map(site => new Feature({
+    geometry: new Point(fromLonLat([site.lon, site.lat])),
+    layerType: 'thediracResearch',
+    ...site
+  }))
+  return new VectorLayer({ properties: { title, type: 'overlay' }, visible: false, source: new VectorSource({ features }), style: feature => researchStyles[feature.get('category') as ThediracResearchSite['category']] })
+}
+
+export function createThediracPrehistoryLayerOL() { return createResearchVectorLayer('Thédirac prehistorie & megalieten', ['prehistorie']) }
+export function createThediracHistoryLayerOL() { return createResearchVectorLayer('Thédirac Romeins & middeleeuws', ['romeins', 'middeleeuwen']) }
+
+export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
   'Geologie 1:50.000 FR': createFranceGeology50LayerOL,
   'Geologie geharmoniseerd FR': createFranceGeologyHarmonizedLayerOL,
@@ -59,5 +61,7 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => TileLayer<any>> = {
   'Infiltratie & afstroming (IDPR)': createFranceIdprLayerOL,
   'Grondwater / kwelrisico': createFranceGroundwaterRiseLayerOL,
   'Aardverschuivingen & terreinbeweging': createFranceTerrainMovementLayerOL,
-  'Breuken & paleoseismiek': createFranceRecentFaultsLayerOL
+  'Breuken & paleoseismiek': createFranceRecentFaultsLayerOL,
+  'Thédirac prehistorie & megalieten': createThediracPrehistoryLayerOL,
+  'Thédirac Romeins & middeleeuws': createThediracHistoryLayerOL
 }
