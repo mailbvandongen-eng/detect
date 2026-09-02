@@ -13,7 +13,7 @@ const ESRI_WORLD_IMAGERY_URL = 'https://server.arcgisonline.com/ArcGIS/rest/serv
 const ESRI_HYBRID_REFERENCE_STYLE_URL = 'https://cdn.arcgis.com/sharing/rest/content/items/30d6b8271e1849cd9c3042060001f425/resources/styles/root.json'
 const OPENFREEMAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty'
 const PDOK_WMTS_CAPABILITIES_URL = 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0?request=GetCapabilities&service=WMTS'
-const WAYBACK_WMTS_CAPABILITIES_URL = 'https://wayback.maptiles.arcgis.com/arcgis/rest/services/world_imagery/wmts?SERVICE=WMTS&REQUEST=GetCapabilities&VERSION=1.0.0'
+const WAYBACK_WMTS_CAPABILITIES_URL = 'https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/WMTS/1.0.0/WMTSCapabilities.xml'
 
 const BASE_LAYERS = [
   'Esri (licht)',
@@ -150,6 +150,11 @@ function openFreeMapReferenceLayerIds(style: MapboxStyleDocument): string[] {
     .map(layer => String(layer.id))
 }
 
+function shouldShowRichReference(): boolean {
+  const visible = useLayerStore.getState().visible
+  return IMAGERY_WITH_REFERENCE.some(layerName => Boolean(visible[layerName]))
+}
+
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
   const initialBgApplied = useRef(false)
@@ -253,6 +258,10 @@ export function MapContainer() {
       zIndex: 110
     })
 
+    const syncHybridReferenceVisibility = () => {
+      hybridReferenceLayer.setVisible(shouldShowRichReference())
+    }
+
     void (async () => {
       try {
         const response = await fetch(OPENFREEMAP_STYLE_URL)
@@ -264,12 +273,15 @@ export function MapContainer() {
 
         await applyStyle(hybridReferenceLayer, style, referenceLayerIds)
         hybridReferenceLayer.getSource()?.setAttributions('OpenFreeMap © OpenMapTiles · Data from OpenStreetMap')
+        syncHybridReferenceVisibility()
         console.log(`OpenFreeMap reference loaded (${referenceLayerIds.length} style layers)`)
       } catch (openFreeMapError) {
         console.warn('OpenFreeMap reference niet beschikbaar, Esri fallback wordt gebruikt', openFreeMapError)
         try {
           await applyStyle(hybridReferenceLayer, ESRI_HYBRID_REFERENCE_STYLE_URL)
+          syncHybridReferenceVisibility()
         } catch (esriError) {
+          hybridReferenceLayer.setVisible(false)
           console.error('Ook Esri Hybrid Reference kon niet worden geladen', esriError)
         }
       }
