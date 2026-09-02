@@ -1,20 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-// Weather condition codes from Open-Meteo
-export type WeatherCode =
-  | 0    // Clear sky
-  | 1 | 2 | 3  // Mainly clear, partly cloudy, overcast
-  | 45 | 48    // Fog
-  | 51 | 53 | 55  // Drizzle
-  | 56 | 57    // Freezing drizzle
-  | 61 | 63 | 65  // Rain
-  | 66 | 67    // Freezing rain
-  | 71 | 73 | 75  // Snow
-  | 77         // Snow grains
-  | 80 | 81 | 82  // Rain showers
-  | 85 | 86    // Snow showers
-  | 95 | 96 | 99  // Thunderstorm
+export type WeatherCode = 0 | 1 | 2 | 3 | 45 | 48 | 51 | 53 | 55 | 56 | 57 | 61 | 63 | 65 | 66 | 67 | 71 | 73 | 75 | 77 | 80 | 81 | 82 | 85 | 86 | 95 | 96 | 99
 
 export interface SavedLocation {
   id: string
@@ -32,7 +19,9 @@ export interface HourlyForecast {
   weatherCode: WeatherCode
   windSpeed: number
   windDirection: number
+  windGusts: number
   humidity: number
+  sunshineDuration: number
 }
 
 export interface DailyForecast {
@@ -47,20 +36,9 @@ export interface DailyForecast {
   sunset: string
 }
 
-// Precipitation forecast per 15 minutes (for rain graph)
 export interface PrecipitationForecast {
   time: string
-  precipitation: number  // mm
-}
-
-// Pollen data
-export interface PollenData {
-  grass: number        // 0-5 scale
-  birch: number
-  alder: number
-  mugwort: number
-  ragweed: number
-  olive: number
+  precipitation: number
 }
 
 export interface WeatherData {
@@ -80,247 +58,151 @@ export interface WeatherData {
   }
   hourly: HourlyForecast[]
   daily: DailyForecast[]
-  // Extra data for detecting conditions
-  precipitation15min: PrecipitationForecast[]  // Next 2 hours per 15 min
-  precipitation48h: PrecipitationForecast[]    // Next 48 hours per 15 min (extended view)
-  frostDays: number  // Number of consecutive frost days (min temp < 0)
-  pollen?: PollenData
+  precipitation15min: PrecipitationForecast[]
+  precipitation48h: PrecipitationForecast[]
+  frostDays: number
   lastUpdated: number
 }
 
 interface WeatherState {
-  // Data
   weatherData: WeatherData | null
   isLoading: boolean
   error: string | null
-
-  // Saved locations
   savedLocations: SavedLocation[]
   selectedLocationId: string | null
-
-  // Panel state
   weatherPanelOpen: boolean
   showBuienradar: boolean
-
-  // Actions
   setWeatherData: (data: WeatherData | null) => void
   setIsLoading: (loading: boolean) => void
   setError: (error: string | null) => void
-
   addLocation: (location: Omit<SavedLocation, 'id'>) => void
   removeLocation: (id: string) => void
   setSelectedLocation: (id: string | null) => void
   updateCurrentLocation: (lat: number, lon: number) => void
-
   toggleWeatherPanel: () => void
   setWeatherPanelOpen: (open: boolean) => void
   setShowBuienradar: (show: boolean) => void
-
-  fetchWeather: (lat: number, lon: number) => Promise<void>
+  fetchWeather: (lat: number, lon: number, locationName?: string) => Promise<void>
 }
 
-// Helper to generate unique IDs
 const generateId = () => Math.random().toString(36).substring(2, 9)
 
-// Weather code descriptions
 export const weatherCodeDescriptions: Record<number, string> = {
-  0: 'Helder',
-  1: 'Overwegend helder',
-  2: 'Halfbewolkt',
-  3: 'Bewolkt',
-  45: 'Mist',
-  48: 'Rijp/mist',
-  51: 'Lichte motregen',
-  53: 'Motregen',
-  55: 'Dichte motregen',
-  56: 'Lichte ijzel',
-  57: 'Ijzel',
-  61: 'Lichte regen',
-  63: 'Regen',
-  65: 'Hevige regen',
-  66: 'Lichte ijsregen',
-  67: 'IJsregen',
-  71: 'Lichte sneeuw',
-  73: 'Sneeuw',
-  75: 'Hevige sneeuw',
-  77: 'Korrelsneeuw',
-  80: 'Lichte buien',
-  81: 'Buien',
-  82: 'Hevige buien',
-  85: 'Lichte sneeuwbuien',
-  86: 'Sneeuwbuien',
-  95: 'Onweer',
-  96: 'Onweer met hagel',
-  99: 'Zwaar onweer met hagel'
+  0: 'Helder', 1: 'Overwegend helder', 2: 'Halfbewolkt', 3: 'Bewolkt', 45: 'Mist', 48: 'Rijp/mist',
+  51: 'Lichte motregen', 53: 'Motregen', 55: 'Dichte motregen', 56: 'Lichte ijzel', 57: 'Ijzel',
+  61: 'Lichte regen', 63: 'Regen', 65: 'Hevige regen', 66: 'Lichte ijsregen', 67: 'IJsregen',
+  71: 'Lichte sneeuw', 73: 'Sneeuw', 75: 'Hevige sneeuw', 77: 'Korrelsneeuw', 80: 'Lichte buien',
+  81: 'Buien', 82: 'Hevige buien', 85: 'Lichte sneeuwbuien', 86: 'Sneeuwbuien', 95: 'Onweer',
+  96: 'Onweer met hagel', 99: 'Zwaar onweer met hagel'
 }
 
-// Wind direction to Dutch text
 export function windDirectionToText(degrees: number): string {
   const directions = ['N', 'NNO', 'NO', 'ONO', 'O', 'OZO', 'ZO', 'ZZO', 'Z', 'ZZW', 'ZW', 'WZW', 'W', 'WNW', 'NW', 'NNW']
-  const index = Math.round(degrees / 22.5) % 16
-  return directions[index]
+  return directions[Math.round(degrees / 22.5) % 16]
 }
 
 export const useWeatherStore = create<WeatherState>()(
   persist(
     (set, get) => ({
-      // Initial state
       weatherData: null,
       isLoading: false,
       error: null,
-      savedLocations: [
-        { id: 'current', name: 'Huidige locatie', lat: 0, lon: 0, isCurrentLocation: true }
-      ],
+      savedLocations: [{ id: 'current', name: 'Huidige locatie', lat: 0, lon: 0, isCurrentLocation: true }],
       selectedLocationId: 'current',
       weatherPanelOpen: false,
       showBuienradar: false,
-
-      // Actions
-      setWeatherData: (data) => set({ weatherData: data }),
-      setIsLoading: (loading) => set({ isLoading: loading }),
-      setError: (error) => set({ error }),
-
-      addLocation: (location) => set(state => ({
-        savedLocations: [...state.savedLocations, { ...location, id: generateId() }]
-      })),
-
-      removeLocation: (id) => set(state => ({
+      setWeatherData: weatherData => set({ weatherData }),
+      setIsLoading: isLoading => set({ isLoading }),
+      setError: error => set({ error }),
+      addLocation: location => set(state => ({ savedLocations: [...state.savedLocations, { ...location, id: generateId() }] })),
+      removeLocation: id => set(state => ({
         savedLocations: state.savedLocations.filter(l => l.id !== id),
         selectedLocationId: state.selectedLocationId === id ? 'current' : state.selectedLocationId
       })),
-
-      setSelectedLocation: (id) => set({ selectedLocationId: id }),
-
+      setSelectedLocation: selectedLocationId => set({ selectedLocationId }),
       updateCurrentLocation: (lat, lon) => set(state => ({
-        savedLocations: state.savedLocations.map(l =>
-          l.isCurrentLocation ? { ...l, lat, lon } : l
-        )
+        savedLocations: state.savedLocations.map(l => l.isCurrentLocation ? { ...l, lat, lon } : l)
       })),
-
       toggleWeatherPanel: () => set(state => ({ weatherPanelOpen: !state.weatherPanelOpen })),
-      setWeatherPanelOpen: (open) => set({ weatherPanelOpen: open }),
-      setShowBuienradar: (show) => set({ showBuienradar: show }),
+      setWeatherPanelOpen: weatherPanelOpen => set({ weatherPanelOpen }),
+      setShowBuienradar: showBuienradar => set({ showBuienradar }),
 
-      fetchWeather: async (lat, lon) => {
-        const { setIsLoading, setError, setWeatherData, savedLocations, selectedLocationId } = get()
-
-        setIsLoading(true)
-        setError(null)
-
+      fetchWeather: async (lat, lon, locationName) => {
+        const { savedLocations, selectedLocationId } = get()
+        set({ isLoading: true, error: null })
         try {
-          // Main weather API call with past days for frost calculation
           const url = new URL('https://api.open-meteo.com/v1/forecast')
-          url.searchParams.set('latitude', lat.toString())
-          url.searchParams.set('longitude', lon.toString())
+          url.searchParams.set('latitude', String(lat))
+          url.searchParams.set('longitude', String(lon))
           url.searchParams.set('current', 'temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,is_day,snow_depth')
-          url.searchParams.set('hourly', 'temperature_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,relative_humidity_2m')
+          url.searchParams.set('hourly', 'temperature_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m,sunshine_duration')
           url.searchParams.set('daily', 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset')
           url.searchParams.set('minutely_15', 'precipitation')
-          url.searchParams.set('timezone', 'Europe/Amsterdam')
+          url.searchParams.set('timezone', 'auto')
           url.searchParams.set('forecast_days', '7')
-          url.searchParams.set('past_days', '7')  // Get past 7 days for frost calculation
+          url.searchParams.set('past_days', '7')
 
           const response = await fetch(url.toString())
-
-          if (!response.ok) {
-            throw new Error('Kon weerdata niet ophalen')
-          }
-
+          if (!response.ok) throw new Error('Kon weerdata niet ophalen')
           const data = await response.json()
+          const now = new Date()
+          const todayStr = data.current?.time?.slice(0, 10) ?? now.toISOString().slice(0, 10)
 
-          // Calculate frost days (consecutive days with min temp < 0)
           let frostDays = 0
-          const dailyMins = data.daily.temperature_2m_min || []
-          const today = new Date().toISOString().split('T')[0]
-          const todayIndex = data.daily.time.indexOf(today)
-
-          // Count backwards from yesterday
+          const todayIndex = data.daily.time.indexOf(todayStr)
           for (let i = todayIndex - 1; i >= 0; i--) {
-            if (dailyMins[i] < 0) {
-              frostDays++
-            } else {
-              break // Stop counting when we hit a non-frost day
-            }
+            if (data.daily.temperature_2m_min[i] < 0) frostDays++
+            else break
           }
 
-          // Find current location info
-          const selectedLocation = savedLocations.find(l => l.id === selectedLocationId) || savedLocations[0]
-
-          // Get precipitation data
-          const now = new Date()
           const precipitation15min: PrecipitationForecast[] = []
           const precipitation48h: PrecipitationForecast[] = []
-
           if (data.minutely_15?.time && data.minutely_15?.precipitation) {
-            const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000)
-            const fortyEightHoursLater = new Date(now.getTime() + 48 * 60 * 60 * 1000)
-
-            for (let i = 0; i < data.minutely_15.time.length; i++) {
-              const time = new Date(data.minutely_15.time[i])
-
-              // Skip past times
-              if (time < now) continue
-
-              // 2-hour data (15min intervals)
-              if (time <= twoHoursLater) {
-                precipitation15min.push({
-                  time: data.minutely_15.time[i],
-                  precipitation: data.minutely_15.precipitation[i]
-                })
-              }
-
-              // 48-hour data (15min intervals but we'll sample every hour for display)
-              if (time <= fortyEightHoursLater) {
-                precipitation48h.push({
-                  time: data.minutely_15.time[i],
-                  precipitation: data.minutely_15.precipitation[i]
-                })
-              }
-            }
+            const twoHoursLater = new Date(now.getTime() + 2 * 3600000)
+            const fortyEightHoursLater = new Date(now.getTime() + 48 * 3600000)
+            data.minutely_15.time.forEach((timeText: string, i: number) => {
+              const time = new Date(timeText)
+              if (time < now) return
+              const point = { time: timeText, precipitation: data.minutely_15.precipitation[i] ?? 0 }
+              if (time <= twoHoursLater) precipitation15min.push(point)
+              if (time <= fortyEightHoursLater) precipitation48h.push(point)
+            })
           }
 
-          // Filter hourly to current time onwards
-          const currentHour = now.getHours()
-          const todayStr = now.toISOString().split('T')[0]
+          const hourly: HourlyForecast[] = data.hourly.time.map((time: string, i: number) => ({
+            time,
+            temperature: data.hourly.temperature_2m[i],
+            precipitation: data.hourly.precipitation[i],
+            precipitationProbability: data.hourly.precipitation_probability[i],
+            weatherCode: data.hourly.weather_code[i] as WeatherCode,
+            windSpeed: data.hourly.wind_speed_10m[i],
+            windDirection: data.hourly.wind_direction_10m[i],
+            windGusts: data.hourly.wind_gusts_10m[i],
+            humidity: data.hourly.relative_humidity_2m[i],
+            sunshineDuration: data.hourly.sunshine_duration[i] ?? 0
+          })).filter((h: HourlyForecast) => new Date(h.time) >= now).slice(0, 24)
 
-          const hourlyFiltered = data.hourly.time
-            .map((time: string, i: number) => ({
-              time,
-              temperature: data.hourly.temperature_2m[i],
-              precipitation: data.hourly.precipitation[i],
-              precipitationProbability: data.hourly.precipitation_probability[i],
-              weatherCode: data.hourly.weather_code[i],
-              windSpeed: data.hourly.wind_speed_10m[i],
-              windDirection: data.hourly.wind_direction_10m[i],
-              humidity: data.hourly.relative_humidity_2m[i]
-            }))
-            .filter((h: HourlyForecast) => new Date(h.time) >= now)
-            .slice(0, 24)
+          const daily: DailyForecast[] = data.daily.time.map((date: string, i: number) => ({
+            date,
+            temperatureMax: data.daily.temperature_2m_max[i],
+            temperatureMin: data.daily.temperature_2m_min[i],
+            precipitationSum: data.daily.precipitation_sum[i],
+            precipitationProbability: data.daily.precipitation_probability_max[i],
+            weatherCode: data.daily.weather_code[i] as WeatherCode,
+            windSpeedMax: data.daily.wind_speed_10m_max[i],
+            sunrise: data.daily.sunrise[i],
+            sunset: data.daily.sunset[i]
+          })).filter((d: DailyForecast) => d.date >= todayStr)
 
-          // Filter daily to today onwards
-          const dailyFiltered = data.daily.time
-            .map((date: string, i: number) => ({
-              date,
-              temperatureMax: data.daily.temperature_2m_max[i],
-              temperatureMin: data.daily.temperature_2m_min[i],
-              precipitationSum: data.daily.precipitation_sum[i],
-              precipitationProbability: data.daily.precipitation_probability_max[i],
-              weatherCode: data.daily.weather_code[i],
-              windSpeedMax: data.daily.wind_speed_10m_max[i],
-              sunrise: data.daily.sunrise[i],
-              sunset: data.daily.sunset[i]
-            }))
-            .filter((d: DailyForecast) => d.date >= todayStr)
-
-          // Transform to our format
+          const selected = savedLocations.find(l => l.id === selectedLocationId) || savedLocations[0]
           const weatherData: WeatherData = {
-            location: { ...selectedLocation, lat, lon },
+            location: { ...selected, name: locationName || selected.name, lat, lon },
             current: {
               temperature: data.current.temperature_2m,
               apparentTemperature: data.current.apparent_temperature,
               humidity: data.current.relative_humidity_2m,
               precipitation: data.current.precipitation,
-              weatherCode: data.current.weather_code,
+              weatherCode: data.current.weather_code as WeatherCode,
               windSpeed: data.current.wind_speed_10m,
               windDirection: data.current.wind_direction_10m,
               windGusts: data.current.wind_gusts_10m,
@@ -328,52 +210,20 @@ export const useWeatherStore = create<WeatherState>()(
               isDay: data.current.is_day === 1,
               snowDepth: data.current.snow_depth
             },
-            hourly: hourlyFiltered,
-            daily: dailyFiltered,
-            precipitation15min,
-            precipitation48h,
-            frostDays,
-            lastUpdated: Date.now()
+            hourly, daily, precipitation15min, precipitation48h, frostDays, lastUpdated: Date.now()
           }
 
-          // Try to fetch pollen data (separate API call, don't fail if it doesn't work)
-          try {
-            const pollenUrl = new URL('https://air-quality-api.open-meteo.com/v1/air-quality')
-            pollenUrl.searchParams.set('latitude', lat.toString())
-            pollenUrl.searchParams.set('longitude', lon.toString())
-            pollenUrl.searchParams.set('current', 'grass_pollen,birch_pollen,alder_pollen,mugwort_pollen,ragweed_pollen,olive_pollen')
-
-            const pollenResponse = await fetch(pollenUrl.toString())
-            if (pollenResponse.ok) {
-              const pollenData = await pollenResponse.json()
-              if (pollenData.current) {
-                // Convert to 0-5 scale (rough approximation)
-                const toScale = (val: number) => Math.min(5, Math.round(val / 20))
-                weatherData.pollen = {
-                  grass: toScale(pollenData.current.grass_pollen || 0),
-                  birch: toScale(pollenData.current.birch_pollen || 0),
-                  alder: toScale(pollenData.current.alder_pollen || 0),
-                  mugwort: toScale(pollenData.current.mugwort_pollen || 0),
-                  ragweed: toScale(pollenData.current.ragweed_pollen || 0),
-                  olive: toScale(pollenData.current.olive_pollen || 0)
-                }
-              }
-            }
-          } catch {
-            // Pollen data failed, continue without it
-          }
-
-          setWeatherData(weatherData)
+          // Store the useful forecast immediately. Secondary data must never block the widget.
+          set({ weatherData, isLoading: false })
         } catch (err) {
-          setError(err instanceof Error ? err.message : 'Onbekende fout')
-        } finally {
-          setIsLoading(false)
+          set({ error: err instanceof Error ? err.message : 'Onbekende fout', isLoading: false })
         }
       }
     }),
     {
       name: 'detectorapp-weather',
-      partialize: (state) => ({
+      partialize: state => ({
+        weatherData: state.weatherData,
         savedLocations: state.savedLocations,
         selectedLocationId: state.selectedLocationId,
         showBuienradar: state.showBuienradar

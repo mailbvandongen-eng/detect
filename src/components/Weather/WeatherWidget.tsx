@@ -1,24 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Cloud, Sun, CloudRain, CloudSnow, CloudLightning, CloudFog, Wind,
-  Droplets, ChevronDown, ChevronUp, RefreshCw,
-  Navigation, Flower2, Type
-} from 'lucide-react'
-import {
-  useWeatherStore,
-  useSettingsStore,
-  useGPSStore,
-  weatherCodeDescriptions,
-  windDirectionToText
-} from '../../store'
-import type { WeatherCode, PrecipitationForecast, PollenData } from '../../store'
-// RainRadar modal replaced by RainRadarLayer (map overlay)
+import { Cloud, Sun, CloudRain, CloudSnow, CloudLightning, CloudFog, Wind, ChevronDown, ChevronUp, RefreshCw, Navigation, MapPin, Crosshair, Type } from 'lucide-react'
+import { toLonLat } from 'ol/proj'
+import { useWeatherStore, useSettingsStore, useGPSStore, useMapStore, weatherCodeDescriptions, windDirectionToText } from '../../store'
+import type { WeatherCode, HourlyForecast, PrecipitationForecast } from '../../store'
 
-// Default location: center of Netherlands
 const DEFAULT_LOCATION = { lat: 52.1326, lon: 5.2913 }
+const TEN_MINUTES = 10 * 60 * 1000
+const LOCATION_REFRESH_KM = 10
 
-// Weather icon based on code
 function WeatherIcon({ code, size = 18 }: { code: WeatherCode; size?: number }) {
   if (code === 0) return <Sun size={size} className="text-yellow-500" />
   if (code >= 1 && code <= 3) return <Cloud size={size} className="text-gray-400" />
@@ -29,116 +19,53 @@ function WeatherIcon({ code, size = 18 }: { code: WeatherCode; size?: number }) 
   return <Cloud size={size} className="text-gray-400" />
 }
 
-// Wind direction arrow
-function WindArrow({ degrees, size = 14 }: { degrees: number; size?: number }) {
-  return (
-    <div style={{ transform: `rotate(${degrees + 180}deg)` }} className="inline-flex">
-      <Navigation size={size} className="text-blue-500" />
-    </div>
-  )
+function WindArrow({ degrees, size = 13 }: { degrees: number; size?: number }) {
+  return <span style={{ transform: `rotate(${degrees + 180}deg)` }} className="inline-flex"><Navigation size={size} className="text-blue-500" /></span>
 }
 
-// Precipitation graph (Buienalarm style) - compact version
-function PrecipitationGraph({ data }: { data: PrecipitationForecast[] }) {
-  if (!data || data.length === 0) return null
+function distanceKm(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
+  const r = 6371
+  const dLat = (b.lat - a.lat) * Math.PI / 180
+  const dLon = (b.lon - a.lon) * Math.PI / 180
+  const lat1 = a.lat * Math.PI / 180
+  const lat2 = b.lat * Math.PI / 180
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2
+  return 2 * r * Math.asin(Math.sqrt(h))
+}
 
-  const maxPrecip = Math.max(...data.map(d => d.precipitation), 0.5)
-  const hasRain = data.some(d => d.precipitation > 0)
+function drySummary(data: PrecipitationForecast[]) {
+  if (!data.length) return 'Neerslagverwachting laden'
+  const firstWet = data.find(point => point.precipitation >= 0.1)
+  if (!firstWet) return 'Droog komende 2 uur'
+  const minutes = Math.max(0, Math.round((new Date(firstWet.time).getTime() - Date.now()) / 60000))
+  if (minutes <= 15) return 'Regen binnen 15 min'
+  const hours = Math.floor(minutes / 60)
+  const rest = minutes % 60
+  return `Regen over ±${hours ? `${hours}u ` : ''}${rest}m`
+}
 
+function HourlyFieldForecast({ hourly }: { hourly: HourlyForecast[] }) {
+  const hours = hourly.slice(0, 12)
+  if (!hours.length) return null
   return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between">
-        <span style={{ fontSize: '0.83em' }} className="text-gray-500">Neerslag 2 uur</span>
-        {!hasRain && <span style={{ fontSize: '0.83em' }} className="text-green-600 font-medium">Droog</span>}
-      </div>
-
-      <div className="relative h-8 bg-gray-100 rounded-lg overflow-hidden">
-        <div className="absolute inset-0 flex items-end px-0.5">
-          {data.map((d, i) => {
-            const height = (d.precipitation / maxPrecip) * 100
-            const intensity = d.precipitation > 2 ? 'bg-blue-600' :
-                             d.precipitation > 0.5 ? 'bg-blue-500' :
-                             d.precipitation > 0 ? 'bg-blue-400' : 'bg-transparent'
+    <div>
+      <div className="text-gray-500 mb-1" style={{ fontSize: '0.83em' }}>Veldweer · komende 12 uur</div>
+      <div className="overflow-x-auto pb-1">
+        <div className="flex gap-1" style={{ width: 'max-content' }}>
+          {hours.map((hour, i) => {
+            const sunshineMinutes = Math.round((hour.sunshineDuration || 0) / 60)
             return (
-              <div key={i} className="flex-1 mx-px">
-                <div
-                  className={`w-full rounded-t transition-all ${intensity}`}
-                  style={{ height: `${Math.max(height, d.precipitation > 0 ? 8 : 0)}%` }}
-                />
+              <div key={hour.time} className={`w-[64px] flex-shrink-0 rounded-lg p-1.5 text-center ${i === 0 ? 'bg-blue-100' : 'bg-gray-50'}`}>
+                <div className="text-gray-500" style={{ fontSize: '0.72em' }}>{i === 0 ? 'Nu' : `${new Date(hour.time).getHours()}u`}</div>
+                <div className="flex justify-center my-0.5"><WeatherIcon code={hour.weatherCode} size={15} /></div>
+                <div className="font-semibold" style={{ fontSize: '0.9em' }}>{Math.round(hour.temperature)}°</div>
+                <div className="text-blue-600" style={{ fontSize: '0.68em' }}>{Math.round(hour.precipitationProbability)}% · {hour.precipitation.toFixed(1)}mm</div>
+                <div className="text-amber-600" style={{ fontSize: '0.68em' }}>☀ {sunshineMinutes}m</div>
+                <div className="text-gray-500" style={{ fontSize: '0.68em' }}>{Math.round(hour.windSpeed)}/{Math.round(hour.windGusts)}</div>
               </div>
             )
           })}
         </div>
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1 text-gray-400" style={{ fontSize: '0.67em' }}>
-          <span>Nu</span>
-          <span>+1u</span>
-          <span>+2u</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Pollen indicator
-function PollenIndicator({ pollen }: { pollen: PollenData }) {
-  const levels = [
-    { name: 'Gras', value: pollen.grass },
-    { name: 'Berk', value: pollen.birch },
-    { name: 'Els', value: pollen.alder },
-    { name: 'Bijvoet', value: pollen.mugwort }
-  ].filter(p => p.value > 0).sort((a, b) => b.value - a.value)
-
-  if (levels.length === 0) {
-    return (
-      <div className="flex items-center gap-1.5 text-green-600" style={{ fontSize: '0.83em' }}>
-        <Flower2 size={12} />
-        <span>Lage pollenconcentratie</span>
-      </div>
-    )
-  }
-
-  const maxLevel = levels[0]
-  const color = maxLevel.value >= 4 ? 'text-red-500' :
-                maxLevel.value >= 3 ? 'text-orange-500' :
-                maxLevel.value >= 2 ? 'text-amber-500' : 'text-green-600'
-
-  return (
-    <div className={`flex items-center gap-1.5 ${color}`} style={{ fontSize: '0.83em' }}>
-      <Flower2 size={12} />
-      <span>
-        {maxLevel.name}: {maxLevel.value >= 4 ? 'Zeer hoog' : maxLevel.value >= 3 ? 'Hoog' : maxLevel.value >= 2 ? 'Matig' : 'Laag'}
-      </span>
-    </div>
-  )
-}
-
-// Hourly mini forecast
-function HourlyForecast({ hourly }: { hourly: any[] }) {
-  const upcomingHours = hourly.slice(0, 6)
-  if (upcomingHours.length === 0) return null
-
-  return (
-    <div className="space-y-1">
-      <div className="text-gray-500" style={{ fontSize: '0.83em' }}>Komende uren</div>
-      <div className="flex gap-1">
-        {upcomingHours.map((hour, i) => {
-          const time = new Date(hour.time)
-          const isNow = i === 0
-          return (
-            <div
-              key={hour.time}
-              className={`flex flex-col items-center p-1.5 rounded-lg flex-1 ${
-                isNow ? 'bg-blue-100' : 'bg-gray-50'
-              }`}
-            >
-              <span className="text-gray-500" style={{ fontSize: '0.75em' }}>
-                {isNow ? 'Nu' : `${time.getHours()}u`}
-              </span>
-              <WeatherIcon code={hour.weatherCode} size={14} />
-              <span className="font-medium" style={{ fontSize: '0.83em' }}>{Math.round(hour.temperature)}°</span>
-            </div>
-          )
-        })}
       </div>
     </div>
   )
@@ -149,239 +76,113 @@ export function WeatherWidget() {
   const showFontSliders = useSettingsStore(state => state.showFontSliders)
   const weatherFontScale = useSettingsStore(state => state.weatherFontScale)
   const setWeatherFontScale = useSettingsStore(state => state.setWeatherFontScale)
-  const gps = useGPSStore()
+  const gpsPosition = useGPSStore(state => state.position)
+  const map = useMapStore(state => state.map)
   const weather = useWeatherStore()
-
   const [isExpanded, setIsExpanded] = useState(false)
   const baseFontSize = 12 * weatherFontScale / 100
-  const showBuienradar = useWeatherStore(state => state.showBuienradar)
-  const setShowBuienradar = useWeatherStore(state => state.setShowBuienradar)
 
-  // Collapse widget when buienradar is opened
   useEffect(() => {
-    if (showBuienradar) {
-      setIsExpanded(false)
-    }
-  }, [showBuienradar])
+    if (weather.showBuienradar) setIsExpanded(false)
+  }, [weather.showBuienradar])
 
-  // Fetch weather on mount and when GPS changes
   useEffect(() => {
     if (!showWeatherButton) return
+    const loc = gpsPosition || DEFAULT_LOCATION
+    const cached = weather.weatherData
+    const stale = !cached || Date.now() - cached.lastUpdated > TEN_MINUTES
+    const moved = cached ? distanceKm(loc, cached.location) >= LOCATION_REFRESH_KM : true
+    if (stale || moved) weather.fetchWeather(loc.lat, loc.lon, gpsPosition ? 'GPS-locatie' : 'Nederland')
+  }, [showWeatherButton, gpsPosition?.lat, gpsPosition?.lon])
 
-    const loc = gps.position || DEFAULT_LOCATION
-    if (!weather.weatherData || Date.now() - weather.weatherData.lastUpdated > 10 * 60 * 1000) {
-      weather.fetchWeather(loc.lat, loc.lon)
-    }
-  }, [showWeatherButton, gps.position?.lat])
-
-  // Auto-refresh every 10 minutes
   useEffect(() => {
     if (!showWeatherButton) return
-
-    const interval = setInterval(() => {
-      const loc = gps.position || DEFAULT_LOCATION
-      weather.fetchWeather(loc.lat, loc.lon)
-    }, 10 * 60 * 1000)
-
-    return () => clearInterval(interval)
-  }, [showWeatherButton, gps.position?.lat])
-
-  if (!showWeatherButton) return null
+    const interval = window.setInterval(() => {
+      const loc = gpsPosition || weather.weatherData?.location || DEFAULT_LOCATION
+      weather.fetchWeather(loc.lat, loc.lon, weather.weatherData?.location.name)
+    }, TEN_MINUTES)
+    return () => window.clearInterval(interval)
+  }, [showWeatherButton, gpsPosition?.lat, gpsPosition?.lon])
 
   const current = weather.weatherData?.current
   const hourly = weather.weatherData?.hourly || []
-  const precipitation15min = weather.weatherData?.precipitation15min || []
-  const pollen = weather.weatherData?.pollen
+  const precip = weather.weatherData?.precipitation15min || []
+  const rainText = useMemo(() => drySummary(precip), [precip])
+  const sunshineNow = Math.round((hourly[0]?.sunshineDuration || 0) / 60)
+
+  if (!showWeatherButton) return null
+
+  const fetchMapCenter = () => {
+    const center = map?.getView().getCenter()
+    if (!center) return
+    const [lon, lat] = toLonLat(center)
+    weather.fetchWeather(lat, lon, 'Kaartpunt')
+  }
+
+  const fetchGps = () => {
+    const loc = gpsPosition || DEFAULT_LOCATION
+    weather.fetchWeather(loc.lat, loc.lon, gpsPosition ? 'GPS-locatie' : 'Nederland')
+  }
 
   return (
     <>
-      {/* Backdrop when expanded - click to close */}
-      {isExpanded && (
-        <div
-          className="fixed inset-0 z-[1099]"
-          onClick={() => setIsExpanded(false)}
-        />
-      )}
-
-      {/* Widget */}
+      {isExpanded && <div className="fixed inset-0 z-[1099]" onClick={() => setIsExpanded(false)} />}
       <motion.div
         className="fixed left-2 z-[1100] bg-white shadow-lg border border-gray-200 select-none rounded-xl"
-        style={{ top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))', width: isExpanded ? '200px' : 'auto', maxWidth: '200px' }}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        layout
+        style={{ top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))', width: isExpanded ? 'min(360px, calc(100vw - 16px))' : 'auto', maxWidth: 'calc(100vw - 16px)' }}
+        initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} layout
       >
-        {weather.isLoading && !current ? (
-          <div className="p-3 flex items-center gap-2" style={{ fontSize: `${baseFontSize}px` }}>
-            <RefreshCw size={16} className="animate-spin text-blue-500" />
-            <span className="text-gray-500" style={{ fontSize: '1.17em' }}>Laden...</span>
-          </div>
-        ) : current ? (
+        {!current ? (
+          <button onClick={fetchGps} className="p-3 flex items-center gap-2 border-0 bg-transparent" style={{ fontSize: `${baseFontSize}px` }}>
+            <RefreshCw size={16} className={weather.isLoading ? 'animate-spin text-blue-500' : 'text-gray-500'} />
+            <span className="text-gray-600">{weather.isLoading ? 'Weer ophalen…' : 'Weer laden'}</span>
+          </button>
+        ) : (
           <div className="p-2.5" style={{ fontSize: `${baseFontSize}px` }}>
-            {/* Collapsed view - always visible as header */}
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="w-full border-0 outline-none bg-transparent p-0"
-            >
-              <div className="flex items-center gap-3">
-                {/* Weather + temp */}
-                <div className="flex items-center gap-2">
-                  <WeatherIcon code={current.weatherCode} size={24} />
-                  <div className="flex flex-col leading-tight">
-                    <span className="font-bold text-gray-800" style={{ fontSize: '1.5em' }}>
-                      {Math.round(current.temperature)}°
-                    </span>
-                  </div>
-                </div>
-
-                {/* Wind */}
-                <div className="flex items-center gap-1">
-                  <Wind size={14} className="text-gray-400" />
-                  <span className="text-gray-600" style={{ fontSize: '1.17em' }}>{Math.round(current.windSpeed)}</span>
-                  <WindArrow degrees={current.windDirection} size={12} />
-                </div>
-
-                {/* Expand */}
-                <div className="ml-auto">
-                  {isExpanded ? (
-                    <ChevronUp size={16} className="text-gray-400" />
-                  ) : (
-                    <ChevronDown size={16} className="text-gray-400" />
-                  )}
-                </div>
+            <button onClick={() => setIsExpanded(!isExpanded)} className="w-full border-0 outline-none bg-transparent p-0 text-left">
+              <div className="flex items-center gap-2">
+                <WeatherIcon code={current.weatherCode} size={24} />
+                <span className="font-bold text-gray-800" style={{ fontSize: '1.5em' }}>{Math.round(current.temperature)}°</span>
+                <span className="text-gray-500">{rainText}</span>
+                {sunshineNow > 0 && <span className="text-amber-600">☀ {sunshineNow}m/u</span>}
+                <span className="flex items-center gap-1 text-gray-600"><Wind size={13} />{Math.round(current.windSpeed)}<WindArrow degrees={current.windDirection} /></span>
+                {weather.isLoading && <RefreshCw size={12} className="animate-spin text-blue-500" />}
+                <span className="ml-auto">{isExpanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}</span>
               </div>
-              {/* Weather description - always visible */}
-              <div className="text-gray-500 text-left mt-1" style={{ fontSize: '0.92em' }}>
-                {weatherCodeDescriptions[current.weatherCode] || 'Onbekend'}
-                <span className="text-gray-400 ml-1">· {Math.round(current.apparentTemperature)}°</span>
+              <div className="text-gray-500 mt-1" style={{ fontSize: '0.86em' }}>
+                {weatherCodeDescriptions[current.weatherCode]} · voelt {Math.round(current.apparentTemperature)}° · {weather.weatherData?.location.name}
               </div>
             </button>
 
-            {/* Expanded view */}
             <AnimatePresence>
               {isExpanded && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                   <div className="pt-2 mt-2 border-t border-gray-200/50 space-y-3">
-                    {/* Weather details grid */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-blue-50 rounded-lg p-2">
-                        <div className="flex items-center gap-1 text-gray-500" style={{ fontSize: '0.83em' }}>
-                          <Droplets size={12} className="text-blue-500" />
-                          <span>Vocht</span>
-                        </div>
-                        <div className="font-bold text-blue-600" style={{ fontSize: '1.17em' }}>
-                          {current.humidity}%
-                        </div>
-                      </div>
-                      <div className="bg-gray-50 rounded-lg p-2">
-                        <div className="flex items-center gap-1 text-gray-500" style={{ fontSize: '0.83em' }}>
-                          <Wind size={12} className="text-gray-500" />
-                          <span>Windstoten</span>
-                        </div>
-                        <div className="font-bold text-gray-600" style={{ fontSize: '1.17em' }}>
-                          {Math.round(current.windGusts)} km/u
-                        </div>
-                      </div>
-                      <div className="bg-cyan-50 rounded-lg p-2">
-                        <div className="flex items-center gap-1 text-gray-500" style={{ fontSize: '0.83em' }}>
-                          <Navigation size={12} className="text-cyan-500" />
-                          <span>Wind</span>
-                        </div>
-                        <div className="font-bold text-cyan-600" style={{ fontSize: '1.17em' }}>
-                          {windDirectionToText(current.windDirection)}
-                        </div>
-                      </div>
-                      <div className="bg-purple-50 rounded-lg p-2">
-                        <div className="flex items-center gap-1 text-gray-500" style={{ fontSize: '0.83em' }}>
-                          <Cloud size={12} className="text-purple-500" />
-                          <span>Bewolking</span>
-                        </div>
-                        <div className="font-bold text-purple-600" style={{ fontSize: '1.17em' }}>
-                          {current.cloudCover}%
-                        </div>
-                      </div>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <button onClick={fetchGps} className="p-2 rounded-lg bg-blue-50 text-blue-700 border-0 flex items-center justify-center gap-1"><Crosshair size={14} /> GPS</button>
+                      <button onClick={fetchMapCenter} className="p-2 rounded-lg bg-gray-50 text-gray-700 border-0 flex items-center justify-center gap-1"><MapPin size={14} /> Kaartpunt</button>
+                      <button onClick={() => weather.setShowBuienradar(!weather.showBuienradar)} className="p-2 rounded-lg bg-gray-50 text-gray-700 border-0 flex items-center justify-center gap-1"><CloudRain size={14} /> Radar</button>
                     </div>
 
-                    {/* Buienradar button - toggles map overlay */}
-                    <button
-                      onClick={() => setShowBuienradar(!showBuienradar)}
-                      className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors border-0 cursor-pointer ${
-                        showBuienradar
-                          ? 'bg-blue-500 hover:bg-blue-600'
-                          : 'bg-blue-50 hover:bg-blue-100'
-                      }`}
-                    >
-                      <CloudRain size={16} className={showBuienradar ? 'text-white' : 'text-blue-500'} />
-                      <span className={`font-medium ${showBuienradar ? 'text-white' : 'text-blue-700'}`} style={{ fontSize: '1.17em' }}>
-                        Buienradar
-                      </span>
-                      <span className={`ml-auto ${showBuienradar ? 'text-blue-100' : 'text-blue-500'}`} style={{ fontSize: '1em' }}>
-                        {showBuienradar ? 'Aan' : 'Uit'}
-                      </span>
-                    </button>
+                    <div className="rounded-lg bg-blue-50 px-2 py-1.5 text-blue-800 font-medium">{rainText}</div>
+                    <HourlyFieldForecast hourly={hourly} />
 
-                    {/* Precipitation graph */}
-                    {precipitation15min.length > 0 && (
-                      <PrecipitationGraph data={precipitation15min} />
-                    )}
-
-                    {/* Hourly forecast */}
-                    {hourly.length > 0 && (
-                      <HourlyForecast hourly={hourly} />
-                    )}
-
-                    {/* Pollen info */}
-                    {pollen && (
-                      <PollenIndicator pollen={pollen} />
-                    )}
-
-                    {/* Last updated */}
-                    <div className="text-gray-400 text-center pt-1" style={{ fontSize: '0.75em' }}>
-                      Bijgewerkt: {new Date(weather.weatherData!.lastUpdated).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+                    <div className="grid grid-cols-3 gap-1.5 text-center">
+                      <div className="bg-gray-50 rounded-lg p-2"><div className="text-gray-500" style={{ fontSize: '0.75em' }}>Windstoten</div><b>{Math.round(current.windGusts)} km/u</b></div>
+                      <div className="bg-gray-50 rounded-lg p-2"><div className="text-gray-500" style={{ fontSize: '0.75em' }}>Wind</div><b>{windDirectionToText(current.windDirection)}</b></div>
+                      <div className="bg-gray-50 rounded-lg p-2"><div className="text-gray-500" style={{ fontSize: '0.75em' }}>Bewolking</div><b>{current.cloudCover}%</b></div>
                     </div>
 
-                    {/* Font size slider - only show when showFontSliders is enabled */}
-                    {showFontSliders && (
-                      <div className="flex items-center gap-2 pt-2 border-t border-gray-200/50">
-                        <Type size={12} className="text-gray-400" />
-                        <input
-                          type="range"
-                          min="80"
-                          max="150"
-                          step="10"
-                          value={weatherFontScale}
-                          onChange={(e) => setWeatherFontScale(parseInt(e.target.value))}
-                          className="flex-1 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                        />
-                        <span className="text-gray-400 w-8" style={{ fontSize: '0.83em' }}>{weatherFontScale}%</span>
-                      </div>
-                    )}
+                    {weather.error && <div className="text-amber-700 bg-amber-50 rounded-lg p-2">Update mislukt; laatste gegevens blijven zichtbaar.</div>}
+                    <div className="text-gray-400 text-center" style={{ fontSize: '0.75em' }}>Bijgewerkt {new Date(weather.weatherData!.lastUpdated).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</div>
+                    {showFontSliders && <div className="flex items-center gap-2"><Type size={12} className="text-gray-400" /><input type="range" min="80" max="150" step="10" value={weatherFontScale} onChange={e => setWeatherFontScale(parseInt(e.target.value))} className="flex-1" /><span>{weatherFontScale}%</span></div>}
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-        ) : (
-          <button
-            onClick={() => {
-              const loc = gps.position || DEFAULT_LOCATION
-              weather.fetchWeather(loc.lat, loc.lon)
-            }}
-            className="p-3 flex items-center gap-2 border-0 outline-none bg-transparent"
-            style={{ fontSize: `${baseFontSize}px` }}
-          >
-            <Cloud size={18} className="text-gray-400" />
-            <span className="text-gray-500" style={{ fontSize: '1.17em' }}>Weer laden</span>
-          </button>
         )}
       </motion.div>
-
-      {/* Rain Radar is now a map layer, controlled via App.tsx */}
     </>
   )
 }

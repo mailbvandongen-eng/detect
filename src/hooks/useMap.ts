@@ -21,40 +21,17 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
 
   useEffect(() => {
     if (!mapRef.current) {
-      const defaultView: MapViewOptions = {
-        center: [5.1214, 52.0907],
-        zoom: 8,
-        rotation: 0,
-        minZoom: 3,
-        maxZoom: 19,
-        ...viewOptions
-      }
-
+      const defaultView: MapViewOptions = { center: [5.1214, 52.0907], zoom: 8, rotation: 0, minZoom: 3, maxZoom: 19, ...viewOptions }
       const map = new Map({
         target,
-        controls: [
-          new Attribution({
-            collapsible: true,
-            collapsed: true,
-            tipLabel: 'Kaartbronnen'
-          })
-        ],
+        controls: [new Attribution({ collapsible: true, collapsed: true, tipLabel: 'Kaartbronnen' })],
         moveTolerance: MAP_CLICK_MOVE_TOLERANCE_PX,
-        view: new View({
-          center: fromLonLat(defaultView.center),
-          zoom: defaultView.zoom,
-          rotation: defaultView.rotation,
-          minZoom: defaultView.minZoom,
-          maxZoom: defaultView.maxZoom
-        })
+        view: new View({ center: fromLonLat(defaultView.center), zoom: defaultView.zoom, rotation: defaultView.rotation, minZoom: defaultView.minZoom, maxZoom: defaultView.maxZoom })
       })
-
       mapRef.current = map
       setMap(map)
-
       ;(window as any).__olMap = map
     }
-
     return () => {
       if (mapRef.current) {
         mapRef.current.setTarget(undefined)
@@ -67,16 +44,19 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
-
     if (showScaleBar) {
       if (!scaleLineRef.current) {
-        scaleLineRef.current = new ScaleLine({
-          units: 'metric',
-          bar: false,
-          text: true,
-          minWidth: 80
-        })
-        map.addControl(scaleLineRef.current)
+        const scale = new ScaleLine({ units: 'metric', bar: false, text: true, minWidth: 72 })
+        const element = scale.element as HTMLElement
+        // The stylesheet intentionally uses !important, so set the mobile-safe position at the same priority.
+        element.style.setProperty('bottom', '72px', 'important')
+        element.style.setProperty('left', '50%', 'important')
+        element.style.setProperty('right', 'auto', 'important')
+        element.style.setProperty('transform', 'translateX(-50%)', 'important')
+        element.style.setProperty('pointer-events', 'none', 'important')
+        element.style.opacity = '0.82'
+        scaleLineRef.current = scale
+        map.addControl(scale)
       }
     } else if (scaleLineRef.current) {
       map.removeControl(scaleLineRef.current)

@@ -5,311 +5,114 @@ import { useMapStore } from '../../store/mapStore'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CloudRain, Play, Pause, X, ChevronLeft, ChevronRight } from 'lucide-react'
 
-interface RadarFrame {
-  path: string
-  time: number
-}
-
-interface RainRadarLayerProps {
-  isVisible: boolean
-  onClose: () => void
-}
+interface RadarFrame { path: string; time: number }
+interface RainRadarLayerProps { isVisible: boolean; onClose: () => void }
 
 export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
   const map = useMapStore(state => state.map)
-
   const layerRef = useRef<TileLayer<XYZ> | null>(null)
-  const animationRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Radar state
+  const animationRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [frames, setFrames] = useState<RadarFrame[]>([])
   const [currentFrameIndex, setCurrentFrameIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
-  const [speed, setSpeed] = useState<'slow' | 'normal' | 'fast'>('normal')
+  const [error, setError] = useState(false)
   const [opacity, setOpacity] = useState(70)
 
-  // Speed in ms
-  const speedMs = speed === 'slow' ? 800 : speed === 'normal' ? 500 : 250
-
-  // Fetch radar frames from RainViewer API
   const fetchRadarData = useCallback(async () => {
     setIsLoading(true)
+    setError(false)
     try {
       const response = await fetch('https://api.rainviewer.com/public/weather-maps.json')
+      if (!response.ok) throw new Error('Radar niet bereikbaar')
       const data = await response.json()
-
-      const allFrames: RadarFrame[] = []
-
-      // Past frames (last ~2 hours)
-      if (data.radar?.past) {
-        data.radar.past.forEach((f: { path: string; time: number }) => {
-          allFrames.push({ path: f.path, time: f.time * 1000 })
-        })
-      }
-
-      // Nowcast/forecast frames (next ~2 hours)
-      if (data.radar?.nowcast) {
-        data.radar.nowcast.forEach((f: { path: string; time: number }) => {
-          allFrames.push({ path: f.path, time: f.time * 1000 })
-        })
-      }
-
-      setFrames(allFrames)
-      // Start at most recent past frame
-      const nowIndex = data.radar?.past?.length ? data.radar.past.length - 1 : 0
-      setCurrentFrameIndex(nowIndex)
-    } catch (error) {
-      console.error('Failed to fetch radar data:', error)
+      const past: RadarFrame[] = (data.radar?.past || []).map((frame: { path: string; time: number }) => ({ path: frame.path, time: frame.time * 1000 }))
+      setFrames(past)
+      setCurrentFrameIndex(Math.max(0, past.length - 1))
+      if (!past.length) setError(true)
+    } catch {
+      setError(true)
     } finally {
       setIsLoading(false)
     }
   }, [])
 
-  // Initial fetch
   useEffect(() => {
-    if (isVisible) {
-      fetchRadarData()
-      // Refresh radar data every 5 minutes
-      const refreshInterval = setInterval(fetchRadarData, 5 * 60 * 1000)
-      return () => clearInterval(refreshInterval)
-    }
+    if (!isVisible) return
+    fetchRadarData()
+    const refresh = setInterval(fetchRadarData, 5 * 60 * 1000)
+    return () => clearInterval(refresh)
   }, [isVisible, fetchRadarData])
 
-  // Create and manage the radar layer
   useEffect(() => {
-    if (!map || !isVisible || frames.length === 0) return
-
+    if (!map || !isVisible || !frames.length) return
     const frame = frames[currentFrameIndex]
     if (!frame) return
-
-    // Create tile URL
     const tileUrl = `https://tilecache.rainviewer.com${frame.path}/256/{z}/{x}/{y}/2/1_1.png`
-
-    // If layer exists, update source
     if (layerRef.current) {
-      const source = layerRef.current.getSource()
-      if (source) {
-        source.setUrl(tileUrl)
-        source.refresh()
-      }
+      layerRef.current.getSource()?.setUrl(tileUrl)
+      layerRef.current.getSource()?.refresh()
     } else {
-      // Create new layer
-      const source = new XYZ({
-        url: tileUrl,
-        crossOrigin: 'anonymous'
-      })
-
       const layer = new TileLayer({
-        source,
+        source: new XYZ({ url: tileUrl, crossOrigin: 'anonymous', maxZoom: 7 }),
         opacity: opacity / 100,
-        zIndex: 1500, // Above most layers but below UI
-        properties: {
-          name: 'rain-radar-layer',
-          title: 'Buienradar'
-        }
+        zIndex: 1500,
+        properties: { name: 'rain-radar-layer', title: 'Regenradar' }
       })
-
       layerRef.current = layer
       map.addLayer(layer)
     }
-
-    return () => {
-      // Don't remove layer here, we manage it separately
-    }
   }, [map, isVisible, frames, currentFrameIndex])
 
-  // Update opacity
-  useEffect(() => {
-    if (layerRef.current) {
-      layerRef.current.setOpacity(opacity / 100)
-    }
-  }, [opacity])
-
-  // Remove layer when hidden
+  useEffect(() => { layerRef.current?.setOpacity(opacity / 100) }, [opacity])
   useEffect(() => {
     if (!isVisible && layerRef.current && map) {
       map.removeLayer(layerRef.current)
       layerRef.current = null
     }
   }, [isVisible, map])
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (layerRef.current && map) {
-        map.removeLayer(layerRef.current)
-        layerRef.current = null
-      }
-      if (animationRef.current) {
-        clearInterval(animationRef.current)
-      }
-    }
+  useEffect(() => () => {
+    if (layerRef.current && map) map.removeLayer(layerRef.current)
+    if (animationRef.current) clearInterval(animationRef.current)
   }, [map])
 
-  // Animation loop
   useEffect(() => {
-    if (!isPlaying || frames.length === 0 || !isVisible) {
-      if (animationRef.current) {
-        clearInterval(animationRef.current)
-        animationRef.current = null
-      }
-      return
-    }
+    if (!isPlaying || !frames.length || !isVisible) return
+    animationRef.current = setInterval(() => setCurrentFrameIndex(prev => (prev + 1) % frames.length), 600)
+    return () => { if (animationRef.current) clearInterval(animationRef.current) }
+  }, [isPlaying, frames.length, isVisible])
 
-    animationRef.current = setInterval(() => {
-      setCurrentFrameIndex(prev => (prev + 1) % frames.length)
-    }, speedMs)
+  const label = frames[currentFrameIndex]
+    ? new Date(frames[currentFrameIndex].time).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+    : '--:--'
 
-    return () => {
-      if (animationRef.current) {
-        clearInterval(animationRef.current)
-        animationRef.current = null
-      }
-    }
-  }, [isPlaying, frames.length, speedMs, isVisible])
-
-  // Get time label for current frame
-  const getTimeLabel = useCallback(() => {
-    if (frames.length === 0 || !frames[currentFrameIndex]) return '--:--'
-
-    const frameTime = frames[currentFrameIndex].time
-    const now = Date.now()
-    const diffMinutes = Math.round((frameTime - now) / 60000)
-
-    const time = new Date(frameTime)
-    const timeStr = time.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
-
-    if (Math.abs(diffMinutes) < 3) return `${timeStr} (nu)`
-    if (diffMinutes < 0) return `${timeStr} (${diffMinutes}m)`
-    return `${timeStr} (+${diffMinutes}m)`
-  }, [frames, currentFrameIndex])
-
-  // Step through frames manually
-  const stepFrame = (direction: 'prev' | 'next') => {
+  const step = (delta: number) => {
     setIsPlaying(false)
-    setCurrentFrameIndex(prev => {
-      if (direction === 'prev') {
-        return prev > 0 ? prev - 1 : frames.length - 1
-      }
-      return (prev + 1) % frames.length
-    })
+    setCurrentFrameIndex(prev => (prev + delta + frames.length) % frames.length)
   }
 
   if (!isVisible) return null
-
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        className="fixed bottom-4 left-2 right-2 z-[1600] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200"
-        style={{ maxWidth: '400px', margin: '0 auto' }}
-      >
-        {/* Compact single-row header with time and close */}
-        <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <CloudRain size={14} className="text-blue-500" />
-            <span className="text-xs font-medium text-gray-700">
-              {isLoading ? 'Laden...' : getTimeLabel()}
-            </span>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
-          >
-            <X size={14} className="text-gray-500" />
-          </button>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-20 left-2 right-2 z-[1600] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200" style={{ maxWidth: '400px', margin: '0 auto' }}>
+        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+          <div className="flex items-center gap-2"><CloudRain size={15} className="text-blue-500" /><b className="text-xs text-gray-700">Regenradar · afgelopen ±2 uur</b></div>
+          <button onClick={onClose} className="p-1 border-0 bg-transparent"><X size={15} /></button>
         </div>
-
-        {/* Compact controls row */}
-        <div className="px-3 py-2 flex items-center gap-2">
-          {/* Play controls */}
-          <div className="flex items-center gap-0.5">
-            <button
-              onClick={() => stepFrame('prev')}
-              className="p-1.5 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
-            >
-              <ChevronLeft size={14} className="text-gray-600" />
-            </button>
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className={`p-1.5 rounded transition-colors border-0 outline-none ${
-                isPlaying ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
-              }`}
-            >
-              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-            </button>
-            <button
-              onClick={() => stepFrame('next')}
-              className="p-1.5 hover:bg-gray-100 rounded transition-colors border-0 outline-none bg-transparent"
-            >
-              <ChevronRight size={14} className="text-gray-600" />
-            </button>
-          </div>
-
-          {/* Timeline slider */}
-          <div className="flex-1 flex items-center gap-1">
-            <span className="text-[9px] text-gray-400 w-6">-2u</span>
-            <input
-              type="range"
-              min="0"
-              max={Math.max(0, frames.length - 1)}
-              value={currentFrameIndex}
-              onChange={(e) => {
-                setIsPlaying(false)
-                setCurrentFrameIndex(parseInt(e.target.value))
-              }}
-              className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-            />
-            <span className="text-[9px] text-gray-400 w-8 text-right">+30m</span>
-          </div>
-
-          {/* Speed */}
-          <div className="flex items-center gap-0.5 bg-gray-100 rounded p-0.5">
-            {(['slow', 'normal', 'fast'] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => setSpeed(s)}
-                className={`px-1.5 py-0.5 text-[9px] rounded transition-colors border-0 outline-none ${
-                  speed === s ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 bg-transparent'
-                }`}
-              >
-                {s === 'slow' ? '½' : s === 'normal' ? '1' : '2'}×
-              </button>
-            ))}
-          </div>
-
-        </div>
-
-        {/* Opacity slider - prominent row */}
-        <div className="px-3 py-1.5 flex items-center gap-2 border-t border-gray-100">
-          <span className="text-[10px] text-gray-500 w-14">Dekking</span>
-          <input
-            type="range"
-            min="10"
-            max="100"
-            value={opacity}
-            onChange={(e) => setOpacity(parseInt(e.target.value))}
-            className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-          />
-          <span className="text-[10px] text-gray-500 w-8 text-right">{opacity}%</span>
-        </div>
-
-        {/* Legend */}
-        <div className="px-3 pb-1.5 flex items-center justify-center gap-1.5">
-          <span className="text-[8px] text-gray-400">Licht</span>
-          <div className="flex h-1.5 rounded overflow-hidden">
-            <div className="w-3" style={{ backgroundColor: '#88D0F3' }} />
-            <div className="w-3" style={{ backgroundColor: '#32B8A4' }} />
-            <div className="w-3" style={{ backgroundColor: '#F4E61F' }} />
-            <div className="w-3" style={{ backgroundColor: '#F09D1C' }} />
-            <div className="w-3" style={{ backgroundColor: '#E12E18' }} />
-          </div>
-          <span className="text-[8px] text-gray-400">Zwaar</span>
-        </div>
+        {error ? <div className="p-3 text-sm text-amber-700">Radar tijdelijk niet beschikbaar. De weersverwachting blijft wel werken.</div> : (
+          <>
+            <div className="px-3 pt-2 text-xs text-gray-600">{isLoading ? 'Radar bijwerken…' : `${label} · historische radar, geen voorspelling`}</div>
+            <div className="px-3 py-2 flex items-center gap-2">
+              <button onClick={() => step(-1)} className="p-1.5 border-0 bg-gray-50 rounded"><ChevronLeft size={15} /></button>
+              <button onClick={() => setIsPlaying(!isPlaying)} className="p-1.5 border-0 bg-blue-50 text-blue-600 rounded">{isPlaying ? <Pause size={15} /> : <Play size={15} />}</button>
+              <button onClick={() => step(1)} className="p-1.5 border-0 bg-gray-50 rounded"><ChevronRight size={15} /></button>
+              <span className="text-[10px] text-gray-400">-2u</span>
+              <input className="flex-1" type="range" min="0" max={Math.max(0, frames.length - 1)} value={currentFrameIndex} onChange={e => { setIsPlaying(false); setCurrentFrameIndex(Number(e.target.value)) }} />
+              <span className="text-[10px] text-gray-500">nu</span>
+            </div>
+            <div className="px-3 pb-2 flex items-center gap-2"><span className="text-[10px] text-gray-500">Dekking</span><input className="flex-1" type="range" min="20" max="100" value={opacity} onChange={e => setOpacity(Number(e.target.value))} /><span className="text-[10px] text-gray-500">{opacity}%</span></div>
+          </>
+        )}
       </motion.div>
     </AnimatePresence>
   )
