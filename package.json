@@ -1,10 +1,10 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.10",
+  "version": "2.33.11",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite build --outDir dist",
     "build": "node scripts/build-pages.mjs",
     "build:dist": "vite build --outDir dist",
     "preview": "vite preview"
