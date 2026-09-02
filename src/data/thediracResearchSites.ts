@@ -12,10 +12,13 @@ export type ThediracResearchSite = {
   source: string
   sourceUrl?: string
   protected?: boolean
-  locationQuality: 'exact' | 'approximate'
+  locationQuality: 'exact' | 'source-centroid' | 'approximate'
 }
 
-// Alleen publiek gedocumenteerde locaties. Geen vertrouwelijke archeologische coordinaten.
+// Coordinaten worden nooit door Detect verplaatst of vervaagd.
+// 'exact' betekent: de openbare bron publiceert dit punt als locatie.
+// 'source-centroid'/'approximate' betekent: de bron zelf geeft alleen een
+// centrum-/globale locatie. Detect bewaart ook die bronpositie ongewijzigd.
 export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
   {
     id: 'surges-dolmen',
@@ -42,8 +45,8 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
     lat: 44.5833,
     periodNl: 'Laat-Neolithicum / Chalcolithicum',
     periodFr: 'Néolithique final / Chalcolithique',
-    descriptionNl: 'Publiek beschreven megalithische vindplaats bij Thédirac. In de literatuur is menselijk bot van deze context gedateerd op circa 4090 ±130 BP. De kaartpositie is indicatief en daarom bewust niet als exacte vindplaats gepresenteerd.',
-    descriptionFr: 'Site mégalithique documenté près de Thédirac. La littérature mentionne une datation d’ossement humain d’environ 4090 ±130 BP. La position cartographique est indicative et n’est pas présentée comme une localisation archéologique précise.',
+    descriptionNl: 'Publiek beschreven megalithische vindplaats bij Thédirac. In de literatuur is menselijk bot van deze context gedateerd op circa 4090 ±130 BP. Dit is de gepubliceerde globale bronpositie; Detect heeft het punt niet verschoven.',
+    descriptionFr: 'Site mégalithique documenté près de Thédirac. La littérature mentionne une datation d’ossement humain d’environ 4090 ±130 BP. Il s’agit de la position globale publiée par la source; Detect ne déplace pas le point.',
     source: 'Archeologische literatuur — publieke locatie-indicatie',
     protected: true,
     locationQuality: 'approximate'
@@ -57,11 +60,11 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
     lat: 44.6017,
     periodNl: 'Middeleeuwen – vooral eind 15e eeuw',
     periodFr: 'Moyen Âge – principalement fin du XVe siècle',
-    descriptionNl: 'Het inventarisdossier noemt de familie Thédirac al in de jaren 1150. Het huidige kasteel bevat vooral laatmiddeleeuwse bouwfasen. De marker staat op dorpsniveau; raadpleeg de bron voor de kadastrale referenties.',
-    descriptionFr: 'Le dossier d’inventaire mentionne les Thédirac dès les années 1150. Le château actuel conserve surtout des phases de construction de la fin du Moyen Âge. Le marqueur est placé au niveau du village; consulter la source pour les références cadastrales.',
+    descriptionNl: 'Het inventarisdossier noemt de familie Thédirac al in de jaren 1150. Het huidige kasteel bevat vooral laatmiddeleeuwse bouwfasen. De huidige bronpositie ligt op dorpsniveau; Detect verplaatst deze niet.',
+    descriptionFr: 'Le dossier d’inventaire mentionne les Thédirac dès les années 1150. Le château actuel conserve surtout des phases de construction de la fin du Moyen Âge. La position source actuelle est au niveau du village; Detect ne la déplace pas.',
     source: 'Région Occitanie / Département du Lot — POP / Mérimée IA46101577',
     sourceUrl: 'https://pop.culture.gouv.fr/notice/merimee/IA46101577',
-    locationQuality: 'approximate'
+    locationQuality: 'source-centroid'
   },
   {
     id: 'catus-roman',
@@ -72,8 +75,8 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
     lat: 44.557,
     periodNl: 'Romeinse tijd, ca. 1e–4e eeuw',
     periodFr: 'Époque romaine, env. Ier–IVe siècle',
-    descriptionNl: 'Archeologische context rond Catus met Romeins bouwmateriaal en aardewerk. Deze laag is bedoeld als onderzoekscontext; de marker is een globale plaatsaanduiding en geen exacte opgravingscoördinaat.',
-    descriptionFr: 'Contexte archéologique autour de Catus avec matériaux de construction et céramiques antiques. Cette couche sert au contexte de recherche; le marqueur indique la zone générale et non les coordonnées précises d’une fouille.',
+    descriptionNl: 'Archeologische context rond Catus met Romeins bouwmateriaal en aardewerk. Dit is de beschikbare globale bronpositie en geen door Detect verschoven vindplaats.',
+    descriptionFr: 'Contexte archéologique autour de Catus avec matériaux de construction et céramiques antiques. Il s’agit de la position globale disponible dans la source, et non d’un point déplacé par Detect.',
     source: 'Publieke archeologische onderzoekscontext Catus',
     locationQuality: 'approximate'
   }
