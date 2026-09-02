@@ -4,7 +4,10 @@ import XYZ from 'ol/source/XYZ'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
 const BRGM_GEOLOGY_WMS = 'https://mapsref.brgm.fr/wxs/referentiel/geologie'
+const BRGM_CATALOGUE_WMS = 'https://mapsref.brgm.fr/wxs/infoterre/catalogue'
+const BRGM_RISKS_WMS = 'https://geoservices.brgm.fr/risques'
 const OCCITANIE_HYDRO_WMS = 'https://ws.carmencarto.fr/WMS/151/Carte_hydrogeol.map'
+const SANDRE_HYDRO_WMS = 'https://services.sandre.eaufrance.fr/geo/eth'
 
 function tileWms(title: string, url: string, layers: string, opacity: number, attribution: string) {
   return new TileLayer({
@@ -46,9 +49,29 @@ export function createLotHydrogeologyLayerOL() {
   return tileWms('Hydrogeologie Lot (46)', OCCITANIE_HYDRO_WMS, 'Carte_hydro_46', 0.62, '© BRGM / SIGES Occitanie — carte hydrogéologique du Lot')
 }
 
+export function createFranceWatercoursesLayerOL() {
+  return tileWms('Waterlopen FR', SANDRE_HYDRO_WMS, 'CoursEau_Carthage2017', 0.82, '© Sandre / Eaufrance — réseau hydrographique')
+}
+
+export function createFranceBssLayerOL() {
+  return tileWms('Ondergrondboringen BRGM', BRGM_CATALOGUE_WMS, 'BSS_TOTAL', 0.9, '© BRGM — Banque du Sous-Sol')
+}
+
+export function createFranceCavitiesLayerOL() {
+  return tileWms('Karst & ondergrondse holtes', BRGM_RISKS_WMS, 'CAVITE_LOCALISEE', 0.9, '© BRGM — cavités souterraines')
+}
+
+export function createFranceIdprLayerOL() {
+  return tileWms('Infiltratie & afstroming (IDPR)', BRGM_GEOLOGY_WMS, 'IDPR', 0.5, '© BRGM — IDPR')
+}
+
 export const FRANCE_RESEARCH_FACTORIES: Record<string, () => TileLayer<any>> = {
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
   'Geologie 1:50.000 FR': createFranceGeology50LayerOL,
   'Geologie geharmoniseerd FR': createFranceGeologyHarmonizedLayerOL,
-  'Hydrogeologie Lot (46)': createLotHydrogeologyLayerOL
+  'Hydrogeologie Lot (46)': createLotHydrogeologyLayerOL,
+  'Waterlopen FR': createFranceWatercoursesLayerOL,
+  'Ondergrondboringen BRGM': createFranceBssLayerOL,
+  'Karst & ondergrondse holtes': createFranceCavitiesLayerOL,
+  'Infiltratie & afstroming (IDPR)': createFranceIdprLayerOL
 }
