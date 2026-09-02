@@ -25,14 +25,14 @@ const BUILT_IN_PRESETS: Preset[] = [
     name: 'Detectie',
     icon: 'Compass',
     layers: ['AMK Monumenten', 'Gewaspercelen', 'Geomorfologie', 'AHN4 Hoogtekaart Kleur', 'Kadastrale Grenzen'],
-    baseLayer: 'Esri (licht)',  // Explicit default base layer
+    baseLayer: 'Esri (licht)',
     layerOpacities: {
       'AMK Monumenten': 0.50,
       'Gewaspercelen': 0.25,
       'Geomorfologie': 0.25,
       'AHN4 Hoogtekaart Kleur': 0.25
     },
-    isBuiltIn: false  // Now editable like other presets
+    isBuiltIn: false
   },
   {
     id: 'lidar-hoogte',
@@ -77,9 +77,6 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'steentijd',
     name: 'Steentijd',
     icon: 'Mountain',
-    // Luchtfoto achtergrond om zandverstuivingen/heide te herkennen
-    // Reliëfkaart voor grafheuvels en oude structuren
-    // Labels overlay voor plaatsnamen
     layers: [
       'Hunebedden', 'Grafheuvels', 'Terpen', 'FAMKE Steentijd', 'AMK Steentijd',
       'AHN4 Multi-Hillshade NL', 'Labels Overlay'
@@ -91,8 +88,6 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'romeins-midvroeg',
     name: 'Romeins - Mid vroeg',
     icon: 'Layers',
-    // Percelen belangrijk voor nederzettingspatronen
-    // Romeinse wegen en forten
     layers: [
       'Romeinse wegen (regio)', 'Romeinse Forten', 'AMK Romeins', 'AMK Vroege ME',
       'Gewaspercelen', 'Kadastrale Grenzen'
@@ -103,7 +98,6 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'midlaat-nieuwetijd',
     name: 'Mid laat - Nieuwe tijd',
     icon: 'Grid',
-    // Historische structuren en erfgoed
     layers: [
       'AMK Late ME', 'Kastelen', 'Essen', 'Rijksmonumenten',
       'Gewaspercelen', 'Kadastrale Grenzen', 'Oude Kernen'
@@ -124,7 +118,6 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'analyse',
     name: 'Terrein Analyse',
     icon: 'Search',
-    // Bodem en terrein voor onderzoek, reliëf en hoogtekaart
     layers: [
       'IKAW', 'Geomorfologie', 'Bodemkaart',
       'AHN4 Multi-Hillshade NL', 'AHN4 Hoogtekaart Kleur'
@@ -135,16 +128,14 @@ const BUILT_IN_PRESETS: Preset[] = [
 
 interface PresetState {
   presets: Preset[]
-  customDefaults: Preset[] | null  // User's saved defaults (null = use BUILT_IN_PRESETS)
-
-  // Actions
+  customDefaults: Preset[] | null
   applyPreset: (id: string) => void
   createPreset: (name: string, icon: string) => void
   updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer'>>) => void
   deletePreset: (id: string) => void
-  saveAsDefaults: () => void  // Save current presets as user's defaults
-  resetToDefaults: () => void  // Reset to user's defaults (or BUILT_IN if no custom)
-  resetToBuiltIn: () => void  // Reset to original BUILT_IN_PRESETS
+  saveAsDefaults: () => void
+  resetToDefaults: () => void
+  resetToBuiltIn: () => void
 }
 
 const BASE_LAYER_NAMES = [
@@ -152,6 +143,7 @@ const BASE_LAYER_NAMES = [
   'OpenStreetMap',
   'Luchtfoto',
   'Satelliet (wereld)',
+  'Hybride (wereld)',
   'TMK 1850',
   'Bonnebladen 1900'
 ]
@@ -203,41 +195,9 @@ function addMissingResearchPresets(presets: Preset[]): Preset[] {
   return [...normalized, ...additions]
 }
 
-// All overlay layer names for clearing - must match PresetButtons.tsx
-const ALL_OVERLAYS = [
-  'Labels Overlay',
-  // Steentijd
-  'Hunebedden', 'FAMKE Steentijd', 'Grafheuvels', 'Terpen',
-  // Archeologie
-  'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
-  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Kastelen', 'IKAW',
-  // Erfgoed
-  'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Essen',
-  // Militair
-  'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
-  'Verdedigingslinies', 'Inundatiegebieden', 'Militaire Objecten',
-  // Paleokaarten
-  'Paleokaart 800 n.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 500 v.Chr.',
-  'Paleokaart 1500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 9000 v.Chr.',
-  // UIKAV
-  'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling',
-  // Hoogtekaarten
-  'AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m',
-  // Terrein
-  'Veengebieden', 'Geomorfologie', 'Bodemkaart',
-  // Fossielen
-  'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
-  // Recreatie
-  'Parken', 'Speeltuinen', 'Strandjes',
-  // Percelen
-  'Gewaspercelen', 'Kadastrale Grenzen',
-  // Provinciale Waardenkaarten - Zuid-Holland
-  'Scheepswrakken', 'Woonheuvels ZH', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen',
-  // Provinciale Waardenkaarten - Gelderland
-  'Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken',
-  // Provinciale Waardenkaarten - Zeeland
-  'Verdronken Dorpen'
-]
+function isOverlayLayer(layerName: string): boolean {
+  return !BASE_LAYER_NAMES.includes(layerName)
+}
 
 export const usePresetStore = create<PresetState>()(
   persist(
@@ -250,27 +210,26 @@ export const usePresetStore = create<PresetState>()(
         if (!rawPreset) return
 
         const preset = normalizePreset(rawPreset)
-
         const layerStore = useLayerStore.getState()
         const currentBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
         const nextBaseLayer = BASE_LAYER_NAMES.includes(preset.baseLayer || '')
           ? preset.baseLayer!
           : currentBaseLayer || 'Esri (licht)'
 
-        // Turn off all overlays
-        ALL_OVERLAYS.forEach(layer => layerStore.setLayerVisibility(layer, false))
+        // Schakel alle huidige overlays uit op basis van de echte laagwinkel.
+        // Nieuwe lagen hoeven daardoor niet meer in een tweede handmatige lijst te worden gezet.
+        Object.keys(layerStore.visible)
+          .filter(isOverlayLayer)
+          .forEach(layerName => layerStore.setLayerVisibility(layerName, false))
 
-        // Turn on preset layers
         preset.layers.forEach(layer => layerStore.setLayerVisibility(layer, true))
 
-        // Apply layer opacities if specified
         if (preset.layerOpacities) {
           Object.entries(preset.layerOpacities).forEach(([layerName, opacity]) => {
             layerStore.setLayerOpacity(layerName, opacity)
           })
         }
 
-        // Always leave exactly one base layer active so a preset can never blank the map.
         BASE_LAYER_NAMES.forEach((layerName) => {
           layerStore.setLayerVisibility(layerName, layerName === nextBaseLayer)
         })
@@ -286,9 +245,8 @@ export const usePresetStore = create<PresetState>()(
         const layerStore = useLayerStore.getState()
         const activeBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
 
-        // Get currently visible layers
         const visibleLayers = Object.entries(layerStore.visible)
-          .filter(([layerName, isVisible]) => isVisible && ALL_OVERLAYS.includes(layerName))
+          .filter(([layerName, isVisible]) => isVisible && isOverlayLayer(layerName))
           .map(([layerName]) => layerName)
 
         const newPreset: Preset = {

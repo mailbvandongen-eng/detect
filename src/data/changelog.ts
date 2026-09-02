@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.10',
+    date: '2 september 2026',
+    title: 'Vensters en transparantie opgeschoond',
+    changes: [
+      'Zijvensters liggen voortaan boven alle kaartbediening, zodat onder meer de GPS-knop niet meer door Kaartlagen of het menu heen kan komen.',
+      'Transparantie opent compact rechtsonder en toont direct alle zichtbare lagen waarvoor een opacity-instelling bestaat; er worden geen sliders meer kunstmatig na drie regels verborgen.',
+      'Het presetvenster is compacter gemaakt, het versienummer in het hamburgermenu staat op dezelfde regel als Instellingen en presets behandelen Hybride wereld voortaan correct als basiskaart.'
+    ]
+  },
+  {
     version: '2.33.9',
     date: '2 september 2026',
     title: 'GPS rustiger en opnieuw inzoomen hersteld',

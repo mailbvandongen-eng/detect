@@ -7,7 +7,6 @@ import type { Preset } from '../../store/presetStore'
 import { fromLonLat } from 'ol/proj'
 import { AppWindow } from './AppWindow'
 
-// Icon mapping for dynamic icon rendering
 const ICON_MAP: Record<string, LucideIcon> = {
   Compass,
   TreePalm,
@@ -19,7 +18,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Grid: Grid3X3
 }
 
-// Icon color mapping
 const ICON_COLORS: Record<string, string> = {
   Compass: 'text-purple-600',
   Waves: 'text-cyan-600',
@@ -42,58 +40,18 @@ const HOVER_COLORS: Record<string, string> = {
   Grid: 'hover:bg-lime-50'
 }
 
-// All overlay layers for reset - must include ALL layers from layerStore
-const ALL_OVERLAYS = [
-  // Mijn data
-  'Mijn Vondsten',
-  'Labels Overlay',
-  // Steentijd
-  'Hunebedden', 'FAMKE Steentijd', 'FAMKE IJzertijd', 'Grafheuvels', 'Terpen',
-  // Archeologie
-  'AMK Monumenten', 'AMK Romeins', 'AMK Steentijd', 'AMK Vroege ME', 'AMK Late ME', 'AMK Overig',
-  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)', 'Romeinse Forten', 'Kastelen', 'IKAW', 'Archeo Onderzoeken',
-  // Erfgoed
-  'Rijksmonumenten', 'Werelderfgoed', 'Religieus Erfgoed', 'Essen', 'Ruïnes',
-  // Militair
-  'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
-  'Verdedigingslinies', 'Inundatiegebieden', 'Militaire Objecten',
-  // Paleokaarten
-  'Paleokaart 800 n.Chr.', 'Paleokaart 100 n.Chr.', 'Paleokaart 500 v.Chr.',
-  'Paleokaart 1500 v.Chr.', 'Paleokaart 2750 v.Chr.', 'Paleokaart 5500 v.Chr.', 'Paleokaart 9000 v.Chr.',
-  // UIKAV
-  'UIKAV Punten', 'UIKAV Vlakken', 'UIKAV Expert', 'UIKAV Buffer', 'UIKAV Indeling',
-  // Hoogtekaarten (Esri + WebGL)
-  'Hoogtekaart (WebGL)', 'AHN4 Hoogtekaart Kleur', 'AHN4 Hillshade NL', 'AHN4 Multi-Hillshade NL', 'AHN 0.5m',
-  // Terrein
-  'Veengebieden', 'Geomorfologie', 'Bodemkaart',
-  // Fossielen, Mineralen & Goud
-  'Fossiel Hotspots', 'Mineralen Hotspots', 'Goudrivieren',
-  'Fossielen Nederland', 'Fossielen België', 'Fossielen Duitsland', 'Fossielen Frankrijk',
-  // Recreatie
-  'Parken', 'Speeltuinen', 'Strandjes',
-  // Percelen
-  'Gewaspercelen', 'Kadastrale Grenzen',
-  // Provinciale Waardenkaarten - Zuid-Holland
-  'Scheepswrakken', 'Woonheuvels ZH', 'Windmolens', 'Erfgoedlijnen', 'Oude Kernen',
-  // Provinciale Waardenkaarten - Gelderland
-  'Relictenkaart Punten', 'Relictenkaart Lijnen', 'Relictenkaart Vlakken',
-  // Provinciale Waardenkaarten - Zeeland
-  'Verdronken Dorpen'
-]
-
-// Base layers
 const BASE_LAYERS = [
   'Esri (licht)',
   'OpenStreetMap',
   'Luchtfoto',
   'Satelliet (wereld)',
+  'Hybride (wereld)',
   'TMK 1850',
   'Bonnebladen 1900'
 ]
 
-// Center of Netherlands (Utrecht area) and zoom level for ~50km view
-const NL_CENTER = [5.2913, 52.1326] // [lon, lat]
-const NL_ZOOM = 8 // ~50km view
+const NL_CENTER = [5.2913, 52.1326]
+const NL_ZOOM = 8
 
 export function PresetButtons() {
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
@@ -110,34 +68,29 @@ export function PresetButtons() {
   const baseFontSize = 14 * fontScale / 100
   const spacingScale = fontScale / 100
 
-  // State for save feedback
   const [savedPresetId, setSavedPresetId] = useState<string | null>(null)
   const [showAddPreset, setShowAddPreset] = useState(false)
   const [newPresetName, setNewPresetName] = useState('')
 
   const resetAll = () => {
-    // Close any open panels
     closeAllPanels()
 
-    // Turn off all overlay layers
-    ALL_OVERLAYS.forEach(layer => setLayerVisibility(layer, false))
+    // Alles behalve de bekende basislagen is een overlay. Hierdoor hoeft deze
+    // knop niet meer handmatig bijgewerkt te worden wanneer er lagen bijkomen.
+    Object.keys(visible)
+      .filter(layerName => !BASE_LAYERS.includes(layerName))
+      .forEach(layerName => setLayerVisibility(layerName, false))
 
-    // Set the light worldwide map as active base layer
-    BASE_LAYERS.forEach(layer => {
-      setLayerVisibility(layer, layer === 'Esri (licht)')
+    BASE_LAYERS.forEach(layerName => {
+      setLayerVisibility(layerName, layerName === 'Esri (licht)')
     })
     setLayerVisibility('Labels Overlay', true)
 
-    // Stop GPS tracking
     stopTracking()
-
-    // Clear monument filter
     clearMonumentFilter()
 
-    // Zoom to center of Netherlands at ~50km view
     if (map) {
-      const view = map.getView()
-      view.animate({
+      map.getView().animate({
         center: fromLonLat(NL_CENTER),
         zoom: NL_ZOOM,
         duration: 500
@@ -152,31 +105,26 @@ export function PresetButtons() {
     closeAllPanels()
   }
 
-  // Save current visible layers to a preset
-  const handleSaveToPreset = (e: React.MouseEvent, presetId: string, presetName: string) => {
-    e.stopPropagation()
+  const handleSaveToPreset = (event: React.MouseEvent, presetId: string, presetName: string) => {
+    event.stopPropagation()
 
-    // Confirm before overwriting
-    if (!confirm(`Preset "${presetName}" overschrijven met huidige lagen?`)) {
-      return
-    }
+    if (!confirm(`Preset "${presetName}" overschrijven met huidige lagen?`)) return
 
     const currentLayers = Object.entries(visible)
-      .filter(([layerName, isVisible]) => isVisible && ALL_OVERLAYS.includes(layerName))
+      .filter(([layerName, isVisible]) => isVisible && !BASE_LAYERS.includes(layerName))
       .map(([layerName]) => layerName)
-    const currentBaseLayer = BASE_LAYERS.find((layerName) => visible[layerName])
+    const currentBaseLayer = BASE_LAYERS.find(layerName => visible[layerName])
+
     updatePreset(presetId, {
       layers: currentLayers,
       baseLayer: currentBaseLayer || 'Esri (licht)'
     })
 
-    // Show feedback
     setSavedPresetId(presetId)
     setTimeout(() => setSavedPresetId(null), 2000)
-    console.log(`💾 Lagen opgeslagen naar preset`)
+    console.log('💾 Lagen opgeslagen naar preset')
   }
 
-  // Add new preset with current layers
   const handleAddPreset = () => {
     if (!newPresetName.trim()) return
     createPreset(newPresetName.trim(), 'Layers')
@@ -184,16 +132,12 @@ export function PresetButtons() {
     setShowAddPreset(false)
   }
 
-  // Reset presets to defaults
   const handleResetPresets = () => {
-    if (confirm('Presets terugzetten naar standaard?')) {
-      resetToDefaults()
-    }
+    if (confirm('Presets terugzetten naar standaard?')) resetToDefaults()
   }
 
   return (
     <>
-      {/* Reset button - bottom left, above nothing */}
       <motion.button
         onClick={resetAll}
         className="fixed bottom-2 left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
@@ -204,7 +148,6 @@ export function PresetButtons() {
         <RotateCcw size={20} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
       </motion.button>
 
-      {/* Presets button - above reset */}
       <motion.button
         onClick={togglePresetsPanel}
         className="fixed bottom-[60px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
@@ -231,10 +174,10 @@ export function PresetButtons() {
               <input
                 type="text"
                 value={newPresetName}
-                onChange={(e) => setNewPresetName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddPreset()
-                  if (e.key === 'Escape') setShowAddPreset(false)
+                onChange={(event) => setNewPresetName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') handleAddPreset()
+                  if (event.key === 'Escape') setShowAddPreset(false)
                 }}
                 placeholder="Naam preset..."
                 autoFocus
@@ -270,7 +213,7 @@ export function PresetButtons() {
           )
         }
       >
-        <div className="p-2">
+        <div className="p-1.5">
           {presets.map((preset: Preset) => {
             const IconComponent = ICON_MAP[preset.icon] || Layers
             const iconColor = ICON_COLORS[preset.icon] || 'text-blue-600'
@@ -281,26 +224,26 @@ export function PresetButtons() {
               <button
                 key={preset.id}
                 onClick={() => handleApplyPreset(preset.id)}
-                className={`w-full flex items-center gap-2 px-3 ${hoverColor} rounded-lg text-left transition-colors border-0 outline-none bg-transparent overflow-hidden ${isSaved ? 'bg-green-50' : ''}`}
+                className={`w-full flex items-center gap-1.5 px-2.5 ${hoverColor} rounded-lg text-left transition-colors border-0 outline-none bg-transparent overflow-hidden ${isSaved ? 'bg-green-50' : ''}`}
                 style={{
                   fontSize: `${baseFontSize}px`,
-                  paddingTop: `${8 * spacingScale}px`,
-                  paddingBottom: `${8 * spacingScale}px`
+                  paddingTop: `${6 * spacingScale}px`,
+                  paddingBottom: `${6 * spacingScale}px`
                 }}
               >
-                <IconComponent size={16} className={`${iconColor} flex-shrink-0`} />
+                <IconComponent size={15} className={`${iconColor} flex-shrink-0`} />
                 <span className="text-gray-700 truncate flex-1">{preset.name}</span>
                 {isSaved ? (
                   <span className="p-1 flex-shrink-0">
-                    <Check size={16} className="text-green-500" />
+                    <Check size={15} className="text-green-500" />
                   </span>
                 ) : (
                   <span
-                    onClick={(e) => handleSaveToPreset(e, preset.id, preset.name)}
-                    className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0"
+                    onClick={(event) => handleSaveToPreset(event, preset.id, preset.name)}
+                    className="p-1 hover:bg-gray-200 rounded-lg transition-colors flex-shrink-0"
                     title="Huidige lagen opslaan naar deze preset"
                   >
-                    <Save size={14} className="text-gray-400 hover:text-blue-500" />
+                    <Save size={13} className="text-gray-400 hover:text-blue-500" />
                   </span>
                 )}
               </button>

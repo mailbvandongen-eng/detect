@@ -75,3 +75,35 @@
   color: var(--detect-accent-text) !important;
   background: var(--detect-accent-soft) !important;
 }
+
+/* Zijvensters horen boven alle kaartknoppen te liggen. De transparante backdrop
+   blijft lager zodat Menu/Kaartlagen buiten het venster direct wisselbaar blijven. */
+[data-detect-theme] .detect-window--right,
+[data-detect-theme] .detect-window--left {
+  z-index: 1600;
+}
+
+/* Transparantie is een compacte werkbalk rechtsonder, gespiegeld aan Presets. */
+[data-detect-theme] .detect-window--compact-bottom-right {
+  top: auto;
+  right: 56px;
+  bottom: max(60px, calc(env(safe-area-inset-bottom, 0px) + 60px));
+  max-height: min(65dvh, 520px);
+}
+
+/* In het hamburgermenu hoort het versienummer op dezelfde regel als Instellingen. */
+[data-detect-theme] .detect-window--right .detect-window__footer > .space-y-1 {
+  position: relative;
+}
+
+[data-detect-theme] .detect-window--right .detect-window__footer > .space-y-1 > button {
+  padding-right: 72px !important;
+}
+
+[data-detect-theme] .detect-window--right .detect-window__footer > .space-y-1 > div.text-center.text-gray-400 {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
