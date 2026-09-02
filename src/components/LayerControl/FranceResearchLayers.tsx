@@ -3,17 +3,25 @@ import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
 import { useLayerStore, useMapStore } from '../../store'
 import { FRANCE_RESEARCH_FACTORIES } from '../../layers/franceResearchOL'
 
-export const FRANCE_RESEARCH_LAYERS = [
+const TERRAIN = [
   ['LiDAR HD terrein FR', 0.78],
   ['Bodem/geologie 1:50.000 FR', 0.68],
-  ['Geologie + reliëf FR', 0.66],
+  ['Geologie + reliëf FR', 0.66]
+] as const
+
+const WATER_LANDSCAPE = [
+  ['Waterlopen BD TOPAGE 2026', 0.9],
+  ['OCS GE landbedekking 2021-2023', 0.62],
+  ['OCS GE landgebruik 2021-2023', 0.62]
+] as const
+
+const ARCHAEOLOGY = [
   ['ArcheOcc · archeologie Occitanie', 1],
   ['Thédirac prehistorie & megalieten', 1],
   ['Thédirac Romeins & middeleeuws', 1]
 ] as const
 
-const TERRAIN = FRANCE_RESEARCH_LAYERS.slice(0, 3)
-const ARCHAEOLOGY = FRANCE_RESEARCH_LAYERS.slice(3)
+export const FRANCE_RESEARCH_LAYERS = [...TERRAIN, ...WATER_LANDSCAPE, ...ARCHAEOLOGY] as const
 
 function ensureLayer(name: string, opacity: number, map: any, registered: Record<string, any>, registerLayer: any, setLayerOpacity: any) {
   if (registered[name]) return
@@ -53,6 +61,7 @@ function ResearchFolder({ title, layers }: { title: string; layers: readonly (re
 export function FranceResearchLayers() {
   return <div className="mb-1 border-b border-gray-100 pb-1">
     <ResearchFolder title="Frankrijk · reliëf, bodem & geologie" layers={TERRAIN} />
+    <ResearchFolder title="Frankrijk · water & landschap" layers={WATER_LANDSCAPE} />
     <ResearchFolder title="Occitanie · archeologie" layers={ARCHAEOLOGY} />
   </div>
 }
