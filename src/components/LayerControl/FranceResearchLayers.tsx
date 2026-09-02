@@ -11,14 +11,11 @@ const TERRAIN = [
 
 const WATER_LANDSCAPE = [
   ['Waterlopen BD TOPAGE 2026', 0.9],
-  ['OCS GE landbedekking 2021-2023', 0.62],
-  ['OCS GE landgebruik 2021-2023', 0.62]
+  ['OCS GE landbedekking 2021-2023', 0.62]
 ] as const
 
 const ARCHAEOLOGY = [
-  ['ArcheOcc · archeologie Occitanie', 1],
-  ['Thédirac prehistorie & megalieten', 1],
-  ['Thédirac Romeins & middeleeuws', 1]
+  ['ArcheOcc · archeologie Occitanie', 1]
 ] as const
 
 export const FRANCE_RESEARCH_LAYERS = [...TERRAIN, ...WATER_LANDSCAPE, ...ARCHAEOLOGY] as const
