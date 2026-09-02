@@ -5,8 +5,8 @@ import type { LoadingState } from '../../store/layerStore'
 interface Props {
   name: string
   type: 'overlay' | 'base'
-  hasOverlay?: boolean  // Show Labels Overlay toggle for this base layer
-  displayName?: string  // Optional display name (uses 'name' for layer lookup)
+  hasOverlay?: boolean
+  displayName?: string
 }
 
 const BASE_LAYER_NAMES = [
@@ -19,6 +19,8 @@ const BASE_LAYER_NAMES = [
   'Bonnebladen 1900'
 ]
 
+const AUTO_REFERENCE_BASE_LAYERS = ['Luchtfoto', 'Satelliet (wereld)', 'Hybride (wereld)']
+
 export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
   const visible = useLayerStore(state => state.visible[name])
   const labelsVisible = useLayerStore(state => state.visible['Labels Overlay'])
@@ -29,6 +31,7 @@ export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
   const isLoading = loadingState === 'loading'
   const hasError = loadingState === 'error'
   const showHybridCompanion = type === 'base' && name === 'Satelliet (wereld)'
+  const showManualLabels = Boolean(hasOverlay) && !AUTO_REFERENCE_BASE_LAYERS.includes(name)
 
   const selectBaseLayer = (layerName: string) => {
     BASE_LAYER_NAMES.forEach(baseLayerName => {
@@ -95,7 +98,7 @@ export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
           </div>
         </button>
 
-        {hasOverlay && isChecked && (
+        {showManualLabels && isChecked && (
           <button
             onClick={handleLabelsToggle}
             className={`p-1 rounded transition-colors border-0 outline-none ${
@@ -115,7 +118,7 @@ export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
             hybridVisible ? 'bg-blue-50 hover:bg-blue-100' : 'bg-transparent hover:bg-blue-50'
           }`}
           style={{ fontSize: 'inherit' }}
-          title="Esri World Imagery met dynamische wegen, plaatsen en gebiedsnamen"
+          title="Satelliet met dynamische straat-, water-, plaats- en gebiedsnamen"
         >
           <span className="flex items-center gap-1 text-gray-600">Hybride (wereld)</span>
           <div

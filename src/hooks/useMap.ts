@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import { fromLonLat } from 'ol/proj'
-import { ScaleLine } from 'ol/control'
+import { Attribution, ScaleLine } from 'ol/control'
 import { useMapStore, useSettingsStore } from '../store'
 import type { MapViewOptions } from '../types/map'
 
@@ -20,10 +20,9 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
   const showScaleBar = useSettingsStore(state => state.showScaleBar)
 
   useEffect(() => {
-    // Create map only once
     if (!mapRef.current) {
       const defaultView: MapViewOptions = {
-        center: [5.1214, 52.0907], // Netherlands center
+        center: [5.1214, 52.0907],
         zoom: 8,
         rotation: 0,
         minZoom: 3,
@@ -33,9 +32,13 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
 
       const map = new Map({
         target,
-        controls: [], // Hide default zoom controls - using custom ZoomButtons
-        // A finger moves a few pixels during a normal tap. OpenLayers defaults
-        // to 1px, which makes mobile taps look like drags and suppresses clicks.
+        controls: [
+          new Attribution({
+            collapsible: true,
+            collapsed: true,
+            tipLabel: 'Kaartbronnen'
+          })
+        ],
         moveTolerance: MAP_CLICK_MOVE_TOLERANCE_PX,
         view: new View({
           center: fromLonLat(defaultView.center),
@@ -49,11 +52,9 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
       mapRef.current = map
       setMap(map)
 
-      // Expose map globally for extent-based loaders (fossils, etc.)
       ;(window as any).__olMap = map
     }
 
-    // Cleanup on unmount
     return () => {
       if (mapRef.current) {
         mapRef.current.setTarget(undefined)
@@ -63,13 +64,11 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
     }
   }, [target, viewOptions, setMap])
 
-  // Handle ScaleLine control based on settings
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
 
     if (showScaleBar) {
-      // Add ScaleLine if not already added
       if (!scaleLineRef.current) {
         scaleLineRef.current = new ScaleLine({
           units: 'metric',
@@ -79,12 +78,9 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
         })
         map.addControl(scaleLineRef.current)
       }
-    } else {
-      // Remove ScaleLine if present
-      if (scaleLineRef.current) {
-        map.removeControl(scaleLineRef.current)
-        scaleLineRef.current = null
-      }
+    } else if (scaleLineRef.current) {
+      map.removeControl(scaleLineRef.current)
+      scaleLineRef.current = null
     }
   }, [showScaleBar])
 

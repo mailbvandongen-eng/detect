@@ -4,7 +4,6 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { writeFileSync } from 'fs'
 import { resolve } from 'path'
 
-// Plugin to create .nojekyll file (GitHub Pages ignores _underscore files otherwise)
 const noJekyllPlugin = () => ({
   name: 'no-jekyll',
   closeBundle() {
@@ -12,7 +11,6 @@ const noJekyllPlugin = () => ({
   }
 })
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
@@ -22,18 +20,12 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        // Don't precache data files and ArcGIS assets (too large)
         globIgnores: ['**/data/**', '**/assets/arcgis/**'],
-        // Increase max file size for ArcGIS SDK bundles
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-        // Clean up old caches when new SW is installed
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
-        // Skip waiting - activate new SW immediately
         skipWaiting: true,
-        // Claim clients immediately
         clientsClaim: true,
         runtimeCaching: [
-          // Esri basemaps + labels overlay
           {
             urlPattern: /^https:\/\/server\.arcgisonline\.com\/ArcGIS\/rest\/services\/.*\/MapServer\/tile\/.*/i,
             handler: 'CacheFirst',
@@ -41,14 +33,41 @@ export default defineConfig({
               cacheName: 'esri-basemap-tiles',
               expiration: {
                 maxEntries: 600,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 30
               },
               cacheableResponse: {
                 statuses: [0, 200]
               }
             }
           },
-          // OpenStreetMap tiles
+          {
+            urlPattern: /^https:\/\/wayback\.maptiles\.arcgis\.com\/.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'esri-wayback',
+              expiration: {
+                maxEntries: 800,
+                maxAgeSeconds: 60 * 60 * 24 * 30
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/tiles\.openfreemap\.org\/.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'openfreemap-reference',
+              expiration: {
+                maxEntries: 800,
+                maxAgeSeconds: 60 * 60 * 24 * 30
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
           {
             urlPattern: /^https:\/\/tile\.openstreetmap\.org\/.*/i,
             handler: 'CacheFirst',
@@ -56,29 +75,27 @@ export default defineConfig({
               cacheName: 'osm-tiles',
               expiration: {
                 maxEntries: 500,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 30
               },
               cacheableResponse: {
                 statuses: [0, 200]
               }
             }
           },
-          // PDOK WMS/WMTS services
           {
             urlPattern: /^https:\/\/service\.pdok\.nl\/.*/i,
-            handler: 'CacheFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'pdok-tiles',
               expiration: {
-                maxEntries: 500,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+                maxEntries: 800,
+                maxAgeSeconds: 60 * 60 * 24 * 30
               },
               cacheableResponse: {
                 statuses: [0, 200]
               }
             }
           },
-          // AHN elevation tiles
           {
             urlPattern: /^https:\/\/ahn\.arcgisonline\.nl\/.*/i,
             handler: 'CacheFirst',
@@ -86,14 +103,13 @@ export default defineConfig({
               cacheName: 'ahn-tiles',
               expiration: {
                 maxEntries: 300,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 30
               },
               cacheableResponse: {
                 statuses: [0, 200]
               }
             }
           },
-          // RainViewer radar
           {
             urlPattern: /^https:\/\/tilecache\.rainviewer\.com\/.*/i,
             handler: 'NetworkFirst',
@@ -101,14 +117,13 @@ export default defineConfig({
               cacheName: 'rain-radar',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 10 // 10 minutes
+                maxAgeSeconds: 60 * 10
               },
               cacheableResponse: {
                 statuses: [0, 200]
               }
             }
           },
-          // Open-Meteo weather API
           {
             urlPattern: /^https:\/\/api\.open-meteo\.com\/.*/i,
             handler: 'NetworkFirst',
@@ -116,14 +131,13 @@ export default defineConfig({
               cacheName: 'weather-api',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 10 // 10 minutes
+                maxAgeSeconds: 60 * 10
               },
               cacheableResponse: {
                 statuses: [0, 200]
               }
             }
           },
-          // GeoJSON data files
           {
             urlPattern: /\/detect\/data\/.*/i,
             handler: 'CacheFirst',
@@ -131,7 +145,7 @@ export default defineConfig({
               cacheName: 'geojson-data',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+                maxAgeSeconds: 60 * 60 * 24 * 7
               },
               cacheableResponse: {
                 statuses: [0, 200]

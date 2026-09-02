@@ -12,7 +12,7 @@ Bij iedere wijziging gelden drie vaste regels:
 
 ## Prioriteit 1 — veldgebruik betrouwbaar maken
 
-1. Gereed in 2.33.5 — hybride wereldkaart met Esri World Imagery en de actuele Hybrid Reference Layer voor automatisch passende wegen, plaats- en gebiedsnamen.
+1. Gereed in 2.33.6 — hybride wereldkaart met duidelijke straat-, water-, plaats- en gebiedsnamen, plus luchtfoto-tijdreis: officiële PDOK-jaargangen vanaf 2016 in Nederland en Esri World Imagery Wayback vanaf 2014 wereldwijd.
 2. Op Android bij de terugknop eerst vragen of Detect echt gesloten moet worden.
 3. GPS-weergave vereenvoudigen:
    - één tik: een duidelijke locatiepunt en inzoomen naar straatniveau;

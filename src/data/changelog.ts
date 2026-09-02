@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.6',
+    date: '2 september 2026',
+    title: 'Betere hybride kaart en luchtfoto-tijdreis',
+    changes: [
+      'Satelliet- en luchtfotokaarten krijgen voortaan een rijkere referentielaag met straat-, water-, plaats- en gebiedsnamen uit OpenFreeMap/OpenStreetMap; als die bron niet bereikbaar is valt Detect terug op Esri.',
+      'Luchtfoto NL heeft een tijdschuif met de officiële PDOK-jaargangen vanaf 2016, waarbij automatisch de beste beschikbare resolutie per jaar wordt gekozen.',
+      'Satelliet wereld heeft een tijdschuif op basis van Esri World Imagery Wayback vanaf 2014. Het getoonde jaar is het archief- of publicatiejaar; de lokale opname kan ouder zijn.',
+      'OpenFreeMap, PDOK en Esri Wayback worden meegenomen in de veldcache en kaartbronvermeldingen zijn weer zichtbaar via de inklapbare bronknop.'
+    ]
+  },
+  {
     version: '2.33.5',
     date: '2 september 2026',
     title: 'Hybride wereldkaart toegevoegd',
