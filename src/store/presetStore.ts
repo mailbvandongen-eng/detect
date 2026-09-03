@@ -26,6 +26,7 @@ const FRANCE_FIELD_LAYERS = [
   'OCS GE landbedekking 2021-2023',
   'Bodem/geologie 1:50.000 FR',
   'Oude bossen · Forêts anciennes',
+  'Bekende plekken · Thédirac',
   'ArcheOcc · Thédirac-regio'
 ] as const
 
@@ -39,6 +40,7 @@ const FRANCE_RESEARCH_LAYER_NAMES = new Set([
   'Waterlopen BD TOPAGE 2026',
   'OCS GE landbedekking 2021-2023',
   'Oude bossen · Forêts anciennes',
+  'Bekende plekken · Thédirac',
   'ArcheOcc · Thédirac-regio'
 ])
 
@@ -163,6 +165,7 @@ const BUILT_IN_PRESETS: Preset[] = [
       'OCS GE landbedekking 2021-2023': 0.24,
       'Bodem/geologie 1:50.000 FR': 0.28,
       'Oude bossen · Forêts anciennes': 0.38,
+      'Bekende plekken · Thédirac': 1,
       'ArcheOcc · Thédirac-regio': 1
     },
     isBuiltIn: false
@@ -231,13 +234,16 @@ function normalizePreset(preset: Preset): Preset {
     }
   }
 
+  const configuredLayers = (preset.layers ?? builtInPreset.layers).map(migrateFranceLayerName)
+  const layers = REQUIRED_PRESET_IDS.has(preset.id)
+    ? [...new Set([...configuredLayers, ...builtInPreset.layers])]
+    : configuredLayers
+
   return {
     ...builtInPreset,
     ...preset,
     name: REQUIRED_PRESET_IDS.has(preset.id) ? builtInPreset.name : preset.name,
-    layers: (preset.layers ?? builtInPreset.layers)
-      .map(migrateFranceLayerName)
-      .filter((layer) => !REMOVED_LAYERS.has(layer)),
+    layers: layers.filter((layer) => !REMOVED_LAYERS.has(layer)),
     baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
     layerOpacities: normalizeLayerOpacities(preset.layerOpacities ?? builtInPreset.layerOpacities),
     mapView: preset.mapView ?? builtInPreset.mapView
@@ -419,7 +425,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 21,
+      version: 22,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {

@@ -31,8 +31,10 @@ Status: gereed.
 Status: gereed voor de huidige onderzoeksset; verdere bronverrijking blijft mogelijk.
 
 - ArcheOcc toont naam, periode, datering, vindplaats, omschrijving, gemeente, bescherming en bron waar beschikbaar;
+- Bekende plekken · Thédirac toont de nader onderzochte steentijd-, Romeinse en middeleeuwse locaties ook wanneer ze beschermd of no-detect zijn; dat is kaartcontext, geen zoekadvies;
+- exacte openbare bronpunten blijven exact, terwijl lieu-ditcentra en onbekende historische vindplekken zichtbaar als benadering zijn gemarkeerd;
 - bestaande INRAP-sites en Franse historische/erfgoedlagen blijven beschikbaar als aanvullende context;
-- de oude vier handmatige Thédirac-punten zijn verwijderd.
+- de oude vier zwak onderbouwde handmatige punten zijn vervangen door afzonderlijk beschreven bronobjecten met locatiekwaliteit en bronlink.
 
 ### Stap 3 — historisch landschap
 

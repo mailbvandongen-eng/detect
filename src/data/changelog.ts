@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.20',
+    date: '3 september 2026',
+    title: 'Bekende archeologische plekken op de kaart',
+    changes: [
+      'De Frankrijk · Thédirac-preset toont nu een aparte kaartlaag met 22 nader onderzochte steentijd-, Keltische, Romeinse en middeleeuwse locaties.',
+      'Beschermd of no-detect betekent voortaan alleen een duidelijke waarschuwing in de popup: het punt blijft zichtbaar voor het archeologische totaalbeeld.',
+      'Exacte bronpunten, lieu-ditcentra en globale gemeenteposities krijgen verschillende symbolen en iedere popup vermeldt de locatieprecisie en bron.'
+    ]
+  },
+  {
     version: '2.33.19',
     date: '3 september 2026',
     title: 'Frankrijk · Thédirac-preset hersteld',

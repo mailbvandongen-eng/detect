@@ -9,28 +9,38 @@ interface ChangeLogModalProps {
 }
 
 const currentRelease = {
-  version: '2.33.19',
+  version: '2.33.20',
   date: '3 september 2026',
-  title: 'Frankrijk · Thédirac-preset hersteld',
+  title: 'Bekende archeologische plekken op de kaart',
   changes: [
-    'Frankrijk · Thédirac staat voortaan altijd onderaan Presets, ook wanneer een oudere lokale of cloudlijst deze preset nog niet bevatte.',
-    'De preset kiest Hybride wereld, activeert de zes bewezen Franse veldlagen en verplaatst de kaart naar de onderzoeksregio Thédirac.',
-    'Een verouderde cloudlijst wordt na het laden automatisch met de ontbrekende preset gerepareerd.'
+    'De Frankrijk · Thédirac-preset toont nu een aparte kaartlaag met 22 nader onderzochte steentijd-, Keltische, Romeinse en middeleeuwse locaties.',
+    'Beschermd of no-detect betekent voortaan alleen een duidelijke waarschuwing in de popup: het punt blijft zichtbaar voor het archeologische totaalbeeld.',
+    'Exacte bronpunten, lieu-ditcentra en globale gemeenteposities krijgen verschillende symbolen en iedere popup vermeldt de locatieprecisie en bron.'
   ]
 }
 
 const recentReleases = [
   {
+    version: '2.33.19',
+    date: '3 september 2026',
+    title: 'Frankrijk · Thédirac-preset hersteld',
+    changes: [
+      'Frankrijk · Thédirac staat voortaan altijd onderaan Presets, ook wanneer een oudere lokale of cloudlijst deze preset nog niet bevatte.',
+      'De preset kiest Hybride wereld, activeert de zes bewezen Franse veldlagen en verplaatst de kaart naar de onderzoeksregio Thédirac.',
+      'Een verouderde cloudlijst wordt na het laden automatisch met de ontbrekende preset gerepareerd.'
+    ]
+  },
+  {
     version: '2.33.18',
     date: '3 september 2026',
     title: 'Thédirac-analyse opgeschoond',
     changes: [
-    'De veldtest van de nieuwe Thédirac-analyse was niet goed genoeg: Hellingklassen, Onderzoekskaart en het losse Onderzoekszone-vlak zijn daarom weer verwijderd in plaats van als gekleurde vakken zonder bruikbare meerwaarde te blijven staan.',
-    'De lokale onderzoeksafbakening blijft intern bestaan om ArcheOcc alleen voor Thédirac, Catus, Montgesty, Lavercantière, Peyrilles, Uzech en Gindou te laden; daarvoor is geen extra kaartvlak nodig.',
-    'De Frankrijk-preset is opgeschoond en bevat nu alleen de bewezen veldlagen: Hybride wereld, LiDAR HD, BD TOPAGE-waterlopen, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes en de lokale ArcheOcc-laag.',
-    'BSS-boringen, IDPR, cavités en geologie + reliëf blijven handmatig beschikbaar, maar worden niet automatisch door de Frankrijk-preset aangezet.',
-    'Een nieuwe analysekaart komt pas terug als de informatie per locatie duidelijk uitlegbaar en in de praktijk bruikbaar is.'
-  ]
+      'De veldtest van de nieuwe Thédirac-analyse was niet goed genoeg: Hellingklassen, Onderzoekskaart en het losse Onderzoekszone-vlak zijn daarom weer verwijderd in plaats van als gekleurde vakken zonder bruikbare meerwaarde te blijven staan.',
+      'De lokale onderzoeksafbakening blijft intern bestaan om ArcheOcc alleen voor Thédirac, Catus, Montgesty, Lavercantière, Peyrilles, Uzech en Gindou te laden; daarvoor is geen extra kaartvlak nodig.',
+      'De Frankrijk-preset is opgeschoond en bevat nu alleen de bewezen veldlagen: Hybride wereld, LiDAR HD, BD TOPAGE-waterlopen, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes en de lokale ArcheOcc-laag.',
+      'BSS-boringen, IDPR, cavités en geologie + reliëf blijven handmatig beschikbaar, maar worden niet automatisch door de Frankrijk-preset aangezet.',
+      'Een nieuwe analysekaart komt pas terug als de informatie per locatie duidelijk uitlegbaar en in de praktijk bruikbaar is.'
+    ]
   },
   {
     version: '2.33.17',
@@ -89,9 +99,11 @@ export function ChangeLogModal({ isOpen, onClose }: ChangeLogModalProps) {
     onClose()
   }
 
-  const entries = version === currentRelease.version
-    ? [currentRelease, ...recentReleases, ...CHANGELOG.filter((entry) => entry.version !== currentRelease.version)]
-    : [...recentReleases, ...CHANGELOG]
+  const curatedReleases = version === currentRelease.version
+    ? [currentRelease, ...recentReleases]
+    : [...recentReleases]
+  const curatedVersions = new Set(curatedReleases.map(entry => entry.version))
+  const entries = [...curatedReleases, ...CHANGELOG.filter(entry => !curatedVersions.has(entry.version))]
 
   return (
     <AppWindow

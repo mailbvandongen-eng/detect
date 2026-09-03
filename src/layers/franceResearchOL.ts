@@ -1,11 +1,15 @@
 import TileLayer from 'ol/layer/Tile'
 import VectorLayer from 'ol/layer/Vector'
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point'
 import TileWMS from 'ol/source/TileWMS'
 import VectorSource from 'ol/source/Vector'
 import XYZ from 'ol/source/XYZ'
 import GeoJSON from 'ol/format/GeoJSON'
-import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
+import { fromLonLat } from 'ol/proj'
+import { Circle as CircleStyle, Fill, RegularShape, Stroke, Style } from 'ol/style'
 import { fetchThediracArcheOccGeoJson } from './thediracAnalysisOL'
+import { THEDIRAC_RESEARCH_SITES, type ThediracResearchSite } from '../data/thediracResearchSites'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
 const IGN_WMS = 'https://data.geopf.fr/wms-r/wms'
@@ -52,6 +56,94 @@ const archeOccStyle = new Style({
     stroke: new Stroke({ color: '#fff', width: 1.5 })
   })
 })
+
+const RESEARCH_SITE_LAYER = 'Bekende plekken · Thédirac'
+const researchSiteColors: Record<ThediracResearchSite['category'], string> = {
+  prehistorie: '#f59e0b',
+  ijzertijd: '#16a34a',
+  romeins: '#dc2626',
+  middeleeuwen: '#7c3aed',
+  onbepaald: '#475569'
+}
+
+const researchSiteCategoryLabels: Record<ThediracResearchSite['category'], string> = {
+  prehistorie: 'Prehistorie',
+  ijzertijd: 'IJzertijd / Keltisch',
+  romeins: 'Romeins',
+  middeleeuwen: 'Middeleeuwen',
+  onbepaald: 'Periode onbekend'
+}
+
+const researchSitePrecisionLabels: Record<ThediracResearchSite['locationQuality'], string> = {
+  exact: 'Exact openbaar bronpunt',
+  'source-centroid': 'Openbaar centrum van lieu-dit of complex',
+  approximate: 'Globale bronpositie; exacte vindplek onbekend'
+}
+
+const researchSiteStyleCache = new Map<string, Style>()
+
+function getResearchSiteStyle(site: ThediracResearchSite) {
+  const { category, locationQuality } = site
+  const isProtected = site.protected === true
+  const color = researchSiteColors[category] ?? researchSiteColors.onbepaald
+  const cacheKey = `${category}:${locationQuality}:${isProtected ? 'protected' : 'context'}`
+  const cached = researchSiteStyleCache.get(cacheKey)
+  if (cached) return cached
+
+  const fillAlpha = locationQuality === 'approximate' ? '99' : locationQuality === 'source-centroid' ? 'd9' : 'ff'
+  const stroke = new Stroke({
+    color: isProtected ? '#111827' : '#ffffff',
+    width: isProtected ? 3 : 1.7,
+    ...(locationQuality === 'approximate' ? { lineDash: [3, 2] } : {})
+  })
+  const image = locationQuality === 'exact'
+    ? new CircleStyle({ radius: 7.5, fill: new Fill({ color: `${color}${fillAlpha}` }), stroke })
+    : new RegularShape({ points: 4, radius: 8.5, angle: Math.PI / 4, fill: new Fill({ color: `${color}${fillAlpha}` }), stroke })
+  const style = new Style({ image })
+  researchSiteStyleCache.set(cacheKey, style)
+  return style
+}
+
+export function createKnownThediracSitesLayerOL() {
+  const features = THEDIRAC_RESEARCH_SITES.map(site => {
+    const color = researchSiteColors[site.category]
+    const feature = new Feature({
+      geometry: new Point(fromLonLat([site.lon, site.lat]))
+    })
+    feature.setId(site.id)
+    feature.setStyle(getResearchSiteStyle(site))
+    feature.setProperties({
+      layerType: 'importedLayer',
+      layerName: RESEARCH_SITE_LAYER,
+      layerColor: color,
+      name: site.nameNl,
+      'Categorie / catégorie': researchSiteCategoryLabels[site.category],
+      'Type locatie / type de site': site.siteTypeNl,
+      'Periode / période': site.periodNl,
+      'Omschrijving': site.descriptionNl,
+      'Kaartstatus': site.protected
+        ? 'Op kaart voor het archeologische beeld · beschermd/no-detect op de locatie'
+        : 'Openbare onderzoekscontext · toestemming en bescherming afzonderlijk beoordelen',
+      'Locatieprecisie': researchSitePrecisionLabels[site.locationQuality],
+      ...(site.locationNoteNl ? { 'Toelichting positie': site.locationNoteNl } : {}),
+      'Coördinaten bronpunt': `${site.lat.toFixed(6)}, ${site.lon.toFixed(6)}`,
+      'Bron / source': site.source,
+      ...(site.sourceUrl ? { Bronlink: site.sourceUrl } : {})
+    }, true)
+    return feature
+  })
+
+  return new VectorLayer({
+    properties: { title: RESEARCH_SITE_LAYER, type: 'overlay' },
+    visible: false,
+    opacity: 1,
+    zIndex: 38,
+    source: new VectorSource({
+      features,
+      attributions: 'Publieke archeologische en erfgoedbronnen — bron per punt vermeld'
+    })
+  })
+}
 
 export function createFranceLidarTerrainLayerOL() {
   return new TileLayer({
@@ -221,5 +313,6 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'Waterlopen BD TOPAGE 2026': createFranceTopageWatercoursesLayerOL,
   'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
   'Oude bossen · Forêts anciennes': createFranceAncientForestsLayerOL,
+  [RESEARCH_SITE_LAYER]: createKnownThediracSitesLayerOL,
   'ArcheOcc · Thédirac-regio': createArcheOccLayerOL
 }
