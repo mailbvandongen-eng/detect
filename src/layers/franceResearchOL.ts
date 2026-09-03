@@ -5,12 +5,7 @@ import VectorSource from 'ol/source/Vector'
 import XYZ from 'ol/source/XYZ'
 import GeoJSON from 'ol/format/GeoJSON'
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style'
-import {
-  createThediracResearchMapLayerOL,
-  createThediracResearchZoneLayerOL,
-  createThediracSlopeLayerOL,
-  fetchThediracArcheOccGeoJson
-} from './thediracAnalysisOL'
+import { fetchThediracArcheOccGeoJson } from './thediracAnalysisOL'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
 const IGN_WMS = 'https://data.geopf.fr/wms-r/wms'
@@ -226,8 +221,5 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'Waterlopen BD TOPAGE 2026': createFranceTopageWatercoursesLayerOL,
   'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
   'Oude bossen · Forêts anciennes': createFranceAncientForestsLayerOL,
-  'ArcheOcc · Thédirac-regio': createArcheOccLayerOL,
-  'Onderzoekszone Thédirac': createThediracResearchZoneLayerOL,
-  'Hellingklassen Thédirac': createThediracSlopeLayerOL,
-  'Onderzoekskaart Thédirac': createThediracResearchMapLayerOL
+  'ArcheOcc · Thédirac-regio': createArcheOccLayerOL
 }

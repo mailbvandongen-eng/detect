@@ -25,18 +25,11 @@ const ARCHAEOLOGY_HISTORY = [
   ['Oude bossen · Forêts anciennes', 0.72]
 ] as const
 
-const ANALYSIS = [
-  ['Onderzoekszone Thédirac', 0.9],
-  ['Hellingklassen Thédirac', 0.5],
-  ['Onderzoekskaart Thédirac', 0.72]
-] as const
-
 export const FRANCE_RESEARCH_LAYERS = [
   ...TERRAIN,
   ...WATER_LANDSCAPE,
   ...SOIL_GEOLOGY,
-  ...ARCHAEOLOGY_HISTORY,
-  ...ANALYSIS
+  ...ARCHAEOLOGY_HISTORY
 ] as const
 
 function ensureLayer(
@@ -113,7 +106,6 @@ export function FranceResearchLayers() {
       <ResearchFolder title="Water & landschap" layers={WATER_LANDSCAPE} />
       <ResearchFolder title="Bodem & geologie" layers={SOIL_GEOLOGY} />
       <ResearchFolder title="Archeologie & historie" layers={ARCHAEOLOGY_HISTORY} />
-      <ResearchFolder title="Analyse" layers={ANALYSIS} />
     </div>
   )
 }

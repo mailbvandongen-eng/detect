@@ -52,46 +52,46 @@ Status: gereed als aanvullende set.
 
 ### Stap 5 — lokale onderzoekszone
 
-Status: gereed in 2.33.17.
+Status: gereed en vereenvoudigd in 2.33.18.
 
-- vaste kernzone Thédirac–Catus–Montgesty–Lavercantière–Peyrilles–Uzech–Gindou;
+- de kernzone blijft Thédirac–Catus–Montgesty–Lavercantière–Peyrilles–Uzech–Gindou;
 - ArcheOcc wordt voor dit onderzoek server-side tot deze gemeenten beperkt zodat niet heel Occitanie wordt geladen;
-- de analysetlagen worden alleen binnen de lokale onderzoeksbbox berekend;
-- een aparte Onderzoekszone Thédirac toont expliciet de werkafbakening zonder die als vindplaats te presenteren.
+- de afbakening wordt intern gebruikt voor gerichte bronselectie en hoeft niet als groot los kaartvlak zichtbaar te zijn;
+- officiële objecten en hun broninformatie blijven leidend; er worden geen kunstmatige lokale vindplaatsen toegevoegd.
 
 ### Stap 6 — verklaarbare analyse Thédirac
 
-Status: gereed in 2.33.17.
+Status: eerste uitwerking afgekeurd na veldtest en verwijderd in 2.33.18.
 
-- Hellingklassen Thédirac worden berekend uit officiële IGN-hoogtegegevens; LiDAR HD is eerste bron, RGE ALTI is alleen fallback waar LiDAR geen geldige hoogte levert;
-- per rastercel worden helling en lokaal hoogteverschil berekend;
-- afstand tot BD TOPAGE-water en nabijheid van bekende ArcheOcc-context worden meegewogen;
-- Onderzoekskaart Thédirac toont alleen hoger scorende cellen en vermeldt in de popup de gebruikte factoren, afstanden, hoogtebron en bronkwaliteit;
-- OCS GE, BRGM-geologie en Forêts anciennes blijven zichtbare controlelagen naast de score, zodat de berekening controleerbaar blijft in plaats van een zwarte doos te worden.
+- de eerste versie met Hellingklassen, Onderzoekskaart en een zichtbaar onderzoekszone-vlak leverde in de praktijk vooral grote gekleurde rastervakken op;
+- de beloofde informatiewaarde was daarmee onvoldoende, ook al bevatte de berekening helling, reliëf, waterafstand en ArcheOcc-context;
+- deze drie kaartlagen zijn daarom volledig uit de interface, fabrieken en Frankrijk-preset gehaald;
+- een analysekaart komt alleen terug als een aangeklikte locatie direct bruikbare, begrijpelijke informatie geeft en de kaart ook zonder popup leesbaar blijft;
+- LiDAR, waterlopen, landbedekking, geologie, oude bossen en echte archeologische bronobjecten blijven voorlopig de betrouwbare analysemiddelen.
 
 ### Stap 7 — interface en popups consequent
 
-Status: gereed in 2.33.17.
+Status: opgeschoond in 2.33.18.
 
-De Frankrijk-sectie gebruikt voortaan de vaste groepen:
+De Frankrijk-sectie gebruikt voorlopig vier groepen:
 
 - Terrein & reliëf;
 - Water & landschap;
 - Bodem & geologie;
-- Archeologie & historie;
-- Analyse.
+- Archeologie & historie.
 
-Lokale vectorlagen gebruiken compacte NL/FR-velden met naam, betekenis, bron en bronkwaliteit. Alle nieuwe lagen lopen mee met dezelfde zichtbaarheid- en transparantieregeling.
+Een aparte groep Analyse keert pas terug wanneer er een aantoonbaar bruikbare analysefunctie is. Lokale vectorlagen gebruiken compacte NL/FR-velden met naam, betekenis, bron en bronkwaliteit. Alle actieve Frankrijk-lagen lopen mee met dezelfde zichtbaarheid- en transparantieregeling.
 
 ### Stap 8 — vaste bouw- en veldset
 
-Status: gereed in 2.33.17.
+Status: gereed en opgeschoond in 2.33.18.
 
 - iedere release wordt pas afgetekend na productiebuild, docs-commit en Pages-deployment;
 - onderaan Presets staat Frankrijk;
-- Frankrijk gebruikt Hybride (wereld) en activeert de praktisch bruikbare veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes, lokale ArcheOcc-context, Onderzoekskaart Thédirac en de onderzoekszone;
-- BSS, IDPR en cavités blijven handmatig beschikbaar maar worden niet automatisch over de veldkaart heen gelegd.
+- Frankrijk gebruikt Hybride (wereld) en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes en lokale ArcheOcc-context;
+- BSS, IDPR, cavités en geologie + reliëf blijven handmatig beschikbaar maar worden niet automatisch over de veldkaart heen gelegd;
+- afgekeurde Thédirac-rasteranalyse wordt ook uit eerder opgeslagen presets gemigreerd.
 
 ## Volgende inhoudelijke richting
 
-Nieuwe lagen worden alleen toegevoegd als ze aantoonbaar beter zijn dan wat er al staat. De eerstvolgende inhoudelijke winst zit daarom niet in meer losse WMS'en, maar in het verbeteren van bronattributen, lokale popups en de verklaarbare analyse met betrouwbare veldwaarnemingen.
+Nieuwe lagen worden alleen toegevoegd als ze aantoonbaar beter zijn dan wat er al staat. De eerstvolgende winst zit in rijkere bronattributen en betrouwbare popups op echte objecten. Een nieuwe lokale analyse wordt pas gebouwd wanneer zij op één aangeklikte plek helder kan uitleggen wat er feitelijk bekend is over reliëf, water, landbedekking, geologie en archeologische context, zonder grote nietszeggende kleurvlakken.

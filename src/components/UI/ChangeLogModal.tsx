@@ -9,19 +9,29 @@ interface ChangeLogModalProps {
 }
 
 const currentRelease = {
-  version: '2.33.17',
+  version: '2.33.18',
   date: '3 september 2026',
-  title: 'Thédirac-analyse en Frankrijk-preset',
+  title: 'Thédirac-analyse opgeschoond',
   changes: [
-    'Thédirac–Catus–Montgesty–Lavercantière–Peyrilles–Uzech–Gindou is nu een vaste lokale onderzoekszone; ArcheOcc laadt voor dit onderzoek alleen nog deze gemeenten in plaats van heel Occitanie.',
-    'Nieuwe analysegroep met Onderzoekszone Thédirac, Hellingklassen Thédirac en Onderzoekskaart Thédirac. De berekening gebruikt officiële IGN-hoogtegegevens, lokaal reliëf, afstand tot BD TOPAGE-water en nabijheid van ArcheOcc-context en vermeldt per vak waarom het opvalt.',
-    'De Frankrijk-groepen zijn consequent ingedeeld als Terrein & reliëf, Water & landschap, Bodem & geologie, Archeologie & historie en Analyse. Lokale vectorpopups tonen Nederlandstalige en Franstalige veldnamen plus bronkwaliteit.',
-    'Onderaan Presets staat nu Frankrijk. Die kiest Hybride wereld en zet de praktisch bruikbare LiDAR-, water-, landbedekkings-, geologie-, oude-bossen-, ArcheOcc- en Thédirac-analysetlagen met leesbare transparantie klaar.',
-    'De onderzoekskaart is nadrukkelijk een verklaarbare onderzoekshulp en geen bewijs van archeologie; OCS GE, BRGM-geologie en Forêts anciennes blijven zichtbare controlelagen naast de berekende score.'
+    'De veldtest van de nieuwe Thédirac-analyse was niet goed genoeg: Hellingklassen, Onderzoekskaart en het losse Onderzoekszone-vlak zijn daarom weer verwijderd in plaats van als gekleurde vakken zonder bruikbare meerwaarde te blijven staan.',
+    'De lokale onderzoeksafbakening blijft intern bestaan om ArcheOcc alleen voor Thédirac, Catus, Montgesty, Lavercantière, Peyrilles, Uzech en Gindou te laden; daarvoor is geen extra kaartvlak nodig.',
+    'De Frankrijk-preset is opgeschoond en bevat nu alleen de bewezen veldlagen: Hybride wereld, LiDAR HD, BD TOPAGE-waterlopen, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes en de lokale ArcheOcc-laag.',
+    'BSS-boringen, IDPR, cavités en geologie + reliëf blijven handmatig beschikbaar, maar worden niet automatisch door de Frankrijk-preset aangezet.',
+    'Een nieuwe analysekaart komt pas terug als de informatie per locatie duidelijk uitlegbaar en in de praktijk bruikbaar is.'
   ]
 }
 
 const recentReleases = [
+  {
+    version: '2.33.17',
+    date: '3 september 2026',
+    title: 'Thédirac-analyse en Frankrijk-preset',
+    changes: [
+      'Thédirac–Catus–Montgesty–Lavercantière–Peyrilles–Uzech–Gindou werd als lokale onderzoekszone ingericht en ArcheOcc werd tot deze gemeenten beperkt.',
+      'Een eerste berekende Thédirac-analyse met helling, reliëf, waterafstand en ArcheOcc-context werd toegevoegd; deze analyse is na veldtest in 2.33.18 weer verwijderd omdat de presentatie onvoldoende bruikbaar bleek.',
+      'Onderaan Presets werd Frankrijk toegevoegd met Hybride wereld en de belangrijkste Franse onderzoekslagen.'
+    ]
+  },
   {
     version: '2.33.16',
     date: '3 september 2026',
