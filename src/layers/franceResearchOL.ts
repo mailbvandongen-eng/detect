@@ -1,4 +1,5 @@
 import TileLayer from 'ol/layer/Tile'
+import LayerGroup from 'ol/layer/Group'
 import VectorLayer from 'ol/layer/Vector'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
@@ -8,7 +9,6 @@ import XYZ from 'ol/source/XYZ'
 import GeoJSON from 'ol/format/GeoJSON'
 import { fromLonLat } from 'ol/proj'
 import { Circle as CircleStyle, Fill, RegularShape, Stroke, Style } from 'ol/style'
-import { fetchThediracArcheOccGeoJson } from './thediracAnalysisOL'
 import { THEDIRAC_RESEARCH_SITES, type ThediracResearchSite } from '../data/thediracResearchSites'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
@@ -16,6 +16,7 @@ const IGN_WMS = 'https://data.geopf.fr/wms-r/wms'
 const BRGM_GEOLOGY_WMS = 'https://geoservices.brgm.fr/geologie'
 const BRGM_RISKS_WMS = 'https://geoservices.brgm.fr/risques'
 const TOPAGE_2026_WMS = 'https://services.sandre.eaufrance.fr/geo/topage2026?'
+const TOPAGE_THEDIRAC_DATA = '/detect/data/topage_thedirac_2026.geojson'
 
 function queryableWmsLayer(title: string, url: string, layerName: string, opacity: number, attribution: string) {
   return new TileLayer({
@@ -49,15 +50,7 @@ function ignWmsLayer(title: string, layerName: string, opacity: number, attribut
   })
 }
 
-const archeOccStyle = new Style({
-  image: new CircleStyle({
-    radius: 6,
-    fill: new Fill({ color: '#dc2626' }),
-    stroke: new Stroke({ color: '#fff', width: 1.5 })
-  })
-})
-
-const RESEARCH_SITE_LAYER = 'Bekende plekken · Thédirac'
+const RESEARCH_SITE_LAYER = 'Archeologische plekken · Thédirac (22)'
 const researchSiteColors: Record<ThediracResearchSite['category'], string> = {
   prehistorie: '#f59e0b',
   ijzertijd: '#16a34a',
@@ -180,21 +173,80 @@ export function createFranceCavitiesLayerOL() {
 }
 
 export function createFranceTopageWatercoursesLayerOL() {
-  return new TileLayer({
-    properties: { title: 'Waterlopen BD TOPAGE 2026', type: 'overlay' },
-    visible: false,
-    opacity: 0.9,
+  const rasterLayer = new TileLayer({
+    visible: true,
     source: new TileWMS({
       url: TOPAGE_2026_WMS,
       params: { LAYERS: 'CoursEau_FXX_Topage2026', TILED: true, FORMAT: 'image/png', TRANSPARENT: true },
+      hidpi: false,
       crossOrigin: 'anonymous',
       attributions: '© IGN / OFB / Sandre — BD TOPAGE® 2026'
     })
   })
+
+  const localSource = new VectorSource({
+    url: TOPAGE_THEDIRAC_DATA,
+    format: new GeoJSON(),
+    attributions: '© IGN / OFB / Sandre — BD TOPAGE® 2026'
+  })
+
+  localSource.on('featuresloadend', () => {
+    for (const feature of localSource.getFeatures()) {
+      const properties = feature.getProperties()
+      const name = firstText(properties.TopoOH)
+      const code = firstText(properties.CdOH)
+      const status = firstText(properties.StatutOH)
+      const sourceName = firstText(properties.SourceNomOH)
+
+      for (const key of Object.keys(properties)) {
+        if (key !== 'geometry') feature.unset(key, true)
+      }
+
+      feature.setProperties({
+        layerType: 'importedLayer',
+        layerName: 'Waterlopen BD TOPAGE 2026',
+        layerColor: '#2563eb',
+        name: name || 'Naam niet beschikbaar',
+        ...(code ? { 'Code waterloop': code } : {}),
+        ...(status ? { 'Status bronobject': status } : {}),
+        'Bron': sourceName ? `Sandre / ${sourceName}` : 'Sandre / IGN / OFB',
+        'Gegevensjaar': '2026'
+      }, true)
+    }
+  })
+
+  const styleCache = new Map<string, Style[]>()
+  const localVectorLayer = new VectorLayer({
+    visible: true,
+    minZoom: 10,
+    zIndex: 2,
+    source: localSource,
+    style: (_feature, resolution) => {
+      const width = resolution <= 5 ? 4.5 : resolution <= 15 ? 4 : resolution <= 40 ? 3.25 : 2.5
+      const cacheKey = String(width)
+      const cached = styleCache.get(cacheKey)
+      if (cached) return cached
+
+      const styles = [
+        new Style({ stroke: new Stroke({ color: 'rgba(255,255,255,0.92)', width: width + 2.25 }) }),
+        new Style({ stroke: new Stroke({ color: '#244ee8', width }) })
+      ]
+      styleCache.set(cacheKey, styles)
+      return styles
+    }
+  })
+
+  return new LayerGroup({
+    properties: { title: 'Waterlopen BD TOPAGE 2026', type: 'overlay' },
+    visible: false,
+    opacity: 0.9,
+    zIndex: 34,
+    layers: [rasterLayer, localVectorLayer]
+  })
 }
 
 export function createFranceOcsCoverageLayerOL() {
-  return ignWmsLayer('OCS GE landbedekking 2021-2023', 'OCSGE.COUVERTURE.2021-2023', 0.62, '© IGN — OCS GE')
+  return queryableWmsLayer('OCS GE landbedekking 2021-2023', IGN_WMS, 'OCSGE.COUVERTURE.2021-2023', 0.62, '© IGN — OCS GE')
 }
 
 export function createFranceAncientForestsLayerOL() {
@@ -209,100 +261,6 @@ function firstText(...values: unknown[]) {
   return ''
 }
 
-function joinText(...values: unknown[]) {
-  const seen = new Set<string>()
-  const out: string[] = []
-  for (const value of values) {
-    const text = firstText(value)
-    if (text && !seen.has(text)) {
-      seen.add(text)
-      out.push(text)
-    }
-  }
-  return out.join(' · ')
-}
-
-export function createArcheOccLayerOL() {
-  const source = new VectorSource({
-    attributions: 'Région Occitanie — ArcheOcc · Licence Ouverte 2.0'
-  })
-
-  void fetchThediracArcheOccGeoJson().then(data => {
-    const features = new GeoJSON().readFeatures(data, {
-      dataProjection: 'EPSG:4326',
-      featureProjection: 'EPSG:3857'
-    })
-
-    for (const feature of features) {
-      const p = feature.getProperties()
-      const name = firstText(
-        p.nom_du_site_du_musee_ou_du_centre_d_interpretation,
-        p.sous_titre,
-        p.lieu_de_decouverte,
-        p.commune,
-        'Archeologische locatie'
-      )
-      const description = firstText(
-        p.decription_longue_historique,
-        p.decription_courte,
-        p.phrase_d_accroche,
-        p.decription_longue_historique0,
-        p.decription_courte0,
-        p.phrase_d_accroche0,
-        p.informations_supplementaires
-      )
-      const period = joinText(p.periodes, p.periodes_objet_1, p.periodes_objet_2, p.periodes_objet_3)
-      const dating = joinText(p.datation, p.datation_objet_1, p.datation_objet_2, p.datation_objet_3)
-      const discovery = joinText(p.lieu_de_decouverte, p.lieu_de_decouverte0, p.lieu_de_decouverte1)
-      const remarkable = firstText(p.elements_remarquables)
-      const keywords = firstText(p.mots_cles)
-      const references = joinText(p.references_patriarche, p.reference_mh, p.references_bibliographiques, p.notice_liee, p.autre_lien)
-      const occupation = firstText(p.type_d_occupation)
-      const municipality = firstText(p.commune)
-      const department = firstText(p.departement)
-      const access = firstText(p.accessible_au_public)
-      const protection = firstText(p.protections_et_labels)
-      const property = firstText(p.statut_de_la_propriete)
-
-      for (const key of Object.keys(p)) {
-        if (key !== 'geometry') feature.unset(key, true)
-      }
-
-      feature.setProperties({
-        layerType: 'importedLayer',
-        layerName: 'ArcheOcc · Thédirac-regio',
-        layerColor: '#dc2626',
-        name,
-        ...(description ? { 'Omschrijving / description': description } : {}),
-        ...(period ? { 'Periode / période': period } : {}),
-        ...(dating ? { 'Datering / datation': dating } : {}),
-        ...(occupation ? { 'Type locatie / type de site': occupation } : {}),
-        ...(discovery ? { 'Vindplaats / lieu de découverte': discovery } : {}),
-        ...(remarkable ? { 'Bijzonderheden / éléments remarquables': remarkable } : {}),
-        ...(keywords ? { 'Trefwoorden / mots-clés': keywords } : {}),
-        ...(municipality ? { 'Gemeente / commune': municipality } : {}),
-        ...(department ? { 'Departement / département': department } : {}),
-        ...(access ? { 'Publiek toegankelijk / accessible': access } : {}),
-        ...(protection ? { 'Bescherming / protection': protection } : {}),
-        ...(property ? { 'Eigendom / propriété': property } : {}),
-        ...(references ? { 'Referenties / références': references } : {}),
-        'Bron / source': 'Région Occitanie — ArcheOcc',
-        'Bronkwaliteit / qualité': 'officiële regionale open dataset; alleen de lokale onderzoeksgemeenten worden geladen',
-        'Licentie / licence': 'Licence Ouverte 2.0'
-      }, true)
-    }
-
-    source.addFeatures(features)
-  }).catch(error => console.error('ArcheOcc Thédirac-regio kon niet worden geladen:', error))
-
-  return new VectorLayer({
-    properties: { title: 'ArcheOcc · Thédirac-regio', type: 'overlay' },
-    visible: false,
-    source,
-    style: archeOccStyle
-  })
-}
-
 export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
   'Bodem/geologie 1:50.000 FR': createFranceGeology50LayerOL,
@@ -313,6 +271,5 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'Waterlopen BD TOPAGE 2026': createFranceTopageWatercoursesLayerOL,
   'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
   'Oude bossen · Forêts anciennes': createFranceAncientForestsLayerOL,
-  [RESEARCH_SITE_LAYER]: createKnownThediracSitesLayerOL,
-  'ArcheOcc · Thédirac-regio': createArcheOccLayerOL
+  [RESEARCH_SITE_LAYER]: createKnownThediracSitesLayerOL
 }

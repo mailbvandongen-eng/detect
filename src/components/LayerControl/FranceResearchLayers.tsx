@@ -21,8 +21,7 @@ const SOIL_GEOLOGY = [
 ] as const
 
 const ARCHAEOLOGY_HISTORY = [
-  ['Bekende plekken · Thédirac', 1],
-  ['ArcheOcc · Thédirac-regio', 1],
+  ['Archeologische plekken · Thédirac (22)', 1],
   ['Oude bossen · Forêts anciennes', 0.72]
 ] as const
 

@@ -9,17 +9,27 @@ interface ChangeLogModalProps {
 }
 
 const currentRelease = {
-  version: '2.33.20',
+  version: '2.33.21',
   date: '3 september 2026',
-  title: 'Bekende archeologische plekken op de kaart',
+  title: 'Water, landbedekking en archeologie hersteld',
   changes: [
-    'De Frankrijk · Thédirac-preset toont nu een aparte kaartlaag met 22 nader onderzochte steentijd-, Keltische, Romeinse en middeleeuwse locaties.',
-    'Beschermd of no-detect betekent voortaan alleen een duidelijke waarschuwing in de popup: het punt blijft zichtbaar voor het archeologische totaalbeeld.',
-    'Exacte bronpunten, lieu-ditcentra en globale gemeenteposities krijgen verschillende symbolen en iedere popup vermeldt de locatieprecisie en bron.'
+    'BD TOPAGE-waterlopen worden rond Thédirac op dorpsniveau duidelijk dikker getekend. De 59 lokale waterobjecten zijn klikbaar; bij 33 daarvan publiceert de bron een naam.',
+    'OCS GE vertaalt de officiële CS- en US-codes voortaan naar gewone Nederlandse bodembedekking en grondgebruik, met peiljaar en oppervlakte in hectare.',
+    'De lege lokale ArcheOcc-laag is verwijderd: de officiële publieksdataset bevat nul objecten in de zeven onderzoeksgemeenten. De 22 echte bronlocaties staan voortaan herkenbaar als Archeologische plekken · Thédirac (22) in de preset.'
   ]
 }
 
 const recentReleases = [
+  {
+    version: '2.33.20',
+    date: '3 september 2026',
+    title: 'Bekende archeologische plekken op de kaart',
+    changes: [
+      'De Frankrijk · Thédirac-preset toont nu een aparte kaartlaag met 22 nader onderzochte steentijd-, Keltische, Romeinse en middeleeuwse locaties.',
+      'Beschermd of no-detect betekent voortaan alleen een duidelijke waarschuwing in de popup: het punt blijft zichtbaar voor het archeologische totaalbeeld.',
+      'Exacte bronpunten, lieu-ditcentra en globale gemeenteposities krijgen verschillende symbolen en iedere popup vermeldt de locatieprecisie en bron.'
+    ]
+  },
   {
     version: '2.33.19',
     date: '3 september 2026',

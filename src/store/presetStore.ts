@@ -19,6 +19,7 @@ export interface Preset {
 }
 
 const THEDIRAC_CENTER: [number, number] = [1.34, 44.595]
+const THEDIRAC_ARCHAEOLOGY_LAYER = 'Archeologische plekken · Thédirac (22)'
 
 const FRANCE_FIELD_LAYERS = [
   'LiDAR HD terrein FR',
@@ -26,8 +27,7 @@ const FRANCE_FIELD_LAYERS = [
   'OCS GE landbedekking 2021-2023',
   'Bodem/geologie 1:50.000 FR',
   'Oude bossen · Forêts anciennes',
-  'Bekende plekken · Thédirac',
-  'ArcheOcc · Thédirac-regio'
+  THEDIRAC_ARCHAEOLOGY_LAYER
 ] as const
 
 const FRANCE_RESEARCH_LAYER_NAMES = new Set([
@@ -40,8 +40,7 @@ const FRANCE_RESEARCH_LAYER_NAMES = new Set([
   'Waterlopen BD TOPAGE 2026',
   'OCS GE landbedekking 2021-2023',
   'Oude bossen · Forêts anciennes',
-  'Bekende plekken · Thédirac',
-  'ArcheOcc · Thédirac-regio'
+  THEDIRAC_ARCHAEOLOGY_LAYER
 ])
 
 const BUILT_IN_PRESETS: Preset[] = [
@@ -165,8 +164,7 @@ const BUILT_IN_PRESETS: Preset[] = [
       'OCS GE landbedekking 2021-2023': 0.24,
       'Bodem/geologie 1:50.000 FR': 0.28,
       'Oude bossen · Forêts anciennes': 0.38,
-      'Bekende plekken · Thédirac': 1,
-      'ArcheOcc · Thédirac-regio': 1
+      [THEDIRAC_ARCHAEOLOGY_LAYER]: 1
     },
     isBuiltIn: false
   }
@@ -204,7 +202,9 @@ const REMOVED_LAYERS = new Set([
   'Musea',
   'Onderzoekszone Thédirac',
   'Hellingklassen Thédirac',
-  'Onderzoekskaart Thédirac'
+  'Onderzoekskaart Thédirac',
+  'ArcheOcc · archeologie Occitanie',
+  'ArcheOcc · Thédirac-regio'
 ])
 
 function migrateLegacyBaseLayer(baseLayer: string | undefined): string | undefined {
@@ -212,12 +212,16 @@ function migrateLegacyBaseLayer(baseLayer: string | undefined): string | undefin
 }
 
 function migrateFranceLayerName(layerName: string): string {
-  return layerName === 'ArcheOcc · archeologie Occitanie' ? 'ArcheOcc · Thédirac-regio' : layerName
+  return layerName === 'Bekende plekken · Thédirac' ? THEDIRAC_ARCHAEOLOGY_LAYER : layerName
 }
 
 function normalizeLayerOpacities(opacities: Record<string, number> | undefined): Record<string, number> | undefined {
   if (!opacities) return undefined
-  return Object.fromEntries(Object.entries(opacities).filter(([layerName]) => !REMOVED_LAYERS.has(layerName)))
+  return Object.fromEntries(
+    Object.entries(opacities)
+      .map(([layerName, opacity]) => [migrateFranceLayerName(layerName), opacity] as const)
+      .filter(([layerName]) => !REMOVED_LAYERS.has(layerName))
+  )
 }
 
 function normalizePreset(preset: Preset): Preset {
@@ -425,7 +429,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 22,
+      version: 23,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {

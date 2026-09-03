@@ -10,6 +10,7 @@ import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHi
 import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondstenStore'
 import { useCustomPointLayerStore, type FeatureGeometry, type GeometryType } from '../../store/customPointLayerStore'
 import { ROMEINSE_FORTEN_INFO, GENERIEK_FORT_INFO, FORT_TYPE_LABELS } from '../../data/romeinseFortenInfo'
+import { describeOcsArtificialisation, describeOcsCoverage, describeOcsUsage, formatOcsArea } from '../../utils/ocsGe'
 import type { MapBrowserEvent } from 'ol'
 
 type PopupFeatureData = {
@@ -1929,6 +1930,25 @@ export function Popup() {
 
           if (data.features && data.features.length > 0) {
             const props = data.features[0].properties
+
+            if (title === 'OCS GE landbedekking 2021-2023') {
+              const coverageCode = String(props.code_cs ?? '').trim()
+              const usageCode = String(props.code_us ?? '').trim()
+              const area = formatOcsArea(props.aire)
+              const artificialisation = describeOcsArtificialisation(props.artif)
+              let html = `<strong class="text-green-800">OCS GE landbedekking</strong>`
+              html += `<br/><span class="text-sm text-green-700"><strong>Bodembedekking:</strong> ${describeOcsCoverage(coverageCode)}</span>`
+              html += `<br/><span class="text-sm text-gray-700"><strong>Gebruik:</strong> ${describeOcsUsage(usageCode)}</span>`
+              if (coverageCode || usageCode) {
+                html += `<br/><span class="text-xs text-gray-500">Broncodes: ${[coverageCode, usageCode].filter(Boolean).join(' · ')}</span>`
+              }
+              if (props.millesime) html += `<br/><span class="text-xs text-gray-500">Peiljaar: ${props.millesime}</span>`
+              if (area) html += `<br/><span class="text-xs text-gray-500">Oppervlakte kaartvlak: ${area}</span>`
+              if (artificialisation) html += `<br/><span class="text-xs text-gray-500">${artificialisation}</span>`
+              html += `<div class="mt-2 text-xs text-gray-500">Bron: IGN OCS GE. De kaart beschrijft huidig bodemgebruik; dit is geen archeologische waardering.</div>`
+              results.push(html)
+              continue
+            }
 
             // AHN 0.5m specific handling - show height in meters NAP
             if (title === 'AHN 0.5m') {

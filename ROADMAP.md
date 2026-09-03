@@ -22,16 +22,16 @@ Doelgebied: Thédirac met de directe onderzoeksomgeving richting Catus, Montgest
 Status: gereed.
 
 - IGN LiDAR HD, BRGM geologie 1:50.000 en geologie + reliëf;
-- BD TOPAGE 2026 voor actuele waterlopen;
-- OCS GE landbedekking; de dubbele/zwakke tweede OCS-laag is verwijderd;
+- BD TOPAGE 2026 voor actuele waterlopen; rond Thédirac liggen klikbare vectorlijnen boven de landelijke WMS, zodat water op dorpsniveau dik genoeg blijft en bronnamen zichtbaar zijn;
+- OCS GE landbedekking; de dubbele/zwakke tweede OCS-laag is verwijderd en de overgebleven CS/US-broncodes worden in de popup naar gewone Nederlandse termen vertaald;
 - alle onderzoekslagen vallen onder de Frankrijk-hoofdschakelaar en dezelfde zichtbaarheid/transparantie-routine.
 
 ### Stap 2 — officiële archeologie
 
 Status: gereed voor de huidige onderzoeksset; verdere bronverrijking blijft mogelijk.
 
-- ArcheOcc toont naam, periode, datering, vindplaats, omschrijving, gemeente, bescherming en bron waar beschikbaar;
-- Bekende plekken · Thédirac toont de nader onderzochte steentijd-, Romeinse en middeleeuwse locaties ook wanneer ze beschermd of no-detect zijn; dat is kaartcontext, geen zoekadvies;
+- Archeologische plekken · Thédirac (22) toont de nader onderzochte steentijd-, Keltische, Romeinse en middeleeuwse locaties ook wanneer ze beschermd of no-detect zijn; dat is kaartcontext, geen zoekadvies;
+- de eerder gebruikte ArcheOcc-publieksdataset bevat 35 musea of publiekslocaties in heel Occitanie, maar nul objecten in de zeven onderzoeksgemeenten; de misleidende lege lokale laag is daarom in 2.33.21 verwijderd;
 - exacte openbare bronpunten blijven exact, terwijl lieu-ditcentra en onbekende historische vindplekken zichtbaar als benadering zijn gemarkeerd;
 - bestaande INRAP-sites en Franse historische/erfgoedlagen blijven beschikbaar als aanvullende context;
 - de oude vier zwak onderbouwde handmatige punten zijn vervangen door afzonderlijk beschreven bronobjecten met locatiekwaliteit en bronlink.
@@ -57,8 +57,7 @@ Status: gereed als aanvullende set.
 Status: gereed en vereenvoudigd in 2.33.18.
 
 - de kernzone blijft Thédirac–Catus–Montgesty–Lavercantière–Peyrilles–Uzech–Gindou;
-- ArcheOcc wordt voor dit onderzoek server-side tot deze gemeenten beperkt zodat niet heel Occitanie wordt geladen;
-- de afbakening wordt intern gebruikt voor gerichte bronselectie en hoeft niet als groot los kaartvlak zichtbaar te zijn;
+- de afbakening wordt intern gebruikt voor de lokale TOPAGE-lijnen en gerichte bronselectie en hoeft niet als groot los kaartvlak zichtbaar te zijn;
 - officiële objecten en hun broninformatie blijven leidend; er worden geen kunstmatige lokale vindplaatsen toegevoegd.
 
 ### Stap 6 — verklaarbare analyse Thédirac
@@ -90,7 +89,7 @@ Status: gereed en opgeschoond in 2.33.18.
 
 - iedere release wordt pas afgetekend na productiebuild, docs-commit en Pages-deployment;
 - onderaan Presets staat Frankrijk · Thédirac, ook wanneer een oudere lokale of cloudlijst de preset nog niet kende;
-- Frankrijk · Thédirac gebruikt Hybride (wereld), opent de onderzoeksregio en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes en lokale ArcheOcc-context;
+- Frankrijk · Thédirac gebruikt Hybride (wereld), opent de onderzoeksregio en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes en de 22 beschreven archeologische bronlocaties;
 - BSS, IDPR, cavités en geologie + reliëf blijven handmatig beschikbaar maar worden niet automatisch over de veldkaart heen gelegd;
 - afgekeurde Thédirac-rasteranalyse wordt ook uit eerder opgeslagen presets gemigreerd.
 
