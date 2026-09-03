@@ -1,24 +1,45 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useLayerStore } from './layerStore'
+import { useMapStore } from './mapStore'
 
 export interface Preset {
   id: string
   name: string
-  icon: string  // lucide icon name
+  icon: string
   layers: string[]
-  baseLayer?: string  // Optional base layer to activate (e.g., 'Luchtfoto')
-  layerOpacities?: Record<string, number>  // Optional per-layer opacity overrides
+  baseLayer?: string
+  layerOpacities?: Record<string, number>
   isBuiltIn: boolean
 }
 
-// Built-in presets - only Detectie is protected (isBuiltIn: true)
-// Logisch ontworpen presets per periode/gebruik:
-// - Steentijd: luchtfoto + reliëf om zandverstuivingen te zien
-// - Romeins/Vroege ME: percelen zijn belangrijk voor nederzettingspatronen
-// - Late ME/Nieuw: kadaster en historische structuren
-// - WOII: militaire objecten en linies
-// - Analyse: bodem en terrein voor onderzoek
+const FRANCE_FIELD_LAYERS = [
+  'LiDAR HD terrein FR',
+  'Waterlopen BD TOPAGE 2026',
+  'OCS GE landbedekking 2021-2023',
+  'Bodem/geologie 1:50.000 FR',
+  'Oude bossen · Forêts anciennes',
+  'ArcheOcc · Thédirac-regio',
+  'Onderzoekskaart Thédirac',
+  'Onderzoekszone Thédirac'
+] as const
+
+const FRANCE_RESEARCH_LAYER_NAMES = new Set([
+  'LiDAR HD terrein FR',
+  'Bodem/geologie 1:50.000 FR',
+  'Geologie + reliëf FR',
+  'BRGM boringen · BSS',
+  'BRGM IDPR · infiltratie/afstroming',
+  'BRGM cavités · ondergrondse holtes',
+  'Waterlopen BD TOPAGE 2026',
+  'OCS GE landbedekking 2021-2023',
+  'Oude bossen · Forêts anciennes',
+  'ArcheOcc · Thédirac-regio',
+  'Onderzoekszone Thédirac',
+  'Hellingklassen Thédirac',
+  'Onderzoekskaart Thédirac'
+])
+
 const BUILT_IN_PRESETS: Preset[] = [
   {
     id: 'detectie',
@@ -123,6 +144,24 @@ const BUILT_IN_PRESETS: Preset[] = [
       'AHN4 Multi-Hillshade NL', 'AHN4 Hoogtekaart Kleur'
     ],
     isBuiltIn: false
+  },
+  {
+    id: 'frankrijk',
+    name: 'Frankrijk',
+    icon: 'Compass',
+    layers: [...FRANCE_FIELD_LAYERS],
+    baseLayer: 'Hybride (wereld)',
+    layerOpacities: {
+      'LiDAR HD terrein FR': 0.48,
+      'Waterlopen BD TOPAGE 2026': 0.92,
+      'OCS GE landbedekking 2021-2023': 0.24,
+      'Bodem/geologie 1:50.000 FR': 0.28,
+      'Oude bossen · Forêts anciennes': 0.38,
+      'ArcheOcc · Thédirac-regio': 1,
+      'Onderzoekskaart Thédirac': 0.72,
+      'Onderzoekszone Thédirac': 0.70
+    },
+    isBuiltIn: false
   }
 ]
 
@@ -149,16 +188,20 @@ const BASE_LAYER_NAMES = [
 ]
 
 const BUILT_IN_PRESET_MAP = new Map(BUILT_IN_PRESETS.map((preset) => [preset.id, preset]))
-const NEW_RESEARCH_PRESET_IDS = new Set(['lidar-hoogte', 'bodem-landschap', 'percelen-historie'])
+const NEW_RESEARCH_PRESET_IDS = new Set(['lidar-hoogte', 'bodem-landschap', 'percelen-historie', 'frankrijk'])
 const REMOVED_LAYERS = new Set([
   'Kringloopwinkels',
   'Ruiterpaden',
   'Laarzenpaden',
-  'Musea',
+  'Musea'
 ])
 
 function migrateLegacyBaseLayer(baseLayer: string | undefined): string | undefined {
   return baseLayer === 'CartoDB (licht)' ? 'Esri (licht)' : baseLayer
+}
+
+function migrateFranceLayerName(layerName: string): string {
+  return layerName === 'ArcheOcc · archeologie Occitanie' ? 'ArcheOcc · Thédirac-regio' : layerName
 }
 
 function normalizePreset(preset: Preset): Preset {
@@ -167,7 +210,9 @@ function normalizePreset(preset: Preset): Preset {
   if (!builtInPreset) {
     return {
       ...preset,
-      layers: preset.layers.filter((layer) => !REMOVED_LAYERS.has(layer)),
+      layers: preset.layers
+        .map(migrateFranceLayerName)
+        .filter((layer) => !REMOVED_LAYERS.has(layer)),
       baseLayer: migrateLegacyBaseLayer(preset.baseLayer)
     }
   }
@@ -175,7 +220,9 @@ function normalizePreset(preset: Preset): Preset {
   return {
     ...builtInPreset,
     ...preset,
-    layers: (preset.layers ?? builtInPreset.layers).filter((layer) => !REMOVED_LAYERS.has(layer)),
+    layers: (preset.layers ?? builtInPreset.layers)
+      .map(migrateFranceLayerName)
+      .filter((layer) => !REMOVED_LAYERS.has(layer)),
     baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
     layerOpacities: preset.layerOpacities ?? builtInPreset.layerOpacities
   }
@@ -199,6 +246,41 @@ function isOverlayLayer(layerName: string): boolean {
   return !BASE_LAYER_NAMES.includes(layerName)
 }
 
+function activateFranceResearchLayer(layerName: string) {
+  if (!FRANCE_RESEARCH_LAYER_NAMES.has(layerName)) return false
+
+  const layerStore = useLayerStore.getState()
+  const registeredLayer = layerStore.layers[layerName]
+  if (registeredLayer) {
+    layerStore.setLayerVisibility(layerName, true)
+    return true
+  }
+
+  const map = useMapStore.getState().map
+  if (!map) return true
+
+  void import('../layers/franceResearchOL').then(({ FRANCE_RESEARCH_FACTORIES }) => {
+    const latestStore = useLayerStore.getState()
+    if (latestStore.layers[layerName]) {
+      latestStore.setLayerVisibility(layerName, true)
+      return
+    }
+
+    const factory = FRANCE_RESEARCH_FACTORIES[layerName]
+    if (!factory) {
+      console.warn(`France-laag niet gevonden: ${layerName}`)
+      return
+    }
+
+    const layer = factory()
+    map.addLayer(layer)
+    latestStore.registerLayer(layerName, layer)
+    latestStore.setLayerVisibility(layerName, true)
+  }).catch(error => console.error(`France-laag kon niet worden geladen: ${layerName}`, error))
+
+  return true
+}
+
 export const usePresetStore = create<PresetState>()(
   persist(
     (set, get) => ({
@@ -216,19 +298,21 @@ export const usePresetStore = create<PresetState>()(
           ? preset.baseLayer!
           : currentBaseLayer || 'Esri (licht)'
 
-        // Schakel alle huidige overlays uit op basis van de echte laagwinkel.
-        // Nieuwe lagen hoeven daardoor niet meer in een tweede handmatige lijst te worden gezet.
         Object.keys(layerStore.visible)
           .filter(isOverlayLayer)
           .forEach(layerName => layerStore.setLayerVisibility(layerName, false))
-
-        preset.layers.forEach(layer => layerStore.setLayerVisibility(layer, true))
 
         if (preset.layerOpacities) {
           Object.entries(preset.layerOpacities).forEach(([layerName, opacity]) => {
             layerStore.setLayerOpacity(layerName, opacity)
           })
         }
+
+        preset.layers.forEach(layerName => {
+          if (!activateFranceResearchLayer(layerName)) {
+            layerStore.setLayerVisibility(layerName, true)
+          }
+        })
 
         BASE_LAYER_NAMES.forEach((layerName) => {
           layerStore.setLayerVisibility(layerName, layerName === nextBaseLayer)
@@ -303,7 +387,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 18,
+      version: 19,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {
@@ -314,15 +398,6 @@ export const usePresetStore = create<PresetState>()(
 
         const state = persistedState as Partial<PresetState>
 
-        // v13: Changed AMK opacity from 60% to 50% in Detectie preset
-        // v12: Updated Detectie preset with specific opacities and added Kadastrale Grenzen
-        // v11: Added Geomorfologie and AHN4 Hoogtekaart Kleur to Detectie preset with low opacity
-        // v10: Removed non-existent 'Archeo Landschappen' from Terrein Analyse preset
-        // v14: Preserve base layers on presets and repair legacy built-in preset metadata
-        // v15: Strip removed live Overpass recreation layers from persisted presets
-        // v16: Strip remaining live Overpass recreation layers from persisted presets
-        // v17: Replace the retired CARTO light basemap in saved presets
-        // v18: Add three practical research presets without changing existing presets
         if (version < 13) {
           return {
             presets: [...BUILT_IN_PRESETS],
@@ -333,12 +408,12 @@ export const usePresetStore = create<PresetState>()(
         return {
           ...state,
           presets: Array.isArray(state.presets)
-            ? version < 18
+            ? version < 19
               ? addMissingResearchPresets(state.presets)
               : normalizePresetCollection(state.presets)
             : [...BUILT_IN_PRESETS],
           customDefaults: Array.isArray(state.customDefaults)
-            ? version < 18
+            ? version < 19
               ? addMissingResearchPresets(state.customDefaults)
               : normalizePresetCollection(state.customDefaults)
             : null

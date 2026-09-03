@@ -2,103 +2,96 @@
 
 ## Uitgangspunt
 
-Detect is uitsluitend Bobs persoonlijke onderzoeksapp. Geen verkoop, abonnementen, premiumlagen of publieke productambitie. De app ondersteunt metaaldetectie, steentijdonderzoek, archeologie, geomorfologie, bodem en bodemgebruik, hoogtekaarten, LiDAR en historische percelen.
+Detect is uitsluitend Bobs persoonlijke onderzoeksapp. Geen verkoop, abonnementen, premiumlagen of publieke productambitie. De app ondersteunt metaaldetectie, steentijdonderzoek, archeologie, geomorfologie, bodem en bodemgebruik, hoogtekaarten, LiDAR en historische landschapsanalyse.
 
-Bij iedere wijziging gelden vaste regels:
-
-1. bestaande goed werkende functies blijven intact;
-2. de wijziging wordt in gewone taal in het wijzigingsoverzicht gezet;
-3. bouwen en publiceren verlopen automatisch via GitHub;
-4. nieuwe externe lagen worden vóór inbouw gecontroleerd op officiële bron, actuele service, bruikbare data en licentie;
-5. iedere stap wordt afzonderlijk gebouwd, gepusht en gecontroleerd: broncommit → productiebuild → gegenereerde docs-commit → GitHub Pages-deployment → functionele controle;
-6. pas na een geslaagde stap wordt aan de volgende stap begonnen.
+Vaste projectregel: eerst bron en endpoint controleren, alleen lagen toevoegen die werkelijk onderzoekswaarde hebben, popups toevoegen waar gegevens beschikbaar zijn, daarna broncommit → productiebuild → gegenereerde docs-commit → GitHub Pages → eindcontrole. Geen laag toevoegen alleen omdat hij op papier interessant klinkt.
 
 ## Prioriteit 1 — veldgebruik betrouwbaar maken
 
-1. Gereed in 2.33.6 — hybride wereldkaart met duidelijke straat-, water-, plaats- en gebiedsnamen, plus luchtfoto-tijdreis: officiële PDOK-jaargangen vanaf 2016 in Nederland en Esri World Imagery Wayback vanaf 2014 wereldwijd.
-2. Gereed in 2.33.8 — Android-terug sluit Detect niet meer direct: een open venster sluit eerst en vanaf de kaart volgt een expliciete sluitvraag. Dezelfde bescherming geldt in de browser, met de browser-eigen waarschuwing bij sluiten, verversen of verlaten waar het platform dat toestaat.
-3. Gereed in 2.33.9 — GPS-weergave vereenvoudigd: één tik toont een locatiepunt en zoomt naar straatniveau; de tweede stand toont de richtingpijl en meedraaiende kaart; bij stilstand worden koers, rotatie en kaartvolging bevroren.
-4. Gereed in 2.33.9 — opnieuw starten van GPS wacht op de eerste nieuwe actieve GPS-fix en zoomt daarna iedere sessie opnieuw betrouwbaar naar straatniveau.
+1. Gereed in 2.33.6 — hybride wereldkaart met straat-, water-, plaats- en gebiedsnamen en luchtfoto-tijdreis.
+2. Gereed in 2.33.8 — Android-terug sluit Detect niet meer direct.
+3. Gereed in 2.33.9 — GPS-punt, richtingstand en rust bij stilstand.
+4. Gereed in 2.33.9 — GPS zoomt na opnieuw inschakelen weer op de eerste verse fix.
 
 ## Prioriteit 2 — Thédirac en omgeving
 
-Doelgebied: Thédirac met de directe onderzoeksomgeving richting Catus, Montgesty, Lavercantière, Peyrilles, Uzech en Gindou. Geen verzameling experimentele WMS-lagen: alleen bronnen die aantoonbaar werken en onderzoekswaarde hebben.
+Doelgebied: Thédirac met de directe onderzoeksomgeving richting Catus, Montgesty, Lavercantière, Peyrilles, Uzech en Gindou. Exacte publieke broncoördinaten blijven exact; broncentroïden of globale posities worden als benadering gemarkeerd. Berekende analyse is altijd onderzoekshulp en nooit bewijs van archeologie.
 
 ### Stap 1 — terrein, water en landgebruik
 
-- bestaande IGN LiDAR HD, BRGM geologie 1:50.000 en geologie + reliëf behouden en functioneel controleren;
-- BD TOPAGE 2026 toevoegen voor actuele metrische waterlopen; waar praktisch ook relevante waterobjecten;
-- OCS GE Lot 2022 toevoegen voor metrische bodem-/landbedekking en landgebruik;
-- nieuwe lagen vallen onder de hoofdschakelaar Frankrijk en dezelfde zichtbaarheid/transparantie-routine;
-- objectdata krijgen een popup wanneer de bron attributen levert.
+Status: gereed.
+
+- IGN LiDAR HD, BRGM geologie 1:50.000 en geologie + reliëf;
+- BD TOPAGE 2026 voor actuele waterlopen;
+- OCS GE landbedekking; de dubbele/zwakke tweede OCS-laag is verwijderd;
+- alle onderzoekslagen vallen onder de Frankrijk-hoofdschakelaar en dezelfde zichtbaarheid/transparantie-routine.
 
 ### Stap 2 — officiële archeologie
 
-- ArcheOcc omzetten van kale punten naar bruikbare objecten met naam, periode, datering, beschrijving en bron;
-- INRAP-opgravingen toevoegen waar de officiële dataset voldoende locatie- en objectinformatie levert;
-- Mérimée/POP toevoegen voor officiële beschermde archeologische en historische objecten;
-- exacte publieke broncoördinaten exact bewaren; broncentroïden of globale posities expliciet als zodanig markeren.
+Status: gereed voor de huidige onderzoeksset; verdere bronverrijking blijft mogelijk.
+
+- ArcheOcc toont naam, periode, datering, vindplaats, omschrijving, gemeente, bescherming en bron waar beschikbaar;
+- bestaande INRAP-sites en Franse historische/erfgoedlagen blijven beschikbaar als aanvullende context;
+- de oude vier handmatige Thédirac-punten zijn verwijderd.
 
 ### Stap 3 — historisch landschap
 
-- officiële IGN-laag Forêts anciennes toevoegen;
-- daarna alleen geverifieerde officiële bronnen voor État-major, Cassini en historische luchtfoto's toevoegen;
-- historische verandering bruikbaar maken voor vergelijking met huidig landgebruik en reliëf.
+Status: gereed.
+
+- officiële IGN-laag Forêts anciennes toegevoegd;
+- oude, recente en verdwenen bossen zijn direct vergelijkbaar met huidig landschap en reliëf;
+- État-major, Cassini en historische luchtfoto's worden alleen later toegevoegd als een officiële stabiele kaartservice afzonderlijk is bevestigd.
 
 ### Stap 4 — bodem, karst en ondergrond
 
-- BRGM-objectlagen alleen toevoegen als objectinformatie bruikbaar kan worden uitgelezen;
-- BSS-boringen, karst/cavités en hydrogeologie gericht toevoegen wanneer locatie en attributen betrouwbaar beschikbaar zijn;
-- geen laag behouden die uitsluitend kaartbeeld geeft terwijl de verwachte objectinformatie ontbreekt, tenzij het kaartbeeld zelf aantoonbare onderzoekswaarde heeft.
+Status: gereed als aanvullende set.
+
+- BRGM BSS-boringen, IDPR en gelokaliseerde cavités toegevoegd via officiële BRGM-services;
+- deze lagen blijven aanvullende onderzoeksinformatie en staan niet standaard in de Frankrijk-preset;
+- geologie blijft visueel bruikbaar; objectinformatie wordt getoond waar de service die levert.
 
 ### Stap 5 — lokale onderzoekszone
 
-- lokale bronnen filteren op de kernzone rond Thédirac zodat telefoon en pc geen onnodige regionale datasets laden;
-- zwakke handmatige referentiepunten vervangen door officiële objecten waar beschikbaar;
-- bron, bronkwaliteit, datering en locatiekwaliteit zichtbaar houden.
+Status: gereed in 2.33.17.
+
+- vaste kernzone Thédirac–Catus–Montgesty–Lavercantière–Peyrilles–Uzech–Gindou;
+- ArcheOcc wordt voor dit onderzoek server-side tot deze gemeenten beperkt zodat niet heel Occitanie wordt geladen;
+- de analysetlagen worden alleen binnen de lokale onderzoeksbbox berekend;
+- een aparte Onderzoekszone Thédirac toont expliciet de werkafbakening zonder die als vindplaats te presenteren.
 
 ### Stap 6 — verklaarbare analyse Thédirac
 
-- hellingklassen en vlakke/zwak hellende zones uit hoogtegegevens;
-- relatie tot waterlopen en terras-/rugposities;
-- combinatie met landgebruik, geologie en bekende archeologische context;
-- uiteindelijke Onderzoekskaart Thédirac toont waarom een zone opvalt en presenteert dit nooit als bewijs van archeologie.
+Status: gereed in 2.33.17.
 
-### Vaste bouwvolgorde
+- Hellingklassen Thédirac worden berekend uit officiële IGN-hoogtegegevens; LiDAR HD is eerste bron, RGE ALTI is alleen fallback waar LiDAR geen geldige hoogte levert;
+- per rastercel worden helling en lokaal hoogteverschil berekend;
+- afstand tot BD TOPAGE-water en nabijheid van bekende ArcheOcc-context worden meegewogen;
+- Onderzoekskaart Thédirac toont alleen hoger scorende cellen en vermeldt in de popup de gebruikte factoren, afstanden, hoogtebron en bronkwaliteit;
+- OCS GE, BRGM-geologie en Forêts anciennes blijven zichtbare controlelagen naast de score, zodat de berekening controleerbaar blijft in plaats van een zwarte doos te worden.
 
-Elke stap afzonderlijk uitvoeren. Na iedere stap: pushen, productiebuild controleren, gegenereerde docs-commit controleren, Pages-publicatie controleren en de nieuwe laag/functionele koppeling testen. Geen volgende stap voordat de vorige aantoonbaar groen en bruikbaar is.
+### Stap 7 — interface en popups consequent
 
-## Prioriteit 3 — onderzoeksgebieden
+Status: gereed in 2.33.17.
 
-Een onderzoeksgebied bewaart bij elkaar:
+De Frankrijk-sectie gebruikt voortaan de vaste groepen:
 
-- locatie, kaartuitsnede en zoomniveau;
-- gekozen preset en actieve lagen;
-- toestemming en contactinformatie;
-- notities, bezoekdatum en eigen punten of vondsten.
+- Terrein & reliëf;
+- Water & landschap;
+- Bodem & geologie;
+- Archeologie & historie;
+- Analyse.
 
-Dit is de logischste grotere uitbreiding: voorbereiding, veldwerk en terugkijken worden één werkwijze, op telefoon en pc via dezelfde cloudgegevens.
+Lokale vectorlagen gebruiken compacte NL/FR-velden met naam, betekenis, bron en bronkwaliteit. Alle nieuwe lagen lopen mee met dezelfde zichtbaarheid- en transparantieregeling.
 
-## Prioriteit 4 — gebiedsprofiel
+### Stap 8 — vaste bouw- en veldset
 
-Van één punt of getekend vlak automatisch een leesbaar profiel maken met beschikbare hoogte, geomorfologie, bodem, bodemgebruik en nabije archeologische signalen. Bronnen en ontbrekende gegevens worden altijd zichtbaar vermeld.
+Status: gereed in 2.33.17.
 
-## Prioriteit 5 — lagen vergelijken
+- iedere release wordt pas afgetekend na productiebuild, docs-commit en Pages-deployment;
+- onderaan Presets staat Frankrijk;
+- Frankrijk gebruikt Hybride (wereld) en activeert de praktisch bruikbare veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes, lokale ArcheOcc-context, Onderzoekskaart Thédirac en de onderzoekszone;
+- BSS, IDPR en cavités blijven handmatig beschikbaar maar worden niet automatisch over de veldkaart heen gelegd.
 
-- twee lagen met een veeglijn of snelle wissel vergelijken;
-- dekking, volgorde en transparantie per onderzoek bewaren;
-- nuttige kaartbeelden als bladwijzer of momentopname opslaan.
+## Volgende inhoudelijke richting
 
-## Prioriteit 6 — sterker veldgebruik
-
-- geselecteerde kaart en onderzoeksgegevens vooraf beschikbaar maken waar bronvoorwaarden dat toestaan;
-- wijzigingen veilig lokaal bewaren bij slecht bereik;
-- later automatisch synchroniseren zonder dubbele gegevens.
-
-## Prioriteit 7 — gerichte Europese uitbreiding
-
-Niet heel Europa blind vullen. Per concreet onderzoeksgebied de beste officiële lagen toevoegen, met zichtbare bronstatus, dekking en actualiteit.
-
-## Prioriteit 8 — verklaarbare analyse
-
-Ondersteun combinaties zoals beekdal + verhoging + geschikte bodem + bekende archeologische context. Toon altijd waarom een gebied opvalt; geen zwarte doos die schijnzekerheid verkoopt.
+Nieuwe lagen worden alleen toegevoegd als ze aantoonbaar beter zijn dan wat er al staat. De eerstvolgende inhoudelijke winst zit daarom niet in meer losse WMS'en, maar in het verbeteren van bronattributen, lokale popups en de verklaarbare analyse met betrouwbare veldwaarnemingen.
