@@ -87,8 +87,8 @@ Een aparte groep Analyse keert pas terug wanneer er een aantoonbaar bruikbare an
 Status: gereed en opgeschoond in 2.33.18.
 
 - iedere release wordt pas afgetekend na productiebuild, docs-commit en Pages-deployment;
-- onderaan Presets staat Frankrijk;
-- Frankrijk gebruikt Hybride (wereld) en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes en lokale ArcheOcc-context;
+- onderaan Presets staat Frankrijk · Thédirac, ook wanneer een oudere lokale of cloudlijst de preset nog niet kende;
+- Frankrijk · Thédirac gebruikt Hybride (wereld), opent de onderzoeksregio en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes en lokale ArcheOcc-context;
 - BSS, IDPR, cavités en geologie + reliëf blijven handmatig beschikbaar maar worden niet automatisch over de veldkaart heen gelegd;
 - afgekeurde Thédirac-rasteranalyse wordt ook uit eerder opgeslagen presets gemigreerd.
 

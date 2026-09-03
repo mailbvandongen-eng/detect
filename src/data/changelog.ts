@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.19',
+    date: '3 september 2026',
+    title: 'Frankrijk · Thédirac-preset hersteld',
+    changes: [
+      'Frankrijk · Thédirac staat voortaan altijd onderaan Presets, ook wanneer een oudere lokale of cloudlijst deze preset nog niet bevatte.',
+      'De preset kiest Hybride wereld, activeert de zes bewezen Franse veldlagen en verplaatst de kaart naar de onderzoeksregio Thédirac.',
+      'Een verouderde cloudlijst wordt na het laden automatisch met de ontbrekende preset gerepareerd.'
+    ]
+  },
+  {
     version: '2.33.10',
     date: '2 september 2026',
     title: 'Vensters en transparantie opgeschoond',

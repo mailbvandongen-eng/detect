@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { fromLonLat } from 'ol/proj'
 import { useLayerStore } from './layerStore'
 import { useMapStore } from './mapStore'
 
@@ -10,8 +11,14 @@ export interface Preset {
   layers: string[]
   baseLayer?: string
   layerOpacities?: Record<string, number>
+  mapView?: {
+    center: [number, number]
+    zoom: number
+  }
   isBuiltIn: boolean
 }
+
+const THEDIRAC_CENTER: [number, number] = [1.34, 44.595]
 
 const FRANCE_FIELD_LAYERS = [
   'LiDAR HD terrein FR',
@@ -142,10 +149,14 @@ const BUILT_IN_PRESETS: Preset[] = [
   },
   {
     id: 'frankrijk',
-    name: 'Frankrijk',
+    name: 'Frankrijk · Thédirac',
     icon: 'Compass',
     layers: [...FRANCE_FIELD_LAYERS],
     baseLayer: 'Hybride (wereld)',
+    mapView: {
+      center: THEDIRAC_CENTER,
+      zoom: 11
+    },
     layerOpacities: {
       'LiDAR HD terrein FR': 0.48,
       'Waterlopen BD TOPAGE 2026': 0.92,
@@ -182,6 +193,7 @@ const BASE_LAYER_NAMES = [
 
 const BUILT_IN_PRESET_MAP = new Map(BUILT_IN_PRESETS.map((preset) => [preset.id, preset]))
 const NEW_RESEARCH_PRESET_IDS = new Set(['lidar-hoogte', 'bodem-landschap', 'percelen-historie', 'frankrijk'])
+const REQUIRED_PRESET_IDS = new Set(['frankrijk'])
 const REMOVED_LAYERS = new Set([
   'Kringloopwinkels',
   'Ruiterpaden',
@@ -222,16 +234,24 @@ function normalizePreset(preset: Preset): Preset {
   return {
     ...builtInPreset,
     ...preset,
+    name: REQUIRED_PRESET_IDS.has(preset.id) ? builtInPreset.name : preset.name,
     layers: (preset.layers ?? builtInPreset.layers)
       .map(migrateFranceLayerName)
       .filter((layer) => !REMOVED_LAYERS.has(layer)),
     baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
-    layerOpacities: normalizeLayerOpacities(preset.layerOpacities ?? builtInPreset.layerOpacities)
+    layerOpacities: normalizeLayerOpacities(preset.layerOpacities ?? builtInPreset.layerOpacities),
+    mapView: preset.mapView ?? builtInPreset.mapView
   }
 }
 
 export function normalizePresetCollection(presets: Preset[]): Preset[] {
-  return presets.map(normalizePreset)
+  const normalized = presets.map(normalizePreset)
+  const existingIds = new Set(normalized.map((preset) => preset.id))
+  const requiredPresets = BUILT_IN_PRESETS.filter(
+    (preset) => REQUIRED_PRESET_IDS.has(preset.id) && !existingIds.has(preset.id)
+  )
+
+  return [...normalized, ...requiredPresets]
 }
 
 function addMissingResearchPresets(presets: Preset[]): Preset[] {
@@ -324,6 +344,16 @@ export const usePresetStore = create<PresetState>()(
           nextBaseLayer === 'Esri (licht)' || preset.layers.includes('Labels Overlay')
         )
 
+        if (preset.mapView) {
+          const map = useMapStore.getState().map
+          map?.getView().animate({
+            center: fromLonLat(preset.mapView.center),
+            zoom: preset.mapView.zoom,
+            rotation: 0,
+            duration: 500
+          })
+        }
+
         console.log(`🎨 Preset toegepast: ${preset.name} (${nextBaseLayer})`)
       },
 
@@ -374,7 +404,7 @@ export const usePresetStore = create<PresetState>()(
       resetToDefaults: () => {
         const { customDefaults } = get()
         if (customDefaults) {
-          set({ presets: [...customDefaults] })
+          set({ presets: normalizePresetCollection(customDefaults) })
           console.log('🔄 Presets hersteld naar eigen standaard')
         } else {
           set({ presets: [...BUILT_IN_PRESETS] })
@@ -389,7 +419,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 20,
+      version: 21,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {

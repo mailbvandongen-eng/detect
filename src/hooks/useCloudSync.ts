@@ -295,6 +295,11 @@ export function useCloudSync() {
 
         if (applyPresetCloudState(data.presetSettings)) {
           console.log('☁️ Presets geladen uit cloud')
+          const repairedPresetSettings = getPresetCloudState()
+          if (JSON.stringify(data.presetSettings) !== JSON.stringify(repairedPresetSettings)) {
+            missingCloudData.presetSettings = repairedPresetSettings
+            missingCloudData.presetsUpdatedAt = serverTimestamp()
+          }
         } else {
           missingCloudData.presetSettings = getPresetCloudState()
           missingCloudData.presetsUpdatedAt = serverTimestamp()

@@ -101,6 +101,8 @@ export function PresetButtons() {
   }
 
   const handleApplyPreset = (id: string) => {
+    const selectedPreset = presets.find((preset) => preset.id === id)
+    if (selectedPreset?.mapView) stopTracking()
     applyPreset(id)
     closeAllPanels()
   }
