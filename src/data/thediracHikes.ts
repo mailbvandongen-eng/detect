@@ -1,0 +1,252 @@
+export type ThediracHikeDifficulty = 'makkelijk' | 'gemiddeld' | 'zwaar'
+
+export type ThediracHike = {
+  id: string
+  name: string
+  distance: string
+  ascent: string
+  duration: string
+  difficulty: ThediracHikeDifficulty
+  officialDifficulty: string
+  routeType: string
+  highlights: string
+  natureWildlife: string
+  climbing: string
+  kneeTerrain: string
+  conditions: string
+  officialPage: string
+  officialGpx: string
+  source: string
+  startLat: number
+  startLon: number
+}
+
+// Alleen lijnen uit GPX-bestanden die door de officiële toerisme- of
+// departementale routepagina zelf worden aangeboden. D+ zonder officiële
+// opgave is afgerond uit het hoogteprofiel van die GPX en staat zo benoemd.
+export const THEDIRAC_HIKES: ThediracHike[] = [
+  {
+    id: 'autoire-reculee',
+    name: 'Circuit de la reculée d’Autoire',
+    distance: '5,7 km',
+    ascent: 'circa 275 m D+ · berekend uit officiële GPX',
+    duration: '2 uur 30',
+    difficulty: 'gemiddeld',
+    officialDifficulty: 'Moyen',
+    routeType: 'Lus · officiële toeristische routefiche met GPX',
+    highlights: 'Kalkklif, hoge waterval, reculée en het rotsfort Château des Anglais.',
+    natureWildlife: 'Karstvallei, bos en klifhabitat; vooral sterk als landschapsroute.',
+    climbing: 'Geen gezekerd klimmen; wel steile, rotsige en plaatselijk smalle passages.',
+    kneeTerrain: 'Steile klim en afdaling. Nat kalksteen kan glad zijn; stokken zijn verstandig.',
+    conditions: 'Weer, padstatus en toegang tot het rotsfort vlak voor vertrek controleren.',
+    officialPage: 'https://www.vallee-dordogne.com/offres/circuit-de-la-reculee-dautoire-autoire-fr-3579975',
+    officialGpx: 'https://cdt46.media.tourinsoft.eu/upload/circuit-de-la-reculee-dautoire.gpx',
+    source: 'Vallée de la Dordogne · officiële routefiche',
+    startLat: 44.853553,
+    startLon: 1.820645
+  },
+  {
+    id: 'moulin-du-saut',
+    name: 'Circuit du Moulin du Saut',
+    distance: '4,6 km',
+    ascent: 'circa 150 m D+ · berekend uit officiële GPX',
+    duration: '2 uur',
+    difficulty: 'gemiddeld',
+    officialDifficulty: 'Facile',
+    routeType: 'Lus · Qualirando · officiële GPX',
+    highlights: 'Alzou-kloof, verlaten 18e-eeuwse molen en een waterval van circa 10 meter.',
+    natureWildlife: 'ENS en Natura 2000; in de vallei leven onder meer otter en vleermuizen.',
+    climbing: 'Geen technisch klimwerk; ongelijk kloofpad en een steile afdaling.',
+    kneeTerrain: 'Afdaling tussen routepunten D en 1 is officieel als glad gemeld. Wandelschoenen vereist.',
+    conditions: 'Niet lopen bij hoogwater; na regen extra glad.',
+    officialPage: 'https://www.tourisme-lot.com/offres/circuit-du-moulin-du-saut-gramat-fr-659458/',
+    officialGpx: 'https://cdt46.media.tourinsoft.eu/upload/circuit-du-moulin-du-saut.gpx',
+    source: 'Lot Tourisme · officiële routefiche',
+    startLat: 44.788723,
+    startLon: 1.673559
+  },
+  {
+    id: 'canyon-alzou',
+    name: 'Le Canyon de l’Alzou',
+    distance: '12,4 km',
+    ascent: 'circa 280 m D+ · berekend uit officiële GPX',
+    duration: '4 uur',
+    difficulty: 'gemiddeld',
+    officialDifficulty: 'Moyen',
+    routeType: 'Lus · PR-wandelroute · officiële GPX',
+    highlights: 'Lange kalkkloof bij Rocamadour, plateaus, vier oude molens en rotswanden.',
+    natureWildlife: 'Afwisseling van droge causse, schaduwbos en de natuur van de Alzouvallei.',
+    climbing: 'Geen technisch klimmen; wel een lang, stenig kloofpad.',
+    kneeTerrain: 'Twaalf kilometer met herhaalde hoogteverschillen; rotsen vragen stabiele knieën en enkels.',
+    conditions: 'Waterstand, hitte en padstatus controleren; weinig ontsnappingsmogelijkheden in delen van de kloof.',
+    officialPage: 'https://www.tourisme-lot.com/offres/le-canyon-de-lalzou-rocamadour-fr-6661085/',
+    officialGpx: 'https://cdt46.media.tourinsoft.eu/upload/vd29-le-canyon-de-lalzou-2.gpx',
+    source: 'Lot Tourisme · officiële routefiche',
+    startLat: 44.802014,
+    startLon: 1.622388
+  },
+  {
+    id: 'andre-breton',
+    name: 'Sur les traces d’André Breton',
+    distance: '9,7 km',
+    ascent: 'circa 310 m D+ · berekend uit officiële GPX',
+    duration: '3 uur',
+    difficulty: 'gemiddeld',
+    officialDifficulty: 'Moyen',
+    routeType: 'Lus · Qualirando · officiële GPX',
+    highlights: 'Jaagpad uit de klif, Lotvallei, Saint-Cirq-Lapopie, causse en troglodietenfort.',
+    natureWildlife: 'Rivieroevers, kalkklif en droge causse in één compacte route.',
+    climbing: 'Geen technisch klimmen; het uitgehakte jaagpad is spectaculair maar eenvoudig beloopbaar.',
+    kneeTerrain: 'Steile klim naar het plateau en afdaling terug naar de Lot; lange stenen stukken.',
+    conditions: 'Het jaagpad kan na zware regen door hoogwater onbegaanbaar zijn.',
+    officialPage: 'https://www.tourisme-lot.com/offres/sur-les-traces-dandre-breton-bouzies-fr-1274805/',
+    officialGpx: 'https://cdt46.media.tourinsoft.eu/upload/sur-les-traces-dandre-breton.gpx',
+    source: 'Lot Tourisme · officiële routefiche',
+    startLat: 44.484017,
+    startLon: 1.644312
+  },
+  {
+    id: 'trois-gouffres',
+    name: 'La boucle des 3 gouffres',
+    distance: '8,6 km',
+    ascent: 'circa 235 m D+ · berekend uit officiële GPX',
+    duration: '2 uur 30',
+    difficulty: 'makkelijk',
+    officialDifficulty: 'Facile',
+    routeType: 'Lus · Qualirando · officiële GPX',
+    highlights: 'Drie karstbronnen, waaronder Cabouy en het turquoise water van Saint-Sauveur.',
+    natureWildlife: 'Helder bronwater, karstlandschap en bosranden rond de Ouysse.',
+    climbing: 'Geen klauter- of klimwerk genoemd op de officiële routefiche.',
+    kneeTerrain: 'Relatief vriendelijk, maar nog steeds circa 235 m stijgen en dalen over natuurpad.',
+    conditions: 'Weinig schaduw op delen van de route; bij warmte water meenemen.',
+    officialPage: 'https://www.tourisme-lot.com/offres/la-boucle-des-3-gouffres-rocamadour-fr-2807628/',
+    officialGpx: 'https://cdt46.media.tourinsoft.eu/upload/la-boucle-des-3-gouffres.gpx',
+    source: 'Lot Tourisme · officiële routefiche',
+    startLat: 44.789562,
+    startLon: 1.609708
+  },
+  {
+    id: 'micoque',
+    name: 'Boucle de la Micoque',
+    distance: '12,3 km in gekoppelde GPX · bronpagina noemt varianten van 8 en 15 km',
+    ascent: 'circa 375 m D+ · berekend uit officiële GPX',
+    duration: 'circa 3–4 uur · niet afzonderlijk opgegeven voor deze GPX-variant',
+    difficulty: 'gemiddeld',
+    officialDifficulty: 'Niet afzonderlijk opgegeven op de bronpagina',
+    routeType: 'Lus · departementale GPX; markering ter plaatse controleren',
+    highlights: 'Wilde Vézèrevallei, hoge Laugerie-kliffen en vindplaats La Micoque.',
+    natureWildlife: 'Meanderende rivier, steile kalkwanden en beboste hellingen.',
+    climbing: 'Geen technisch klimwerk; rots- en bospaden onder de kliffen.',
+    kneeTerrain: 'Langere lus met circa 375 m D+ en ongelijk terrein; stokken kunnen de afdaling ontzien.',
+    conditions: 'Kies de juiste variant op de bronkaart; de gekoppelde lijn meet 12,3 km en is dus geen nette 8 of 15 km.',
+    officialPage: 'https://www.dordogne-perigord-tourisme.fr/preparer-son-sejour/bouger/randonnee-dordogne/randonnee-dordogne-sans-voiture/grands-itineraires-randonnee-sans-voiture/sur-la-vallee-de-la-vezere-lignes-perigueux-agen-et-perigueux-brive/',
+    officialGpx: 'https://woody.cloudly.space/app/uploads/dordogne-perigord/2024/02/Boucle-de-la-micoque-1-1.gpx',
+    source: 'Dordogne Périgord Tourisme / CD24',
+    startLat: 44.93803,
+    startLon: 1.009928
+  },
+  {
+    id: 'bozouls-pr26',
+    name: 'PR 26 · Randonnée Bozouls',
+    distance: '14 km',
+    ascent: '180 m D+ · officiële routefiche',
+    duration: '4 uur',
+    difficulty: 'gemiddeld',
+    officialDifficulty: 'Moyenne',
+    routeType: 'Lus · PR 26 · officiële GPX',
+    highlights: 'De hoefijzervormige Trou de Bozouls en diepe Dourdou-kloof.',
+    natureWildlife: 'Kalkplateau, rivierkloof, bos en open uitzicht over de geologische meander.',
+    climbing: 'Geen technisch klimmen; de route daalt wel de kloof in en klimt er weer uit.',
+    kneeTerrain: 'Veertien kilometer; let vooral op de langere afdaling en klim in de kloof.',
+    conditions: 'Officiële routefiche en lokale markering volgen; terrein kan na regen modderig of glad zijn.',
+    officialPage: 'https://www.tourisme-aveyron.com/fr/diffusio/itineraires-touristiques/randonnee-bozouls-bozouls_TFO297079859205',
+    officialGpx: 'https://www.tourisme-aveyron.com/lae/services1.0/plugins/laetis/diffusio-258/data-cdt12_SQL3c/downloadFile.php?file=https://medias.hit.enaveyron.fr/fiches/18588/documents/bd89210d-1463-4248-9ebe-6559eca1d49d.gpx',
+    source: 'Tourisme Aveyron · officiële routefiche',
+    startLat: 44.470047,
+    startLon: 2.719669
+  },
+  {
+    id: 'viaur-ens',
+    name: 'Sentier ENS Basse Vallée du Viaur',
+    distance: '9,1 km',
+    ascent: '489 m D+ · officiële routefiche',
+    duration: '3 uur',
+    difficulty: 'zwaar',
+    officialDifficulty: 'Modéré',
+    routeType: 'Lus · geel gemarkeerde PR door Département de l’Aveyron',
+    highlights: 'Viaur-kloof, kastanjebos, rivieroevers, gehuchten en meerdere uitzichtpunten.',
+    natureWildlife: 'Beschermd ENS met gevarieerd bos en rivierleven; vogels en eekhoorns zijn mogelijk.',
+    climbing: 'Geen gezekerd klimmen; wel steile natuurpaden en bijna 500 hoogtemeters.',
+    kneeTerrain: 'Zwaar voor knieën: 489 m stijgen én dalen in slechts 9,1 km.',
+    conditions: 'Bij nat weer rekening houden met glad bos- en rivierpad.',
+    officialPage: 'https://www.bastides-gorges-aveyron.fr/randonnee/sentier-ens-basse-vallee-du-viaur-bor-et-bar/',
+    officialGpx: 'https://un.cirkwi.com/exporter_gpx.php?id_circuit=373411&w=591183627993&lang=fr&id_outil=206695&id_flux_export=50&compter_visites=1&extension=.gpx',
+    source: 'Bastides et Gorges de l’Aveyron / Département',
+    startLat: 44.1887,
+    startLon: 2.07566
+  },
+  {
+    id: 'bec-aigle-puy-griou',
+    name: 'Bec de l’Aigle · Puy Griou (route 31)',
+    distance: '13,1 km',
+    ascent: '680 m D+ · officiële routefiche',
+    duration: '1 uur 40–3 uur 20 als trail · als wandeling ruimer plannen',
+    difficulty: 'zwaar',
+    officialDifficulty: 'Modéré als trailparcours',
+    routeType: 'Gemarkeerde trail-lus 31 · officieel parcours, wandelbaar',
+    highlights: 'Alpiene rug, Bec de l’Aigle, Téton de Vénus, Puy Griou en vulkaanpanorama’s.',
+    natureWildlife: 'Berggrasland, beukenbos en open kam; de officiële routefiche noemt geen specifieke diersoorten.',
+    climbing: 'Rotsig alpien terrein; geen gezekerde klim. De topklauter van Puy Griou ligt niet in deze lijn.',
+    kneeTerrain: 'Zwaar: 680 m D+ en een lange bergafdaling. Alleen kiezen met stabiele knieën en goede schoenen.',
+    conditions: 'Alleen bij gunstig bergweer; wind, mist, sneeuw en ijs kunnen de route ongeschikt maken.',
+    officialPage: 'https://www.cantal-destination.com/fiche/parcours-trail-31-bec-de-laigle-puy-griou/',
+    officialGpx: 'https://static.apidae-tourisme.com/filestore/objets-touristiques/plans/217/3/16909273/n+31+bec+de+laigle+puy+griou.gpx',
+    source: 'Cantal Destination · officiële routefiche',
+    startLat: 45.08829,
+    startLon: 2.74169
+  },
+  {
+    id: 'cascade-faillitoux',
+    name: 'Boucle de Faillitoux · secrets de la cascade',
+    distance: '4,5 km',
+    ascent: '253 m D+ · officiële routefiche',
+    duration: '1 uur 30',
+    difficulty: 'gemiddeld',
+    officialDifficulty: 'Modéré',
+    routeType: 'Gemarkeerde lus · officiële GPX',
+    highlights: 'Waterval van circa 40 meter over basaltzuilen, weide en beukenbos.',
+    natureWildlife: 'Salers-runderen; in het seizoen kan het burlen van edelherten hoorbaar zijn.',
+    climbing: 'Geen technisch klimmen; rotsige toegang bij de waterval en steil bospad.',
+    kneeTerrain: 'Korte maar stevige route; de bosafdaling voor de cascade is steil en vaak nat.',
+    conditions: 'Honden worden afgeraden; sneeuw, ijs en nat weer maken de route duidelijk lastiger.',
+    officialPage: 'https://www.cantal-destination.com/fiche/boucle-de-faillitoux-secrets-de-la-cascade/',
+    officialGpx: 'https://static.apidae-tourisme.com/filestore/objets-touristiques/plans/137/221/7396745/Cascade+du+Faillitoux+-+trace.gpx',
+    source: 'Cantal Destination · officiële routefiche',
+    startLat: 45.019611,
+    startLon: 2.639273
+  },
+  {
+    id: 'pas-de-cere',
+    name: 'Sentier découverte du Pas de Cère',
+    distance: '2 km heen-en-terug · GPX tekent de enkele heenlijn van circa 1 km',
+    ascent: '150 m D+ · officiële routefiche',
+    duration: '1 uur',
+    difficulty: 'gemiddeld',
+    officialDifficulty: 'Modéré',
+    routeType: 'Gemarkeerde heen-en-terugroute · officiële GPX',
+    highlights: 'Smalle vulkanische kloof, rivierpad en dramatische rotswanden.',
+    natureWildlife: 'Espace naturel sensible met bijzondere flora en leefgebied van de otter.',
+    climbing: 'Geen technisch klimwerk; ingericht maar rotsig kloofpad.',
+    kneeTerrain: 'Kort, maar met trappen/rotsige hoogteverschillen; terugweg gaat over dezelfde lijn.',
+    conditions: 'De passage kan bij hoogwater en in winterse omstandigheden onmogelijk zijn.',
+    officialPage: 'https://www.cantal-destination.com/fiche/sentier-decouverte-du-pas-de-cere/',
+    officialGpx: 'https://static.apidae-tourisme.com/filestore/objets-touristiques/plans/132/227/27583364/parcours_2647159.gpx',
+    source: 'Cantal Destination · officiële routefiche',
+    startLat: 45.00163,
+    startLon: 2.64843
+  }
+]
+
+export const THEDIRAC_HIKES_BY_ID = new Map(THEDIRAC_HIKES.map(route => [route.id, route]))
+
+export const THEDIRAC_HIKES_LAYER_NAME = `Spectaculaire wandelroutes (${THEDIRAC_HIKES.length})`

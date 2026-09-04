@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import { fromLonLat } from 'ol/proj'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
+import { THEDIRAC_HIKES_LAYER_NAME } from '../data/thediracHikes'
 import { useLayerStore } from './layerStore'
 import { useMapStore } from './mapStore'
 
@@ -30,7 +31,8 @@ const FRANCE_FIELD_LAYERS = [
   'Bodem/geologie 1:50.000 FR',
   'Oude bossen · Forêts anciennes',
   THEDIRAC_ARCHAEOLOGY_LAYER,
-  THEDIRAC_SIGHTS_LAYER_NAME
+  THEDIRAC_SIGHTS_LAYER_NAME,
+  THEDIRAC_HIKES_LAYER_NAME
 ] as const
 
 const FRANCE_RESEARCH_LAYER_NAMES = new Set([
@@ -44,7 +46,8 @@ const FRANCE_RESEARCH_LAYER_NAMES = new Set([
   'OCS GE landbedekking 2021-2023',
   'Oude bossen · Forêts anciennes',
   THEDIRAC_ARCHAEOLOGY_LAYER,
-  THEDIRAC_SIGHTS_LAYER_NAME
+  THEDIRAC_SIGHTS_LAYER_NAME,
+  THEDIRAC_HIKES_LAYER_NAME
 ])
 
 const BUILT_IN_PRESETS: Preset[] = [
@@ -169,7 +172,8 @@ const BUILT_IN_PRESETS: Preset[] = [
       'Bodem/geologie 1:50.000 FR': 0.28,
       'Oude bossen · Forêts anciennes': 0.38,
       [THEDIRAC_ARCHAEOLOGY_LAYER]: 1,
-      [THEDIRAC_SIGHTS_LAYER_NAME]: 1
+      [THEDIRAC_SIGHTS_LAYER_NAME]: 1,
+      [THEDIRAC_HIKES_LAYER_NAME]: 1
     },
     isBuiltIn: false
   }
@@ -438,7 +442,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 25,
+      version: 26,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {

@@ -75,13 +75,14 @@ Status: eerste uitwerking afgekeurd na veldtest en verwijderd in 2.33.18.
 
 Status: opgeschoond in 2.33.18.
 
-De Frankrijk-sectie gebruikt vijf groepen:
+De Frankrijk-sectie gebruikt zes groepen:
 
 - Terrein & reliëf;
 - Water & landschap;
 - Bodem & geologie;
 - Archeologie & historie;
 - Bezienswaardigheden.
+- Wandelroutes.
 
 Een aparte groep Analyse keert pas terug wanneer er een aantoonbaar bruikbare analysefunctie is. Lokale vectorlagen gebruiken compacte NL/FR-velden met naam, betekenis, bron en bronkwaliteit. Alle actieve Frankrijk-lagen lopen mee met dezelfde zichtbaarheid- en transparantieregeling.
 
@@ -91,7 +92,7 @@ Status: gereed en opgeschoond in 2.33.18.
 
 - iedere release wordt pas afgetekend na productiebuild, docs-commit en Pages-deployment;
 - onderaan Presets staat Frankrijk · Thédirac, ook wanneer een oudere lokale of cloudlijst de preset nog niet kende;
-- Frankrijk · Thédirac gebruikt Hybride (wereld), opent de onderzoeksregio en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes, de 38 beschreven archeologische bronlocaties en Bezienswaardigheden;
+- Frankrijk · Thédirac gebruikt Hybride (wereld), opent de onderzoeksregio en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes, de 38 beschreven archeologische bronlocaties, Bezienswaardigheden en de officiële wandelroutes;
 - BSS, IDPR, cavités en geologie + reliëf blijven handmatig beschikbaar maar worden niet automatisch over de veldkaart heen gelegd;
 - afgekeurde Thédirac-rasteranalyse wordt ook uit eerder opgeslagen presets gemigreerd.
 
@@ -104,6 +105,16 @@ Status: uitgebreid in 2.33.24.
 - betekenis gaat voor een starre uurgrens: 66 bestemmingen liggen binnen circa drie uur; Niaux, Gargas en Pair-non-Pair blijven als expliciete uitzonderingen zichtbaar op circa 3 uur 02 tot 3 uur 13;
 - langere ritten krijgen een veld Waarom de rit waard; replica’s, tijdelijke sluiting, verplichte reservering, steile toegang en trappen worden zonder toeristische mist vermeld;
 - de selectie gebruikt echte grotten, kastelen, ruïnes, dorpen, bossen, natuurgebieden, uitzichtpunten en waterlandschappen; er zijn geen fictieve locaties toegevoegd.
+
+### Stap 10 — spectaculaire officiële wandelroutes
+
+Status: gereed in 2.33.25.
+
+- de aparte laag Spectaculaire wandelroutes bevat elf lijnen uit GPX-bestanden die rechtstreeks door officiële toerisme- of departementale routepagina’s worden aangeboden;
+- de selectie omvat kalkkliffen, watervallen en karst in Lot en Dordogne, de kloven van Bozouls en Viaur en vulkaan- en watervalroutes in de Cantal;
+- iedere popup vermeldt afstand, D+, duur, zwaarte, routevorm en markering, bijzonderheden, natuur en wildlife, klim- of klauterwerk, kniebelasting, omstandigheden, route naar de start en de officiële website en GPX;
+- de gekoppelde GPX van Micoque meet 12,3 km terwijl de bronpagina varianten van 8 en 15 km noemt; Pas de Cère toont de enkele lijn van 1 km terwijl de officiële afstand van 2 km heen-en-terug is. Beide bronafwijkingen staan zichtbaar in de popup;
+- tijdelijk gesloten routes zijn niet opgenomen. De Cantal-trail rond Bec de l’Aigle en Puy Griou staat eerlijk als gemarkeerde trailroute vermeld, inclusief ruimer te plannen wandeltijd en bergweerwaarschuwing.
 
 ## Volgende inhoudelijke richting
 

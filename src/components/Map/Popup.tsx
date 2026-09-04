@@ -2239,14 +2239,15 @@ export function Popup() {
                   .replace(/^./, str => str.toUpperCase())
 
                 // Format the value
-                let formattedValue = String(value)
-                if (formattedValue.length > 200) {
-                  formattedValue = formattedValue.substring(0, 200) + '...'
-                }
+                const rawValue = String(value)
+                const isUrl = rawValue.startsWith('http://') || rawValue.startsWith('https://')
+                const formattedValue = !isUrl && rawValue.length > 200
+                  ? rawValue.substring(0, 200) + '...'
+                  : rawValue
 
                 // Check if it's a URL
-                if (formattedValue.startsWith('http://') || formattedValue.startsWith('https://')) {
-                  html += `<div class="text-sm"><span class="text-gray-500">${formattedKey}:</span> <a href="${formattedValue}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">Link</a></div>`
+                if (isUrl) {
+                  html += `<div class="text-sm"><span class="text-gray-500">${formattedKey}:</span> <a href="${rawValue}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">Link</a></div>`
                 } else {
                   html += `<div class="text-sm"><span class="text-gray-500">${formattedKey}:</span> <span class="text-gray-700">${formattedValue}</span></div>`
                 }

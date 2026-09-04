@@ -9,17 +9,27 @@ interface ChangeLogModalProps {
 }
 
 const currentRelease = {
-  version: '2.33.24',
+  version: '2.33.25',
   date: '4 september 2026',
-  title: 'Bestemming bepaalt de rit',
+  title: 'Officiële wandelroutes als lijnen',
   changes: [
-    'Bezienswaardigheden groeit van 37 naar 69 gecontroleerde plekken. De 32 aanvullingen leggen de nadruk op authentieke grotkunst, prehistorische en Romeinse sites, ruïnes, oud bos en uitzonderlijk landschap.',
-    'Prehistorie & archeologie is een eigen zevende categorie. Nieuwe popups leggen uit waarom een langere rit de moeite waard is en vermelden eerlijk replica’s, reservering, sluiting, trappen en zware toegang.',
-    'De reistijd is geen harde uurgrens meer: 66 bestemmingen liggen binnen circa drie uur. Niaux, Gargas en Pair-non-Pair blijven als expliciete uitzonderingen zichtbaar op circa 3 uur 02 tot 3 uur 13.'
+    'Een aparte laag Spectaculaire wandelroutes toont elf echte routegeometrieën uit officiële GPX-downloads; geen punten en geen met de hand getekende benaderingen.',
+    'De selectie loopt van de kliffen en watervallen van Lot en Dordogne via de kloven van Aveyron tot de vulkaanruggen van de Cantal. Makkelijk, gemiddeld en zwaar hebben herkenbare groene, oranje en rode lijnen.',
+    'Een tik op een route toont afstand, D+, duur, markering, landschap en wildlife, klim- of klauterwerk, knie- en terreinwaarschuwingen, route naar de start, officiële website en officiële GPX.'
   ]
 }
 
 const recentReleases = [
+  {
+    version: '2.33.24',
+    date: '4 september 2026',
+    title: 'Bestemming bepaalt de rit',
+    changes: [
+      'Bezienswaardigheden groeit van 37 naar 69 gecontroleerde plekken. De 32 aanvullingen leggen de nadruk op authentieke grotkunst, prehistorische en Romeinse sites, ruïnes, oud bos en uitzonderlijk landschap.',
+      'Prehistorie & archeologie is een eigen zevende categorie. Nieuwe popups leggen uit waarom een langere rit de moeite waard is en vermelden eerlijk replica’s, reservering, sluiting, trappen en zware toegang.',
+      'De reistijd is geen harde uurgrens meer: 66 bestemmingen liggen binnen circa drie uur. Niaux, Gargas en Pair-non-Pair blijven als expliciete uitzonderingen zichtbaar op circa 3 uur 02 tot 3 uur 13.'
+    ]
+  },
   {
     version: '2.33.23',
     date: '4 september 2026',

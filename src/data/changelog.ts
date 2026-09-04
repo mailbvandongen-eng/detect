@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.25',
+    date: '4 september 2026',
+    title: 'Officiële wandelroutes als lijnen',
+    changes: [
+      'Een aparte laag Spectaculaire wandelroutes toont elf echte routegeometrieën uit officiële GPX-downloads; geen punten en geen met de hand getekende benaderingen.',
+      'De selectie loopt van de kliffen en watervallen van Lot en Dordogne via de kloven van Aveyron tot de vulkaanruggen van de Cantal. Makkelijk, gemiddeld en zwaar hebben herkenbare groene, oranje en rode lijnen.',
+      'Een tik op een route toont afstand, D+, duur, markering, landschap en wildlife, klim- of klauterwerk, knie- en terreinwaarschuwingen, route naar de start, officiële website en officiële GPX.'
+    ]
+  },
+  {
     version: '2.33.24',
     date: '4 september 2026',
     title: 'Bestemming bepaalt de rit',
