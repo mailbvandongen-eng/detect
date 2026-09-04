@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.23',
+    date: '4 september 2026',
+    title: 'Bezienswaardigheden rond Thédirac',
+    changes: [
+      'Een aparte laag Bezienswaardigheden toont 37 echte bestemmingen rond Thédirac: grotten, kastelen en ruïnes, historische dorpen, natuur en oude bossen, uitzichtpunten en waterlandschap.',
+      'Ieder punt heeft een eigen categoriesymbool, een label bij verder inzoomen en een tweetalige popup met bezoekinformatie, openbare coördinaten, bron en een directe autoroute vanaf Thédirac.',
+      'De routeberekening vermeldt afstand en richttijd zonder verkeersdrukte. 34 plekken liggen binnen circa 63 minuten; Saint-Cirq-Lapopie, Padirac en Barrières staan eerlijk als randgebied op 67–71 minuten.'
+    ]
+  },
+  {
     version: '2.33.22',
     date: '3 september 2026',
     title: 'Archeologische regio uitgebreid',

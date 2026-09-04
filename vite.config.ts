@@ -1,15 +1,23 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type ResolvedConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import { writeFileSync } from 'fs'
+import { mkdirSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
 
-const noJekyllPlugin = () => ({
-  name: 'no-jekyll',
-  closeBundle() {
-    writeFileSync(resolve(__dirname, 'docs/.nojekyll'), '')
+const noJekyllPlugin = () => {
+  let outputDir = resolve(__dirname, 'docs')
+
+  return {
+    name: 'no-jekyll',
+    configResolved(config: ResolvedConfig) {
+      outputDir = resolve(config.root, config.build.outDir)
+    },
+    closeBundle() {
+      mkdirSync(outputDir, { recursive: true })
+      writeFileSync(resolve(outputDir, '.nojekyll'), '')
+    }
   }
-})
+}
 
 export default defineConfig({
   plugins: [

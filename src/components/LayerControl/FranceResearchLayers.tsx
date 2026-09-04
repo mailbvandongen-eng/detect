@@ -3,6 +3,7 @@ import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
 import { useLayerStore, useMapStore } from '../../store'
 import { FRANCE_RESEARCH_FACTORIES } from '../../layers/franceResearchOL'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../../data/thediracResearchSites'
+import { THEDIRAC_SIGHTS_LAYER_NAME } from '../../data/thediracSights'
 
 const TERRAIN = [
   ['LiDAR HD terrein FR', 0.78]
@@ -26,11 +27,16 @@ const ARCHAEOLOGY_HISTORY = [
   ['Oude bossen · Forêts anciennes', 0.72]
 ] as const
 
+const SIGHTS = [
+  [THEDIRAC_SIGHTS_LAYER_NAME, 1]
+] as const
+
 export const FRANCE_RESEARCH_LAYERS = [
   ...TERRAIN,
   ...WATER_LANDSCAPE,
   ...SOIL_GEOLOGY,
-  ...ARCHAEOLOGY_HISTORY
+  ...ARCHAEOLOGY_HISTORY,
+  ...SIGHTS
 ] as const
 
 function ensureLayer(
@@ -107,6 +113,7 @@ export function FranceResearchLayers() {
       <ResearchFolder title="Water & landschap" layers={WATER_LANDSCAPE} />
       <ResearchFolder title="Bodem & geologie" layers={SOIL_GEOLOGY} />
       <ResearchFolder title="Archeologie & historie" layers={ARCHAEOLOGY_HISTORY} />
+      <ResearchFolder title="Bezienswaardigheden" layers={SIGHTS} />
     </div>
   )
 }

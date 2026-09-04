@@ -14,6 +14,8 @@ import {
   THEDIRAC_RESEARCH_SITES,
   type ThediracResearchSite
 } from '../data/thediracResearchSites'
+import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
+import { createThediracSightsLayerOL } from './thediracSightsOL'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
 const IGN_WMS = 'https://data.geopf.fr/wms-r/wms'
@@ -274,5 +276,6 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'Waterlopen BD TOPAGE 2026': createFranceTopageWatercoursesLayerOL,
   'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
   'Oude bossen · Forêts anciennes': createFranceAncientForestsLayerOL,
-  [THEDIRAC_RESEARCH_LAYER_NAME]: createKnownThediracSitesLayerOL
+  [THEDIRAC_RESEARCH_LAYER_NAME]: createKnownThediracSitesLayerOL,
+  [THEDIRAC_SIGHTS_LAYER_NAME]: createThediracSightsLayerOL
 }

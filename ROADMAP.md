@@ -75,12 +75,13 @@ Status: eerste uitwerking afgekeurd na veldtest en verwijderd in 2.33.18.
 
 Status: opgeschoond in 2.33.18.
 
-De Frankrijk-sectie gebruikt voorlopig vier groepen:
+De Frankrijk-sectie gebruikt vijf groepen:
 
 - Terrein & reliëf;
 - Water & landschap;
 - Bodem & geologie;
-- Archeologie & historie.
+- Archeologie & historie;
+- Bezienswaardigheden.
 
 Een aparte groep Analyse keert pas terug wanneer er een aantoonbaar bruikbare analysefunctie is. Lokale vectorlagen gebruiken compacte NL/FR-velden met naam, betekenis, bron en bronkwaliteit. Alle actieve Frankrijk-lagen lopen mee met dezelfde zichtbaarheid- en transparantieregeling.
 
@@ -90,9 +91,18 @@ Status: gereed en opgeschoond in 2.33.18.
 
 - iedere release wordt pas afgetekend na productiebuild, docs-commit en Pages-deployment;
 - onderaan Presets staat Frankrijk · Thédirac, ook wanneer een oudere lokale of cloudlijst de preset nog niet kende;
-- Frankrijk · Thédirac gebruikt Hybride (wereld), opent de onderzoeksregio en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes en de 22 beschreven archeologische bronlocaties;
+- Frankrijk · Thédirac gebruikt Hybride (wereld), opent de onderzoeksregio en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes, de 38 beschreven archeologische bronlocaties en Bezienswaardigheden;
 - BSS, IDPR, cavités en geologie + reliëf blijven handmatig beschikbaar maar worden niet automatisch over de veldkaart heen gelegd;
 - afgekeurde Thédirac-rasteranalyse wordt ook uit eerder opgeslagen presets gemigreerd.
+
+### Stap 9 — bezienswaardigheden op rijafstand
+
+Status: gereed in 2.33.23.
+
+- de aparte laag Bezienswaardigheden bevat 37 gecontroleerde publieke bestemmingen in zes herkenbare categorieën;
+- iedere popup bevat een korte Nederlandse en Franse uitleg, bezoeknotitie, openbaar markerpunt, bronlink, autoroute en een OSRM-richttijd vanaf Thédirac zonder actuele verkeersdrukte;
+- 34 bestemmingen liggen binnen circa 63 minuten; Saint-Cirq-Lapopie, Gouffre de Padirac en het verlaten hameau Barrières blijven als bekende randgevallen zichtbaar op circa 67–71 minuten;
+- de selectie gebruikt echte grotten, kastelen, ruïnes, dorpen, bossen, natuurgebieden, uitzichtpunten en waterlandschappen; er zijn geen fictieve locaties toegevoegd.
 
 ## Volgende inhoudelijke richting
 

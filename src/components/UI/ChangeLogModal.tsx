@@ -9,17 +9,27 @@ interface ChangeLogModalProps {
 }
 
 const currentRelease = {
-  version: '2.33.22',
-  date: '3 september 2026',
-  title: 'Archeologische regio uitgebreid',
+  version: '2.33.23',
+  date: '4 september 2026',
+  title: 'Bezienswaardigheden rond Thédirac',
   changes: [
-    'De bronlaag groeit van 22 naar 38 plekken. Nieuw zijn onder meer Le Piage, Cougnac, Combe Nègre, Roc de la Cave, zes dolmens, de oppida van l’Impernal en Murcens, het aquaduct van Vers, Cazals, Abbaye Nouvelle en het oude kasteelterrein van Luzech.',
-    'Het onderzoekskader is verruimd tot circa 35 × 40 kilometer rond Thédirac; de Frankrijk-preset opent iets ruimer zodat ook Gourdon, Luzech en Murcens direct in beeld passen.',
-    'De lokale BD TOPAGE-dekking volgt die verruiming met 150 klikbare waterlopen, waarvan 75 met een gepubliceerde naam. Beschermde en no-detectplekken blijven zichtbaar als archeologische context.'
+    'Een aparte laag Bezienswaardigheden toont 37 echte bestemmingen rond Thédirac: grotten, kastelen en ruïnes, historische dorpen, natuur en oude bossen, uitzichtpunten en waterlandschap.',
+    'Ieder punt heeft een eigen categoriesymbool, een label bij verder inzoomen en een tweetalige popup met bezoekinformatie, openbare coördinaten, bron en een directe autoroute vanaf Thédirac.',
+    'De routeberekening vermeldt afstand en richttijd zonder verkeersdrukte. 34 plekken liggen binnen circa 63 minuten; Saint-Cirq-Lapopie, Padirac en Barrières staan eerlijk als randgebied op 67–71 minuten.'
   ]
 }
 
 const recentReleases = [
+  {
+    version: '2.33.22',
+    date: '3 september 2026',
+    title: 'Archeologische regio uitgebreid',
+    changes: [
+      'De bronlaag groeit van 22 naar 38 plekken. Nieuw zijn onder meer Le Piage, Cougnac, Combe Nègre, Roc de la Cave, zes dolmens, de oppida van l’Impernal en Murcens, het aquaduct van Vers, Cazals, Abbaye Nouvelle en het oude kasteelterrein van Luzech.',
+      'Het onderzoekskader is verruimd tot circa 35 × 40 kilometer rond Thédirac; de Frankrijk-preset opent iets ruimer zodat ook Gourdon, Luzech en Murcens direct in beeld passen.',
+      'De lokale BD TOPAGE-dekking volgt die verruiming met 150 klikbare waterlopen, waarvan 75 met een gepubliceerde naam. Beschermde en no-detectplekken blijven zichtbaar als archeologische context.'
+    ]
+  },
   {
     version: '2.33.21',
     date: '3 september 2026',
