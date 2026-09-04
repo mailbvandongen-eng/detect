@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { fromLonLat } from 'ol/proj'
+import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { useLayerStore } from './layerStore'
 import { useMapStore } from './mapStore'
 
@@ -18,8 +19,8 @@ export interface Preset {
   isBuiltIn: boolean
 }
 
-const THEDIRAC_CENTER: [number, number] = [1.34, 44.595]
-const THEDIRAC_ARCHAEOLOGY_LAYER = 'Archeologische plekken · Thédirac (22)'
+const THEDIRAC_CENTER: [number, number] = [1.34, 44.625]
+const THEDIRAC_ARCHAEOLOGY_LAYER = THEDIRAC_RESEARCH_LAYER_NAME
 
 const FRANCE_FIELD_LAYERS = [
   'LiDAR HD terrein FR',
@@ -156,7 +157,7 @@ const BUILT_IN_PRESETS: Preset[] = [
     baseLayer: 'Hybride (wereld)',
     mapView: {
       center: THEDIRAC_CENTER,
-      zoom: 11
+      zoom: 10.7
     },
     layerOpacities: {
       'LiDAR HD terrein FR': 0.48,
@@ -212,7 +213,11 @@ function migrateLegacyBaseLayer(baseLayer: string | undefined): string | undefin
 }
 
 function migrateFranceLayerName(layerName: string): string {
-  return layerName === 'Bekende plekken · Thédirac' ? THEDIRAC_ARCHAEOLOGY_LAYER : layerName
+  if (layerName === 'Bekende plekken · Thédirac') return THEDIRAC_ARCHAEOLOGY_LAYER
+  if (/^Archeologische plekken · (?:regio )?Thédirac \(\d+\)$/.test(layerName)) {
+    return THEDIRAC_ARCHAEOLOGY_LAYER
+  }
+  return layerName
 }
 
 function normalizeLayerOpacities(opacities: Record<string, number> | undefined): Record<string, number> | undefined {
@@ -429,7 +434,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 23,
+      version: 24,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {

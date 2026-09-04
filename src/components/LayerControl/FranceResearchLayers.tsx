@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
 import { useLayerStore, useMapStore } from '../../store'
 import { FRANCE_RESEARCH_FACTORIES } from '../../layers/franceResearchOL'
+import { THEDIRAC_RESEARCH_LAYER_NAME } from '../../data/thediracResearchSites'
 
 const TERRAIN = [
   ['LiDAR HD terrein FR', 0.78]
@@ -21,7 +22,7 @@ const SOIL_GEOLOGY = [
 ] as const
 
 const ARCHAEOLOGY_HISTORY = [
-  ['Archeologische plekken · Thédirac (22)', 1],
+  [THEDIRAC_RESEARCH_LAYER_NAME, 1],
   ['Oude bossen · Forêts anciennes', 0.72]
 ] as const
 

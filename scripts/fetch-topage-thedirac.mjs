@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url'
 
 const SOURCE = 'https://services.sandre.eaufrance.fr/geo/topage2026'
 const OUTPUT = resolve(dirname(fileURLToPath(import.meta.url)), '../public/data/topage_thedirac_2026.geojson')
-const BBOX = [1.20, 44.48, 1.48, 44.71]
-const SIMPLIFY_TOLERANCE = 0.00001
+const BBOX = [1.12, 44.45, 1.57, 44.81]
+const SIMPLIFY_TOLERANCE = 0.00004
 
 function outCode([x, y]) {
   let code = 0

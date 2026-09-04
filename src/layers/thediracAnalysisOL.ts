@@ -1,4 +1,4 @@
-export const THEDIRAC_RESEARCH_BBOX = [1.20, 44.48, 1.48, 44.71] as const
+export const THEDIRAC_RESEARCH_BBOX = [1.12, 44.45, 1.57, 44.81] as const
 
 export const THEDIRAC_RESEARCH_COMMUNES = [
   'Thédirac',
@@ -7,7 +7,22 @@ export const THEDIRAC_RESEARCH_COMMUNES = [
   'Lavercantière',
   'Peyrilles',
   'Uzech',
-  'Gindou'
+  'Gindou',
+  'Cazals',
+  'Salviac',
+  'Léobard',
+  'Gourdon',
+  'Payrignac',
+  'Fajoles',
+  'Saint-Cirq-Madelon',
+  'Ginouillac',
+  'Soucirac',
+  'Saint-Projet',
+  'Cras',
+  'Luzech',
+  'Vers',
+  'Prayssac',
+  'Frayssinet-le-Gélat'
 ] as const
 
 const ARCHEOCC_EXPORT = 'https://data.laregion.fr/api/explore/v2.1/catalog/datasets/base_archeocc_opendata/exports/geojson'

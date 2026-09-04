@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import type { Layer } from 'ol/layer'
 import { layerRegistry } from '../layers/layerRegistry'
+import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { useMapStore } from './mapStore'
 
 export type LoadingState = 'idle' | 'loading' | 'loaded' | 'error'
@@ -102,7 +103,7 @@ export const useLayerStore = create<LayerState>()(
       'Waterlopen BD TOPAGE 2026': false,
       'OCS GE landbedekking 2021-2023': false,
       'Oude bossen · Forêts anciennes': false,
-      'Archeologische plekken · Thédirac (22)': false,
+      [THEDIRAC_RESEARCH_LAYER_NAME]: false,
       'Sites ClassÃ©s Bretagne': false,
       'Sites ClassÃ©s Normandie': false,
       'Sites ClassÃ©s Hauts-de-France': false,
@@ -182,7 +183,7 @@ export const useLayerStore = create<LayerState>()(
       'Waterlopen BD TOPAGE 2026': 0.9,
       'OCS GE landbedekking 2021-2023': 0.62,
       'Oude bossen · Forêts anciennes': 0.72,
-      'Archeologische plekken · Thédirac (22)': 1,
+      [THEDIRAC_RESEARCH_LAYER_NAME]: 1,
       'Sites ClassÃ©s Bretagne': 0.5,
       'Sites ClassÃ©s Normandie': 0.5,
       'Sites ClassÃ©s Hauts-de-France': 0.5,

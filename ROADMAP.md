@@ -15,14 +15,14 @@ Vaste projectregel: eerst bron en endpoint controleren, alleen lagen toevoegen d
 
 ## Prioriteit 2 — Thédirac en omgeving
 
-Doelgebied: Thédirac met de directe onderzoeksomgeving richting Catus, Montgesty, Lavercantière, Peyrilles, Uzech en Gindou. Exacte publieke broncoördinaten blijven exact; broncentroïden of globale posities worden als benadering gemarkeerd. Berekende analyse is altijd onderzoekshulp en nooit bewijs van archeologie.
+Doelgebied: een kader van circa 35 × 40 kilometer rond Thédirac, met de kern Catus–Montgesty–Lavercantière–Uzech–Gindou en uitlopers naar Gourdon, Luzech en Murcens. Exacte publieke broncoördinaten blijven exact; broncentroïden of globale posities worden als benadering gemarkeerd. Berekende analyse is altijd onderzoekshulp en nooit bewijs van archeologie.
 
 ### Stap 1 — terrein, water en landgebruik
 
 Status: gereed.
 
 - IGN LiDAR HD, BRGM geologie 1:50.000 en geologie + reliëf;
-- BD TOPAGE 2026 voor actuele waterlopen; rond Thédirac liggen klikbare vectorlijnen boven de landelijke WMS, zodat water op dorpsniveau dik genoeg blijft en bronnamen zichtbaar zijn;
+- BD TOPAGE 2026 voor actuele waterlopen; 150 klikbare vectorobjecten binnen het verruimde onderzoekskader liggen boven de landelijke WMS, zodat water op dorpsniveau dik genoeg blijft en de 75 beschikbare bronnamen zichtbaar zijn;
 - OCS GE landbedekking; de dubbele/zwakke tweede OCS-laag is verwijderd en de overgebleven CS/US-broncodes worden in de popup naar gewone Nederlandse termen vertaald;
 - alle onderzoekslagen vallen onder de Frankrijk-hoofdschakelaar en dezelfde zichtbaarheid/transparantie-routine.
 
@@ -30,7 +30,8 @@ Status: gereed.
 
 Status: gereed voor de huidige onderzoeksset; verdere bronverrijking blijft mogelijk.
 
-- Archeologische plekken · Thédirac (22) toont de nader onderzochte steentijd-, Keltische, Romeinse en middeleeuwse locaties ook wanneer ze beschermd of no-detect zijn; dat is kaartcontext, geen zoekadvies;
+- Archeologische plekken · regio Thédirac (38) toont de nader onderzochte steentijd-, Keltische, Romeinse en middeleeuwse locaties ook wanneer ze beschermd of no-detect zijn; dat is kaartcontext, geen zoekadvies;
+- de verruiming in 2.33.22 voegt 16 bronlocaties toe, waaronder vier paleolithische afzettingen/grotten, zes dolmens, twee oppida, Romeinse infrastructuur en drie verlaten of versterkte middeleeuwse complexen;
 - de eerder gebruikte ArcheOcc-publieksdataset bevat 35 musea of publiekslocaties in heel Occitanie, maar nul objecten in de zeven onderzoeksgemeenten; de misleidende lege lokale laag is daarom in 2.33.21 verwijderd;
 - exacte openbare bronpunten blijven exact, terwijl lieu-ditcentra en onbekende historische vindplekken zichtbaar als benadering zijn gemarkeerd;
 - bestaande INRAP-sites en Franse historische/erfgoedlagen blijven beschikbaar als aanvullende context;
@@ -56,7 +57,7 @@ Status: gereed als aanvullende set.
 
 Status: gereed en vereenvoudigd in 2.33.18.
 
-- de kernzone blijft Thédirac–Catus–Montgesty–Lavercantière–Peyrilles–Uzech–Gindou;
+- de kernzone blijft Thédirac–Catus–Montgesty–Lavercantière–Peyrilles–Uzech–Gindou; het werkvenster loopt nu iets ruimer van Prayssac en Frayssinet-le-Gélat tot Fajoles, Ginouillac en Murcens;
 - de afbakening wordt intern gebruikt voor de lokale TOPAGE-lijnen en gerichte bronselectie en hoeft niet als groot los kaartvlak zichtbaar te zijn;
 - officiële objecten en hun broninformatie blijven leidend; er worden geen kunstmatige lokale vindplaatsen toegevoegd.
 

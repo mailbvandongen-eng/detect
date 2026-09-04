@@ -9,7 +9,11 @@ import XYZ from 'ol/source/XYZ'
 import GeoJSON from 'ol/format/GeoJSON'
 import { fromLonLat } from 'ol/proj'
 import { Circle as CircleStyle, Fill, RegularShape, Stroke, Style } from 'ol/style'
-import { THEDIRAC_RESEARCH_SITES, type ThediracResearchSite } from '../data/thediracResearchSites'
+import {
+  THEDIRAC_RESEARCH_LAYER_NAME,
+  THEDIRAC_RESEARCH_SITES,
+  type ThediracResearchSite
+} from '../data/thediracResearchSites'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
 const IGN_WMS = 'https://data.geopf.fr/wms-r/wms'
@@ -50,7 +54,6 @@ function ignWmsLayer(title: string, layerName: string, opacity: number, attribut
   })
 }
 
-const RESEARCH_SITE_LAYER = 'Archeologische plekken · Thédirac (22)'
 const researchSiteColors: Record<ThediracResearchSite['category'], string> = {
   prehistorie: '#f59e0b',
   ijzertijd: '#16a34a',
@@ -107,7 +110,7 @@ export function createKnownThediracSitesLayerOL() {
     feature.setStyle(getResearchSiteStyle(site))
     feature.setProperties({
       layerType: 'importedLayer',
-      layerName: RESEARCH_SITE_LAYER,
+      layerName: THEDIRAC_RESEARCH_LAYER_NAME,
       layerColor: color,
       name: site.nameNl,
       'Categorie / catégorie': researchSiteCategoryLabels[site.category],
@@ -127,7 +130,7 @@ export function createKnownThediracSitesLayerOL() {
   })
 
   return new VectorLayer({
-    properties: { title: RESEARCH_SITE_LAYER, type: 'overlay' },
+    properties: { title: THEDIRAC_RESEARCH_LAYER_NAME, type: 'overlay' },
     visible: false,
     opacity: 1,
     zIndex: 38,
@@ -271,5 +274,5 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'Waterlopen BD TOPAGE 2026': createFranceTopageWatercoursesLayerOL,
   'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
   'Oude bossen · Forêts anciennes': createFranceAncientForestsLayerOL,
-  [RESEARCH_SITE_LAYER]: createKnownThediracSitesLayerOL
+  [THEDIRAC_RESEARCH_LAYER_NAME]: createKnownThediracSitesLayerOL
 }
