@@ -9,17 +9,27 @@ interface ChangeLogModalProps {
 }
 
 const currentRelease = {
-  version: '2.33.23',
+  version: '2.33.24',
   date: '4 september 2026',
-  title: 'Bezienswaardigheden rond Thédirac',
+  title: 'Bestemming bepaalt de rit',
   changes: [
-    'Een aparte laag Bezienswaardigheden toont 37 echte bestemmingen rond Thédirac: grotten, kastelen en ruïnes, historische dorpen, natuur en oude bossen, uitzichtpunten en waterlandschap.',
-    'Ieder punt heeft een eigen categoriesymbool, een label bij verder inzoomen en een tweetalige popup met bezoekinformatie, openbare coördinaten, bron en een directe autoroute vanaf Thédirac.',
-    'De routeberekening vermeldt afstand en richttijd zonder verkeersdrukte. 34 plekken liggen binnen circa 63 minuten; Saint-Cirq-Lapopie, Padirac en Barrières staan eerlijk als randgebied op 67–71 minuten.'
+    'Bezienswaardigheden groeit van 37 naar 69 gecontroleerde plekken. De 32 aanvullingen leggen de nadruk op authentieke grotkunst, prehistorische en Romeinse sites, ruïnes, oud bos en uitzonderlijk landschap.',
+    'Prehistorie & archeologie is een eigen zevende categorie. Nieuwe popups leggen uit waarom een langere rit de moeite waard is en vermelden eerlijk replica’s, reservering, sluiting, trappen en zware toegang.',
+    'De reistijd is geen harde uurgrens meer: 66 bestemmingen liggen binnen circa drie uur. Niaux, Gargas en Pair-non-Pair blijven als expliciete uitzonderingen zichtbaar op circa 3 uur 02 tot 3 uur 13.'
   ]
 }
 
 const recentReleases = [
+  {
+    version: '2.33.23',
+    date: '4 september 2026',
+    title: 'Bezienswaardigheden rond Thédirac',
+    changes: [
+      'Een aparte laag Bezienswaardigheden toont 37 echte bestemmingen rond Thédirac: grotten, kastelen en ruïnes, historische dorpen, natuur en oude bossen, uitzichtpunten en waterlandschap.',
+      'Ieder punt heeft een eigen categoriesymbool, een label bij verder inzoomen en een tweetalige popup met bezoekinformatie, openbare coördinaten, bron en een directe autoroute vanaf Thédirac.',
+      'De routeberekening vermeldt afstand en richttijd zonder verkeersdrukte. 34 plekken liggen binnen circa 63 minuten; Saint-Cirq-Lapopie, Padirac en Barrières staan eerlijk als randgebied op 67–71 minuten.'
+    ]
+  },
   {
     version: '2.33.22',
     date: '3 september 2026',

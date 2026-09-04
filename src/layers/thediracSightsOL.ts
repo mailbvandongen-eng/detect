@@ -15,6 +15,7 @@ const THEDIRAC_ORIGIN = { lat: 44.6005861, lon: 1.3164838 }
 
 const categoryColors: Record<ThediracSightCategory, string> = {
   'grot-ondergronds': '#7c3aed',
+  'prehistorie-archeologie': '#0f766e',
   'kasteel-ruine': '#dc2626',
   'historisch-dorp': '#d97706',
   'natuur-bos': '#15803d',
@@ -24,6 +25,7 @@ const categoryColors: Record<ThediracSightCategory, string> = {
 
 const categoryLabels: Record<ThediracSightCategory, string> = {
   'grot-ondergronds': 'Grot & ondergronds / grotte & souterrain',
+  'prehistorie-archeologie': 'Prehistorie & archeologie / préhistoire & archéologie',
   'kasteel-ruine': 'Kasteel & ruïne / château & ruine',
   'historisch-dorp': 'Historisch dorp / village historique',
   'natuur-bos': 'Natuur & oud bos / nature & forêt ancienne',
@@ -35,6 +37,7 @@ const markerLabels: Record<ThediracSight['markerType'], string> = {
   ingang: 'Openbare ingang / entrée publique',
   bezoekerspunt: 'Bezoekerspunt / point d’accueil',
   plaatscentrum: 'Openbaar plaatscentrum / centre public',
+  toegangsroute: 'Exact publiek punt op toegangsroute / point public exact sur l’accès',
   uitzichtpunt: 'Openbaar uitzichtpunt / belvédère public',
   object: 'Openbaar objectpunt / point public de l’objet'
 }
@@ -51,6 +54,8 @@ function createSymbol(category: ThediracSightCategory) {
   switch (category) {
     case 'grot-ondergronds':
       return new RegularShape({ ...shared, points: 3, radius: 10, angle: Math.PI })
+    case 'prehistorie-archeologie':
+      return new RegularShape({ ...shared, points: 4, radius: 10, radius2: 4.5 })
     case 'kasteel-ruine':
       return new RegularShape({ ...shared, points: 4, radius: 9.5, angle: Math.PI / 4 })
     case 'historisch-dorp':
@@ -98,9 +103,10 @@ function mapUrl(site: ThediracSight) {
 }
 
 function driveStatus(site: ThediracSight) {
-  if (site.driveMinutes > 65) return 'Randgebied: iets meer dan een uur volgens de routeberekening'
-  if (site.driveMinutes > 60) return 'Circa een uur; route en verkeer kunnen dit verlengen'
-  return 'Binnen circa een uur volgens de routeberekening'
+  if (site.driveMinutes > 180) return 'Uitzonderlijke bestemming: iets meer dan 3 uur / destination exceptionnelle : un peu plus de 3 h'
+  if (site.driveMinutes > 120) return 'Grote dagtocht: circa 2–3 uur / grande excursion : environ 2–3 h'
+  if (site.driveMinutes > 65) return 'Dagtocht: circa 1–2 uur / excursion : environ 1–2 h'
+  return 'Regiobezoek: tot circa 1 uur / visite régionale : jusqu’à environ 1 h'
 }
 
 export function createThediracSightsLayerOL() {
@@ -122,8 +128,10 @@ export function createThediracSightsLayerOL() {
       'Description': site.descriptionFr,
       'Bezoek': site.visitNl,
       'Visite': site.visitFr,
+      'Waarom de rit waard': site.whyWorthItNl,
+      'Pourquoi le détour': site.whyWorthItFr,
       'Rijtijd vanaf Thédirac': `circa ${site.driveMinutes} min · ${site.driveKm.toFixed(1)} km enkele reis`,
-      'Rijtijdstatus': driveStatus(site),
+      'Dagtocht / excursion': driveStatus(site),
       'Routeberekening': 'OSRM-richtwaarde zonder actuele verkeersdrukte',
       'Marker / repère': markerLabels[site.markerType],
       'Coördinaten': `${site.lat.toFixed(6)}, ${site.lon.toFixed(6)}`,

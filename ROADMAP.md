@@ -97,11 +97,12 @@ Status: gereed en opgeschoond in 2.33.18.
 
 ### Stap 9 — bezienswaardigheden op rijafstand
 
-Status: gereed in 2.33.23.
+Status: uitgebreid in 2.33.24.
 
-- de aparte laag Bezienswaardigheden bevat 37 gecontroleerde publieke bestemmingen in zes herkenbare categorieën;
+- de aparte laag Bezienswaardigheden bevat 69 gecontroleerde publieke bestemmingen in zeven herkenbare categorieën, waaronder apart Prehistorie & archeologie;
 - iedere popup bevat een korte Nederlandse en Franse uitleg, bezoeknotitie, openbaar markerpunt, bronlink, autoroute en een OSRM-richttijd vanaf Thédirac zonder actuele verkeersdrukte;
-- 34 bestemmingen liggen binnen circa 63 minuten; Saint-Cirq-Lapopie, Gouffre de Padirac en het verlaten hameau Barrières blijven als bekende randgevallen zichtbaar op circa 67–71 minuten;
+- betekenis gaat voor een starre uurgrens: 66 bestemmingen liggen binnen circa drie uur; Niaux, Gargas en Pair-non-Pair blijven als expliciete uitzonderingen zichtbaar op circa 3 uur 02 tot 3 uur 13;
+- langere ritten krijgen een veld Waarom de rit waard; replica’s, tijdelijke sluiting, verplichte reservering, steile toegang en trappen worden zonder toeristische mist vermeld;
 - de selectie gebruikt echte grotten, kastelen, ruïnes, dorpen, bossen, natuurgebieden, uitzichtpunten en waterlandschappen; er zijn geen fictieve locaties toegevoegd.
 
 ## Volgende inhoudelijke richting

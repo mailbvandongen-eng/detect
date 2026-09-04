@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.24',
+    date: '4 september 2026',
+    title: 'Bestemming bepaalt de rit',
+    changes: [
+      'Bezienswaardigheden groeit van 37 naar 69 gecontroleerde plekken. De 32 aanvullingen leggen de nadruk op authentieke grotkunst, prehistorische en Romeinse sites, ruïnes, oud bos en uitzonderlijk landschap.',
+      'Prehistorie & archeologie is een eigen zevende categorie. Nieuwe popups leggen uit waarom een langere rit de moeite waard is en vermelden eerlijk replica’s, reservering, sluiting, trappen en zware toegang.',
+      'De reistijd is geen harde uurgrens meer: 66 bestemmingen liggen binnen circa drie uur. Niaux, Gargas en Pair-non-Pair blijven als expliciete uitzonderingen zichtbaar op circa 3 uur 02 tot 3 uur 13.'
+    ]
+  },
+  {
     version: '2.33.23',
     date: '4 september 2026',
     title: 'Bezienswaardigheden rond Thédirac',
