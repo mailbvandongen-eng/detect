@@ -4,6 +4,10 @@ import { fromLonLat } from 'ol/proj'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
 import { THEDIRAC_HIKES_LAYER_NAME } from '../data/thediracHikes'
+import {
+  THEDIRAC_FOSSILS_LAYER_NAME,
+  THEDIRAC_MINERALS_LAYER_NAME
+} from '../data/thediracGeologySites'
 import { useLayerStore } from './layerStore'
 import { useMapStore } from './mapStore'
 
@@ -31,6 +35,8 @@ const FRANCE_FIELD_LAYERS = [
   'Bodem/geologie 1:50.000 FR',
   'Oude bossen · Forêts anciennes',
   THEDIRAC_ARCHAEOLOGY_LAYER,
+  THEDIRAC_MINERALS_LAYER_NAME,
+  THEDIRAC_FOSSILS_LAYER_NAME,
   THEDIRAC_SIGHTS_LAYER_NAME,
   THEDIRAC_HIKES_LAYER_NAME
 ] as const
@@ -46,6 +52,8 @@ const FRANCE_RESEARCH_LAYER_NAMES = new Set([
   'OCS GE landbedekking 2021-2023',
   'Oude bossen · Forêts anciennes',
   THEDIRAC_ARCHAEOLOGY_LAYER,
+  THEDIRAC_MINERALS_LAYER_NAME,
+  THEDIRAC_FOSSILS_LAYER_NAME,
   THEDIRAC_SIGHTS_LAYER_NAME,
   THEDIRAC_HIKES_LAYER_NAME
 ])
@@ -172,6 +180,8 @@ const BUILT_IN_PRESETS: Preset[] = [
       'Bodem/geologie 1:50.000 FR': 0.28,
       'Oude bossen · Forêts anciennes': 0.38,
       [THEDIRAC_ARCHAEOLOGY_LAYER]: 1,
+      [THEDIRAC_MINERALS_LAYER_NAME]: 1,
+      [THEDIRAC_FOSSILS_LAYER_NAME]: 1,
       [THEDIRAC_SIGHTS_LAYER_NAME]: 1,
       [THEDIRAC_HIKES_LAYER_NAME]: 1
     },

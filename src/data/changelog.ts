@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.26',
+    date: '4 september 2026',
+    title: 'Mineralen en fossielen met bewijs',
+    changes: [
+      'Twee aparte puntlagen voegen 12 mineralogische locaties en 22 fossielvindplaatsen toe, geselecteerd uit de officieel gevalideerde INPG-inventaris en officiële bezoekersbronnen.',
+      'Alle mineralenlocaties liggen binnen circa 1½ uur, met twee expliciete OSRM-randgevallen van 92 en 95 minuten. Twintig fossielplekken liggen binnen circa 90 minuten; alleen de uitzonderlijk rijke publieksvindplaatsen Béon en Sansan staan als langere dagtocht op de kaart.',
+      'Iedere popup vermeldt terreintype, bewijs, zichtbaarheid aan het oppervlak, rijtijd, bron, markerprecisie, toegang en verzamelregels. Beschermd of privé blijft zichtbaar, maar wordt nooit als toestemming gepresenteerd.'
+    ]
+  },
+  {
     version: '2.33.25',
     date: '4 september 2026',
     title: 'Officiële wandelroutes als lijnen',

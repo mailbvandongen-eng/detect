@@ -75,11 +75,12 @@ Status: eerste uitwerking afgekeurd na veldtest en verwijderd in 2.33.18.
 
 Status: opgeschoond in 2.33.18.
 
-De Frankrijk-sectie gebruikt zes groepen:
+De Frankrijk-sectie gebruikt zeven groepen:
 
 - Terrein & reliëf;
 - Water & landschap;
 - Bodem & geologie;
+- Mineralen & fossielen;
 - Archeologie & historie;
 - Bezienswaardigheden.
 - Wandelroutes.
@@ -92,7 +93,7 @@ Status: gereed en opgeschoond in 2.33.18.
 
 - iedere release wordt pas afgetekend na productiebuild, docs-commit en Pages-deployment;
 - onderaan Presets staat Frankrijk · Thédirac, ook wanneer een oudere lokale of cloudlijst de preset nog niet kende;
-- Frankrijk · Thédirac gebruikt Hybride (wereld), opent de onderzoeksregio en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes, de 38 beschreven archeologische bronlocaties, Bezienswaardigheden en de officiële wandelroutes;
+- Frankrijk · Thédirac gebruikt Hybride (wereld), opent de onderzoeksregio en activeert de bewezen veldset: LiDAR HD, BD TOPAGE-water, OCS GE landbedekking, geologie 1:50.000, Forêts anciennes, de 38 beschreven archeologische bronlocaties, Mineralen, Fossielen, Bezienswaardigheden en de officiële wandelroutes;
 - BSS, IDPR, cavités en geologie + reliëf blijven handmatig beschikbaar maar worden niet automatisch over de veldkaart heen gelegd;
 - afgekeurde Thédirac-rasteranalyse wordt ook uit eerder opgeslagen presets gemigreerd.
 
@@ -115,6 +116,16 @@ Status: gereed in 2.33.25.
 - iedere popup vermeldt afstand, D+, duur, zwaarte, routevorm en markering, bijzonderheden, natuur en wildlife, klim- of klauterwerk, kniebelasting, omstandigheden, route naar de start en de officiële website en GPX;
 - de gekoppelde GPX van Micoque meet 12,3 km terwijl de bronpagina varianten van 8 en 15 km noemt; Pas de Cère toont de enkele lijn van 1 km terwijl de officiële afstand van 2 km heen-en-terug is. Beide bronafwijkingen staan zichtbaar in de popup;
 - tijdelijk gesloten routes zijn niet opgenomen. De Cantal-trail rond Bec de l’Aigle en Puy Griou staat eerlijk als gemarkeerde trailroute vermeld, inclusief ruimer te plannen wandeltijd en bergweerwaarschuwing.
+
+### Stap 11 — mineralen en fossielen
+
+Status: gereed in 2.33.26.
+
+- twee aparte puntlagen bevatten 12 mineralogische locaties en 22 fossielvindplaatsen uit de publiek gevalideerde INPG-inventaris, aangevuld met officiële bezoekers- en beheerbronnen;
+- de selectie onderscheidt bovengrondse ontsluitingen en steengroeven van ondergrondse mijnen, grotten en karstvullingen; een historisch rijke vindplaats wordt niet automatisch als actuele oppervlaktevondst verkocht;
+- vrijwel alles ligt binnen circa 1½ uur rijden vanaf Thédirac. Alleen de uitzonderlijk rijke, officieel bezoekbare paleosites Béon en Sansan zijn als langere fossieldagtocht opgenomen;
+- ieder punt vermeldt bewijs, geologische context, oppervlakte-status, rijtijd, bron, markerprecisie, toegang en verzamelregels. INPG-contourcentra worden nadrukkelijk niet als ingang of toestemming gepresenteerd;
+- verzamelen en prospecteren staat bij de Réserve naturelle nationale géologique du Lot en de beschermde géotopes Thézels en Combe Dorée als verboden. Verlaten mijnen, schachten en niet-openbare groeves krijgen een expliciete niet-betredenwaarschuwing.
 
 ## Volgende inhoudelijke richting
 

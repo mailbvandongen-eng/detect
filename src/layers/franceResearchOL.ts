@@ -16,8 +16,16 @@ import {
 } from '../data/thediracResearchSites'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
 import { THEDIRAC_HIKES_LAYER_NAME } from '../data/thediracHikes'
+import {
+  THEDIRAC_FOSSILS_LAYER_NAME,
+  THEDIRAC_MINERALS_LAYER_NAME
+} from '../data/thediracGeologySites'
 import { createThediracSightsLayerOL } from './thediracSightsOL'
 import { createThediracHikesLayerOL } from './thediracHikesOL'
+import {
+  createThediracFossilsLayerOL,
+  createThediracMineralsLayerOL
+} from './thediracGeologySitesOL'
 
 const IGN_WMTS = 'https://data.geopf.fr/wmts'
 const IGN_WMS = 'https://data.geopf.fr/wms-r/wms'
@@ -279,6 +287,8 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
   'Oude bossen · Forêts anciennes': createFranceAncientForestsLayerOL,
   [THEDIRAC_RESEARCH_LAYER_NAME]: createKnownThediracSitesLayerOL,
+  [THEDIRAC_MINERALS_LAYER_NAME]: createThediracMineralsLayerOL,
+  [THEDIRAC_FOSSILS_LAYER_NAME]: createThediracFossilsLayerOL,
   [THEDIRAC_SIGHTS_LAYER_NAME]: createThediracSightsLayerOL,
   [THEDIRAC_HIKES_LAYER_NAME]: createThediracHikesLayerOL
 }

@@ -9,17 +9,27 @@ interface ChangeLogModalProps {
 }
 
 const currentRelease = {
-  version: '2.33.25',
+  version: '2.33.26',
   date: '4 september 2026',
-  title: 'Officiële wandelroutes als lijnen',
+  title: 'Mineralen en fossielen met bewijs',
   changes: [
-    'Een aparte laag Spectaculaire wandelroutes toont elf echte routegeometrieën uit officiële GPX-downloads; geen punten en geen met de hand getekende benaderingen.',
-    'De selectie loopt van de kliffen en watervallen van Lot en Dordogne via de kloven van Aveyron tot de vulkaanruggen van de Cantal. Makkelijk, gemiddeld en zwaar hebben herkenbare groene, oranje en rode lijnen.',
-    'Een tik op een route toont afstand, D+, duur, markering, landschap en wildlife, klim- of klauterwerk, knie- en terreinwaarschuwingen, route naar de start, officiële website en officiële GPX.'
+    'Twee aparte puntlagen voegen 12 mineralogische locaties en 22 fossielvindplaatsen toe, geselecteerd uit de officieel gevalideerde INPG-inventaris en officiële bezoekersbronnen.',
+    'Alle mineralenlocaties liggen binnen circa 1½ uur, met twee expliciete OSRM-randgevallen van 92 en 95 minuten. Twintig fossielplekken liggen binnen circa 90 minuten; alleen de uitzonderlijk rijke publieksvindplaatsen Béon en Sansan staan als langere dagtocht op de kaart.',
+    'Iedere popup vermeldt terreintype, bewijs, zichtbaarheid aan het oppervlak, rijtijd, bron, markerprecisie, toegang en verzamelregels. Beschermd of privé blijft zichtbaar, maar wordt nooit als toestemming gepresenteerd.'
   ]
 }
 
 const recentReleases = [
+  {
+    version: '2.33.25',
+    date: '4 september 2026',
+    title: 'Officiële wandelroutes als lijnen',
+    changes: [
+      'Een aparte laag Spectaculaire wandelroutes toont elf echte routegeometrieën uit officiële GPX-downloads; geen punten en geen met de hand getekende benaderingen.',
+      'De selectie loopt van de kliffen en watervallen van Lot en Dordogne via de kloven van Aveyron tot de vulkaanruggen van de Cantal. Makkelijk, gemiddeld en zwaar hebben herkenbare groene, oranje en rode lijnen.',
+      'Een tik op een route toont afstand, D+, duur, markering, landschap en wildlife, klim- of klauterwerk, knie- en terreinwaarschuwingen, route naar de start, officiële website en officiële GPX.'
+    ]
+  },
   {
     version: '2.33.24',
     date: '4 september 2026',

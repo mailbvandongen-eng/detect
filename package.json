@@ -1,7 +1,7 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.25",
+  "version": "2.33.26",
   "type": "module",
   "scripts": {
     "dev": "vite",

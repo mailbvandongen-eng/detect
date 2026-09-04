@@ -5,6 +5,10 @@ import { FRANCE_RESEARCH_FACTORIES } from '../../layers/franceResearchOL'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../../data/thediracResearchSites'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../../data/thediracSights'
 import { THEDIRAC_HIKES_LAYER_NAME } from '../../data/thediracHikes'
+import {
+  THEDIRAC_FOSSILS_LAYER_NAME,
+  THEDIRAC_MINERALS_LAYER_NAME
+} from '../../data/thediracGeologySites'
 
 const TERRAIN = [
   ['LiDAR HD terrein FR', 0.78]
@@ -21,6 +25,11 @@ const SOIL_GEOLOGY = [
   ['BRGM boringen · BSS', 1],
   ['BRGM IDPR · infiltratie/afstroming', 0.55],
   ['BRGM cavités · ondergrondse holtes', 1]
+] as const
+
+const GEOLOGICAL_FINDS = [
+  [THEDIRAC_MINERALS_LAYER_NAME, 1],
+  [THEDIRAC_FOSSILS_LAYER_NAME, 1]
 ] as const
 
 const ARCHAEOLOGY_HISTORY = [
@@ -40,6 +49,7 @@ export const FRANCE_RESEARCH_LAYERS = [
   ...TERRAIN,
   ...WATER_LANDSCAPE,
   ...SOIL_GEOLOGY,
+  ...GEOLOGICAL_FINDS,
   ...ARCHAEOLOGY_HISTORY,
   ...SIGHTS,
   ...HIKES
@@ -118,6 +128,7 @@ export function FranceResearchLayers() {
       <ResearchFolder title="Terrein & reliëf" layers={TERRAIN} />
       <ResearchFolder title="Water & landschap" layers={WATER_LANDSCAPE} />
       <ResearchFolder title="Bodem & geologie" layers={SOIL_GEOLOGY} />
+      <ResearchFolder title="Mineralen & fossielen" layers={GEOLOGICAL_FINDS} />
       <ResearchFolder title="Archeologie & historie" layers={ARCHAEOLOGY_HISTORY} />
       <ResearchFolder title="Bezienswaardigheden" layers={SIGHTS} />
       <ResearchFolder title="Wandelroutes" layers={HIKES} />
