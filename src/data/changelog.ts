@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.28',
+    date: '5 september 2026',
+    title: 'Referentielijnen onder de punten',
+    changes: [
+      'De lichte gele en witte lijnen op de hybride luchtfoto zijn wegen uit de OpenFreeMap/OpenStreetMap-referentielaag; het zijn geen onderzoeksroutes of verbindingen tussen vindplaatsen.',
+      'De referentielaag verhuist van z-index 110 naar 17, zodat kaartpunten en thematische lijnen er voortaan boven worden getekend.',
+      'Wegen en overige referentielijnen zijn 28 procent dunner gemaakt. De blauwe BD TOPAGE-waterlopen blijven ongewijzigd.'
+    ]
+  },
+  {
     version: '2.33.27',
     date: '5 september 2026',
     title: 'Brede regioscan toegevoegd',

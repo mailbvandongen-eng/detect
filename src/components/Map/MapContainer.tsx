@@ -14,6 +14,7 @@ const ESRI_HYBRID_REFERENCE_STYLE_URL = 'https://cdn.arcgis.com/sharing/rest/con
 const OPENFREEMAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty'
 const PDOK_WMTS_CAPABILITIES_URL = 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0?request=GetCapabilities&service=WMTS'
 const WAYBACK_WMTS_CAPABILITIES_URL = 'https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/WMTS/1.0.0/WMTSCapabilities.xml'
+const REFERENCE_LINE_WIDTH_SCALE = 0.72
 
 const BASE_LAYERS = [
   'Esri (licht)',
@@ -45,10 +46,46 @@ interface MapboxStyleLayer {
   id?: string
   type?: string
   source?: string
+  paint?: Record<string, unknown>
 }
 
 interface MapboxStyleDocument {
   layers?: MapboxStyleLayer[]
+}
+
+function scaleReferenceLineWidth(width: unknown): unknown {
+  if (typeof width === 'number') return width * REFERENCE_LINE_WIDTH_SCALE
+  if (Array.isArray(width)) return ['*', REFERENCE_LINE_WIDTH_SCALE, width]
+  if (!width || typeof width !== 'object') return width
+
+  const legacyWidth = { ...width } as Record<string, unknown>
+  if (Array.isArray(legacyWidth.stops)) {
+    legacyWidth.stops = legacyWidth.stops.map(stop => (
+      Array.isArray(stop) && typeof stop[1] === 'number'
+        ? [stop[0], stop[1] * REFERENCE_LINE_WIDTH_SCALE]
+        : stop
+    ))
+  }
+  if (typeof legacyWidth.default === 'number') {
+    legacyWidth.default *= REFERENCE_LINE_WIDTH_SCALE
+  }
+
+  return legacyWidth
+}
+
+function thinReferenceLineWidths(style: MapboxStyleDocument): MapboxStyleDocument {
+  const lineWidthProperties = ['line-width', 'line-gap-width']
+
+  style.layers?.forEach(layer => {
+    if (layer.type !== 'line' || !layer.paint) return
+
+    lineWidthProperties.forEach(property => {
+      const width = layer.paint?.[property]
+      if (width !== undefined) layer.paint![property] = scaleReferenceLineWidth(width)
+    })
+  })
+
+  return style
 }
 
 function capabilityLayers(capabilities: any): any[] {
@@ -255,7 +292,8 @@ export function MapContainer() {
       properties: { title: 'Hybrid Reference Overlay', type: 'overlay' },
       visible: false,
       declutter: true,
-      zIndex: 110
+      // Onder alle puntlagen, maar boven de basiskaart en rasteranalyses.
+      zIndex: 17
     })
 
     const syncHybridReferenceVisibility = () => {
@@ -267,18 +305,22 @@ export function MapContainer() {
         const response = await fetch(OPENFREEMAP_STYLE_URL)
         if (!response.ok) throw new Error(`OpenFreeMap style HTTP ${response.status}`)
 
-        const style = await response.json() as MapboxStyleDocument
+        const style = thinReferenceLineWidths(await response.json() as MapboxStyleDocument)
         const referenceLayerIds = openFreeMapReferenceLayerIds(style)
         if (referenceLayerIds.length === 0) throw new Error('Geen bruikbare referentielagen in OpenFreeMap style')
 
-        await applyStyle(hybridReferenceLayer, style, referenceLayerIds)
+        await applyStyle(hybridReferenceLayer, style, referenceLayerIds, OPENFREEMAP_STYLE_URL)
         hybridReferenceLayer.getSource()?.setAttributions('OpenFreeMap © OpenMapTiles · Data from OpenStreetMap')
         syncHybridReferenceVisibility()
         console.log(`OpenFreeMap reference loaded (${referenceLayerIds.length} style layers)`)
       } catch (openFreeMapError) {
         console.warn('OpenFreeMap reference niet beschikbaar, Esri fallback wordt gebruikt', openFreeMapError)
         try {
-          await applyStyle(hybridReferenceLayer, ESRI_HYBRID_REFERENCE_STYLE_URL)
+          const response = await fetch(ESRI_HYBRID_REFERENCE_STYLE_URL)
+          if (!response.ok) throw new Error(`Esri reference style HTTP ${response.status}`)
+
+          const style = thinReferenceLineWidths(await response.json() as MapboxStyleDocument)
+          await applyStyle(hybridReferenceLayer, style, undefined, ESRI_HYBRID_REFERENCE_STYLE_URL)
           syncHybridReferenceVisibility()
         } catch (esriError) {
           hybridReferenceLayer.setVisible(false)
