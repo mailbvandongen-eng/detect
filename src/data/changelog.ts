@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.27',
+    date: '5 september 2026',
+    title: 'Brede regioscan toegevoegd',
+    changes: [
+      'De brede regioscan voegt 6 bewezen fossiellocaties, 2 archeologische contextsites en 8 officiële bezienswaardigheden of geosites toe. De mineralenlaag blijft bewust ongewijzigd omdat extra BRGM-indices geen betrouwbare publieks- of oppervlakteplekken opleverden.',
+      'Spectaculaire wandelroutes groeit van 11 naar 15 officiële GPX-lijnen met Ouysse–Alzou, À Vercinge(to)ry, Pierre-Levée langs Vieux Sauliac en Monteils langs de Célé-kliffen.',
+      'Privéterrein, groeve- en weggevaar, beschermde no-detectsites en tijdelijke sluiting worden expliciet gemeld. Roucadour blijft zichtbaar voor het archeologische beeld, maar is niet bezoekbaar.'
+    ]
+  },
+  {
     version: '2.33.26',
     date: '4 september 2026',
     title: 'Mineralen en fossielen met bewijs',

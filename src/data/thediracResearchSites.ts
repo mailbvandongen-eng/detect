@@ -718,6 +718,46 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
     locationQuality: 'source-centroid',
     locationNoteNl: 'Officieel punt van het beschermde kasteelensemble; de resten beslaan meerdere percelen.',
     locationNoteFr: 'Point officiel de l’ensemble castral protégé ; les vestiges couvrent plusieurs parcelles.'
+  },
+  {
+    id: 'grotte-roucadour',
+    category: 'prehistorie',
+    siteTypeNl: 'Versierde grot en bewoningscontext',
+    siteTypeFr: 'Grotte ornée et contexte d’occupation',
+    nameNl: 'Grotte de Roucadour',
+    nameFr: 'Grotte de Roucadour',
+    lon: 1.815295,
+    lat: 44.721176,
+    periodNl: 'Paleolithicum tot Neolithicum; versieringen vooral Gravettien',
+    periodFr: 'Paléolithique au Néolithique ; art principalement gravettien',
+    descriptionNl: 'Belangrijk maar niet bezoekbaar grotheiligdom met 495 geregistreerde motieven, waaronder 139 dieren zoals paarden, katachtigen, reuzenherten, bizons en mammoeten. Latere bewoning uit het Mesolithicum en Neolithicum is eveneens aangetoond. De grot is afgesloten voor conservering: niet naar de ingang gaan, niet betreden en niet detecteren.',
+    descriptionFr: 'Important sanctuaire souterrain non visitable comptant 495 motifs recensés, dont 139 animaux : chevaux, félins, mégacéros, bisons et mammouths. Des occupations mésolithiques et néolithiques sont aussi attestées. La grotte est fermée pour sa conservation : ne pas chercher l’entrée, ne pas pénétrer et ne pas prospecter.',
+    source: 'Ministère de la Culture — Grands sites archéologiques / Roucadour',
+    sourceUrl: 'https://archeologie.culture.gouv.fr/fr/roucadour',
+    protected: true,
+    locationQuality: 'exact',
+    locationNoteNl: 'Openbaar gepubliceerd monumentpunt; geen bezoekersingang en geen toestemming om het terrein te betreden.',
+    locationNoteFr: 'Point monumental publié ; ni entrée de visite ni autorisation d’accéder au terrain.'
+  },
+  {
+    id: 'archeosite-fieux',
+    category: 'prehistorie',
+    siteTypeNl: 'Prehistorische grotval en archeosite',
+    siteTypeFr: 'Piège naturel préhistorique et archéosite',
+    nameNl: 'Archéosite des Fieux',
+    nameFr: 'Archéosite des Fieux',
+    lon: 1.68822526,
+    lat: 44.8767191,
+    periodNl: 'Midden-Paleolithicum tot recente prehistorie; circa 80.000 jaar gebruik',
+    periodFr: 'Paléolithique moyen à la Préhistoire récente ; environ 80 000 ans d’utilisation',
+    descriptionNl: 'Een natuurlijke holte die bijna 80.000 jaar als dierenval en jachtplaats is gebruikt. De archeosite presenteert ook een versierde grot via beeldmateriaal en activiteiten. De publieksstatus verandert: controleer de officiële heropening vóór vertrek. Buiten het bezoekersparcours geldt beschermd/no-detectterrein.',
+    descriptionFr: 'Cavité naturelle utilisée pendant près de 80 000 ans comme piège à animaux et lieu de chasse. L’archéosite présente aussi une grotte ornée par images et animations. Le statut d’ouverture évolue : vérifier la réouverture officielle avant le départ. Hors parcours, site protégé et sans prospection.',
+    source: 'Parc naturel régional des Causses du Quercy — Archéosite des Fieux',
+    sourceUrl: 'https://www.parc-causses-du-quercy.fr/fiche-tourisme/archeosite-des-fieux-prehistoire/',
+    protected: true,
+    locationQuality: 'exact',
+    locationNoteNl: 'Officieel bezoekerspunt; opening vooraf controleren en uitsluitend het toegestane parcours volgen.',
+    locationNoteFr: 'Point d’accueil officiel ; vérifier l’ouverture et rester exclusivement sur le parcours autorisé.'
   }
 ]
 

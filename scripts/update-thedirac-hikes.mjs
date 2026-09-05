@@ -76,6 +76,30 @@ const routes = [
     distanceKm: 2,
     geometryDistanceKm: 1,
     gpxUrl: 'https://static.apidae-tourisme.com/filestore/objets-touristiques/plans/132/227/27583364/parcours_2647159.gpx'
+  },
+  {
+    id: 'ouysse-alzou-ens',
+    file: 'ouysse-alzou.gpx',
+    distanceKm: 7.4,
+    gpxUrl: 'https://cdt46.media.tourinsoft.eu/upload/circuit-ens-entre-ouysse-et-alzou.gpx'
+  },
+  {
+    id: 'vercingetory',
+    file: 'vercingetory.gpx',
+    distanceKm: 14.9,
+    gpxUrl: 'https://cdt46.media.tourinsoft.eu/upload/a-vercingetory.gpx'
+  },
+  {
+    id: 'pierre-levee',
+    file: 'pierre-levee.gpx',
+    distanceKm: 4.1,
+    gpxUrl: 'https://cdt46.media.tourinsoft.eu/upload/le-chemin-de-la-pierre-levee.gpx'
+  },
+  {
+    id: 'monteils',
+    file: 'monteils.gpx',
+    distanceKm: 12.7,
+    gpxUrl: 'https://cdt46.media.tourinsoft.eu/upload/monteils.gpx'
   }
 ]
 
