@@ -179,11 +179,12 @@ export function ChangeLogModal({ isOpen, onClose }: ChangeLogModalProps) {
     onClose()
   }
 
-  const curatedReleases = version === currentRelease.version
-    ? [currentRelease, ...recentReleases]
-    : [...recentReleases]
-  const curatedVersions = new Set(curatedReleases.map(entry => entry.version))
-  const entries = [...curatedReleases, ...CHANGELOG.filter(entry => !curatedVersions.has(entry.version))]
+  const curatedReleases = [currentRelease, ...recentReleases]
+  const entries = Array.from(
+    new Map(
+      [...curatedReleases, ...CHANGELOG].map(entry => [entry.version, entry])
+    ).values()
+  ).sort((a, b) => b.version.localeCompare(a.version, undefined, { numeric: true }))
 
   return (
     <AppWindow

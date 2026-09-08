@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.30',
+    date: '8 september 2026',
+    title: 'Wijzigingsvenster toont de juiste release',
+    changes: [
+      'Het wijzigingsvenster zet voortaan altijd de werkelijk actieve Detect-versie bovenaan en geeft alleen die versie het label Nieuw.',
+      'Oudere handmatig samengestelde releaseberichten blijven in de juiste volgorde beschikbaar zonder de actuele update naar halverwege de geschiedenis te duwen.'
+    ]
+  },
+  {
     version: '2.33.29',
     date: '8 september 2026',
     title: 'Tijdreis uit de weg wanneer jij dat wilt',
