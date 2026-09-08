@@ -7,6 +7,14 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.31',
+    date: '8 september 2026',
+    title: 'Schaalbalk echt boven de knoppen',
+    changes: [
+      'De schaalbalk gebruikt nu dezelfde vaste schermonderrand als GPS en zoom. Daardoor kan de Android-app hem niet meer vanuit een afwijkende kaartcontainer onder de GPS-knop schuiven.'
+    ]
+  },
+  {
     version: '2.33.30',
     date: '8 september 2026',
     title: 'Wijzigingsvenster toont de juiste release',

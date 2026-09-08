@@ -683,10 +683,15 @@ html, body, #root {
 }
 
 /* ============================================================
-   OPENLAYERS SCALE LINE - Gecentreerd onderaan, dunne lijn
+   OPENLAYERS SCALE LINE - vast boven de onderste kaartknoppen
    ============================================================ */
 .ol-scale-line {
-  position: absolute !important;
+  /*
+   * GPS en zoom zijn fixed. De schaal moet hetzelfde coördinatenstelsel
+   * gebruiken; 100dvh en de Android-PWA-kaartcontainer kunnen anders enkele
+   * tientallen pixels uiteenlopen.
+   */
+  position: fixed !important;
   bottom: max(64px, calc(env(safe-area-inset-bottom, 0px) + 64px)) !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
