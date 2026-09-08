@@ -32,7 +32,31 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
       setMap(map)
       ;(window as any).__olMap = map
     }
+
+    const map = mapRef.current
+    if (!map) return
+
+    let resizeFrame: number | null = null
+    const syncMapSize = () => {
+      if (resizeFrame !== null) cancelAnimationFrame(resizeFrame)
+      resizeFrame = requestAnimationFrame(() => {
+        map.updateSize()
+        resizeFrame = null
+      })
+    }
+    const visualViewport = window.visualViewport
+
+    window.addEventListener('resize', syncMapSize)
+    visualViewport?.addEventListener('resize', syncMapSize)
+    visualViewport?.addEventListener('scroll', syncMapSize)
+    syncMapSize()
+
     return () => {
+      window.removeEventListener('resize', syncMapSize)
+      visualViewport?.removeEventListener('resize', syncMapSize)
+      visualViewport?.removeEventListener('scroll', syncMapSize)
+      if (resizeFrame !== null) cancelAnimationFrame(resizeFrame)
+
       if (mapRef.current) {
         mapRef.current.setTarget(undefined)
         setMap(null)
@@ -47,14 +71,6 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
     if (showScaleBar) {
       if (!scaleLineRef.current) {
         const scale = new ScaleLine({ units: 'metric', bar: false, text: true, minWidth: 72 })
-        const element = scale.element as HTMLElement
-        // The stylesheet intentionally uses !important, so set the mobile-safe position at the same priority.
-        element.style.setProperty('bottom', '72px', 'important')
-        element.style.setProperty('left', '50%', 'important')
-        element.style.setProperty('right', 'auto', 'important')
-        element.style.setProperty('transform', 'translateX(-50%)', 'important')
-        element.style.setProperty('pointer-events', 'none', 'important')
-        element.style.opacity = '0.82'
         scaleLineRef.current = scale
         map.addControl(scale)
       }

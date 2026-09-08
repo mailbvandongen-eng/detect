@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import 'ol/ol.css'
 import { Tile as TileLayer } from 'ol/layer'
 import VectorTileLayer from 'ol/layer/VectorTile'
@@ -195,6 +195,7 @@ function shouldShowRichReference(): boolean {
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
   const initialBgApplied = useRef(false)
+  const timeTravelDragStartY = useRef<number | null>(null)
   const pdokLayerRef = useRef<TileLayer | null>(null)
   const worldArchiveLayerRef = useRef<TileLayer | null>(null)
   const pdokCapabilitiesRef = useRef<any>(null)
@@ -206,6 +207,7 @@ export function MapContainer() {
   const [worldReleases, setWorldReleases] = useState<ArchiveRelease[]>([])
   const [worldYear, setWorldYear] = useState(2026)
   const [worldStatus, setWorldStatus] = useState<ArchiveStatus>('loading')
+  const [timeTravelCollapsed, setTimeTravelCollapsed] = useState(false)
 
   useMap({ target: 'map' })
   const map = useMapStore(state => state.map)
@@ -518,34 +520,79 @@ export function MapContainer() {
   const selectedWorldIndex = Math.max(0, worldReleases.findIndex(release => release.year === worldYear))
   const selectedWorldRelease = worldReleases.find(release => release.year === worldYear)
   const timeTravelVisible = activeBaseLayer === 'Luchtfoto' || activeBaseLayer === 'Satelliet (wereld)'
+  const timeTravelYear = activeBaseLayer === 'Luchtfoto'
+    ? pdokStatus === 'ready' ? String(pdokYear) : 'actueel'
+    : worldStatus === 'ready' ? String(worldYear) : 'actueel'
+  const timeTravelName = activeBaseLayer === 'Luchtfoto' ? 'Luchtfoto NL' : 'Satelliet wereld'
+
+  const handleTimeTravelGripPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    timeTravelDragStartY.current = event.clientY
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const handleTimeTravelGripPointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const startY = timeTravelDragStartY.current
+    timeTravelDragStartY.current = null
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+
+    if (startY !== null && event.clientY - startY >= 24) {
+      setTimeTravelCollapsed(true)
+    }
+  }
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+    <div className="detect-map-viewport">
       <div
         id="map"
         ref={containerRef}
-        style={{ width: '100%', height: '100vh' }}
       />
 
-      {timeTravelVisible && (
-        <div
+      {timeTravelVisible && timeTravelCollapsed && (
+        <button
+          type="button"
+          className="time-travel-reopen"
+          aria-label={`${timeTravelName} tijdreis openen, huidig jaar ${timeTravelYear}`}
+          aria-expanded="false"
+          title="Tijdreis openen"
           onPointerDown={event => event.stopPropagation()}
-          onClick={event => event.stopPropagation()}
-          style={{
-            position: 'absolute',
-            left: '50%',
-            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
-            transform: 'translateX(-50%)',
-            width: 'min(430px, 92vw)',
-            zIndex: 1200,
-            background: 'rgba(255,255,255,0.94)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(148,163,184,0.45)',
-            borderRadius: 12,
-            padding: '10px 12px',
-            boxShadow: '0 5px 18px rgba(15,23,42,0.22)'
+          onClick={event => {
+            event.stopPropagation()
+            setTimeTravelCollapsed(false)
           }}
         >
+          <span>{timeTravelYear}</span>
+          <span aria-hidden="true">▲</span>
+        </button>
+      )}
+
+      {timeTravelVisible && !timeTravelCollapsed && (
+        <div
+          className="time-travel-panel"
+          role="region"
+          aria-label={`${timeTravelName} tijdreis`}
+          onPointerDown={event => event.stopPropagation()}
+          onClick={event => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            className="time-travel-collapse-handle"
+            aria-label="Tijdreisbalk minimaliseren"
+            aria-expanded="true"
+            title="Tik of veeg omlaag om te minimaliseren"
+            onPointerDown={handleTimeTravelGripPointerDown}
+            onPointerUp={handleTimeTravelGripPointerUp}
+            onPointerCancel={() => { timeTravelDragStartY.current = null }}
+            onClick={event => {
+              event.stopPropagation()
+              setTimeTravelCollapsed(true)
+            }}
+          >
+            <span className="time-travel-grip" aria-hidden="true" />
+          </button>
+
           {activeBaseLayer === 'Luchtfoto' && (
             <>
               <div className="flex items-center justify-between gap-3 text-sm font-medium text-gray-800">

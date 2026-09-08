@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.29',
+    date: '8 september 2026',
+    title: 'Tijdreis uit de weg wanneer jij dat wilt',
+    changes: [
+      'De luchtfoto- en satelliettijdreis blijft bij het openen volledig boven de kaart zweven, maar kan voortaan met de handgreep worden aangetikt of omlaag geveegd.',
+      'Ingeklapt blijft alleen een compact jaartalknopje rechts boven Transparantie staan. Het gekozen jaar en de ingeklapte stand blijven behouden wanneer GPS of een preset wordt gebruikt.',
+      'De gewone mobiele browser en de geïnstalleerde snelkoppeling gebruiken nu dezelfde dynamische schermhoogte. De schaalbalk heeft nog maar één positie en blijft daardoor netjes boven de onderste kaartknoppen staan.'
+    ]
+  },
+  {
     version: '2.33.28',
     date: '5 september 2026',
     title: 'Referentielijnen onder de punten',
