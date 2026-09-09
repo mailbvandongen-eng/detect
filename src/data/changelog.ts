@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.33',
+    date: '9 september 2026',
+    title: 'Nieuw Detect-icoon',
+    changes: [
+      'Het generieke vizier maakt plaats voor een eigen Detect-icoon: een witte detectorspoel op donkerpaars, met één goudgele vondststip.',
+      'Het nieuwe ontwerp wordt gebruikt als browserfavicon, Apple-aanraakicoon en PWA-snelkoppeling en blijft ook op klein formaat herkenbaar.'
+    ]
+  },
+  {
     version: '2.33.32',
     date: '9 september 2026',
     title: 'Transparantie weer compact',
