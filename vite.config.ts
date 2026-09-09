@@ -25,7 +25,7 @@ export default defineConfig({
     noJekyllPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'favicon.svg', 'icon-192.png', 'icon-512.png'],
+      includeAssets: ['favicon-23334.ico', 'favicon-23334.svg', 'icon-192-23334.png', 'icon-512-23334.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         globIgnores: ['**/data/**', '**/assets/arcgis/**'],
@@ -174,12 +174,12 @@ export default defineConfig({
         scope: '/detect/',
         icons: [
           {
-            src: 'icon-192.png',
+            src: 'icon-192-23334.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'icon-512.png',
+            src: 'icon-512-23334.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'

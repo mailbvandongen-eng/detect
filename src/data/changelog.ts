@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.34',
+    date: '9 september 2026',
+    title: 'Android herkent het nieuwe icoon',
+    changes: [
+      'De favicon- en PWA-iconen hebben nieuwe versiegebonden bestandsnamen, zodat Android de wijziging niet langer als hetzelfde oude icoon behandelt.',
+      'Lokale kaart-, laag- en siteopslag blijft bij deze update volledig onaangeraakt en hoeft niet te worden gewist.'
+    ]
+  },
+  {
     version: '2.33.33',
     date: '9 september 2026',
     title: 'Nieuw Detect-icoon',
