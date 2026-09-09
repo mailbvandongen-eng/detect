@@ -213,7 +213,7 @@ const BASE_LAYER_NAMES = [
 
 const BUILT_IN_PRESET_MAP = new Map(BUILT_IN_PRESETS.map((preset) => [preset.id, preset]))
 const NEW_RESEARCH_PRESET_IDS = new Set(['lidar-hoogte', 'bodem-landschap', 'percelen-historie', 'frankrijk'])
-const REQUIRED_PRESET_IDS = new Set(['frankrijk'])
+const ALWAYS_AVAILABLE_PRESET_IDS = new Set(['frankrijk'])
 const REMOVED_LAYERS = new Set([
   'Kringloopwinkels',
   'Ruiterpaden',
@@ -261,16 +261,15 @@ function normalizePreset(preset: Preset): Preset {
     }
   }
 
+  // Ingebouwde presets leveren alleen migratie-fallbacks. Een bestaande preset
+  // blijft van de gebruiker: verwijderde lagen mogen bij herstart of cloud-sync
+  // niet stilletjes uit de ingebouwde definitie worden teruggezet.
   const configuredLayers = (preset.layers ?? builtInPreset.layers).map(migrateFranceLayerName)
-  const layers = REQUIRED_PRESET_IDS.has(preset.id)
-    ? [...new Set([...configuredLayers, ...builtInPreset.layers])]
-    : configuredLayers
 
   return {
     ...builtInPreset,
     ...preset,
-    name: REQUIRED_PRESET_IDS.has(preset.id) ? builtInPreset.name : preset.name,
-    layers: layers.filter((layer) => !REMOVED_LAYERS.has(layer)),
+    layers: configuredLayers.filter((layer) => !REMOVED_LAYERS.has(layer)),
     baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
     layerOpacities: normalizeLayerOpacities(preset.layerOpacities ?? builtInPreset.layerOpacities),
     mapView: preset.mapView ?? builtInPreset.mapView
@@ -281,7 +280,7 @@ export function normalizePresetCollection(presets: Preset[]): Preset[] {
   const normalized = presets.map(normalizePreset)
   const existingIds = new Set(normalized.map((preset) => preset.id))
   const requiredPresets = BUILT_IN_PRESETS.filter(
-    (preset) => REQUIRED_PRESET_IDS.has(preset.id) && !existingIds.has(preset.id)
+    (preset) => ALWAYS_AVAILABLE_PRESET_IDS.has(preset.id) && !existingIds.has(preset.id)
   )
 
   return [...normalized, ...requiredPresets]
@@ -452,7 +451,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 26,
+      version: 27,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {

@@ -160,7 +160,9 @@ function InfoTab() {
           <ul className="list-disc list-inside ml-2 text-xs space-y-1">
             <li>Je eigen aangemaakte lagen (Mijn Lagen)</li>
             <li>Je vondsten registraties</li>
+            <li>Je opgeslagen routes</li>
             <li>Je preset-instellingen</li>
+            <li>Je algemene app-instellingen</li>
           </ul>
           <p>
             <strong>Wat NIET wordt gedeeld:</strong>

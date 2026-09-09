@@ -8,6 +8,7 @@ import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS'
 import { applyStyle } from 'ol-mapbox-style'
 import { useMap } from '../../hooks/useMap'
 import { useLayerStore, useMapStore, useSettingsStore, useGPSStore, useUIStore } from '../../store'
+import { normalizeWaybackCapabilitiesXml } from '../../utils/wmtsCapabilities'
 
 const ESRI_WORLD_IMAGERY_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 const ESRI_HYBRID_REFERENCE_STYLE_URL = 'https://cdn.arcgis.com/sharing/rest/content/items/30d6b8271e1849cd9c3042060001f425/resources/styles/root.json'
@@ -434,7 +435,7 @@ export function MapContainer() {
       })
       .then(text => {
         if (cancelled) return
-        const capabilities = new WMTSCapabilities().read(text)
+        const capabilities = new WMTSCapabilities().read(normalizeWaybackCapabilitiesXml(text))
         const releases = waybackReleasesFromCapabilities(capabilities)
         if (releases.length === 0) throw new Error('Geen Esri Wayback-jaargangen gevonden')
 

@@ -292,7 +292,8 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                         <strong>Wat wordt gesynchroniseerd:</strong><br/>
                         • Mijn Lagen (eigen punten)<br/>
                         • Vondsten registraties<br/>
-                        • Opgeslagen routes
+                        • Opgeslagen routes<br/>
+                        • Presets en algemene instellingen
                       </p>
                     </div>
                     <div className="p-2 bg-blue-50 rounded-lg">
@@ -302,7 +303,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     </div>
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
-                    Presets en algemene instellingen blijven lokaal op het apparaat. Gebruik Synchroniseren in het menu om de cloud-sync handmatig uit te voeren.
+                    Gebruik Synchroniseren in het menu om lokale wijzigingen direct met je andere apparaten gelijk te trekken.
                   </p>
                 </Section>
 

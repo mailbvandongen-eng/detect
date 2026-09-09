@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.35',
+    date: '9 september 2026',
+    title: 'Wayback en preset-sync hersteld',
+    changes: [
+      'Esri Wayback wordt weer ingelezen nadat Esri de WMTS-namespace-URI’s van http naar https wijzigde; de wereldsatelliettijdreis toont opnieuw de beschikbare archiefjaren.',
+      'Een aangepaste Frankrijk · Thédirac-preset wordt bij herstart niet meer met de ingebouwde standaardlagen aangevuld. Opgeslagen wijzigingen blijven daardoor lokaal én via Google-sync gelijk op andere apparaten.',
+      'De handleiding vermeldt nu correct dat presets en algemene instellingen onderdeel zijn van Google-sync.'
+    ]
+  },
+  {
     version: '2.33.34',
     date: '9 september 2026',
     title: 'Android herkent het nieuwe icoon',
