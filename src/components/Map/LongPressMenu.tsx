@@ -1,11 +1,12 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { MapBrowserEvent } from 'ol'
-import { X, MapPin, Plus, ExternalLink, Layers, ChevronRight, Check, Camera, Settings2, Crosshair, PersonStanding } from 'lucide-react'
+import { X, MapPin, Plus, ExternalLink, Layers, ChevronRight, Check, Camera, Settings2, Crosshair, PersonStanding, Plane } from 'lucide-react'
 import { toLonLat } from 'ol/proj'
 import { useMapStore } from '../../store'
 import { useUIStore } from '../../store/uiStore'
 import { useCustomPointLayerStore, CustomPointLayer } from '../../store/customPointLayerStore'
+import { buildGoogleAerialEntryUrl, buildGoogleMapsLocationUrl, buildGoogleStreetViewUrl } from '../../utils/googleMapsUrls'
 
 // Check if a coordinate is already in a layer (within ~10m tolerance)
 const TOLERANCE = 0.0001 // ~10 meters at equator
@@ -343,7 +344,7 @@ export function LongPressMenu() {
     if (!menuLocation) return
 
     const [lng, lat] = menuLocation.coordinate
-    const url = `https://www.google.com/maps?q=${lat},${lng}`
+    const url = buildGoogleMapsLocationUrl(lat, lng)
     window.open(url, '_blank')
 
     // Close menu
@@ -352,13 +353,20 @@ export function LongPressMenu() {
     setCanClose(false)
   }
 
+  const handleOpenGoogleAerial = () => {
+    if (!menuLocation) return
+
+    const [lng, lat] = menuLocation.coordinate
+    window.open(buildGoogleAerialEntryUrl(lat, lng), '_blank')
+
+    forceClose()
+  }
+
   const handleOpenStreetView = () => {
     if (!menuLocation) return
 
     const [lng, lat] = menuLocation.coordinate
-    // Google Street View URL - opens Street View at this location
-    const url = `https://www.google.com/maps?layer=c&cbll=${lat},${lng}`
-    window.open(url, '_blank')
+    window.open(buildGoogleStreetViewUrl(lat, lng), '_blank')
 
     forceClose()
   }
@@ -418,9 +426,9 @@ export function LongPressMenu() {
               // Position menu near the long press location
               // Calculate available space and position accordingly
               left: Math.min(menuLocation.pixel[0], window.innerWidth - 220),
-              // Menu height: ~340px base + ~100px if submenu open
+              // Menu height: ~430px base + ~100px if submenu open
               top: (() => {
-                const menuHeight = showLayerSubmenu ? 480 : 380
+                const menuHeight = showLayerSubmenu ? 550 : 450
                 const spaceBelow = window.innerHeight - menuLocation.pixel[1]
                 // If not enough space below, position above the click point
                 if (spaceBelow < menuHeight && menuLocation.pixel[1] > menuHeight) {
@@ -548,6 +556,19 @@ export function LongPressMenu() {
               >
                 <ExternalLink size={20} className="text-blue-600" />
                 <span className="font-medium">Open in Google Maps</span>
+              </button>
+
+              {/* Open Google aerial view */}
+              <button
+                onClick={handleOpenGoogleAerial}
+                className="w-full px-4 py-3 flex items-center gap-3 transition-colors hover:bg-sky-50 text-gray-700 bg-white border-0 outline-none"
+                title="Open de gekozen plek en tik linksonder op Luchtfoto"
+              >
+                <Plane size={20} className="text-sky-600" />
+                <span className="flex flex-col items-start">
+                  <span className="font-medium">Google Lucht</span>
+                  <span className="text-xs text-gray-400">tik in Maps op Luchtfoto</span>
+                </span>
               </button>
 
               {/* Open Street View */}

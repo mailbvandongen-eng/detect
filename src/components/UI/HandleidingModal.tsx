@@ -178,7 +178,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     <li>Bij geschikte percelen kan de popup ook een hoogtekaart tonen.</li>
                   </ul>
                   <p className="text-xs text-gray-500 mt-2 italic">
-                    Een long-press opent het locatiemenu; dit is een andere actie dan de gewone kaartpopup.
+                    Een long-press opent het locatiemenu met Google Maps, Street View en Google Lucht. Voor de droneachtige weergave tik je in Google Maps linksonder op Luchtfoto.
                   </p>
                 </Section>
 

@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.36',
+    date: '9 september 2026',
+    title: 'Google Lucht en Street View op de juiste plek',
+    changes: [
+      'Het contextmenu bevat nu Google Lucht. De gekozen kaartplek opent rechtstreeks in de gecombineerde Street View- en Immersive View-viewer; tik daar linksonder op Luchtfoto voor de droneachtige 3D-weergave.',
+      'Street View gebruikt voortaan Googles officiële panoramalink met het aangeklikte coördinaat als viewpoint. Google zoekt daarmee het dichtstbijzijnde beschikbare panorama en valt niet meer terug op je huidige locatie.',
+      'Ook de gewone Google Maps-link in het contextmenu gebruikt nu de officiële locatiezoekopdracht en houdt de gekozen plek exact vast.'
+    ]
+  },
+  {
     version: '2.33.35',
     date: '9 september 2026',
     title: 'Wayback en preset-sync hersteld',
