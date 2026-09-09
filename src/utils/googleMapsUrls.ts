@@ -18,9 +18,3 @@ export function buildGoogleStreetViewUrl(latitude: number, longitude: number): s
 
   return `https://www.google.com/maps/@?${params.toString()}`
 }
-
-// Google Maps exposes Luchtfoto as a switch inside its Street View viewer,
-// but does not currently offer a separate external URL action for that mode.
-export function buildGoogleAerialEntryUrl(latitude: number, longitude: number): string {
-  return buildGoogleStreetViewUrl(latitude, longitude)
-}

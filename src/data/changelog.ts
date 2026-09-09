@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.37',
+    date: '9 september 2026',
+    title: 'Dubbele Google Lucht-knop verwijderd',
+    changes: [
+      'De losse knop Google Lucht is uit het contextmenu verwijderd, omdat die exact dezelfde Google Maps-viewer opende als Street View.',
+      'Street View blijft de herstelde officiële panoramalink gebruiken. Vanuit die viewer kun je linksonder naar Luchtfoto schakelen.'
+    ]
+  },
+  {
     version: '2.33.36',
     date: '9 september 2026',
     title: 'Google Lucht en Street View op de juiste plek',
