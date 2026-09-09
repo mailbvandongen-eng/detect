@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.32',
+    date: '9 september 2026',
+    title: 'Transparantie weer compact',
+    changes: [
+      'Bij meer dan drie zichtbare lagen toont Transparantie standaard drie schuifregelaars, met de vertrouwde knoppen Meer tonen en Minder tonen.',
+      'De ingeklapte tijdreisknop en de grote tijdreisbalk verdwijnen tijdelijk wanneer het transparantievenster openstaat en keren na sluiten in dezelfde stand terug.'
+    ]
+  },
+  {
     version: '2.33.31',
     date: '8 september 2026',
     title: 'Schaalbalk echt boven de knoppen',

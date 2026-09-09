@@ -1,11 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { SlidersHorizontal } from 'lucide-react'
+import { ChevronDown, ChevronUp, SlidersHorizontal } from 'lucide-react'
 import { useLayerStore } from '../../store/layerStore'
 import { useUIStore } from '../../store/uiStore'
 import { AppWindow } from './AppWindow'
 
 export function OpacitySliders() {
+  const [isExpanded, setIsExpanded] = useState(false)
   const isOpen = useUIStore(state => state.activeWindow === 'opacity')
   const toggleWindow = useUIStore(state => state.toggleWindow)
   const closeWindow = useUIStore(state => state.closeWindow)
@@ -22,7 +23,15 @@ export function OpacitySliders() {
     if (isOpen && activeSliders.length === 0) closeWindow()
   }, [activeSliders.length, closeWindow, isOpen])
 
+  useEffect(() => {
+    if (!isOpen || activeSliders.length <= 3) setIsExpanded(false)
+  }, [activeSliders.length, isOpen])
+
   if (activeSliders.length === 0) return null
+
+  const displayedSliders = isExpanded ? activeSliders : activeSliders.slice(0, 3)
+  const hiddenSliderCount = activeSliders.length - displayedSliders.length
+  const hasMore = activeSliders.length > 3
 
   return (
     <div className="fixed bottom-[56px] right-2 z-[900]">
@@ -47,10 +56,22 @@ export function OpacitySliders() {
         placement="right"
         className="detect-window--compact-bottom-right"
         onClose={closeWindow}
+        footer={hasMore ? (
+          <button
+            type="button"
+            className="detect-window-secondary-button w-full"
+            aria-expanded={isExpanded}
+            aria-controls="opacity-slider-list"
+            onClick={() => setIsExpanded(expanded => !expanded)}
+          >
+            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {isExpanded ? 'Minder tonen' : `${hiddenSliderCount} meer tonen`}
+          </button>
+        ) : undefined}
       >
         <div className="p-3">
-          <div className="space-y-2.5">
-            {activeSliders.map(layerName => {
+          <div id="opacity-slider-list" className="space-y-2.5">
+            {displayedSliders.map(layerName => {
               const opacity = opacities[layerName]
               return (
                 <div key={layerName}>

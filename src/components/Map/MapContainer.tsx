@@ -7,7 +7,7 @@ import { OSM, XYZ } from 'ol/source'
 import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS'
 import { applyStyle } from 'ol-mapbox-style'
 import { useMap } from '../../hooks/useMap'
-import { useLayerStore, useMapStore, useSettingsStore, useGPSStore } from '../../store'
+import { useLayerStore, useMapStore, useSettingsStore, useGPSStore, useUIStore } from '../../store'
 
 const ESRI_WORLD_IMAGERY_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 const ESRI_HYBRID_REFERENCE_STYLE_URL = 'https://cdn.arcgis.com/sharing/rest/content/items/30d6b8271e1849cd9c3042060001f425/resources/styles/root.json'
@@ -214,6 +214,7 @@ export function MapContainer() {
   const registerLayer = useLayerStore(state => state.registerLayer)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
   const visibleLayers = useLayerStore(state => state.visible)
+  const opacityWindowOpen = useUIStore(state => state.activeWindow === 'opacity')
   const defaultBackground = useSettingsStore(state => state.defaultBackground)
   const fieldModeEnabled = useSettingsStore(state => state.fieldModeEnabled)
   const fieldModeOfflineLabels = useSettingsStore(state => state.fieldModeOfflineLabels)
@@ -550,7 +551,7 @@ export function MapContainer() {
         ref={containerRef}
       />
 
-      {timeTravelVisible && timeTravelCollapsed && (
+      {timeTravelVisible && !opacityWindowOpen && timeTravelCollapsed && (
         <button
           type="button"
           className="time-travel-reopen"
@@ -568,7 +569,7 @@ export function MapContainer() {
         </button>
       )}
 
-      {timeTravelVisible && !timeTravelCollapsed && (
+      {timeTravelVisible && !opacityWindowOpen && !timeTravelCollapsed && (
         <div
           className="time-travel-panel"
           role="region"
