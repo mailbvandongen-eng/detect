@@ -124,7 +124,7 @@ export const DEFAULT_IMPORT_STYLE_DEFAULTS: ImportStyleDefaults = {
     radius: 4,
     outlineColor: '#ffffff',
     outlineWidth: 1,
-    cluster: true,
+    cluster: false,
     clusterDistance: 36,
     clusterMaxZoom: 12,
   },

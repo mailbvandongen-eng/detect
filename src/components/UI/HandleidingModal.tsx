@@ -260,11 +260,11 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
                     <li>Detect toont vóór het opslaan hoeveel punten, lijnen en vlakken zijn gevonden.</li>
                     <li>Bij een gemengd bestand blijven punten zichtbaar en staan vlakken standaard uit.</li>
-                    <li>Open het tandwiel naast een import voor kleur, grootte, lijndikte, transparantie en popupvelden.</li>
-                    <li>Kies <strong>Als standaard</strong> om dezelfde weergaveregels voor volgende imports te gebruiken.</li>
+                    <li>Open het tandwiel naast een import om punten, lijnen en vlakken apart aan of uit te zetten en hun kleur te kiezen.</li>
+                    <li>De puntgrootte wordt automatisch aangepast aan het zoomniveau; popupvelden kun je wel zelf instellen.</li>
                   </ul>
                   <p className="text-xs text-gray-500 mt-2">
-                    Bestaande imports worden automatisch overgezet; opnieuw importeren is niet nodig. Verborgen onderdelen blijven bewaard totdat je ze zelf definitief wist.
+                    Bestaande imports worden automatisch overgezet; opnieuw importeren is niet nodig. Uitgeschakelde onderdelen blijven gewoon in de import bewaard.
                   </p>
                 </Section>
 

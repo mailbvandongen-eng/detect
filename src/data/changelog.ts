@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.39',
+    date: '13 september 2026',
+    title: 'Eigen imports teruggebracht tot de bedoeling',
+    changes: [
+      'Geïmporteerde punten gebruiken automatisch een sobere zoomafhankelijke grootte van 2 tot 5 pixels. De grote genummerde clusterbollen zijn verwijderd.',
+      'Per geometriesoort blijven alleen zichtbaar aan/uit en kleur over; grootte, dekking, dikte, wissen en standaardknoppen zijn uit dit paneel verwijderd.',
+      'Popupinstellingen blijven beschikbaar voor titel, technische velden en de selectie van getoonde velden.',
+      'Bestaande en nieuwe imports volgen automatisch dezelfde puntweergave; opnieuw importeren is niet nodig.'
+    ]
+  },
+  {
     version: '2.33.38',
     date: '12 september 2026',
     title: 'Eigen imports zonder kaartsoep',

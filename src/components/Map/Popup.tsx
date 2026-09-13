@@ -2113,24 +2113,6 @@ export function Popup() {
         { hitTolerance: MOBILE_HIT_TOLERANCE_PX }
       )
 
-      // Clusters zijn navigatieknoppen: inzoomen in plaats van een zinloze popup openen.
-      const importedCluster = features.find(feature => feature.get('layerType') === 'importedCluster')
-      if (importedCluster) {
-        const currentZoom = map.getView().getZoom() ?? 0
-        const clusterMaxZoom = Number(importedCluster.get('clusterMaxZoom') || 12)
-        const targetZoom = currentZoom < clusterMaxZoom
-          ? Math.min(currentZoom + 2, clusterMaxZoom)
-          : Math.min(currentZoom + 2, 18)
-        popupRequestIdRef.current += 1
-        setVisible(false)
-        map.getView().animate({
-          center: evt.coordinate,
-          zoom: targetZoom,
-          duration: 250,
-        })
-        return
-      }
-
       const orderedFeatures = [...features].sort((a, b) => {
         const { geometry: _aGeometry, ...aProps } = a.getProperties()
         const { geometry: _bGeometry, ...bProps } = b.getProperties()

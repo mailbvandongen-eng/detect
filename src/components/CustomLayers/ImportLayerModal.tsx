@@ -22,7 +22,6 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
   const addLayer = useCustomLayerStore(state => state.addLayer)
   const importedLayerCount = useCustomLayerStore(state => state.layers.length)
   const importDefaults = useCustomLayerStore(state => state.importDefaults)
-  const setImportDefaultsFromStyle = useCustomLayerStore(state => state.setImportDefaultsFromStyle)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [importState, setImportState] = useState<ImportState>('idle')
@@ -32,7 +31,6 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [styleDraft, setStyleDraft] = useState<CustomLayerStyle | null>(null)
-  const [rememberAsDefault, setRememberAsDefault] = useState(false)
 
   const resetState = useCallback(() => {
     setImportState('idle')
@@ -41,7 +39,6 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
     setLayerName('')
     setError(null)
     setStyleDraft(null)
-    setRememberAsDefault(false)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -156,13 +153,6 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
       sourceFileName: selectedFile?.name || 'unknown'
     })
 
-    if (rememberAsDefault) {
-      setImportDefaultsFromStyle(
-        styleDraft,
-        getGeometryCounts(parseResult.features)
-      )
-    }
-
     handleClose()
   }, [
     parseResult,
@@ -171,8 +161,6 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
     selectedFile,
     addLayer,
     importDefaults.popup.showTechnicalFields,
-    rememberAsDefault,
-    setImportDefaultsFromStyle,
     handleClose,
   ])
 
@@ -315,7 +303,7 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
                     <div className="rounded-lg border border-cyan-100 p-3 space-y-3">
                       <div>
                         <p className="text-sm font-medium text-gray-700">Weergave</p>
-                        <p className="text-xs text-gray-500">Direct aanpassen of later via Kaartlagen.</p>
+                        <p className="text-xs text-gray-500">Zichtbaarheid en kleur kun je later ook via Kaartlagen wijzigen.</p>
                       </div>
 
                       {previewCounts.points > 0 && (
@@ -335,27 +323,7 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
                               title="Puntkleur"
                             />
                           </div>
-                          <label className="flex items-center gap-2 text-xs text-gray-600">
-                            <span>Grootte</span>
-                            <input
-                              type="range"
-                              min="2"
-                              max="10"
-                              step="1"
-                              value={styleDraft.points.radius}
-                              onChange={event => updateStyleDraft('points', { radius: Number(event.target.value) })}
-                              className="flex-1"
-                            />
-                            <span>{styleDraft.points.radius}px</span>
-                          </label>
-                          <label className="flex items-center justify-between text-xs text-gray-600">
-                            <span>Clusteren bij uitzoomen</span>
-                            <input
-                              type="checkbox"
-                              checked={styleDraft.points.cluster}
-                              onChange={event => updateStyleDraft('points', { cluster: event.target.checked })}
-                            />
-                          </label>
+                          <p className="text-[11px] text-gray-500">Puntgrootte wordt automatisch door Detect bepaald.</p>
                         </div>
                       )}
 
@@ -376,19 +344,6 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
                               title="Lijnkleur"
                             />
                           </div>
-                          <label className="flex items-center gap-2 text-xs text-gray-600">
-                            <span>Dikte</span>
-                            <input
-                              type="range"
-                              min="0.5"
-                              max="8"
-                              step="0.5"
-                              value={styleDraft.lines.width}
-                              onChange={event => updateStyleDraft('lines', { width: Number(event.target.value) })}
-                              className="flex-1"
-                            />
-                            <span>{styleDraft.lines.width}px</span>
-                          </label>
                         </div>
                       )}
 
@@ -412,34 +367,11 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
                               title="Vlakkleur"
                             />
                           </div>
-                          <label className="flex items-center gap-2 text-xs text-gray-600">
-                            <span>Vulling</span>
-                            <input
-                              type="range"
-                              min="0"
-                              max="60"
-                              step="2"
-                              value={Math.round(styleDraft.polygons.fillOpacity * 100)}
-                              onChange={event => updateStyleDraft('polygons', { fillOpacity: Number(event.target.value) / 100 })}
-                              className="flex-1"
-                            />
-                            <span>{Math.round(styleDraft.polygons.fillOpacity * 100)}%</span>
-                          </label>
                           {mixedPointPolygon && !styleDraft.polygons.visible && (
                             <p className="text-xs text-amber-600">Vlakken staan uit omdat dit bestand ook punten bevat.</p>
                           )}
                         </div>
                       )}
-
-                      <label className="flex items-start gap-2 text-xs text-gray-600">
-                        <input
-                          type="checkbox"
-                          checked={rememberAsDefault}
-                          onChange={event => setRememberAsDefault(event.target.checked)}
-                          className="mt-0.5"
-                        />
-                        <span>Deze maten, clustering en zichtbaarheid voortaan als standaard gebruiken. Nieuwe lagen houden wel elk hun eigen kleur.</span>
-                      </label>
                     </div>
                   )}
 

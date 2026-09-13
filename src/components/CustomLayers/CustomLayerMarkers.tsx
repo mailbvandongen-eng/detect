@@ -1,14 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { Feature } from 'ol'
-import type { EventsKey } from 'ol/events'
 import { LineString, MultiLineString, MultiPolygon, Point, Polygon } from 'ol/geom'
 import type { Geometry } from 'ol/geom'
 import VectorLayer from 'ol/layer/Vector'
-import { unByKey } from 'ol/Observable'
 import { fromLonLat } from 'ol/proj'
-import Cluster from 'ol/source/Cluster'
 import VectorSource from 'ol/source/Vector'
-import { Circle, Fill, Stroke, Style, Text } from 'ol/style'
+import { Circle, Fill, Stroke, Style } from 'ol/style'
 import { useMapStore } from '../../store'
 import {
   getGeometryGroup,
@@ -17,12 +14,12 @@ import {
   type CustomLayer,
   type PointLayerStyle,
 } from '../../store/customLayerStore'
+import { getAutomaticImportedPointRadius } from '../../utils/importedLayerStyle'
 
 type OlFeature = Feature<Geometry>
 
 interface RenderedLayerBundle {
   layers: VectorLayer<VectorSource<OlFeature>>[]
-  viewListener?: EventsKey
 }
 
 function createGeometry(geoJsonGeometry: CustomFeature['geometry']): Geometry | null {
@@ -57,35 +54,12 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
-function getPointRadius(style: PointLayerStyle, resolution: number): number {
-  if (resolution > 80) return Math.max(2, style.radius - 1)
-  if (resolution < 5) return Math.min(10, style.radius + 1)
-  return style.radius
-}
-
 function createPointStyle(style: PointLayerStyle, resolution: number): Style {
   return new Style({
     image: new Circle({
-      radius: getPointRadius(style, resolution),
+      radius: getAutomaticImportedPointRadius(resolution),
       fill: new Fill({ color: style.color }),
       stroke: new Stroke({ color: style.outlineColor, width: style.outlineWidth }),
-    }),
-  })
-}
-
-function createClusterStyle(style: PointLayerStyle, count: number): Style {
-  const radius = count > 99 ? 19 : count > 9 ? 17 : 15
-  return new Style({
-    image: new Circle({
-      radius,
-      fill: new Fill({ color: hexToRgba(style.color, 0.9) }),
-      stroke: new Stroke({ color: '#ffffff', width: 1.5 }),
-    }),
-    text: new Text({
-      text: String(count),
-      fill: new Fill({ color: '#ffffff' }),
-      stroke: new Stroke({ color: 'rgba(0,0,0,0.35)', width: 2 }),
-      font: 'bold 11px sans-serif',
     }),
   })
 }
@@ -151,7 +125,6 @@ function addGeometryFeatures(
 
 function disposeBundle(map: ReturnType<typeof useMapStore.getState>['map'], bundle: RenderedLayerBundle): void {
   bundle.layers.forEach(layer => map?.removeLayer(layer))
-  if (bundle.viewListener) unByKey(bundle.viewListener)
 }
 
 /** Beheert voor iedere import drie onafhankelijke kaartlagen: vlakken, lijnen en punten. */
@@ -169,7 +142,6 @@ export function CustomLayerMarkers() {
 
     layers.forEach(layer => {
       const renderedLayers: VectorLayer<VectorSource<OlFeature>>[] = []
-      let viewListener: EventsKey | undefined
 
       const polygonSource = new VectorSource<OlFeature>()
       addGeometryFeatures(polygonSource, layer, 'polygons')
@@ -215,89 +187,25 @@ export function CustomLayerMarkers() {
       addPointFeatures(pointSource, layer)
       if (pointSource.getFeatures().length > 0) {
         const pointStyleCache = new Map<number, Style>()
-        const clusterStyleCache = new Map<number, Style>()
-        let displaySource: VectorSource<OlFeature> = pointSource
-
-        if (layer.style.points.cluster) {
-          const clusterSource = new Cluster<OlFeature>({
-            distance: layer.style.points.clusterDistance,
-            source: pointSource,
-            createCluster: (point, members) => {
-              if (members.length === 1) {
-                const properties = { ...members[0].getProperties() }
-                delete properties.geometry
-                return new Feature({ geometry: point, ...properties })
-              }
-              return new Feature({
-                geometry: point,
-                layerType: 'importedCluster',
-                layerId: layer.id,
-                layerName: layer.name,
-                layerColor: layer.style.points.color,
-                clusterCount: members.length,
-                clusterMembers: members,
-                clusterMaxZoom: layer.style.points.clusterMaxZoom,
-              })
-            },
-          })
-          displaySource = clusterSource
-
-          const updateClusterDistance = () => {
-            const zoom = map.getView().getZoom() ?? 0
-            clusterSource.setDistance(zoom < layer.style.points.clusterMaxZoom
-              ? layer.style.points.clusterDistance
-              : 0)
-          }
-          updateClusterDistance()
-          viewListener = map.getView().on('change:resolution', updateClusterDistance)
-
-          const pointLayer = new VectorLayer({
-            source: displaySource,
-            zIndex: 902,
-            visible: layer.visible && layer.style.points.visible,
-            opacity: layer.opacity,
-            style: (feature, resolution) => {
-              const count = Number(feature.get('clusterCount') || 1)
-              if (count > 1) {
-                if (!clusterStyleCache.has(count)) {
-                  clusterStyleCache.set(count, createClusterStyle(layer.style.points, count))
-                }
-                return clusterStyleCache.get(count)
-              }
-              const radius = getPointRadius(layer.style.points, resolution)
-              if (!pointStyleCache.has(radius)) {
-                pointStyleCache.set(radius, createPointStyle(layer.style.points, resolution))
-              }
-              return pointStyleCache.get(radius)
-            },
-            properties: { title: `${layer.name} · Punten`, customLayerId: layer.id },
-          })
-          map.addLayer(pointLayer)
-          renderedLayers.push(pointLayer)
-        } else {
-          const pointLayer = new VectorLayer({
-            source: displaySource,
-            zIndex: 902,
-            visible: layer.visible && layer.style.points.visible,
-            opacity: layer.opacity,
-            style: (_feature, resolution) => {
-              const radius = getPointRadius(layer.style.points, resolution)
-              if (!pointStyleCache.has(radius)) {
-                pointStyleCache.set(radius, createPointStyle(layer.style.points, resolution))
-              }
-              return pointStyleCache.get(radius)
-            },
-            properties: { title: `${layer.name} · Punten`, customLayerId: layer.id },
-          })
-          map.addLayer(pointLayer)
-          renderedLayers.push(pointLayer)
-        }
+        const pointLayer = new VectorLayer({
+          source: pointSource,
+          zIndex: 902,
+          visible: layer.visible && layer.style.points.visible,
+          opacity: layer.opacity,
+          style: (_feature, resolution) => {
+            const radius = getAutomaticImportedPointRadius(resolution)
+            if (!pointStyleCache.has(radius)) {
+              pointStyleCache.set(radius, createPointStyle(layer.style.points, resolution))
+            }
+            return pointStyleCache.get(radius)
+          },
+          properties: { title: `${layer.name} · Punten`, customLayerId: layer.id },
+        })
+        map.addLayer(pointLayer)
+        renderedLayers.push(pointLayer)
       }
 
-      bundlesRef.current.set(layer.id, {
-        layers: renderedLayers,
-        viewListener,
-      })
+      bundlesRef.current.set(layer.id, { layers: renderedLayers })
     })
 
     return () => {
