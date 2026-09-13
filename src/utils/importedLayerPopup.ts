@@ -51,6 +51,13 @@ const FIELD_LABELS: Record<string, string> = {
   source: 'Bron',
   url: 'Link',
   link: 'Link',
+  phone: 'Telefoonnummer',
+  telephone: 'Telefoonnummer',
+  telefoon: 'Telefoonnummer',
+  telefoonnummer: 'Telefoonnummer',
+  tel: 'Telefoonnummer',
+  mobile: 'Mobiel nummer',
+  mobiel: 'Mobiel nummer',
 }
 
 function escapeHtml(value: unknown): string {
@@ -170,9 +177,16 @@ function fieldPriority(key: string): number {
   return index === -1 ? priorities.length : index
 }
 
-function renderValue(value: string): string {
+function renderValue(value: string, key: string): string {
   const plainValue = stripHtml(value)
   const shortened = plainValue.length > 500 ? `${plainValue.slice(0, 500)}…` : plainValue
+  const normalizedKey = key.toLowerCase().replace(/[\s_-]/g, '')
+  if (['phone', 'telephone', 'telefoon', 'telefoonnummer', 'tel', 'mobile', 'mobiel'].includes(normalizedKey)) {
+    const phoneHref = plainValue.replace(/[^+\d]/g, '')
+    if (phoneHref) {
+      return `<a href="tel:${escapeHtml(phoneHref)}" class="text-blue-600 hover:underline">${escapeHtml(shortened)}</a>`
+    }
+  }
   if (/^https?:\/\/\S+$/i.test(plainValue)) {
     return `<a href="${escapeHtml(plainValue)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Open link</a>`
   }
@@ -233,13 +247,15 @@ export function formatImportedLayerPopup(properties: Record<string, unknown>): s
   }
 
   rows.sort((a, b) => a[2] - b[2])
-  let html = `<strong style="color:${layerColor}">${escapeHtml(title)}</strong>`
-  html += `<br/><span class="text-xs text-gray-500">${escapeHtml(layerName)}</span>`
+  // Popup.tsx promotes the first <strong> to the blue header. For personal
+  // layers that is always the layer name; the object name belongs in the body.
+  let html = `<strong>${escapeHtml(layerName)}</strong>`
+  html += `<br/><strong style="color:${layerColor}">${escapeHtml(title)}</strong>`
 
   if (rows.length > 0) {
     html += '<div class="mt-2 space-y-1">'
     for (const [key, value] of rows) {
-      html += `<div class="text-sm"><span class="text-gray-500">${escapeHtml(formatImportedFieldLabel(key))}:</span> ${renderValue(value)}</div>`
+      html += `<div class="text-sm"><span class="text-gray-500">${escapeHtml(formatImportedFieldLabel(key))}:</span> ${renderValue(value, key)}</div>`
     }
     html += '</div>'
   }

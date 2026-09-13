@@ -1,13 +1,14 @@
 import { useState } from 'react'
-import { Layers, Check, Upload, ExternalLink, Globe, ChevronDown, ChevronRight } from 'lucide-react'
-import { useUIStore, useSettingsStore } from '../../store'
-import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
+import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight } from 'lucide-react'
+import { useUIStore } from '../../store'
+import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
 import { useCustomLayerStore } from '../../store/customLayerStore'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
 import { CustomLayerItem } from '../CustomLayers/CustomLayerItem'
 import { isThemeVisible, isSpecialSectionVisible } from '../../config/buildMode'
 import { AppWindow } from '../UI/AppWindow'
+import { getStandalonePointLayers } from '../../utils/userLayerCatalog'
 
 // Speciale archeologische 3D projecten - externe links
 const SPECIAL_PROJECTS = [
@@ -24,14 +25,56 @@ const HERITAGE_PLATFORMS = [
   { name: 'Google Open Heritage', url: 'https://artsandculture.google.com/project/openheritage', desc: '26+ UNESCO sites in 3D' },
 ]
 
+function PointLayerItem({ layer, onToggle, onColorChange }: {
+  layer: CustomPointLayer
+  onToggle: () => void
+  onColorChange: (color: string) => void
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded px-1 py-1 hover:bg-purple-50">
+      <button
+        onClick={(event) => { event.stopPropagation(); onToggle() }}
+        className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0"
+        style={{
+          backgroundColor: layer.visible ? layer.color : 'white',
+          border: `2px solid ${layer.visible ? layer.color : '#9ca3af'}`,
+        }}
+        title={layer.visible ? 'Laag verbergen' : 'Laag tonen'}
+      >
+        {layer.visible && <Check size={11} strokeWidth={3} color="white" />}
+      </button>
+      <button
+        onClick={(event) => { event.stopPropagation(); onToggle() }}
+        className="min-w-0 flex-1 truncate text-left text-gray-700"
+        style={{ fontSize: '0.9em' }}
+        title={layer.name}
+      >
+        {layer.name}
+      </button>
+      <span className="text-[10px] text-gray-400">{layer.points.length}</span>
+      <label
+        className="flex h-7 w-8 items-center justify-center"
+        title="Puntkleur"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <input
+          type="color"
+          value={layer.color}
+          onChange={(event) => onColorChange(event.target.value)}
+          className="h-7 w-8 border-0 bg-transparent p-0"
+        />
+      </label>
+    </div>
+  )
+}
+
 export function ThemesPanel() {
   const themesPanelOpen = useUIStore(state => state.activeWindow === 'layers')
   const toggleThemesPanel = useUIStore(state => state.toggleThemesPanel)
   const openWindow = useUIStore(state => state.openWindow)
-  const { layers: customLayers, toggleVisibility } = useCustomPointLayerStore()
+  const { layers: customLayers, toggleVisibility, updateLayer } = useCustomPointLayerStore()
   const importedLayers = useCustomLayerStore(state => state.layers)
-
-  const showCustomPointLayers = useSettingsStore(state => state.showCustomPointLayers)
+  const standalonePointLayers = getStandalonePointLayers(customLayers, importedLayers)
 
   // State for special projects section
   const [specialProjectsOpen, setSpecialProjectsOpen] = useState(false)
@@ -45,55 +88,37 @@ export function ThemesPanel() {
       onClose={toggleThemesPanel}
     >
       <div className="p-2">
-            {/* Mijn lagen - custom point layers with orange header */}
-            {showCustomPointLayers && customLayers.filter(l => !l.archived).length > 0 && (
-              <div className="mb-2 pb-1 border-b border-gray-100">
-                <div className="flex items-center gap-1 py-0.5 px-1 mb-1">
-                  <span className="text-orange-600 font-medium" style={{ fontSize: '0.9em' }}>Mijn lagen</span>
-                </div>
-                {customLayers.filter(l => !l.archived).map(layer => (
-                  <button
-                    key={layer.id}
-                    onClick={(e) => { e.stopPropagation(); toggleVisibility(layer.id) }}
-                    className={`w-full flex items-center justify-between py-1 pl-3 pr-2 border-0 outline-none transition-colors text-left ${
-                      layer.visible ? 'bg-orange-50 hover:bg-orange-100' : 'bg-transparent hover:bg-orange-50'
-                    }`}
-                    style={{ fontSize: 'inherit' }}
-                  >
-                    <span className="flex items-center gap-2 text-gray-600">
-                      {layer.name}
-                      <span className="text-xs text-gray-400">({layer.points.length})</span>
-                    </span>
-                    <div
-                      className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-100 flex-shrink-0"
-                      style={{
-                        backgroundColor: layer.visible ? '#f97316' : 'white',
-                        border: layer.visible ? '2px solid #f97316' : '2px solid #fb923c',
-                        color: 'white'
-                      }}
-                    >
-                      {layer.visible && <Check size={12} strokeWidth={3} />}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Eigen imports: altijd beschikbaar, ook vóór de eerste import. */}
+            {/* Eén lijst voor zelfgemaakte en geïmporteerde lagen. */}
             <div className="mb-2 pb-1 border-b border-gray-100">
               <div className="flex items-center gap-1 py-0.5 px-1 mb-1">
-                <Upload size={12} className="text-cyan-600" />
-                <span className="text-cyan-600 font-medium" style={{ fontSize: '0.9em' }}>Eigen imports</span>
+                <Layers size={12} className="text-purple-600" />
+                <span className="text-purple-600 font-medium" style={{ fontSize: '0.9em' }}>Mijn lagen</span>
               </div>
+              {standalonePointLayers.map(layer => (
+                <PointLayerItem
+                  key={layer.id}
+                  layer={layer}
+                  onToggle={() => toggleVisibility(layer.id)}
+                  onColorChange={color => updateLayer(layer.id, { color })}
+                />
+              ))}
               {importedLayers.map(layer => (
                 <CustomLayerItem key={layer.id} layer={layer} compact />
               ))}
-              <button
-                onClick={() => openWindow('importLayer', 'layers')}
-                className="w-full text-left py-1 pl-3 text-xs text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50 transition-colors"
-              >
-                + Laag importeren...
-              </button>
+              <div className="grid grid-cols-2 gap-2 px-1 pt-2">
+                <button
+                  onClick={(event) => { event.stopPropagation(); openWindow('createLayer', 'layers') }}
+                  className="flex items-center justify-center gap-1 rounded-lg bg-purple-50 px-2 py-2 text-xs text-purple-700 hover:bg-purple-100"
+                >
+                  <Plus size={14} /> Nieuwe laag
+                </button>
+                <button
+                  onClick={(event) => { event.stopPropagation(); openWindow('importLayer', 'layers') }}
+                  className="flex items-center justify-center gap-1 rounded-lg bg-cyan-50 px-2 py-2 text-xs text-cyan-700 hover:bg-cyan-100"
+                >
+                  <Upload size={14} /> Importeren
+                </button>
+              </div>
             </div>
 
             {/* Basislaag - vaste sectie zonder pijltje */}

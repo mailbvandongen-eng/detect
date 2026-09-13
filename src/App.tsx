@@ -21,7 +21,7 @@ import { RouteRecordButton, RouteRecordingLayer, SavedRoutesLayer, CoverageHeatm
 import { WeatherWidget, RainRadarLayer } from './components/Weather'
 import { LocalVondstMarkers } from './components/Vondst/LocalVondstMarkers'
 import { CustomLayerMarkers } from './components/CustomLayers'
-import { CustomPointMarkers, CreateLayerModal, AddPointModal, LayerManagerModal, LayerDashboard } from './components/CustomPoints'
+import { CustomPointMarkers, CreateLayerModal, AddPointModal } from './components/CustomPoints'
 import { OfflineIndicator } from './components/UI/OfflineIndicator'
 import { MonumentSearch } from './components/UI/MonumentSearch'
 import { MonumentFilter } from './components/UI/MonumentFilter'
@@ -153,8 +153,6 @@ function App() {
       <SettingsPanel />
       <CreateLayerModal />
       <AddPointModal />
-      <LayerManagerModal />
-      <LayerDashboard />
       <RouteDashboard
         isOpen={routeDashboardOpen}
         onClose={toggleRouteDashboard}

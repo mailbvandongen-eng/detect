@@ -9,15 +9,26 @@ import { useMapStore, useUIStore } from '../../store'
 import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
 import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondstenStore'
 import { useCustomPointLayerStore, type FeatureGeometry, type GeometryType } from '../../store/customPointLayerStore'
+import { useCustomLayerStore } from '../../store/customLayerStore'
 import { ROMEINSE_FORTEN_INFO, GENERIEK_FORT_INFO, FORT_TYPE_LABELS } from '../../data/romeinseFortenInfo'
 import { describeOcsArtificialisation, describeOcsCoverage, describeOcsUsage, formatOcsArea } from '../../utils/ocsGe'
 import { formatImportedLayerPopup } from '../../utils/importedLayerPopup'
+import { buildUserLayerCatalog, type UserLayerTarget } from '../../utils/userLayerCatalog'
 import type { MapBrowserEvent } from 'ol'
 
 type PopupFeatureData = {
   geometry?: FeatureGeometry
   properties?: Record<string, unknown>
   popupHtml?: string
+  isOwnLayer?: boolean
+  customPointRef?: { layerId: string; pointId: string }
+}
+
+type EditableCustomPoint = {
+  name: string
+  phone: string
+  notes: string
+  url: string
 }
 
 // Register RD New projection
@@ -53,6 +64,32 @@ function translateOpeningHours(hours: string): string {
 
 const POPUP_REQUEST_TIMEOUT_MS = 5000
 const MOBILE_HIT_TOLERANCE_PX = 10
+
+function escapePopupHtml(value: unknown): string {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+function getPhoneHref(phone: string): string {
+  return phone.replace(/[^+\d]/g, '')
+}
+
+function getSafeExternalHref(value: string): string | null {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  const candidate = /^[a-z][a-z\d+.-]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`
+
+  try {
+    const url = new URL(candidate)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null
+  } catch {
+    return null
+  }
+}
 
 async function fetchWithTimeout(
   input: RequestInfo | URL,
@@ -184,11 +221,22 @@ function getSoilExplanation(soilName: string, soilCode?: string): string[] {
 
 export function Popup() {
   const map = useMapStore(state => state.map)
-  const isDrawingMode = useUIStore(state => state.isDrawingMode)
   const removeVondst = useLocalVondstenStore(state => state.removeVondst)
   const updateVondst = useLocalVondstenStore(state => state.updateVondst)
   const vondsten = useLocalVondstenStore(state => state.vondsten)
-  const { layers: customLayers, addPoint: addPointToLayer, addLayer: createNewLayer } = useCustomPointLayerStore()
+  const {
+    layers: customLayers,
+    addPoint: addPointToLayer,
+    addLayer: createNewLayer,
+    ensureImportedLayerOverlay,
+    updateLayer: updatePointLayer,
+    updatePoint: updateCustomPoint,
+    removePoint: removeCustomPoint,
+  } = useCustomPointLayerStore()
+  const importedLayers = useCustomLayerStore(state => state.layers)
+  const updateImportedGeometryStyle = useCustomLayerStore(state => state.updateGeometryStyle)
+  const updateImportedLayer = useCustomLayerStore(state => state.updateLayer)
+  const selectableUserLayers = buildUserLayerCatalog(customLayers, importedLayers)
   const [allContents, setAllContents] = useState<string[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [visible, setVisible] = useState(false)
@@ -202,14 +250,20 @@ export function Popup() {
   const [showLayerPicker, setShowLayerPicker] = useState(false)
   const [addedToLayer, setAddedToLayer] = useState<string | null>(null)
   const [popupCoordinate, setPopupCoordinate] = useState<number[] | null>(null)
-  // Store current feature's geometry and properties for "add to layer"
-  const [popupFeatureData, setPopupFeatureData] = useState<PopupFeatureData | null>(null)
   const [showNewLayerInput, setShowNewLayerInput] = useState(false)
   const [newLayerName, setNewLayerName] = useState('')
+  const [editingCustomPoint, setEditingCustomPoint] = useState<EditableCustomPoint | null>(null)
+  const [confirmCustomPointDelete, setConfirmCustomPointDelete] = useState(false)
   // Store feature data for each popup content (parallel to allContents)
   const [allFeatureData, setAllFeatureData] = useState<Array<PopupFeatureData | null>>([])
   // Get current feature data based on index
   const currentFeatureData = allFeatureData[currentIndex] || null
+  const currentCustomPointRef = currentFeatureData?.customPointRef || null
+  const currentCustomPoint = currentCustomPointRef
+    ? customLayers
+        .find(layer => layer.id === currentCustomPointRef.layerId)
+        ?.points.find(point => point.id === currentCustomPointRef.pointId)
+    : undefined
   // Popup text scale: 100 = normal, 120 = 20% bigger, etc
   const [textScale, setTextScale] = useState(() => {
     const saved = localStorage.getItem('popupTextScale')
@@ -265,16 +319,63 @@ export function Popup() {
   const { title: extractedTitle, contentWithoutTitle: rawContent } = extractTitleAndContent(content)
   const contentWithoutTitle = transformForScaling(rawContent)
 
+  const addPopupPointToLayer = (layerId: string, layerName: string) => {
+    if (!popupCoordinate) return
+    const featureData = currentFeatureData
+    addPointToLayer(layerId, {
+      name: extractedTitle || 'Punt',
+      category: 'Overig',
+      notes: '',
+      coordinates: [popupCoordinate[0], popupCoordinate[1]],
+      sourceLayer: extractedTitle,
+      geometry: featureData?.geometry,
+      sourceProperties: featureData?.properties,
+      popupContent: featureData?.popupHtml,
+    })
+    setShowLayerPicker(false)
+    setShowNewLayerInput(false)
+    setNewLayerName('')
+    setAddedToLayer(layerName)
+    setTimeout(() => setAddedToLayer(null), 2000)
+  }
+
+  const addPopupPointToUserLayer = (target: UserLayerTarget, layerName: string) => {
+    if (target.kind === 'point') {
+      updatePointLayer(target.id, { visible: true })
+      addPopupPointToLayer(target.id, layerName)
+      return
+    }
+
+    const importedLayer = importedLayers.find(layer => layer.id === target.id)
+    if (!importedLayer) return
+    const color = importedLayer.style.points.color || importedLayer.color
+    const overlayId = ensureImportedLayerOverlay(importedLayer.id, importedLayer.name, color)
+    updateImportedGeometryStyle(importedLayer.id, 'points', { visible: true })
+    updateImportedLayer(importedLayer.id, { visible: true })
+    addPopupPointToLayer(overlayId, layerName)
+  }
+
+  const createLayerAndAddPopupPoint = () => {
+    const layerName = newLayerName.trim()
+    if (!layerName) return
+    const layerId = createNewLayer(layerName, [])
+    addPopupPointToLayer(layerId, layerName)
+  }
+
   // Check if current content is a parcel
   const isParcel = content.includes('Landbouwperceel')
   // Check if current content is a vondst
   const isVondst = content.includes('data-vondst-id=')
 
   const goToPrevious = () => {
+    setEditingCustomPoint(null)
+    setConfirmCustomPointDelete(false)
     setCurrentIndex(i => (i - 1 + allContents.length) % allContents.length)
   }
 
   const goToNext = () => {
+    setEditingCustomPoint(null)
+    setConfirmCustomPointDelete(false)
     setCurrentIndex(i => (i + 1) % allContents.length)
   }
 
@@ -331,6 +432,8 @@ export function Popup() {
     setShowNewLayerInput(false)
     setNewLayerName('')
     setAddedToLayer(null)
+    setEditingCustomPoint(null)
+    setConfirmCustomPointDelete(false)
 
     const lonLat = toLonLat(coordinate)
     setPopupCoordinate(lonLat)
@@ -2164,22 +2267,15 @@ export function Popup() {
           const layerName = dataProps.customLayerName || 'Mijn Laag'
           const layerColor = dataProps.customLayerColor || '#f97316'
 
-          let pointHtml = ''
+          // The popup header identifies the layer; the point name belongs in the body.
+          let pointHtml = `<strong>${escapePopupHtml(layerName)}</strong><br/>`
 
-          // If this point has stored popup content (from adding a monument/feature), show that
           if (point.popupContent) {
-            // Show original popup content with layer badge
-            pointHtml = `<div class="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
-              <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${layerColor}"></span>
-              <span class="text-xs font-medium" style="color: ${layerColor}">${layerName}</span>
-            </div>`
             pointHtml += point.popupContent
           } else {
-            // Standard custom point display
-            pointHtml = `<strong>${point.name}</strong>`
-            pointHtml += `<br/><span class="text-xs text-gray-500">${layerName}</span>`
+            pointHtml += `<strong style="color:${escapePopupHtml(layerColor)}">${escapePopupHtml(point.name)}</strong>`
             if (point.category && point.category !== 'Overig') {
-              pointHtml += `<br/><span class="text-sm text-gray-600"><strong>Categorie:</strong> ${point.category}</span>`
+              pointHtml += `<br/><span class="text-sm text-gray-600"><strong>Categorie:</strong> ${escapePopupHtml(point.category)}</span>`
             }
           }
 
@@ -2198,16 +2294,26 @@ export function Popup() {
             pointHtml += `</div>`
           }
 
+          if (point.phone) {
+            const phoneHref = getPhoneHref(point.phone)
+            pointHtml += `<br/><a href="tel:${escapePopupHtml(phoneHref)}" class="text-sm text-blue-600 hover:underline">${escapePopupHtml(point.phone)}</a>`
+          }
           // Notes (always show if available and no popup content)
           if (point.notes && !point.popupContent) {
-            pointHtml += `<br/><span class="text-sm text-gray-600 mt-1">${point.notes}</span>`
+            pointHtml += `<br/><span class="text-sm text-gray-600 mt-1">${escapePopupHtml(point.notes)}</span>`
           }
           if (point.url) {
-            pointHtml += `<br/><a href="${point.url}" target="_blank" rel="noopener" class="text-blue-600 hover:underline text-sm">Meer info</a>`
+            const safeHref = getSafeExternalHref(point.url)
+            if (safeHref) {
+              pointHtml += `<br/><a href="${escapePopupHtml(safeHref)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline text-sm">Meer info</a>`
+            }
           }
           pointHtml += `<br/><span class="text-xs text-gray-400">${new Date(point.createdAt).toLocaleDateString('nl-NL')}</span>`
           collectedContents.push(pointHtml)
-          collectedFeatureData.push(null) // Custom points are already stored
+          collectedFeatureData.push({
+            isOwnLayer: true,
+            customPointRef: { layerId: dataProps.customLayerId, pointId: point.id },
+          })
           continue
         }
 
@@ -2220,7 +2326,8 @@ export function Popup() {
           collectedFeatureData.push({
             geometry: extractGeometry(geometry),
             properties: dataProps,
-            popupHtml: html
+            popupHtml: html,
+            isOwnLayer: true,
           })
           continue
         }
@@ -2300,7 +2407,6 @@ export function Popup() {
         // Romeinse Forten (GeoJSON) - compacte popup zoals AMK stijl
         if (dataProps.layerType === 'romeinsFort' || dataProps.layerType === 'romeinsFortLijn') {
           const fortNaam = dataProps.Name || dataProps.name || ''
-          const beschrijving = dataProps.description || ''
 
           // Zoek specifieke info voor dit fort
           const fortInfo = ROMEINSE_FORTEN_INFO[fortNaam] || null
@@ -3754,6 +3860,8 @@ export function Popup() {
     popupRequestIdRef.current += 1
     setVisible(false)
     setPopupHeight('half') // Reset to half height for next popup
+    setEditingCustomPoint(null)
+    setConfirmCustomPointDelete(false)
     // Clear height map when closing popup
     if (map && showingHeightMap) {
       clearParcelHighlight(map)
@@ -3855,7 +3963,7 @@ export function Popup() {
               <div className="flex items-center gap-1 flex-shrink-0">
 
               {/* Add to layer button */}
-              {popupCoordinate && (
+              {popupCoordinate && !currentFeatureData?.isOwnLayer && (
                 <div className="relative">
                   <button
                     onClick={(e) => { e.stopPropagation(); setShowLayerPicker(!showLayerPicker); }}
@@ -3876,28 +3984,10 @@ export function Popup() {
                       <div className="px-3 py-1 text-xs text-gray-400 font-medium">Toevoegen aan:</div>
                       {/* Scrollable layer list */}
                       <div className="max-h-[200px] overflow-y-auto">
-                        {customLayers.filter(l => !l.archived).map(layer => (
+                        {selectableUserLayers.map(layer => (
                           <button
-                            key={layer.id}
-                            onClick={() => {
-                              // Add point to layer - include full geometry if available
-                              const featureData = currentFeatureData
-                              addPointToLayer(layer.id, {
-                                name: extractedTitle || 'Punt',
-                                category: 'Overig',
-                                notes: '',
-                                url: undefined,
-                                coordinates: [popupCoordinate[0], popupCoordinate[1]],
-                                sourceLayer: extractedTitle,
-                                // Include full geometry and properties if available
-                                geometry: featureData?.geometry,
-                                sourceProperties: featureData?.properties,
-                                popupContent: featureData?.popupHtml,
-                              })
-                              setShowLayerPicker(false)
-                              setAddedToLayer(layer.name)
-                              setTimeout(() => setAddedToLayer(null), 2000)
-                            }}
+                            key={layer.key}
+                            onClick={() => addPopupPointToUserLayer(layer.target, layer.name)}
                             className="w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-blue-50 border-0 outline-none bg-transparent flex items-center gap-2"
                           >
                             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: layer.color }}></span>
@@ -3918,25 +4008,7 @@ export function Popup() {
                               autoFocus
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' && newLayerName.trim()) {
-                                  // Create new layer and add point
-                                  const newLayerId = createNewLayer(newLayerName.trim())
-                                  const featureData = currentFeatureData
-                                  addPointToLayer(newLayerId, {
-                                    name: extractedTitle || 'Punt',
-                                    category: 'Overig',
-                                    notes: '',
-                                    url: undefined,
-                                    coordinates: [popupCoordinate[0], popupCoordinate[1]],
-                                    sourceLayer: extractedTitle,
-                                    geometry: featureData?.geometry,
-                                    sourceProperties: featureData?.properties,
-                                    popupContent: featureData?.popupHtml,
-                                  })
-                                  setShowLayerPicker(false)
-                                  setShowNewLayerInput(false)
-                                  setNewLayerName('')
-                                  setAddedToLayer(newLayerName.trim())
-                                  setTimeout(() => setAddedToLayer(null), 2000)
+                                  createLayerAndAddPopupPoint()
                                 } else if (e.key === 'Escape') {
                                   setShowNewLayerInput(false)
                                   setNewLayerName('')
@@ -3945,28 +4017,7 @@ export function Popup() {
                             />
                             <div className="flex gap-1 mt-1">
                               <button
-                                onClick={() => {
-                                  if (newLayerName.trim()) {
-                                    const newLayerId = createNewLayer(newLayerName.trim())
-                                    const featureData = currentFeatureData
-                                    addPointToLayer(newLayerId, {
-                                      name: extractedTitle || 'Punt',
-                                      category: 'Overig',
-                                      notes: '',
-                                      url: undefined,
-                                      coordinates: [popupCoordinate[0], popupCoordinate[1]],
-                                      sourceLayer: extractedTitle,
-                                      geometry: featureData?.geometry,
-                                      sourceProperties: featureData?.properties,
-                                      popupContent: featureData?.popupHtml,
-                                    })
-                                    setShowLayerPicker(false)
-                                    setShowNewLayerInput(false)
-                                    setNewLayerName('')
-                                    setAddedToLayer(newLayerName.trim())
-                                    setTimeout(() => setAddedToLayer(null), 2000)
-                                  }
-                                }}
+                                onClick={createLayerAndAddPopupPoint}
                                 disabled={!newLayerName.trim()}
                                 className="flex-1 px-2 py-1 text-xs bg-orange-500 text-white rounded disabled:opacity-50"
                               >
@@ -4061,6 +4112,111 @@ export function Popup() {
               />
               <span className="text-gray-400 w-8 text-right" style={{ fontSize: '0.857em' }}>{textScale}%</span>
             </div>
+
+            {/* Handmatig toegevoegde punten worden rechtstreeks vanuit hun popup beheerd. */}
+            {currentCustomPointRef && currentCustomPoint && !editingCustomPoint && (
+              <div className="px-4 pb-4 flex gap-2 flex-shrink-0">
+                <button
+                  onClick={() => {
+                    setConfirmCustomPointDelete(false)
+                    setEditingCustomPoint({
+                      name: currentCustomPoint.name,
+                      phone: currentCustomPoint.phone || '',
+                      notes: currentCustomPoint.notes || '',
+                      url: currentCustomPoint.url || '',
+                    })
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors border-0 outline-none"
+                >
+                  <Pencil size={16} />
+                  <span>Bewerken</span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (!confirmCustomPointDelete) {
+                      setConfirmCustomPointDelete(true)
+                      return
+                    }
+                    removeCustomPoint(currentCustomPointRef.layerId, currentCustomPointRef.pointId)
+                    setVisible(false)
+                    setConfirmCustomPointDelete(false)
+                  }}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-white rounded-lg transition-colors border-0 outline-none ${
+                    confirmCustomPointDelete ? 'bg-red-700 hover:bg-red-800' : 'bg-red-500 hover:bg-red-600'
+                  }`}
+                >
+                  <Trash2 size={16} />
+                  <span>{confirmCustomPointDelete ? 'Nogmaals' : 'Verwijderen'}</span>
+                </button>
+              </div>
+            )}
+
+            {editingCustomPoint && currentCustomPointRef && (
+              <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3 flex-shrink-0 overflow-y-auto max-h-[50vh]">
+                <div className="text-sm font-medium text-blue-600">Punt bewerken</div>
+                <div>
+                  <label className="text-xs text-gray-500">Naam *</label>
+                  <input
+                    type="text"
+                    value={editingCustomPoint.name}
+                    onChange={(event) => setEditingCustomPoint({ ...editingCustomPoint, name: event.target.value })}
+                    className="w-full px-2 py-1.5 text-sm bg-gray-50 rounded border-0 outline-none focus:bg-blue-50"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500">Telefoonnummer</label>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    value={editingCustomPoint.phone}
+                    onChange={(event) => setEditingCustomPoint({ ...editingCustomPoint, phone: event.target.value })}
+                    className="w-full px-2 py-1.5 text-sm bg-gray-50 rounded border-0 outline-none focus:bg-blue-50"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500">Notitie</label>
+                  <textarea
+                    value={editingCustomPoint.notes}
+                    onChange={(event) => setEditingCustomPoint({ ...editingCustomPoint, notes: event.target.value })}
+                    className="w-full h-16 px-2 py-1.5 text-sm bg-gray-50 rounded border-0 outline-none focus:bg-blue-50 resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500">Link</label>
+                  <input
+                    type="url"
+                    value={editingCustomPoint.url}
+                    onChange={(event) => setEditingCustomPoint({ ...editingCustomPoint, url: event.target.value })}
+                    className="w-full px-2 py-1.5 text-sm bg-gray-50 rounded border-0 outline-none focus:bg-blue-50"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setEditingCustomPoint(null)}
+                    className="flex-1 px-3 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border-0 outline-none text-sm"
+                  >
+                    Annuleren
+                  </button>
+                  <button
+                    disabled={!editingCustomPoint.name.trim()}
+                    onClick={() => {
+                      updateCustomPoint(currentCustomPointRef.layerId, currentCustomPointRef.pointId, {
+                        name: editingCustomPoint.name.trim(),
+                        phone: editingCustomPoint.phone.trim(),
+                        notes: editingCustomPoint.notes.trim(),
+                        url: editingCustomPoint.url.trim(),
+                      })
+                      setEditingCustomPoint(null)
+                      setVisible(false)
+                    }}
+                    className="flex-1 px-3 py-2 text-white bg-blue-500 hover:bg-blue-600 disabled:opacity-50 rounded-lg transition-colors border-0 outline-none text-sm"
+                  >
+                    Opslaan
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Edit/Delete buttons for vondsten */}
             {isVondst && currentVondstId && !editingVondst && (

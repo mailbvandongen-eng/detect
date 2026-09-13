@@ -1,14 +1,11 @@
 import { useState } from 'react'
-import { Settings, Map, Navigation, Smartphone, Layers, Plus, Trash2, MapPin, Download, BarChart3, Pencil, Upload, Bug, User, Sliders, Volume2, Cloud, WifiOff, Palette } from 'lucide-react'
+import { Settings, Map, Navigation, Smartphone, Layers, MapPin, BarChart3, Upload, Bug, Sliders, Palette } from 'lucide-react'
 
 const BUG_REPORT_URL = 'https://forms.gle/R5LCk11Bzu5XrkBj8'
-import { useUIStore, useSettingsStore, usePresetStore } from '../../store'
+import { useUIStore, useSettingsStore } from '../../store'
 import { useLocalVondstenStore } from '../../store/localVondstenStore'
-import { useCustomLayerStore } from '../../store/customLayerStore'
-import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import { VondstenDashboard } from '../Vondst/VondstenDashboard'
-import { ImportLayerModal, CustomLayerItem } from '../CustomLayers'
-import { GoogleSignInButton } from '../Auth/GoogleSignInButton'
+import { ImportLayerModal } from '../CustomLayers'
 import type { DefaultBackground, DetectTheme } from '../../store/settingsStore'
 import { AppWindow } from './AppWindow'
 
@@ -29,28 +26,8 @@ export function SettingsPanel() {
   const openWindow = useUIStore(state => state.openWindow)
   const backWindow = useUIStore(state => state.backWindow)
   const settings = useSettingsStore()
-  const { presets, createPreset, deletePreset, updatePreset } = usePresetStore()
   const vondsten = useLocalVondstenStore(state => state.vondsten)
-  const customLayers = useCustomLayerStore(state => state.layers)
-  const { layers: customPointLayers, updateLayer: updateCustomPointLayer } = useCustomPointLayerStore()
-  const [newPresetName, setNewPresetName] = useState('')
-  const [showNewPresetInput, setShowNewPresetInput] = useState(false)
-  const [renamingPresetId, setRenamingPresetId] = useState<string | null>(null)
-  const [renameValue, setRenameValue] = useState('')
-  const [renamingLayerId, setRenamingLayerId] = useState<string | null>(null)
-  const [renameLayerValue, setRenameLayerValue] = useState('')
   const [activeTab, setActiveTab] = useState<TabType>('algemeen')
-
-  const handleCreatePreset = () => {
-    if (newPresetName.trim()) {
-      createPreset(newPresetName.trim(), 'Layers')
-      setNewPresetName('')
-      setShowNewPresetInput(false)
-    }
-  }
-  const startRenamePreset = (id: string, currentName: string) => { setRenamingPresetId(id); setRenameValue(currentName) }
-  const handleRenamePreset = (id: string) => { if (renameValue.trim()) updatePreset(id, { name: renameValue.trim() }); setRenamingPresetId(null); setRenameValue('') }
-  const cancelRename = () => { setRenamingPresetId(null); setRenameValue('') }
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
     { id: 'algemeen', label: 'Algemeen', icon: <Sliders size={14} /> },
@@ -71,7 +48,7 @@ export function SettingsPanel() {
             <section className="space-y-2"><h3 className="font-medium text-gray-800 flex items-center gap-2"><Navigation size={16} /> GPS</h3><label className="flex items-center justify-between text-sm"><span>GPS automatisch starten</span><input type="checkbox" checked={settings.gpsAutoStart} onChange={e => settings.setGpsAutoStart(e.target.checked)} /></label><label className="flex items-center justify-between text-sm"><span>Nauwkeurigheidscirkel</span><input type="checkbox" checked={settings.showAccuracyCircle} onChange={e => settings.setShowAccuracyCircle(e.target.checked)} /></label></section>
             <section className="space-y-2"><h3 className="font-medium text-gray-800 flex items-center gap-2"><Smartphone size={16} /> Interface</h3><label className="flex items-center justify-between text-sm"><span>Haptische feedback</span><input type="checkbox" checked={settings.hapticFeedback} onChange={e => settings.setHapticFeedback(e.target.checked)} /></label><label className="flex items-center justify-between text-sm"><span>Lettergrootte</span><input type="range" min="80" max="130" step="10" value={settings.fontScale} onChange={e => settings.setFontScale(Number(e.target.value))} /></label></section>
           </>}
-          {activeTab === 'lagen' && <section className="space-y-3"><h3 className="font-medium text-gray-800 flex items-center gap-2"><Layers size={16} /> Lagen</h3><label className="flex items-center justify-between text-sm"><span>Eigen puntlagen tonen</span><input type="checkbox" checked={settings.showCustomPointLayers} onChange={e => settings.setShowCustomPointLayers(e.target.checked)} /></label><label className="flex items-center justify-between text-sm"><span>Vondsten op kaart tonen</span><input type="checkbox" checked={settings.showLocalVondsten} onChange={e => settings.setShowLocalVondsten(e.target.checked)} /></label><button className="detect-window-secondary-button w-full" onClick={() => openWindow('importLayer', 'settings')}><Upload size={16} /> Laag importeren</button></section>}
+          {activeTab === 'lagen' && <section className="space-y-3"><h3 className="font-medium text-gray-800 flex items-center gap-2"><Layers size={16} /> Lagen</h3><p className="text-sm text-gray-500">Zet je eigen lagen afzonderlijk aan of uit via Kaartlagen.</p><label className="flex items-center justify-between text-sm"><span>Vondsten op kaart tonen</span><input type="checkbox" checked={settings.showLocalVondsten} onChange={e => settings.setShowLocalVondsten(e.target.checked)} /></label><button className="detect-window-secondary-button w-full" onClick={() => openWindow('importLayer', 'settings')}><Upload size={16} /> Laag importeren</button></section>}
           {activeTab === 'vondsten' && <section className="space-y-3"><h3 className="font-medium text-gray-800 flex items-center gap-2"><MapPin size={16} /> Vondsten</h3><p className="text-sm text-gray-500">{vondsten.length} vondsten opgeslagen</p><label className="flex items-center justify-between text-sm"><span>Alleen lokaal opslaan</span><input type="checkbox" checked={settings.vondstenLocalOnly} onChange={e => settings.setVondstenLocalOnly(e.target.checked)} /></label><button className="detect-window-secondary-button w-full" onClick={() => openWindow('vondstDashboard', 'settings')}><BarChart3 size={16} /> Vondsten beheren</button></section>}
         </div>
       </AppWindow>

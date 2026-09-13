@@ -1,7 +1,7 @@
 import {
   Search, MapPin, Compass, SlidersHorizontal, Filter, Menu, RotateCcw,
   Cloud, Ruler, Pencil, Printer, Plus, Navigation, Map,
-  ChevronRight, Settings, Route, Star, Eye, Upload
+  ChevronRight, Settings, Route, Star, Eye
 } from 'lucide-react'
 import { AppWindow } from './AppWindow'
 
@@ -102,7 +102,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                       <li><strong>Vondst knop</strong> - Knop voor vondsten vastleggen</li>
                       <li><strong>Route knop</strong> - Knop voor routes opnemen en beheren</li>
                       <li><strong>Weerwidget</strong> - Actueel weer linksboven</li>
-                      <li><strong>Mijn lagen</strong> - Eigen kaartobjecten tonen of verbergen</li>
+                      <li><strong>Kaartlagen</strong> - Eigen lagen afzonderlijk tonen of verbergen</li>
                       <li><strong>Meten, Tekenen en Exporteren</strong> - Gereedschappen linksboven</li>
                       <li><strong>Tekstgrootte</strong> - Schuifregelaars in panelen tonen</li>
                     </ul>
@@ -235,37 +235,21 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 {/* Mijn Lagen */}
                 <Section title="Mijn Lagen" icon={<MapPin size={16} />}>
                   <p className="text-xs text-gray-600 mb-2">
-                    Sla interessante locaties op in eigen lagen:
-                  </p>
-                  <ol className="text-xs text-gray-600 space-y-1 ml-4 list-decimal">
-                    <li>Tik op een object op de kaart (monument, bunker, etc.)</li>
-                    <li>Tik op <strong>+</strong> in de blauwe kop van de popup</li>
-                    <li>Kies een bestaande laag of maak een nieuwe aan</li>
-                  </ol>
-                  <div className="mt-2 p-2 bg-orange-50 rounded-lg">
-                    <p className="text-xs text-orange-700">
-                      <strong>Tip:</strong> De volledige vorm (polygoon) en popup-info worden mee opgeslagen!
-                    </p>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Beheer namen en inhoud via Instellingen → Lagen → Mijn lagen. In dezelfde tab kun je GeoJSON-, KML- en GPX-bestanden als kaartlaag importeren.
-                  </p>
-                </Section>
-
-                {/* Eigen imports */}
-                <Section title="Eigen imports" icon={<Upload size={16} />}>
-                  <p className="text-xs text-gray-600 mb-2">
-                    Importeer GeoJSON-, KML- en GPX-bestanden via Kaartlagen → Eigen imports:
+                    Zelfgemaakte en geïmporteerde lagen staan samen onder Kaartlagen → Mijn lagen.
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
+                    <li>Iedere laag heeft een eigen aan/uitknop.</li>
                     <li>Detect toont vóór het opslaan hoeveel punten, lijnen en vlakken zijn gevonden.</li>
                     <li>Bij een gemengd bestand blijven punten zichtbaar en staan vlakken standaard uit.</li>
-                    <li>Open het tandwiel naast een import om punten, lijnen en vlakken apart aan of uit te zetten en hun kleur te kiezen.</li>
-                    <li>De puntgrootte wordt automatisch aangepast aan het zoomniveau; popupvelden kun je wel zelf instellen.</li>
+                    <li>Punten en vlakken kun je per import apart tonen en een kleur geven.</li>
+                    <li>Het Naamveld en de zichtbare popupvelden blijven instelbaar.</li>
                   </ul>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Bestaande imports worden automatisch overgezet; opnieuw importeren is niet nodig. Uitgeschakelde onderdelen blijven gewoon in de import bewaard.
-                  </p>
+                  <ol className="text-xs text-gray-600 space-y-1 ml-4 mt-3 list-decimal">
+                    <li>Houd je vinger op de gewenste kaartplek.</li>
+                    <li>Kies <strong>Punt toevoegen</strong>.</li>
+                    <li>Kies een laag, ook een geïmporteerde laag.</li>
+                    <li>Vul naam, telefoonnummer en eventuele extra informatie in.</li>
+                  </ol>
                 </Section>
 
                 {/* Vondsten */}
@@ -275,7 +259,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
                     <li><strong>Vondstknop:</strong> zet Menu → Vondst knop aan en gebruik de oranje knop onderaan</li>
-                    <li><strong>Long-press:</strong> Houd vinger op kaart → "Vondst toevoegen"</li>
+                    <li><strong>Long-press:</strong> Houd vinger op kaart → "Vondst registreren"</li>
                     <li><strong>Velden:</strong> Type, materiaal, periode, diepte, conditie, gewicht</li>
                     <li><strong>Export:</strong> Excel, CSV, GeoJSON, GPX, KML</li>
                   </ul>

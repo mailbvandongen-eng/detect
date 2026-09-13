@@ -7,6 +7,18 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.40',
+    date: '13 september 2026',
+    title: 'Mijn lagen terug naar de basis',
+    changes: [
+      'Bij eigen en geïmporteerde lagen staat voortaan de laagnaam in de blauwe popupkop en de naam van het kaartobject in de inhoud.',
+      'Zelfgemaakte puntlagen en geïmporteerde GeoJSON-, KML- en GPX-lagen staan samen onder Kaartlagen → Mijn lagen en zijn daar afzonderlijk aan of uit te zetten.',
+      'Houd de kaart ingedrukt, kies Punt toevoegen en selecteer daarna iedere eigen laag, inclusief een geïmporteerde laag.',
+      'Nieuwe punten ondersteunen naam, telefoonnummer, notities, link en foto; handmatig toegevoegde punten zijn vanuit hun popup te bewerken of verwijderen.',
+      'Geïmporteerde geometrie blijft onaangeraakt. Extra punten bij een import worden apart en veilig in de bestaande laag-sync bewaard.'
+    ]
+  },
+  {
     version: '2.33.39',
     date: '13 september 2026',
     title: 'Eigen imports teruggebracht tot de bedoeling',

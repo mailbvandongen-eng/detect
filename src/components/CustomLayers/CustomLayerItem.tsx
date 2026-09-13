@@ -7,6 +7,7 @@ import {
   type CustomLayer,
   type GeometryGroup,
 } from '../../store/customLayerStore'
+import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import { formatImportedFieldLabel, isTechnicalImportedField } from '../../utils/importedLayerPopup'
 
 interface Props {
@@ -49,13 +50,16 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
     updatePopupConfig,
   } = useCustomLayerStore()
   const [expanded, setExpanded] = useState(false)
+  const linkedPointCount = useCustomPointLayerStore(state =>
+    state.layers.find(pointLayer => pointLayer.linkedImportedLayerId === layer.id)?.points.length || 0
+  )
 
   const counts = useMemo(() => getGeometryCounts(layer.features), [layer.features])
   const propertyKeys = useMemo(() => getImportedPropertyKeys(layer.features), [layer.features])
   const visiblePropertyKeys = propertyKeys.filter(key =>
     layer.popupConfig.showTechnicalFields || !isTechnicalImportedField(key)
   )
-  const featureCount = layer.features.features.length
+  const featureCount = layer.features.features.length + linkedPointCount
   const primaryColor = counts.points > 0
     ? layer.style.points.color
     : counts.lines > 0
@@ -85,7 +89,7 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
           title={layer.style[group].visible ? `${GROUP_LABELS[group]} verbergen` : `${GROUP_LABELS[group]} tonen`}
         />
         <span className="flex-1 text-xs font-medium text-gray-700">
-          {GROUP_LABELS[group]} <span className="font-normal text-gray-400">({counts[group]})</span>
+          {GROUP_LABELS[group]} <span className="font-normal text-gray-400">({counts[group] + (group === 'points' ? linkedPointCount : 0)})</span>
         </span>
         <label className="flex items-center gap-1 text-[11px] text-gray-500">
           Kleur
@@ -128,7 +132,7 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
 
       {expanded && (
         <div className="mx-1 mb-2 mt-1 rounded-lg border border-cyan-100 bg-white p-2 space-y-3 shadow-sm">
-          {counts.points > 0 && renderGeometryRow(
+          {(counts.points > 0 || linkedPointCount > 0) && renderGeometryRow(
             'points',
             layer.style.points.color,
             color => updateGeometryStyle(layer.id, 'points', { color })
@@ -149,7 +153,7 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
           <section className="space-y-2 rounded border border-gray-100 p-2">
             <div className="text-xs font-medium text-gray-700">Popup</div>
             <label className="block text-xs text-gray-600">
-              Titel
+              Naamveld
               <select
                 value={layer.popupConfig.titleField || ''}
                 onChange={event => updatePopupConfig(layer.id, { titleField: event.target.value || null })}

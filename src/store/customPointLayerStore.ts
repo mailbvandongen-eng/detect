@@ -61,6 +61,7 @@ export interface CustomPoint {
   name: string
   category: string
   notes: string
+  phone?: string
   url?: string
   coordinates: [number, number] // [lon, lat] WGS84 - center point for display
   createdAt: string
@@ -90,6 +91,9 @@ export interface CustomPointLayer {
   visible: boolean
   archived: boolean
   createdAt: string
+  // Handmatige punten die logisch bij een geïmporteerde laag horen.
+  // De zware importgeometrie blijft lokaal; deze punten blijven cloud-synchroniseerbaar.
+  linkedImportedLayerId?: string
 }
 
 interface CustomPointLayerStore {
@@ -98,6 +102,7 @@ interface CustomPointLayerStore {
 
   // Layer operations
   addLayer: (name: string, categories?: string[]) => string
+  ensureImportedLayerOverlay: (importedLayerId: string, name: string, color: string) => string
   removeLayer: (id: string) => void
   updateLayer: (id: string, updates: Partial<Omit<CustomPointLayer, 'id' | 'points' | 'createdAt'>>) => void
   toggleVisibility: (id: string) => void
@@ -165,6 +170,31 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
           colorIndex: state.colorIndex + 1
         }))
 
+        return id
+      },
+
+      ensureImportedLayerOverlay: (importedLayerId, name, color) => {
+        const existing = get().layers.find(layer => layer.linkedImportedLayerId === importedLayerId)
+        if (existing) return existing.id
+
+        const preferredId = `import-overlay-${importedLayerId}`
+        const id = get().layers.some(layer => layer.id === preferredId) ? crypto.randomUUID() : preferredId
+        set(state => ({
+          layers: [
+            ...state.layers,
+            {
+              id,
+              name,
+              color,
+              categories: [],
+              points: [],
+              visible: true,
+              archived: false,
+              createdAt: new Date().toISOString(),
+              linkedImportedLayerId: importedLayerId,
+            }
+          ]
+        }))
         return id
       },
 
@@ -355,6 +385,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               name: point.name,
               category: point.category,
               notes: point.notes,
+              phone: point.phone,
               url: point.url,
               status: point.status,
               sourceLayer: point.sourceLayer,
@@ -396,6 +427,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               name: f.properties?.name || 'Naamloos',
               category: f.properties?.category || 'Overig',
               notes: f.properties?.notes || '',
+              phone: f.properties?.phone,
               url: f.properties?.url,
               status: f.properties?.status || 'todo',
               sourceLayer: f.properties?.sourceLayer,
@@ -456,7 +488,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
     }),
     {
       name: 'detectorapp-custom-point-layers',
-      version: 3,
+      version: 4,
       // Ensure default layer exists after rehydration
       onRehydrateStorage: () => (state) => {
         if (state) {

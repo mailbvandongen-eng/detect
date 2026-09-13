@@ -1,22 +1,14 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { MapBrowserEvent } from 'ol'
-import { X, MapPin, Plus, ExternalLink, Layers, ChevronRight, Check, Camera, Settings2, Crosshair, PersonStanding } from 'lucide-react'
+import { X, MapPin, ExternalLink, Layers, ChevronRight, Crosshair, PersonStanding } from 'lucide-react'
 import { toLonLat } from 'ol/proj'
 import { useMapStore } from '../../store'
 import { useUIStore } from '../../store/uiStore'
-import { useCustomPointLayerStore, CustomPointLayer } from '../../store/customPointLayerStore'
+import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
+import { useCustomLayerStore } from '../../store/customLayerStore'
 import { buildGoogleMapsLocationUrl, buildGoogleStreetViewUrl } from '../../utils/googleMapsUrls'
-
-// Check if a coordinate is already in a layer (within ~10m tolerance)
-const TOLERANCE = 0.0001 // ~10 meters at equator
-function isCoordinateInLayer(layer: CustomPointLayer, coord: [number, number]): boolean {
-  return layer.points.some(point => {
-    const dx = Math.abs(point.coordinates[0] - coord[0])
-    const dy = Math.abs(point.coordinates[1] - coord[1])
-    return dx < TOLERANCE && dy < TOLERANCE
-  })
-}
+import { buildUserLayerCatalog, type UserLayerTarget } from '../../utils/userLayerCatalog'
 
 interface LongPressLocation {
   pixel: [number, number]
@@ -26,8 +18,10 @@ interface LongPressLocation {
 export function LongPressMenu() {
   const map = useMapStore(state => state.map)
   const openVondstForm = useUIStore(state => state.openVondstForm)
-  const { openAddPointModal, openCreateLayerModal, openLayerManagerModal } = useUIStore()
-  const customLayers = useCustomPointLayerStore(state => state.layers)
+  const openAddPointModal = useUIStore(state => state.openAddPointModal)
+  const pointLayers = useCustomPointLayerStore(state => state.layers)
+  const importedLayers = useCustomLayerStore(state => state.layers)
+  const selectableLayers = buildUserLayerCatalog(pointLayers, importedLayers)
 
   const [menuLocation, setMenuLocation] = useState<LongPressLocation | null>(null)
   const [visible, setVisible] = useState(false)
@@ -312,17 +306,12 @@ export function LongPressMenu() {
     setShowLayerSubmenu(false)
   }
 
-  const handleAddToLayer = (layerId: string) => {
+  const handleAddToLayer = (target: UserLayerTarget) => {
     if (!menuLocation) return
 
     const [lng, lat] = menuLocation.coordinate
-    openAddPointModal(layerId, { lat, lng })
+    openAddPointModal(target, { lat, lng })
 
-    forceClose()
-  }
-
-  const handleCreateNewLayer = () => {
-    openCreateLayerModal()
     forceClose()
   }
 
@@ -362,34 +351,6 @@ export function LongPressMenu() {
     forceClose()
   }
 
-  // Take photo with location metadata
-  const handleTakePhoto = () => {
-    if (!menuLocation) return
-
-    // Create hidden file input for camera
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = 'image/*'
-    input.capture = 'environment' // Use back camera
-
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0]
-      if (!file) return
-
-      // Open vondst form with location AND photo
-      const [lng, lat] = menuLocation.coordinate
-      openVondstForm({ lat, lng }, file)
-    }
-
-    input.click()
-    forceClose()
-  }
-
-  // Open layer manager
-  const handleManageLayers = () => {
-    openLayerManagerModal()
-    forceClose()
-  }
 
   // Format coordinate for display
   const formatCoordinate = (coord: [number, number]) => {
@@ -417,9 +378,9 @@ export function LongPressMenu() {
               // Position menu near the long press location
               // Calculate available space and position accordingly
               left: Math.min(menuLocation.pixel[0], window.innerWidth - 220),
-              // Menu height: ~380px base + ~100px if submenu open
+              // Keep the compact menu clear of the pressed location.
               top: (() => {
-                const menuHeight = showLayerSubmenu ? 480 : 380
+                const menuHeight = showLayerSubmenu ? 440 : 320
                 const spaceBelow = window.innerHeight - menuLocation.pixel[1]
                 // If not enough space below, position above the click point
                 if (spaceBelow < menuHeight && menuLocation.pixel[1] > menuHeight) {
@@ -445,32 +406,14 @@ export function LongPressMenu() {
 
             {/* Menu items */}
             <div className="bg-white">
-              {/* Add vondst */}
-              <button
-                onClick={handleAddVondst}
-                className="w-full px-4 py-3 flex items-center gap-3 transition-colors hover:bg-orange-50 text-gray-700 bg-white border-0 outline-none"
-              >
-                <Crosshair size={20} className="text-orange-500" />
-                <span className="font-medium">Vondst toevoegen</span>
-              </button>
-
-              {/* Take photo */}
-              <button
-                onClick={handleTakePhoto}
-                className="w-full px-4 py-3 flex items-center gap-3 transition-colors hover:bg-green-50 text-gray-700 bg-white border-0 outline-none"
-              >
-                <Camera size={20} className="text-green-500" />
-                <span className="font-medium">Foto maken</span>
-              </button>
-
-              {/* Add to layer - with submenu */}
+              {/* Generic point: choose from every personal layer, including imports. */}
               <div className="relative">
                 <button
                   onClick={() => setShowLayerSubmenu(!showLayerSubmenu)}
                   className="w-full px-4 py-3 flex items-center gap-3 transition-colors hover:bg-blue-50 text-gray-700 bg-white border-0 outline-none"
                 >
                   <Layers size={20} className="text-purple-500" />
-                  <span className="font-medium flex-1 text-left">Voeg toe aan laag...</span>
+                  <span className="font-medium flex-1 text-left">Punt toevoegen</span>
                   <ChevronRight size={16} className={`text-gray-400 transition-transform ${showLayerSubmenu ? 'rotate-90' : ''}`} />
                 </button>
 
@@ -478,66 +421,42 @@ export function LongPressMenu() {
                 <AnimatePresence>
                   {showLayerSubmenu && (
                     <motion.div
-                      className="bg-gray-50 border-t border-gray-100"
+                      className="bg-gray-50 border-t border-gray-100 max-h-52 overflow-y-auto"
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                     >
-                      {customLayers.length === 0 ? (
-                        <button
-                          onClick={handleCreateNewLayer}
-                          className="w-full px-4 py-2 pl-11 flex items-center gap-2 text-sm text-purple-600 hover:bg-purple-50 bg-transparent border-0 outline-none"
-                        >
-                          <Plus size={14} />
-                          <span>Maak eerst een laag aan</span>
-                        </button>
+                      {selectableLayers.length === 0 ? (
+                        <div className="px-4 py-3 pl-11 text-sm text-gray-500">
+                          Maak eerst een laag via Kaartlagen
+                        </div>
                       ) : (
-                        <>
-                          {customLayers.map(layer => {
-                            const isAlreadyAdded = menuLocation ? isCoordinateInLayer(layer, menuLocation.coordinate) : false
-                            return (
-                              <button
-                                key={layer.id}
-                                onClick={() => !isAlreadyAdded && handleAddToLayer(layer.id)}
-                                className={`w-full px-4 py-2 pl-11 flex items-center gap-2 text-sm bg-transparent border-0 outline-none ${
-                                  isAlreadyAdded
-                                    ? 'text-gray-400 cursor-not-allowed'
-                                    : 'text-gray-700 hover:bg-gray-100'
-                                }`}
-                                title={isAlreadyAdded ? 'Al toegevoegd aan deze laag' : undefined}
-                                disabled={isAlreadyAdded}
-                              >
-                                {isAlreadyAdded && (
-                                  <Check size={14} className="text-green-500 flex-shrink-0" />
-                                )}
-                                <span className="truncate">{layer.name}</span>
-                                <span className="text-xs text-gray-400 ml-auto">
-                                  {isAlreadyAdded ? 'al toegevoegd' : `(${layer.points.length})`}
-                                </span>
-                              </button>
-                            )
-                          })}
+                        selectableLayers.map(layer => (
                           <button
-                            onClick={handleCreateNewLayer}
-                            className="w-full px-4 py-2 pl-11 flex items-center gap-2 text-sm text-purple-600 hover:bg-purple-50 bg-transparent border-0 outline-none border-t border-gray-200"
+                            key={layer.key}
+                            onClick={() => handleAddToLayer(layer.target)}
+                            className="w-full px-4 py-2.5 pl-11 flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100 bg-transparent border-0 outline-none"
                           >
-                            <Plus size={14} />
-                            <span>Nieuwe laag...</span>
+                            <span
+                              className="w-3 h-3 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: layer.color }}
+                            />
+                            <span className="truncate">{layer.name}</span>
                           </button>
-                        </>
+                        ))
                       )}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* Manage layers */}
+              {/* Detailed archaeological find registration stays separate. */}
               <button
-                onClick={handleManageLayers}
-                className="w-full px-4 py-3 flex items-center gap-3 transition-colors hover:bg-purple-50 text-gray-700 bg-white border-0 outline-none"
+                onClick={handleAddVondst}
+                className="w-full px-4 py-3 flex items-center gap-3 transition-colors hover:bg-orange-50 text-gray-700 bg-white border-0 outline-none"
               >
-                <Settings2 size={20} className="text-purple-500" />
-                <span className="font-medium">Lagen beheren</span>
+                <Crosshair size={20} className="text-orange-500" />
+                <span className="font-medium">Vondst registreren</span>
               </button>
 
               {/* Open in Google Maps */}

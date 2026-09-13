@@ -1,22 +1,15 @@
 import { useEffect, useRef } from 'react'
-import { useMapStore, useSettingsStore } from '../../store'
+import { useMapStore } from '../../store'
 import { useCustomPointLayerStore, type FeatureGeometry } from '../../store/customPointLayerStore'
+import { useCustomLayerStore } from '../../store/customLayerStore'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Feature } from 'ol'
 import { Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon } from 'ol/geom'
 import { fromLonLat } from 'ol/proj'
-import { Style, Circle, Fill, Stroke, Text } from 'ol/style'
+import { Style, Circle, Fill, Stroke } from 'ol/style'
 import type { Geometry } from 'ol/geom'
-
-// Category icons (first letter)
-const CATEGORY_LABELS: Record<string, string> = {
-  'Mineraal': 'M',
-  'Fossiel': 'F',
-  'Erfgoed': 'E',
-  'Monument': 'Mo',
-  'Overig': '•'
-}
+import { getAutomaticImportedPointRadius } from '../../utils/importedLayerStyle'
 
 // Helper to convert FeatureGeometry (WGS84) to OpenLayers geometry (EPSG:3857)
 function createOLGeometry(geometry: FeatureGeometry): Geometry {
@@ -56,7 +49,7 @@ function createOLGeometry(geometry: FeatureGeometry): Geometry {
 export function CustomPointMarkers() {
   const map = useMapStore(state => state.map)
   const layers = useCustomPointLayerStore(state => state.layers)
-  const showCustomPointLayers = useSettingsStore(state => state.showCustomPointLayers)
+  const importedLayers = useCustomLayerStore(state => state.layers)
   const layersRef = useRef<Map<string, VectorLayer<VectorSource>>>(new Map())
 
   useEffect(() => {
@@ -74,6 +67,14 @@ export function CustomPointMarkers() {
 
     // Add/update layers
     layers.forEach(customLayer => {
+      const linkedImport = customLayer.linkedImportedLayerId
+        ? importedLayers.find(layer => layer.id === customLayer.linkedImportedLayerId)
+        : undefined
+      const displayName = linkedImport?.name || customLayer.name
+      const displayColor = linkedImport?.style.points.color || customLayer.color
+      const displayVisible = linkedImport
+        ? linkedImport.visible && linkedImport.style.points.visible
+        : customLayer.visible
       const source = new VectorSource()
 
       // Add features for each point
@@ -94,11 +95,9 @@ export function CustomPointMarkers() {
           layerType: 'customPoint',
           customPoint: point,
           customLayerId: customLayer.id,
-          customLayerName: customLayer.name,
-          customLayerColor: customLayer.color
+          customLayerName: displayName,
+          customLayerColor: displayColor
         })
-
-        const label = CATEGORY_LABELS[point.category] || point.category.charAt(0).toUpperCase()
 
         // Style depends on geometry type
         if (hasFullGeometry) {
@@ -107,53 +106,34 @@ export function CustomPointMarkers() {
           feature.setStyle(() => {
             if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
               return new Style({
-                fill: new Fill({ color: customLayer.color + '40' }), // 25% opacity fill
-                stroke: new Stroke({ color: customLayer.color, width: 2 })
+                fill: new Fill({ color: displayColor + '40' }), // 25% opacity fill
+                stroke: new Stroke({ color: displayColor, width: 2 })
               })
             } else if (geometryType === 'LineString' || geometryType === 'MultiLineString') {
               return new Style({
-                stroke: new Stroke({ color: customLayer.color, width: 3 })
+                stroke: new Stroke({ color: displayColor, width: 3 })
               })
             }
             // MultiPoint or other - use circle style
             return new Style({
               image: new Circle({
-                radius: 8,
-                fill: new Fill({ color: customLayer.color }),
-                stroke: new Stroke({ color: '#ffffff', width: 2 })
+                radius: 5,
+                fill: new Fill({ color: displayColor }),
+                stroke: new Stroke({ color: '#ffffff', width: 1 })
               })
             })
           })
         } else {
-          // Zoom-dependent style function for points
+          // The same restrained automatic size routine used by imported points.
           feature.setStyle((_, resolution) => {
-            const baseRadius = 12
-            const minRadius = 6
-            const maxRadius = 14
-
-            let radius = baseRadius
-            if (resolution > 50) {
-              radius = minRadius
-            } else if (resolution > 10) {
-              radius = Math.max(minRadius, baseRadius - (resolution - 10) / 10)
-            } else if (resolution < 2) {
-              radius = maxRadius
-            }
-
-            const fontSize = Math.max(8, Math.min(12, radius - 2))
+            const radius = getAutomaticImportedPointRadius(resolution)
 
             return new Style({
               image: new Circle({
                 radius,
-                fill: new Fill({ color: customLayer.color }),
-                stroke: new Stroke({ color: '#ffffff', width: radius > 8 ? 2 : 1 })
-              }),
-              text: radius >= 8 ? new Text({
-                text: label,
-                font: `bold ${fontSize}px sans-serif`,
-                fill: new Fill({ color: '#ffffff' }),
-                offsetY: 1
-              }) : undefined
+                fill: new Fill({ color: displayColor }),
+                stroke: new Stroke({ color: '#ffffff', width: 1 })
+              })
             })
           })
         }
@@ -167,17 +147,17 @@ export function CustomPointMarkers() {
       if (existingLayer) {
         // Update existing layer - combine global toggle with individual layer visibility
         existingLayer.setSource(source)
-        existingLayer.setVisible(showCustomPointLayers && customLayer.visible)
+        existingLayer.setVisible(displayVisible)
       } else {
         // Create new layer - combine global toggle with individual layer visibility
         const vectorLayer = new VectorLayer({
           source,
           zIndex: 950, // Between imported layers (900) and vondsten (1000)
           properties: {
-            title: customLayer.name,
+            title: displayName,
             customPointLayerId: customLayer.id
           },
-          visible: showCustomPointLayers && customLayer.visible
+          visible: displayVisible
         })
         map.addLayer(vectorLayer)
         layersRef.current.set(customLayer.id, vectorLayer)
@@ -191,7 +171,7 @@ export function CustomPointMarkers() {
       })
       layersRef.current.clear()
     }
-  }, [map, layers, showCustomPointLayers])
+  }, [map, layers, importedLayers])
 
   return null // Render-less component
 }

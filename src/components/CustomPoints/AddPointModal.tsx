@@ -1,38 +1,70 @@
 import { useState } from 'react'
-import { MapPin } from 'lucide-react'
+import { MapPin, Phone } from 'lucide-react'
 import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, type PhotoData } from '../../store/customPointLayerStore'
+import { useCustomLayerStore } from '../../store/customLayerStore'
 import { PhotoCapture } from './PhotoCapture'
 import { AppWindow } from '../UI/AppWindow'
 
 export function AddPointModal() {
   const addPointModalOpen = useUIStore(state => state.activeWindow === 'addPoint')
-  const addPointModalLayerId = useUIStore(state => state.addPointModalLayerId)
+  const addPointModalLayerTarget = useUIStore(state => state.addPointModalLayerTarget)
   const addPointModalLocation = useUIStore(state => state.addPointModalLocation)
   const closeAddPointModal = useUIStore(state => state.closeAddPointModal)
-  const { addPoint, getLayer } = useCustomPointLayerStore()
+  const {
+    addPoint,
+    getLayer,
+    ensureImportedLayerOverlay,
+    updateLayer: updatePointLayer,
+  } = useCustomPointLayerStore()
+  const importedLayers = useCustomLayerStore(state => state.layers)
+  const updateImportedGeometryStyle = useCustomLayerStore(state => state.updateGeometryStyle)
+  const updateImportedLayer = useCustomLayerStore(state => state.updateLayer)
 
   const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
   const [notes, setNotes] = useState('')
   const [url, setUrl] = useState('')
   const [photos, setPhotos] = useState<PhotoData[]>([])
 
-  const layer = addPointModalLayerId ? getLayer(addPointModalLayerId) : null
+  const pointLayer = addPointModalLayerTarget?.kind === 'point'
+    ? getLayer(addPointModalLayerTarget.id)
+    : null
+  const importedLayer = addPointModalLayerTarget?.kind === 'imported'
+    ? importedLayers.find(layer => layer.id === addPointModalLayerTarget.id)
+    : null
+  const layerName = pointLayer?.name || importedLayer?.name || ''
+  const layerColor = pointLayer?.color || importedLayer?.style.points.color || importedLayer?.color || '#3b82f6'
 
   const handleSubmit = () => {
-    if (!name.trim() || !addPointModalLayerId || !addPointModalLocation) return
+    if (!name.trim() || !addPointModalLayerTarget || !addPointModalLocation || !layerName) return
+    const trimmedPhone = phone.trim()
+    const trimmedUrl = url.trim()
 
-    addPoint(addPointModalLayerId, {
+    const targetLayerId = addPointModalLayerTarget.kind === 'point'
+      ? addPointModalLayerTarget.id
+      : ensureImportedLayerOverlay(addPointModalLayerTarget.id, layerName, layerColor)
+
+    if (addPointModalLayerTarget.kind === 'imported') {
+      updateImportedGeometryStyle(addPointModalLayerTarget.id, 'points', { visible: true })
+      updateImportedLayer(addPointModalLayerTarget.id, { visible: true })
+    } else {
+      updatePointLayer(addPointModalLayerTarget.id, { visible: true })
+    }
+
+    addPoint(targetLayerId, {
       name: name.trim(),
       category: 'Overig',
       notes: notes.trim(),
-      url: url.trim() || undefined,
       coordinates: [addPointModalLocation.lng, addPointModalLocation.lat],
-      photos: photos.length > 0 ? photos : undefined
+      ...(trimmedPhone ? { phone: trimmedPhone } : {}),
+      ...(trimmedUrl ? { url: trimmedUrl } : {}),
+      ...(photos.length > 0 ? { photos } : {})
     })
 
     // Reset form
     setName('')
+    setPhone('')
     setNotes('')
     setUrl('')
     setPhotos([])
@@ -41,13 +73,14 @@ export function AddPointModal() {
 
   const handleClose = () => {
     setName('')
+    setPhone('')
     setNotes('')
     setUrl('')
     setPhotos([])
     closeAddPointModal()
   }
 
-  if (!layer) return null
+  if (!layerName) return null
 
   return (
     <AppWindow
@@ -58,13 +91,13 @@ export function AddPointModal() {
       onClose={handleClose}
       subHeader={
         <div className="px-4 py-2">
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: layer.color }}
-                />
-                <span className="text-sm text-gray-600">{layer.name}</span>
-              </div>
+          <div className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: layerColor }}
+            />
+            <span className="text-sm text-gray-600">{layerName}</span>
+          </div>
         </div>
       }
       footer={
@@ -82,7 +115,7 @@ export function AddPointModal() {
         </div>
       }
     >
-            <div className="p-4 space-y-3">
+      <div className="p-4 space-y-3">
               {/* Point name */}
               <div>
                 <label className="block font-medium text-gray-700 mb-1" style={{ fontSize: '0.9em' }}>
@@ -96,6 +129,26 @@ export function AddPointModal() {
                   style={{ fontSize: '1em' }}
                   autoFocus
                 />
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block font-medium text-gray-700 mb-1" style={{ fontSize: '0.9em' }}>
+                  Telefoonnummer
+                </label>
+                <div className="relative">
+                  <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="bijv. 06 12345678"
+                    className="w-full pl-9 pr-3 py-1.5 bg-white rounded-lg border-0 outline-none hover:bg-blue-50 transition-colors"
+                    style={{ fontSize: '1em' }}
+                  />
+                </div>
               </div>
 
               {/* Photos */}
@@ -134,7 +187,7 @@ export function AddPointModal() {
                   style={{ fontSize: '1em' }}
                 />
               </div>
-            </div>
+      </div>
     </AppWindow>
   )
 }

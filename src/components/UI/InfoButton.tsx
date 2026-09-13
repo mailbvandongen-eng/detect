@@ -404,7 +404,7 @@ function HandleidingTab() {
         <h3 className="font-semibold text-gray-800 mb-2">Vondst registreren</h3>
         <div className="text-gray-600 space-y-2 text-xs">
           <p><strong>Via GPS:</strong> Open menu → Vondst toevoegen. Je locatie wordt automatisch ingevuld.</p>
-          <p><strong>Via long-press:</strong> Houd je vinger op de kaart → kies "Vondst toevoegen".</p>
+          <p><strong>Via long-press:</strong> Houd je vinger op de kaart → kies "Vondst registreren".</p>
           <p><strong>Handmatig:</strong> In het formulier → "Kies op kaart" voor exacte locatie.</p>
           <p><strong>Foto's:</strong> Voeg foto-links toe of upload direct.</p>
         </div>

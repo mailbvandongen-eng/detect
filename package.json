@@ -1,12 +1,13 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.39",
+  "version": "2.33.40",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "node scripts/build-pages.mjs",
     "build:dist": "vite build --outDir dist",
+    "test:user-layers": "node scripts/test-user-layers.mjs",
     "preview": "vite preview"
   },
   "devDependencies": {

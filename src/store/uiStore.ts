@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { UserLayerTarget } from '../utils/userLayerCatalog'
 
 export type UIWindowId =
   | 'menu' | 'layers' | 'layerControl' | 'legend' | 'backgrounds' | 'settings'
@@ -12,7 +13,7 @@ interface UIState {
   returnWindow: UIWindowId | null
   vondstFormLocation: { lat: number; lng: number } | null
   vondstFormPhoto: File | null
-  addPointModalLayerId: string | null
+  addPointModalLayerTarget: UserLayerTarget | null
   addPointModalLocation: { lat: number; lng: number } | null
   layerDashboardLayerId: string | null
   isDrawingMode: boolean
@@ -39,7 +40,7 @@ interface UIState {
   toggleVondstDashboard: () => void
   openCreateLayerModal: () => void
   closeCreateLayerModal: () => void
-  openAddPointModal: (layerId: string, location: { lat: number; lng: number }) => void
+  openAddPointModal: (layer: UserLayerTarget, location: { lat: number; lng: number }) => void
   closeAddPointModal: () => void
   openLayerManagerModal: () => void
   closeLayerManagerModal: () => void
@@ -58,7 +59,7 @@ const closeWindowState = { activeWindow: null, returnWindow: null } as const
 export const useUIStore = create<UIState>()((set, get) => ({
   activeWindow: null, returnWindow: null,
   vondstFormLocation: null, vondstFormPhoto: null,
-  addPointModalLayerId: null, addPointModalLocation: null,
+  addPointModalLayerTarget: null, addPointModalLocation: null,
   layerDashboardLayerId: null, isDrawingMode: false,
   collapsedCategories: new Set<string>(),
   // Eén centrale schakelaar: een nieuw venster vervangt altijd het oude.
@@ -84,8 +85,8 @@ export const useUIStore = create<UIState>()((set, get) => ({
   toggleVondstDashboard: () => get().toggleWindow('vondstDashboard'),
   openCreateLayerModal: () => get().openWindow('createLayer'),
   closeCreateLayerModal: () => { if (get().activeWindow === 'createLayer') get().closeWindow() },
-  openAddPointModal: (layerId, location) => set({ activeWindow: 'addPoint', returnWindow: null, addPointModalLayerId: layerId, addPointModalLocation: location }),
-  closeAddPointModal: () => set(state => ({ ...(state.activeWindow === 'addPoint' ? closeWindowState : {}), addPointModalLayerId: null, addPointModalLocation: null })),
+  openAddPointModal: (layer, location) => set({ activeWindow: 'addPoint', returnWindow: null, addPointModalLayerTarget: layer, addPointModalLocation: location }),
+  closeAddPointModal: () => set(state => ({ ...(state.activeWindow === 'addPoint' ? closeWindowState : {}), addPointModalLayerTarget: null, addPointModalLocation: null })),
   openLayerManagerModal: () => get().openWindow('layerManager'),
   closeLayerManagerModal: () => { if (get().activeWindow === 'layerManager') get().closeWindow() },
   openLayerDashboard: (layerId) => set({ activeWindow: 'layerDashboard', returnWindow: 'layerManager', layerDashboardLayerId: layerId }),
