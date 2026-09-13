@@ -1,6 +1,12 @@
 import { useState, useRef, useCallback } from 'react'
 import { Upload, FileText, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
-import { useCustomLayerStore } from '../../store/customLayerStore'
+import {
+  createLayerStyle,
+  getGeometryCounts,
+  getNextLayerColor,
+  useCustomLayerStore,
+  type CustomLayerStyle,
+} from '../../store/customLayerStore'
 import { parseFile, validateFile, getAcceptedExtensions, getSupportedFormatsText, detectFileType } from '../../utils/fileImport'
 import type { ParseResult } from '../../utils/fileImport'
 import { AppWindow } from '../UI/AppWindow'
@@ -14,6 +20,9 @@ type ImportState = 'idle' | 'parsing' | 'preview' | 'error'
 
 export function ImportLayerModal({ isOpen, onClose }: Props) {
   const addLayer = useCustomLayerStore(state => state.addLayer)
+  const importedLayerCount = useCustomLayerStore(state => state.layers.length)
+  const importDefaults = useCustomLayerStore(state => state.importDefaults)
+  const setImportDefaultsFromStyle = useCustomLayerStore(state => state.setImportDefaultsFromStyle)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [importState, setImportState] = useState<ImportState>('idle')
@@ -22,6 +31,8 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
   const [layerName, setLayerName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [styleDraft, setStyleDraft] = useState<CustomLayerStyle | null>(null)
+  const [rememberAsDefault, setRememberAsDefault] = useState(false)
 
   const resetState = useCallback(() => {
     setImportState('idle')
@@ -29,6 +40,8 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
     setParseResult(null)
     setLayerName('')
     setError(null)
+    setStyleDraft(null)
+    setRememberAsDefault(false)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -72,12 +85,17 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
       }
 
       setParseResult(result)
+      setStyleDraft(createLayerStyle(
+        getNextLayerColor(importedLayerCount),
+        result.features,
+        importDefaults
+      ))
       setImportState('preview')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Onbekende fout bij parsen')
       setImportState('error')
     }
-  }, [])
+  }, [importDefaults, importedLayerCount])
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -106,10 +124,21 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
     }
   }, [processFile])
 
+  const updateStyleDraft = useCallback((
+    group: keyof CustomLayerStyle,
+    updates: Partial<CustomLayerStyle[keyof CustomLayerStyle]>
+  ) => {
+    setStyleDraft(current => current ? ({
+      ...current,
+      [group]: { ...current[group], ...updates },
+    } as CustomLayerStyle) : current)
+  }, [])
+
   const handleImport = useCallback(() => {
-    if (!parseResult || !layerName.trim()) return
+    if (!parseResult || !styleDraft || !layerName.trim()) return
 
     const fileType = selectedFile ? detectFileType(selectedFile.name) : 'geojson'
+    const color = styleDraft.points.color || styleDraft.lines.color || styleDraft.polygons.strokeColor
 
     addLayer({
       name: layerName.trim(),
@@ -117,12 +146,40 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
       features: parseResult.features,
       visible: true,
       opacity: 1,
-      color: '', // Will use default color from store
+      color,
+      style: styleDraft,
+      popupConfig: {
+        titleField: null,
+        hiddenFields: [],
+        showTechnicalFields: importDefaults.popup.showTechnicalFields,
+      },
       sourceFileName: selectedFile?.name || 'unknown'
     })
 
+    if (rememberAsDefault) {
+      setImportDefaultsFromStyle(
+        styleDraft,
+        getGeometryCounts(parseResult.features)
+      )
+    }
+
     handleClose()
-  }, [parseResult, layerName, selectedFile, addLayer, handleClose])
+  }, [
+    parseResult,
+    styleDraft,
+    layerName,
+    selectedFile,
+    addLayer,
+    importDefaults.popup.showTechnicalFields,
+    rememberAsDefault,
+    setImportDefaultsFromStyle,
+    handleClose,
+  ])
+
+  const previewCounts = parseResult
+    ? getGeometryCounts(parseResult.features)
+    : { points: 0, lines: 0, polygons: 0 }
+  const mixedPointPolygon = previewCounts.points > 0 && previewCounts.polygons > 0
 
   return (
     <AppWindow
@@ -253,6 +310,138 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
                       </div>
                     </div>
                   </div>
+
+                  {styleDraft && (
+                    <div className="rounded-lg border border-cyan-100 p-3 space-y-3">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">Weergave</p>
+                        <p className="text-xs text-gray-500">Direct aanpassen of later via Kaartlagen.</p>
+                      </div>
+
+                      {previewCounts.points > 0 && (
+                        <div className="rounded bg-gray-50 p-2 space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={styleDraft.points.visible}
+                              onChange={event => updateStyleDraft('points', { visible: event.target.checked })}
+                            />
+                            <span className="flex-1">Punten ({previewCounts.points})</span>
+                            <input
+                              type="color"
+                              value={styleDraft.points.color}
+                              onChange={event => updateStyleDraft('points', { color: event.target.value })}
+                              className="h-7 w-8 border-0 bg-transparent p-0"
+                              title="Puntkleur"
+                            />
+                          </div>
+                          <label className="flex items-center gap-2 text-xs text-gray-600">
+                            <span>Grootte</span>
+                            <input
+                              type="range"
+                              min="2"
+                              max="10"
+                              step="1"
+                              value={styleDraft.points.radius}
+                              onChange={event => updateStyleDraft('points', { radius: Number(event.target.value) })}
+                              className="flex-1"
+                            />
+                            <span>{styleDraft.points.radius}px</span>
+                          </label>
+                          <label className="flex items-center justify-between text-xs text-gray-600">
+                            <span>Clusteren bij uitzoomen</span>
+                            <input
+                              type="checkbox"
+                              checked={styleDraft.points.cluster}
+                              onChange={event => updateStyleDraft('points', { cluster: event.target.checked })}
+                            />
+                          </label>
+                        </div>
+                      )}
+
+                      {previewCounts.lines > 0 && (
+                        <div className="rounded bg-gray-50 p-2 space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={styleDraft.lines.visible}
+                              onChange={event => updateStyleDraft('lines', { visible: event.target.checked })}
+                            />
+                            <span className="flex-1">Lijnen ({previewCounts.lines})</span>
+                            <input
+                              type="color"
+                              value={styleDraft.lines.color}
+                              onChange={event => updateStyleDraft('lines', { color: event.target.value })}
+                              className="h-7 w-8 border-0 bg-transparent p-0"
+                              title="Lijnkleur"
+                            />
+                          </div>
+                          <label className="flex items-center gap-2 text-xs text-gray-600">
+                            <span>Dikte</span>
+                            <input
+                              type="range"
+                              min="0.5"
+                              max="8"
+                              step="0.5"
+                              value={styleDraft.lines.width}
+                              onChange={event => updateStyleDraft('lines', { width: Number(event.target.value) })}
+                              className="flex-1"
+                            />
+                            <span>{styleDraft.lines.width}px</span>
+                          </label>
+                        </div>
+                      )}
+
+                      {previewCounts.polygons > 0 && (
+                        <div className="rounded bg-gray-50 p-2 space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={styleDraft.polygons.visible}
+                              onChange={event => updateStyleDraft('polygons', { visible: event.target.checked })}
+                            />
+                            <span className="flex-1">Vlakken ({previewCounts.polygons})</span>
+                            <input
+                              type="color"
+                              value={styleDraft.polygons.fillColor}
+                              onChange={event => updateStyleDraft('polygons', {
+                                fillColor: event.target.value,
+                                strokeColor: event.target.value,
+                              })}
+                              className="h-7 w-8 border-0 bg-transparent p-0"
+                              title="Vlakkleur"
+                            />
+                          </div>
+                          <label className="flex items-center gap-2 text-xs text-gray-600">
+                            <span>Vulling</span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="60"
+                              step="2"
+                              value={Math.round(styleDraft.polygons.fillOpacity * 100)}
+                              onChange={event => updateStyleDraft('polygons', { fillOpacity: Number(event.target.value) / 100 })}
+                              className="flex-1"
+                            />
+                            <span>{Math.round(styleDraft.polygons.fillOpacity * 100)}%</span>
+                          </label>
+                          {mixedPointPolygon && !styleDraft.polygons.visible && (
+                            <p className="text-xs text-amber-600">Vlakken staan uit omdat dit bestand ook punten bevat.</p>
+                          )}
+                        </div>
+                      )}
+
+                      <label className="flex items-start gap-2 text-xs text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={rememberAsDefault}
+                          onChange={event => setRememberAsDefault(event.target.checked)}
+                          className="mt-0.5"
+                        />
+                        <span>Deze maten, clustering en zichtbaarheid voortaan als standaard gebruiken. Nieuwe lagen houden wel elk hun eigen kleur.</span>
+                      </label>
+                    </div>
+                  )}
 
                   {/* Layer name input */}
                   <div>

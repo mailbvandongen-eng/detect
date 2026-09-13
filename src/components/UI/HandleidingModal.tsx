@@ -1,7 +1,7 @@
 import {
   Search, MapPin, Compass, SlidersHorizontal, Filter, Menu, RotateCcw,
   Cloud, Ruler, Pencil, Printer, Plus, Navigation, Map,
-  ChevronRight, Settings, Route, Star, Eye
+  ChevronRight, Settings, Route, Star, Eye, Upload
 } from 'lucide-react'
 import { AppWindow } from './AppWindow'
 
@@ -249,6 +249,22 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
                     Beheer namen en inhoud via Instellingen → Lagen → Mijn lagen. In dezelfde tab kun je GeoJSON-, KML- en GPX-bestanden als kaartlaag importeren.
+                  </p>
+                </Section>
+
+                {/* Eigen imports */}
+                <Section title="Eigen imports" icon={<Upload size={16} />}>
+                  <p className="text-xs text-gray-600 mb-2">
+                    Importeer GeoJSON-, KML- en GPX-bestanden via Kaartlagen → Eigen imports:
+                  </p>
+                  <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
+                    <li>Detect toont vóór het opslaan hoeveel punten, lijnen en vlakken zijn gevonden.</li>
+                    <li>Bij een gemengd bestand blijven punten zichtbaar en staan vlakken standaard uit.</li>
+                    <li>Open het tandwiel naast een import voor kleur, grootte, lijndikte, transparantie en popupvelden.</li>
+                    <li>Kies <strong>Als standaard</strong> om dezelfde weergaveregels voor volgende imports te gebruiken.</li>
+                  </ul>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Bestaande imports worden automatisch overgezet; opnieuw importeren is niet nodig. Verborgen onderdelen blijven bewaard totdat je ze zelf definitief wist.
                   </p>
                 </Section>
 

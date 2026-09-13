@@ -1,261 +1,371 @@
-import { useState, useRef, useEffect } from 'react'
-import { Trash2, Pencil, Check, X } from 'lucide-react'
-import { useCustomLayerStore, type CustomLayer } from '../../store/customLayerStore'
-
-// Preset colors for quick selection
-const PRESET_COLORS = [
-  '#ef4444', // red
-  '#f97316', // orange
-  '#eab308', // yellow
-  '#22c55e', // green
-  '#06b6d4', // cyan
-  '#3b82f6', // blue
-  '#8b5cf6', // violet
-  '#ec4899', // pink
-  '#6b7280', // gray
-]
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Check, ChevronDown, Pencil, RotateCcw, Save, Settings2, Trash2, X } from 'lucide-react'
+import {
+  getGeometryCounts,
+  getImportedPropertyKeys,
+  useCustomLayerStore,
+  type CustomLayer,
+  type GeometryGroup,
+} from '../../store/customLayerStore'
+import { formatImportedFieldLabel, isTechnicalImportedField } from '../../utils/importedLayerPopup'
 
 interface Props {
   layer: CustomLayer
-  compact?: boolean // For ThemesPanel display
+  compact?: boolean
+}
+
+const GROUP_LABELS: Record<GeometryGroup, string> = {
+  points: 'Punten',
+  lines: 'Lijnen',
+  polygons: 'Vlakken',
+}
+
+function VisibilityButton({ visible, color, onClick, title }: {
+  visible: boolean
+  color: string
+  onClick: () => void
+  title: string
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0"
+      style={{
+        backgroundColor: visible ? color : 'white',
+        border: `2px solid ${visible ? color : '#9ca3af'}`,
+      }}
+      title={title}
+    >
+      {visible && <Check size={11} strokeWidth={3} color="white" />}
+    </button>
+  )
 }
 
 export function CustomLayerItem({ layer, compact = false }: Props) {
-  const { toggleVisibility, removeLayer, updateLayer, setColor } = useCustomLayerStore()
-  const [showConfirm, setShowConfirm] = useState(false)
+  const {
+    toggleVisibility,
+    removeLayer,
+    updateLayer,
+    setOpacity,
+    updateGeometryStyle,
+    toggleGeometryVisibility,
+    updatePopupConfig,
+    resetLayerStyle,
+    saveLayerStyleAsDefaults,
+    removeGeometryGroup,
+  } = useCustomLayerStore()
+  const [expanded, setExpanded] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState(layer.name)
-  const [showColorPicker, setShowColorPicker] = useState(false)
+  const [deleteLayerConfirm, setDeleteLayerConfirm] = useState(false)
+  const [deleteGroupConfirm, setDeleteGroupConfirm] = useState<GeometryGroup | null>(null)
+  const [defaultsSaved, setDefaultsSaved] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const colorPickerRef = useRef<HTMLDivElement>(null)
 
+  const counts = useMemo(() => getGeometryCounts(layer.features), [layer.features])
+  const propertyKeys = useMemo(() => getImportedPropertyKeys(layer.features), [layer.features])
+  const visiblePropertyKeys = propertyKeys.filter(key =>
+    layer.popupConfig.showTechnicalFields || !isTechnicalImportedField(key)
+  )
   const featureCount = layer.features.features.length
-  const geometryTypes = [...new Set(layer.features.features.map(f => f.geometry?.type).filter(Boolean))]
+  const primaryColor = counts.points > 0
+    ? layer.style.points.color
+    : counts.lines > 0
+      ? layer.style.lines.color
+      : layer.style.polygons.strokeColor
 
-  // Focus input when editing starts
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
+    if (isEditing) {
+      inputRef.current?.focus()
+      inputRef.current?.select()
     }
   }, [isEditing])
 
-  // Close color picker on click outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
-        setShowColorPicker(false)
-      }
-    }
-    if (showColorPicker) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showColorPicker])
-
-  const handleDelete = () => {
-    if (showConfirm) {
-      removeLayer(layer.id)
-    } else {
-      setShowConfirm(true)
-      setTimeout(() => setShowConfirm(false), 3000)
-    }
-  }
-
-  const handleSaveName = () => {
-    const trimmed = editName.trim()
-    if (trimmed && trimmed !== layer.name) {
-      updateLayer(layer.id, { name: trimmed })
-    }
+  const saveName = () => {
+    const name = editName.trim()
+    if (name && name !== layer.name) updateLayer(layer.id, { name })
     setIsEditing(false)
   }
 
-  const handleCancelEdit = () => {
+  const cancelName = () => {
     setEditName(layer.name)
     setIsEditing(false)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSaveName()
-    } else if (e.key === 'Escape') {
-      handleCancelEdit()
+  const confirmLayerDelete = () => {
+    if (deleteLayerConfirm) {
+      removeLayer(layer.id)
+      return
     }
+    setDeleteLayerConfirm(true)
+    window.setTimeout(() => setDeleteLayerConfirm(false), 3500)
   }
 
-  const handleColorSelect = (color: string) => {
-    setColor(layer.id, color)
-    setShowColorPicker(false)
+  const confirmGroupDelete = (group: GeometryGroup) => {
+    if (deleteGroupConfirm === group) {
+      removeGeometryGroup(layer.id, group)
+      setDeleteGroupConfirm(null)
+      return
+    }
+    setDeleteGroupConfirm(group)
+    window.setTimeout(() => setDeleteGroupConfirm(current => current === group ? null : current), 3500)
   }
 
-  // Compact view for ThemesPanel
-  if (compact) {
-    return (
-      <div className="flex items-center gap-1 py-0.5 px-1 hover:bg-blue-50 transition-colors rounded">
-        {/* Color indicator & toggle */}
-        <button
-          onClick={() => toggleVisibility(layer.id)}
-          className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-100 flex-shrink-0"
-          style={{
-            backgroundColor: layer.visible ? layer.color : 'white',
-            border: `2px solid ${layer.color}`,
-          }}
-          title={layer.visible ? 'Verbergen' : 'Tonen'}
-        >
-          {layer.visible && (
-            <svg width="10" height="10" viewBox="0 0 10 10">
-              <path
-                d="M2 5 L4 7 L8 3"
-                stroke="white"
-                strokeWidth="2"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          )}
-        </button>
-
-        {/* Layer name */}
-        <span
-          className="text-gray-700 truncate flex-1 cursor-pointer"
-          style={{ fontSize: '0.9em' }}
-          onClick={() => toggleVisibility(layer.id)}
-        >
-          {layer.name}
-        </span>
-
-        {/* Feature count badge */}
-        <span className="text-[10px] text-gray-400 flex-shrink-0">
-          {featureCount}
-        </span>
-      </div>
-    )
+  const togglePopupField = (key: string) => {
+    const hidden = layer.popupConfig.hiddenFields.includes(key)
+    updatePopupConfig(layer.id, {
+      hiddenFields: hidden
+        ? layer.popupConfig.hiddenFields.filter(field => field !== key)
+        : [...layer.popupConfig.hiddenFields, key],
+    })
   }
 
-  // Full view for Settings panel
+  const saveDefaults = () => {
+    saveLayerStyleAsDefaults(layer.id)
+    setDefaultsSaved(true)
+    window.setTimeout(() => setDefaultsSaved(false), 2500)
+  }
+
+  const renderGroupHeader = (group: GeometryGroup, color: string) => (
+    <div className="flex items-center gap-2">
+      <VisibilityButton
+        visible={layer.style[group].visible}
+        color={color}
+        onClick={() => toggleGeometryVisibility(layer.id, group)}
+        title={layer.style[group].visible ? `${GROUP_LABELS[group]} verbergen` : `${GROUP_LABELS[group]} tonen`}
+      />
+      <span className="text-xs font-medium text-gray-700 flex-1">
+        {GROUP_LABELS[group]} <span className="font-normal text-gray-400">({counts[group]})</span>
+      </span>
+      <button
+        onClick={() => confirmGroupDelete(group)}
+        className={`p-1 rounded ${deleteGroupConfirm === group ? 'bg-red-500 text-white' : 'text-gray-400 hover:text-red-600'}`}
+        title={deleteGroupConfirm === group ? `Nogmaals: ${GROUP_LABELS[group].toLowerCase()} definitief wissen` : `${GROUP_LABELS[group]} definitief wissen`}
+      >
+        <Trash2 size={12} />
+      </button>
+    </div>
+  )
+
   return (
-    <div className="flex items-center justify-between py-1.5 group">
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        {/* Color picker button */}
-        <div className="relative" ref={colorPickerRef}>
-          <button
-            onClick={() => setShowColorPicker(!showColorPicker)}
-            className="w-5 h-5 rounded border-2 border-white shadow-sm flex-shrink-0 hover:scale-110 transition-transform"
-            style={{ backgroundColor: layer.color }}
-            title="Kleur wijzigen"
-          />
-
-          {/* Color picker popup */}
-          {showColorPicker && (
-            <div className="absolute top-6 left-0 z-50 bg-white rounded-lg shadow-lg border p-2 grid grid-cols-3 gap-1">
-              {PRESET_COLORS.map(color => (
-                <button
-                  key={color}
-                  onClick={() => handleColorSelect(color)}
-                  className={`w-6 h-6 rounded border-2 transition-transform hover:scale-110 ${
-                    color === layer.color ? 'border-gray-800 scale-110' : 'border-white'
-                  }`}
-                  style={{ backgroundColor: color }}
-                  title={color}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Layer info */}
-        <div className="flex-1 min-w-0">
-          {isEditing ? (
-            <div className="flex items-center gap-1">
-              <input
-                ref={inputRef}
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="flex-1 text-sm px-1 py-0.5 border rounded min-w-0"
-              />
-              <button
-                onClick={handleSaveName}
-                className="p-0.5 text-green-600 hover:bg-green-50 rounded"
-                title="Opslaan"
-              >
-                <Check size={14} />
-              </button>
-              <button
-                onClick={handleCancelEdit}
-                className="p-0.5 text-gray-400 hover:bg-gray-100 rounded"
-                title="Annuleren"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center gap-1">
-                <span className="text-sm text-gray-700 truncate">{layer.name}</span>
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="p-0.5 text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Naam wijzigen"
-                >
-                  <Pencil size={12} />
-                </button>
-              </div>
-              <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                <span>{featureCount} {featureCount === 1 ? 'feature' : 'features'}</span>
-                {geometryTypes.length > 0 && (
-                  <>
-                    <span className="mx-0.5">·</span>
-                    <span>{geometryTypes.join(', ')}</span>
-                  </>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-1">
-        {/* Visibility toggle checkbox - same style as LayerItem */}
-        <button
+    <div className={`border-b border-gray-100 ${compact ? 'py-0.5' : 'py-1'}`}>
+      <div className="flex items-center gap-1 px-1 py-1 hover:bg-cyan-50 rounded">
+        <VisibilityButton
+          visible={layer.visible}
+          color={primaryColor}
           onClick={() => toggleVisibility(layer.id)}
-          className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-100 flex-shrink-0"
-          style={{
-            backgroundColor: layer.visible ? layer.color : 'white',
-            border: `2px solid ${layer.visible ? layer.color : '#9ca3af'}`,
-          }}
-          title={layer.visible ? 'Verbergen' : 'Tonen'}
-        >
-          {layer.visible && (
-            <svg width="10" height="10" viewBox="0 0 10 10">
-              <path
-                d="M2 5 L4 7 L8 3"
-                stroke="white"
-                strokeWidth="2"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          )}
-        </button>
+          title={layer.visible ? 'Hele import verbergen' : 'Hele import tonen'}
+        />
 
-        {/* Delete button */}
-        <button
-          onClick={handleDelete}
-          className={`p-1 rounded transition-colors border-0 outline-none ${
-            showConfirm
-              ? 'text-white bg-red-500 hover:bg-red-600'
-              : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
-          }`}
-          title={showConfirm ? 'Klik nogmaals om te verwijderen' : 'Verwijderen'}
-        >
-          <Trash2 size={14} />
+        {isEditing ? (
+          <div className="flex flex-1 items-center gap-1 min-w-0">
+            <input
+              ref={inputRef}
+              value={editName}
+              onChange={event => setEditName(event.target.value)}
+              onKeyDown={event => {
+                if (event.key === 'Enter') saveName()
+                if (event.key === 'Escape') cancelName()
+              }}
+              className="min-w-0 flex-1 border rounded px-1 py-0.5 text-xs"
+            />
+            <button onClick={saveName} title="Naam opslaan"><Check size={13} className="text-green-600" /></button>
+            <button onClick={cancelName} title="Annuleren"><X size={13} className="text-gray-500" /></button>
+          </div>
+        ) : (
+          <button
+            onClick={() => toggleVisibility(layer.id)}
+            className="text-left text-gray-700 truncate flex-1 min-w-0"
+            style={{ fontSize: '0.9em' }}
+            title={layer.name}
+          >
+            {layer.name}
+          </button>
+        )}
+
+        <span className="text-[10px] text-gray-400 flex-shrink-0">{featureCount}</span>
+        <button onClick={() => setExpanded(value => !value)} className="p-1 text-cyan-700" title="Weergave instellen">
+          {expanded ? <ChevronDown size={14} /> : <Settings2 size={14} />}
         </button>
       </div>
+
+      {expanded && (
+        <div className="mx-1 mb-2 mt-1 rounded-lg border border-cyan-100 bg-white p-2 space-y-3 shadow-sm">
+          <div className="flex items-center gap-2">
+            <button onClick={() => setIsEditing(true)} className="text-xs text-gray-500 flex items-center gap-1">
+              <Pencil size={12} /> Naam
+            </button>
+            <button
+              onClick={confirmLayerDelete}
+              className={`ml-auto text-xs flex items-center gap-1 rounded px-1.5 py-1 ${deleteLayerConfirm ? 'bg-red-500 text-white' : 'text-gray-500'}`}
+            >
+              <Trash2 size={12} /> {deleteLayerConfirm ? 'Nogmaals wissen' : 'Import wissen'}
+            </button>
+          </div>
+
+          <label className="block text-xs text-gray-600">
+            <span className="flex justify-between"><span>Totale dekking</span><span>{Math.round(layer.opacity * 100)}%</span></span>
+            <input
+              type="range"
+              min="10"
+              max="100"
+              step="5"
+              value={Math.round(layer.opacity * 100)}
+              onChange={event => setOpacity(layer.id, Number(event.target.value) / 100)}
+              className="w-full"
+            />
+          </label>
+
+          {counts.points > 0 && (
+            <section className="space-y-2 rounded bg-gray-50 p-2">
+              {renderGroupHeader('points', layer.style.points.color)}
+              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 text-xs text-gray-600">
+                <input
+                  type="color"
+                  value={layer.style.points.color}
+                  onChange={event => updateGeometryStyle(layer.id, 'points', { color: event.target.value })}
+                  className="h-7 w-8 p-0 border-0 bg-transparent"
+                  title="Puntkleur"
+                />
+                <label>Grootte</label>
+                <input
+                  type="range"
+                  min="2"
+                  max="10"
+                  step="1"
+                  value={layer.style.points.radius}
+                  onChange={event => updateGeometryStyle(layer.id, 'points', { radius: Number(event.target.value) })}
+                  className="w-20"
+                />
+              </div>
+              <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
+                <span>Clusteren bij uitzoomen</span>
+                <input
+                  type="checkbox"
+                  checked={layer.style.points.cluster}
+                  onChange={event => updateGeometryStyle(layer.id, 'points', { cluster: event.target.checked })}
+                />
+              </label>
+            </section>
+          )}
+
+          {counts.lines > 0 && (
+            <section className="space-y-2 rounded bg-gray-50 p-2">
+              {renderGroupHeader('lines', layer.style.lines.color)}
+              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 text-xs text-gray-600">
+                <input
+                  type="color"
+                  value={layer.style.lines.color}
+                  onChange={event => updateGeometryStyle(layer.id, 'lines', { color: event.target.value })}
+                  className="h-7 w-8 p-0 border-0 bg-transparent"
+                  title="Lijnkleur"
+                />
+                <label>Dikte</label>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="8"
+                  step="0.5"
+                  value={layer.style.lines.width}
+                  onChange={event => updateGeometryStyle(layer.id, 'lines', { width: Number(event.target.value) })}
+                  className="w-20"
+                />
+              </div>
+            </section>
+          )}
+
+          {counts.polygons > 0 && (
+            <section className="space-y-2 rounded bg-gray-50 p-2">
+              {renderGroupHeader('polygons', layer.style.polygons.strokeColor)}
+              <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-600">
+                <label className="flex items-center gap-1">Vulling
+                  <input
+                    type="color"
+                    value={layer.style.polygons.fillColor}
+                    onChange={event => updateGeometryStyle(layer.id, 'polygons', { fillColor: event.target.value })}
+                    className="h-7 w-8 p-0 border-0 bg-transparent"
+                  />
+                </label>
+                <label className="flex items-center gap-1">Rand
+                  <input
+                    type="color"
+                    value={layer.style.polygons.strokeColor}
+                    onChange={event => updateGeometryStyle(layer.id, 'polygons', { strokeColor: event.target.value })}
+                    className="h-7 w-8 p-0 border-0 bg-transparent"
+                  />
+                </label>
+              </div>
+              <label className="block text-xs text-gray-600">
+                <span className="flex justify-between"><span>Vulling</span><span>{Math.round(layer.style.polygons.fillOpacity * 100)}%</span></span>
+                <input
+                  type="range"
+                  min="0"
+                  max="60"
+                  step="2"
+                  value={Math.round(layer.style.polygons.fillOpacity * 100)}
+                  onChange={event => updateGeometryStyle(layer.id, 'polygons', { fillOpacity: Number(event.target.value) / 100 })}
+                  className="w-full"
+                />
+              </label>
+            </section>
+          )}
+
+          <section className="space-y-2 rounded border border-gray-100 p-2">
+            <div className="text-xs font-medium text-gray-700">Popup</div>
+            <label className="block text-xs text-gray-600">
+              Titel
+              <select
+                value={layer.popupConfig.titleField || ''}
+                onChange={event => updatePopupConfig(layer.id, { titleField: event.target.value || null })}
+                className="mt-1 w-full rounded border border-gray-200 bg-white px-2 py-1 text-xs"
+              >
+                <option value="">Automatisch</option>
+                {propertyKeys.filter(key => !isTechnicalImportedField(key)).map(key => (
+                  <option key={key} value={key}>{formatImportedFieldLabel(key)}</option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center justify-between text-xs text-gray-600">
+              <span>Technische velden tonen</span>
+              <input
+                type="checkbox"
+                checked={layer.popupConfig.showTechnicalFields}
+                onChange={event => updatePopupConfig(layer.id, { showTechnicalFields: event.target.checked })}
+              />
+            </label>
+            {visiblePropertyKeys.length > 0 && (
+              <details>
+                <summary className="cursor-pointer text-xs text-cyan-700">Velden kiezen</summary>
+                <div className="mt-1 max-h-36 overflow-y-auto space-y-1 border-t border-gray-100 pt-1">
+                  {visiblePropertyKeys.map(key => (
+                    <label key={key} className="flex items-center gap-2 text-xs text-gray-600">
+                      <input
+                        type="checkbox"
+                        checked={!layer.popupConfig.hiddenFields.includes(key)}
+                        onChange={() => togglePopupField(key)}
+                      />
+                      <span className="truncate">{formatImportedFieldLabel(key)}</span>
+                    </label>
+                  ))}
+                </div>
+              </details>
+            )}
+          </section>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => resetLayerStyle(layer.id)} className="detect-window-secondary-button text-xs">
+              <RotateCcw size={13} /> Herstel
+            </button>
+            <button onClick={saveDefaults} className="detect-window-secondary-button text-xs">
+              {defaultsSaved ? <Check size={13} /> : <Save size={13} />}
+              {defaultsSaved ? 'Bewaard' : 'Als standaard'}
+            </button>
+          </div>
+          <p className="text-[10px] text-gray-400">
+            Standaard geldt voor volgende imports; hun kleur blijft automatisch verschillend.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

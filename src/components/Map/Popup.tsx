@@ -11,6 +11,7 @@ import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondst
 import { useCustomPointLayerStore, type FeatureGeometry, type GeometryType } from '../../store/customPointLayerStore'
 import { ROMEINSE_FORTEN_INFO, GENERIEK_FORT_INFO, FORT_TYPE_LABELS } from '../../data/romeinseFortenInfo'
 import { describeOcsArtificialisation, describeOcsCoverage, describeOcsUsage, formatOcsArea } from '../../utils/ocsGe'
+import { formatImportedLayerPopup } from '../../utils/importedLayerPopup'
 import type { MapBrowserEvent } from 'ol'
 
 type PopupFeatureData = {
@@ -2112,6 +2113,24 @@ export function Popup() {
         { hitTolerance: MOBILE_HIT_TOLERANCE_PX }
       )
 
+      // Clusters zijn navigatieknoppen: inzoomen in plaats van een zinloze popup openen.
+      const importedCluster = features.find(feature => feature.get('layerType') === 'importedCluster')
+      if (importedCluster) {
+        const currentZoom = map.getView().getZoom() ?? 0
+        const clusterMaxZoom = Number(importedCluster.get('clusterMaxZoom') || 12)
+        const targetZoom = currentZoom < clusterMaxZoom
+          ? Math.min(currentZoom + 2, clusterMaxZoom)
+          : Math.min(currentZoom + 2, 18)
+        popupRequestIdRef.current += 1
+        setVisible(false)
+        map.getView().animate({
+          center: evt.coordinate,
+          zoom: targetZoom,
+          duration: 250,
+        })
+        return
+      }
+
       const orderedFeatures = [...features].sort((a, b) => {
         const { geometry: _aGeometry, ...aProps } = a.getProperties()
         const { geometry: _bGeometry, ...bProps } = b.getProperties()
@@ -2210,51 +2229,9 @@ export function Popup() {
           continue
         }
 
-        // Geïmporteerde lagen (GeoJSON/KML/GPX) - nette popup met alle properties
+        // Geïmporteerde lagen: betekenisvolle titel, bruikbare velden en technische rommel verborgen.
         if (dataProps.layerType === 'importedLayer') {
-          const layerName = dataProps.layerName || 'Geïmporteerde laag'
-          const layerColor = dataProps.layerColor || '#8b5cf6'
-
-          // Skip the system properties, show user data
-          const skipProps = ['layerType', 'layerId', 'layerName', 'layerColor', 'featureIndex', 'geometry']
-
-          // Find a good name for the feature
-          const featureName = dataProps.name || dataProps.Name || dataProps.naam || dataProps.title ||
-                             dataProps.NAAM || dataProps.NAME || dataProps.label || dataProps.description || 'Feature'
-
-          let html = `<strong style="color: ${layerColor}">${featureName}</strong>`
-          html += `<br/><span class="text-xs text-gray-500">${layerName}</span>`
-
-          // Show all other properties
-          const userProps = Object.entries(dataProps).filter(([key]) => !skipProps.includes(key) && key !== 'name' && key !== 'Name')
-
-          if (userProps.length > 0) {
-            html += `<div class="mt-2 space-y-1">`
-            for (const [key, value] of userProps) {
-              if (value !== null && value !== undefined && value !== '') {
-                // Format the key nicely
-                const formattedKey = key
-                  .replace(/_/g, ' ')
-                  .replace(/([a-z])([A-Z])/g, '$1 $2')
-                  .replace(/^./, str => str.toUpperCase())
-
-                // Format the value
-                const rawValue = String(value)
-                const isUrl = rawValue.startsWith('http://') || rawValue.startsWith('https://')
-                const formattedValue = !isUrl && rawValue.length > 200
-                  ? rawValue.substring(0, 200) + '...'
-                  : rawValue
-
-                // Check if it's a URL
-                if (isUrl) {
-                  html += `<div class="text-sm"><span class="text-gray-500">${formattedKey}:</span> <a href="${rawValue}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">Link</a></div>`
-                } else {
-                  html += `<div class="text-sm"><span class="text-gray-500">${formattedKey}:</span> <span class="text-gray-700">${formattedValue}</span></div>`
-                }
-              }
-            }
-            html += `</div>`
-          }
+          const html = formatImportedLayerPopup(dataProps)
 
           collectedContents.push(html)
           // Capture geometry and properties for imported layers (allow adding to other layers)

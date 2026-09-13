@@ -7,6 +7,18 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.38',
+    date: '12 september 2026',
+    title: 'Eigen imports zonder kaartsoep',
+    changes: [
+      'Bestaande geïmporteerde lagen worden automatisch naar het nieuwe systeem overgezet. Objecten en attributen blijven behouden; opnieuw importeren is niet nodig.',
+      'Punten, lijnen en vlakken zijn voortaan onafhankelijk zichtbaar en instelbaar. Bij een gemengde import blijven punten aan en staan vlakken standaard uit.',
+      'Geïmporteerde punten zijn kleiner en worden bij uitzoomen geclusterd. Een tik op een cluster zoomt in; vanaf zoomniveau 12 verschijnen de losse punten.',
+      'De nieuwe groep Eigen imports biedt kleur, grootte, dikte, transparantie, popupvelden en herbruikbare standaardinstellingen voor volgende imports.',
+      'Popups kiezen een bruikbare titel, verbergen technische velden en tonen ArcGIS alleen nog als bron.'
+    ]
+  },
+  {
     version: '2.33.37',
     date: '9 september 2026',
     title: 'Dubbele Google Lucht-knop verwijderd',

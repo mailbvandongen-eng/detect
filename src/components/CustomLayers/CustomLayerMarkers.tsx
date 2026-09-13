@@ -1,36 +1,36 @@
 import { useEffect, useRef } from 'react'
-import { useMapStore } from '../../store'
-import { useCustomLayerStore, type CustomLayer, type CustomFeature } from '../../store/customLayerStore'
-import VectorLayer from 'ol/layer/Vector'
-import VectorSource from 'ol/source/Vector'
 import { Feature } from 'ol'
-import { Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon } from 'ol/geom'
+import type { EventsKey } from 'ol/events'
+import { LineString, MultiLineString, MultiPolygon, Point, Polygon } from 'ol/geom'
 import type { Geometry } from 'ol/geom'
+import VectorLayer from 'ol/layer/Vector'
+import { unByKey } from 'ol/Observable'
 import { fromLonLat } from 'ol/proj'
-import { Style, Circle, Fill, Stroke, Text } from 'ol/style'
+import Cluster from 'ol/source/Cluster'
+import VectorSource from 'ol/source/Vector'
+import { Circle, Fill, Stroke, Style, Text } from 'ol/style'
+import { useMapStore } from '../../store'
+import {
+  getGeometryGroup,
+  useCustomLayerStore,
+  type CustomFeature,
+  type CustomLayer,
+  type PointLayerStyle,
+} from '../../store/customLayerStore'
 
-/**
- * Create OpenLayers geometry from GeoJSON geometry
- */
+type OlFeature = Feature<Geometry>
+
+interface RenderedLayerBundle {
+  layers: VectorLayer<VectorSource<OlFeature>>[]
+  viewListener?: EventsKey
+}
+
 function createGeometry(geoJsonGeometry: CustomFeature['geometry']): Geometry | null {
   const { type, coordinates } = geoJsonGeometry
-
-  // Transform coordinates from WGS84 to Web Mercator
-  const transformCoords = (coords: number[]): number[] => {
-    return fromLonLat(coords)
-  }
-
-  const transformCoordsArray = (coords: number[][]): number[][] => {
-    return coords.map(transformCoords)
-  }
-
-  const transformCoordsArray2 = (coords: number[][][]): number[][][] => {
-    return coords.map(transformCoordsArray)
-  }
-
-  const transformCoordsArray3 = (coords: number[][][][]): number[][][][] => {
-    return coords.map(transformCoordsArray2)
-  }
+  const transformCoords = (coords: number[]): number[] => fromLonLat(coords)
+  const transformCoordsArray = (coords: number[][]): number[][] => coords.map(transformCoords)
+  const transformCoordsArray2 = (coords: number[][][]): number[][][] => coords.map(transformCoordsArray)
+  const transformCoordsArray3 = (coords: number[][][][]): number[][][][] => coords.map(transformCoordsArray2)
 
   switch (type) {
     case 'Point':
@@ -39,190 +39,272 @@ function createGeometry(geoJsonGeometry: CustomFeature['geometry']): Geometry | 
       return new LineString(transformCoordsArray(coordinates as number[][]))
     case 'Polygon':
       return new Polygon(transformCoordsArray2(coordinates as number[][][]))
-    case 'MultiPoint':
-      return new MultiPoint(transformCoordsArray(coordinates as number[][]))
     case 'MultiLineString':
       return new MultiLineString(transformCoordsArray2(coordinates as number[][][]))
     case 'MultiPolygon':
       return new MultiPolygon(transformCoordsArray3(coordinates as number[][][][]))
     default:
-      console.warn(`Unsupported geometry type: ${type}`)
       return null
   }
 }
 
-/**
- * Create style for a feature based on layer settings and geometry type
- */
-function createStyle(layer: CustomLayer, geometryType: string, resolution: number): Style {
-  const color = layer.color
+function hexToRgba(hex: string, alpha: number): string {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  if (!result) return hex
+  const r = parseInt(result[1], 16)
+  const g = parseInt(result[2], 16)
+  const b = parseInt(result[3], 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 
-  // Calculate size based on resolution (zoom)
-  const baseRadius = 10
-  const minRadius = 5
-  const maxRadius = 14
+function getPointRadius(style: PointLayerStyle, resolution: number): number {
+  if (resolution > 80) return Math.max(2, style.radius - 1)
+  if (resolution < 5) return Math.min(10, style.radius + 1)
+  return style.radius
+}
 
-  let radius = baseRadius
-  if (resolution > 50) {
-    radius = minRadius
-  } else if (resolution > 10) {
-    radius = Math.max(minRadius, baseRadius - (resolution - 10) / 10)
-  } else if (resolution < 2) {
-    radius = maxRadius
-  }
+function createPointStyle(style: PointLayerStyle, resolution: number): Style {
+  return new Style({
+    image: new Circle({
+      radius: getPointRadius(style, resolution),
+      fill: new Fill({ color: style.color }),
+      stroke: new Stroke({ color: style.outlineColor, width: style.outlineWidth }),
+    }),
+  })
+}
 
-  // Point style
-  if (geometryType === 'Point' || geometryType === 'MultiPoint') {
-    return new Style({
-      image: new Circle({
-        radius,
-        fill: new Fill({ color }),
-        stroke: new Stroke({ color: '#ffffff', width: 2 })
-      })
-    })
-  }
-
-  // Line style
-  if (geometryType === 'LineString' || geometryType === 'MultiLineString') {
-    return new Style({
-      stroke: new Stroke({
-        color,
-        width: 3
-      })
-    })
-  }
-
-  // Polygon style
-  if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
-    // Create semi-transparent fill
-    const fillColor = hexToRgba(color, 0.3)
-    return new Style({
-      fill: new Fill({ color: fillColor }),
-      stroke: new Stroke({
-        color,
-        width: 2
-      })
-    })
-  }
-
-  // Fallback
+function createClusterStyle(style: PointLayerStyle, count: number): Style {
+  const radius = count > 99 ? 19 : count > 9 ? 17 : 15
   return new Style({
     image: new Circle({
       radius,
-      fill: new Fill({ color }),
-      stroke: new Stroke({ color: '#ffffff', width: 2 })
+      fill: new Fill({ color: hexToRgba(style.color, 0.9) }),
+      stroke: new Stroke({ color: '#ffffff', width: 1.5 }),
+    }),
+    text: new Text({
+      text: String(count),
+      fill: new Fill({ color: '#ffffff' }),
+      stroke: new Stroke({ color: 'rgba(0,0,0,0.35)', width: 2 }),
+      font: 'bold 11px sans-serif',
+    }),
+  })
+}
+
+function createFeatureProperties(
+  layer: CustomLayer,
+  feature: CustomFeature,
+  featureIndex: number,
+  geometryType: CustomFeature['geometry']['type']
+) {
+  const group = getGeometryGroup(geometryType)
+  const color = group === 'points'
+    ? layer.style.points.color
+    : group === 'lines'
+      ? layer.style.lines.color
+      : layer.style.polygons.strokeColor
+
+  return {
+    ...(feature.properties || {}),
+    layerType: 'importedLayer',
+    layerId: layer.id,
+    layerName: layer.name,
+    layerColor: color,
+    layerPopupConfig: layer.popupConfig,
+    importedGeometryType: geometryType,
+    importedGeometryGroup: group,
+    featureIndex,
+  }
+}
+
+function addPointFeatures(source: VectorSource<OlFeature>, layer: CustomLayer): void {
+  layer.features.features.forEach((feature, featureIndex) => {
+    if (!feature.geometry || getGeometryGroup(feature.geometry.type) !== 'points') return
+    const coordinates = feature.geometry.type === 'Point'
+      ? [feature.geometry.coordinates as number[]]
+      : feature.geometry.coordinates as number[][]
+
+    coordinates.forEach((coordinate, pointIndex) => {
+      source.addFeature(new Feature({
+        geometry: new Point(fromLonLat(coordinate)),
+        ...createFeatureProperties(layer, feature, featureIndex, feature.geometry.type),
+        importedPointIndex: pointIndex,
+      }))
     })
   })
 }
 
-/**
- * Convert hex color to rgba
- */
-function hexToRgba(hex: string, alpha: number): string {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  if (result) {
-    const r = parseInt(result[1], 16)
-    const g = parseInt(result[2], 16)
-    const b = parseInt(result[3], 16)
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`
-  }
-  return hex
+function addGeometryFeatures(
+  source: VectorSource<OlFeature>,
+  layer: CustomLayer,
+  group: 'lines' | 'polygons'
+): void {
+  layer.features.features.forEach((feature, featureIndex) => {
+    if (!feature.geometry || getGeometryGroup(feature.geometry.type) !== group) return
+    const geometry = createGeometry(feature.geometry)
+    if (!geometry) return
+    source.addFeature(new Feature({
+      geometry,
+      ...createFeatureProperties(layer, feature, featureIndex, feature.geometry.type),
+    }))
+  })
 }
 
-/**
- * Renders custom layers on the map
- * This is a render-less component that manages OpenLayers layers
- */
+function disposeBundle(map: ReturnType<typeof useMapStore.getState>['map'], bundle: RenderedLayerBundle): void {
+  bundle.layers.forEach(layer => map?.removeLayer(layer))
+  if (bundle.viewListener) unByKey(bundle.viewListener)
+}
+
+/** Beheert voor iedere import drie onafhankelijke kaartlagen: vlakken, lijnen en punten. */
 export function CustomLayerMarkers() {
   const map = useMapStore(state => state.map)
   const layers = useCustomLayerStore(state => state.layers)
-  const layersRef = useRef<Map<string, VectorLayer<VectorSource>>>(new Map())
+  const bundlesRef = useRef<Map<string, RenderedLayerBundle>>(new Map())
 
-  // Create/update layers
   useEffect(() => {
     if (!map) return
 
-    // Track which layers we've processed
-    const processedIds = new Set<string>()
+    // Een stijlwijziging bouwt alleen de relatief kleine geïmporteerde vectorlagen opnieuw op.
+    bundlesRef.current.forEach(bundle => disposeBundle(map, bundle))
+    bundlesRef.current.clear()
 
     layers.forEach(layer => {
-      processedIds.add(layer.id)
+      const renderedLayers: VectorLayer<VectorSource<OlFeature>>[] = []
+      let viewListener: EventsKey | undefined
 
-      // Create vector source with features
-      const source = new VectorSource()
-
-      layer.features.features.forEach((geoJsonFeature, index) => {
-        if (!geoJsonFeature.geometry) return
-
-        const geometry = createGeometry(geoJsonFeature.geometry)
-        if (!geometry) return
-
-        const feature = new Feature({
-          geometry,
-          // Copy all original properties for popup display
-          ...geoJsonFeature.properties,
-          // Add layer identification for popup handling
-          layerType: 'importedLayer',
-          layerId: layer.id,
-          layerName: layer.name,
-          layerColor: layer.color,
-          featureIndex: index
-        })
-
-        // Set zoom-dependent style
-        feature.setStyle((_, resolution) => {
-          return createStyle(layer, geoJsonFeature.geometry.type, resolution)
-        })
-
-        source.addFeature(feature)
-      })
-
-      // Check if layer already exists
-      const existingLayer = layersRef.current.get(layer.id)
-
-      if (existingLayer) {
-        // Update existing layer
-        existingLayer.setSource(source)
-        existingLayer.setVisible(layer.visible)
-        existingLayer.setOpacity(layer.opacity)
-      } else {
-        // Create new layer
-        const vectorLayer = new VectorLayer({
-          source,
-          zIndex: 900, // Below Mijn Vondsten (1000)
-          visible: layer.visible,
+      const polygonSource = new VectorSource<OlFeature>()
+      addGeometryFeatures(polygonSource, layer, 'polygons')
+      if (polygonSource.getFeatures().length > 0) {
+        const polygonLayer = new VectorLayer({
+          source: polygonSource,
+          zIndex: 900,
+          visible: layer.visible && layer.style.polygons.visible,
           opacity: layer.opacity,
-          properties: {
-            title: layer.name,
-            customLayerId: layer.id
-          }
+          style: new Style({
+            fill: new Fill({
+              color: hexToRgba(layer.style.polygons.fillColor, layer.style.polygons.fillOpacity),
+            }),
+            stroke: new Stroke({
+              color: layer.style.polygons.strokeColor,
+              width: layer.style.polygons.strokeWidth,
+            }),
+          }),
+          properties: { title: `${layer.name} · Vlakken`, customLayerId: layer.id },
         })
-
-        map.addLayer(vectorLayer)
-        layersRef.current.set(layer.id, vectorLayer)
+        map.addLayer(polygonLayer)
+        renderedLayers.push(polygonLayer)
       }
+
+      const lineSource = new VectorSource<OlFeature>()
+      addGeometryFeatures(lineSource, layer, 'lines')
+      if (lineSource.getFeatures().length > 0) {
+        const lineLayer = new VectorLayer({
+          source: lineSource,
+          zIndex: 901,
+          visible: layer.visible && layer.style.lines.visible,
+          opacity: layer.opacity,
+          style: new Style({
+            stroke: new Stroke({ color: layer.style.lines.color, width: layer.style.lines.width }),
+          }),
+          properties: { title: `${layer.name} · Lijnen`, customLayerId: layer.id },
+        })
+        map.addLayer(lineLayer)
+        renderedLayers.push(lineLayer)
+      }
+
+      const pointSource = new VectorSource<OlFeature>()
+      addPointFeatures(pointSource, layer)
+      if (pointSource.getFeatures().length > 0) {
+        const pointStyleCache = new Map<number, Style>()
+        const clusterStyleCache = new Map<number, Style>()
+        let displaySource: VectorSource<OlFeature> = pointSource
+
+        if (layer.style.points.cluster) {
+          const clusterSource = new Cluster<OlFeature>({
+            distance: layer.style.points.clusterDistance,
+            source: pointSource,
+            createCluster: (point, members) => {
+              if (members.length === 1) {
+                const properties = { ...members[0].getProperties() }
+                delete properties.geometry
+                return new Feature({ geometry: point, ...properties })
+              }
+              return new Feature({
+                geometry: point,
+                layerType: 'importedCluster',
+                layerId: layer.id,
+                layerName: layer.name,
+                layerColor: layer.style.points.color,
+                clusterCount: members.length,
+                clusterMembers: members,
+                clusterMaxZoom: layer.style.points.clusterMaxZoom,
+              })
+            },
+          })
+          displaySource = clusterSource
+
+          const updateClusterDistance = () => {
+            const zoom = map.getView().getZoom() ?? 0
+            clusterSource.setDistance(zoom < layer.style.points.clusterMaxZoom
+              ? layer.style.points.clusterDistance
+              : 0)
+          }
+          updateClusterDistance()
+          viewListener = map.getView().on('change:resolution', updateClusterDistance)
+
+          const pointLayer = new VectorLayer({
+            source: displaySource,
+            zIndex: 902,
+            visible: layer.visible && layer.style.points.visible,
+            opacity: layer.opacity,
+            style: (feature, resolution) => {
+              const count = Number(feature.get('clusterCount') || 1)
+              if (count > 1) {
+                if (!clusterStyleCache.has(count)) {
+                  clusterStyleCache.set(count, createClusterStyle(layer.style.points, count))
+                }
+                return clusterStyleCache.get(count)
+              }
+              const radius = getPointRadius(layer.style.points, resolution)
+              if (!pointStyleCache.has(radius)) {
+                pointStyleCache.set(radius, createPointStyle(layer.style.points, resolution))
+              }
+              return pointStyleCache.get(radius)
+            },
+            properties: { title: `${layer.name} · Punten`, customLayerId: layer.id },
+          })
+          map.addLayer(pointLayer)
+          renderedLayers.push(pointLayer)
+        } else {
+          const pointLayer = new VectorLayer({
+            source: displaySource,
+            zIndex: 902,
+            visible: layer.visible && layer.style.points.visible,
+            opacity: layer.opacity,
+            style: (_feature, resolution) => {
+              const radius = getPointRadius(layer.style.points, resolution)
+              if (!pointStyleCache.has(radius)) {
+                pointStyleCache.set(radius, createPointStyle(layer.style.points, resolution))
+              }
+              return pointStyleCache.get(radius)
+            },
+            properties: { title: `${layer.name} · Punten`, customLayerId: layer.id },
+          })
+          map.addLayer(pointLayer)
+          renderedLayers.push(pointLayer)
+        }
+      }
+
+      bundlesRef.current.set(layer.id, {
+        layers: renderedLayers,
+        viewListener,
+      })
     })
 
-    // Remove layers that no longer exist in store
-    layersRef.current.forEach((vectorLayer, id) => {
-      if (!processedIds.has(id)) {
-        map.removeLayer(vectorLayer)
-        layersRef.current.delete(id)
-      }
-    })
+    return () => {
+      bundlesRef.current.forEach(bundle => disposeBundle(map, bundle))
+      bundlesRef.current.clear()
+    }
   }, [map, layers])
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (map) {
-        layersRef.current.forEach(vectorLayer => {
-          map.removeLayer(vectorLayer)
-        })
-        layersRef.current.clear()
-      }
-    }
-  }, [map])
-
-  return null // Render-less component
+  return null
 }

@@ -27,7 +27,7 @@ const HERITAGE_PLATFORMS = [
 export function ThemesPanel() {
   const themesPanelOpen = useUIStore(state => state.activeWindow === 'layers')
   const toggleThemesPanel = useUIStore(state => state.toggleThemesPanel)
-  const toggleSettingsPanel = useUIStore(state => state.toggleSettingsPanel)
+  const openWindow = useUIStore(state => state.openWindow)
   const { layers: customLayers, toggleVisibility } = useCustomPointLayerStore()
   const importedLayers = useCustomLayerStore(state => state.layers)
 
@@ -79,24 +79,22 @@ export function ThemesPanel() {
               </div>
             )}
 
-            {/* Geïmporteerde lagen - section with teal/cyan header */}
-            {importedLayers.length > 0 && (
-              <div className="mb-2 pb-1 border-b border-gray-100">
-                <div className="flex items-center gap-1 py-0.5 px-1 mb-1">
-                  <Upload size={12} className="text-cyan-600" />
-                  <span className="text-cyan-600 font-medium" style={{ fontSize: '0.9em' }}>Geïmporteerde lagen</span>
-                </div>
-                {importedLayers.map(layer => (
-                  <CustomLayerItem key={layer.id} layer={layer} compact />
-                ))}
-                <button
-                  onClick={() => { toggleThemesPanel(); toggleSettingsPanel() }}
-                  className="w-full text-left py-1 pl-3 text-xs text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50 transition-colors"
-                >
-                  + Laag importeren...
-                </button>
+            {/* Eigen imports: altijd beschikbaar, ook vóór de eerste import. */}
+            <div className="mb-2 pb-1 border-b border-gray-100">
+              <div className="flex items-center gap-1 py-0.5 px-1 mb-1">
+                <Upload size={12} className="text-cyan-600" />
+                <span className="text-cyan-600 font-medium" style={{ fontSize: '0.9em' }}>Eigen imports</span>
               </div>
-            )}
+              {importedLayers.map(layer => (
+                <CustomLayerItem key={layer.id} layer={layer} compact />
+              ))}
+              <button
+                onClick={() => openWindow('importLayer', 'layers')}
+                className="w-full text-left py-1 pl-3 text-xs text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50 transition-colors"
+              >
+                + Laag importeren...
+              </button>
+            </div>
 
             {/* Basislaag - vaste sectie zonder pijltje */}
             <div className="mb-2">
