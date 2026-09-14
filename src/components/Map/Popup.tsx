@@ -6,7 +6,7 @@ import { toLonLat } from 'ol/proj'
 import proj4 from 'proj4'
 import { X, ChevronLeft, ChevronRight, Mountain, Loader2, Trash2, Type, ExternalLink, Plus, Check, Pencil, PersonStanding, GripHorizontal } from 'lucide-react'
 import { useMapStore, useUIStore } from '../../store'
-import { showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
+import { canShowParcelHeightMapAt, showParcelHeightMap, clearParcelHighlight } from '../../layers/parcelHighlight'
 import { useLocalVondstenStore, type LocalVondst } from '../../store/localVondstenStore'
 import { useCustomPointLayerStore, type FeatureGeometry, type GeometryType } from '../../store/customPointLayerStore'
 import { useCustomLayerStore } from '../../store/customLayerStore'
@@ -14,6 +14,7 @@ import { ROMEINSE_FORTEN_INFO, GENERIEK_FORT_INFO, FORT_TYPE_LABELS } from '../.
 import { describeOcsArtificialisation, describeOcsCoverage, describeOcsUsage, formatOcsArea } from '../../utils/ocsGe'
 import { formatImportedLayerPopup } from '../../utils/importedLayerPopup'
 import { buildUserLayerCatalog, type UserLayerTarget } from '../../utils/userLayerCatalog'
+import { isMapPopupGestureAllowed } from '../../utils/fieldReliability'
 import type { MapBrowserEvent } from 'ol'
 
 type PopupFeatureData = {
@@ -243,6 +244,7 @@ export function Popup() {
   const [parcelCoordinate, setParcelCoordinate] = useState<number[] | null>(null)
   const [showingHeightMap, setShowingHeightMap] = useState(false)
   const [loadingHeightMap, setLoadingHeightMap] = useState(false)
+  const [heightMapError, setHeightMapError] = useState<string | null>(null)
   const [currentVondstId, setCurrentVondstId] = useState<string | null>(null)
   const [editingVondst, setEditingVondst] = useState<LocalVondst | null>(null)
   const [mapsUrl, setMapsUrl] = useState<string | null>(null)
@@ -272,6 +274,7 @@ export function Popup() {
   // Popup height: 'half' (50vh) or 'full' (90vh)
   const [popupHeight, setPopupHeight] = useState<'half' | 'full'>('half')
   const popupRequestIdRef = useRef(0)
+  const heightMapAbortRef = useRef<AbortController | null>(null)
 
   // Save text scale to localStorage
   const handleTextScaleChange = (value: number) => {
@@ -364,6 +367,14 @@ export function Popup() {
 
   // Check if current content is a parcel
   const isParcel = content.includes('Landbouwperceel')
+  const hasVisibleParcelLayer = Boolean(map?.getLayers().getArray().some(layer =>
+    layer.get('title') === 'Gewaspercelen' && layer.getVisible()
+  ))
+  const canShowHeightMap = Boolean(
+    parcelCoordinate &&
+    (isParcel || hasVisibleParcelLayer) &&
+    canShowParcelHeightMapAt(parcelCoordinate)
+  )
   // Check if current content is a vondst
   const isVondst = content.includes('data-vondst-id=')
 
@@ -380,33 +391,60 @@ export function Popup() {
   }
 
   const handleShowHeightMap = async () => {
-    console.log('🔘 HOOGTEKAART KNOP GEKLIKT')
-    console.log('🔘 parcelCoordinate uit state:', parcelCoordinate)
-
     if (!map || !parcelCoordinate || loadingHeightMap) {
-      console.log('🔘 STOP - map:', !!map, 'coord:', parcelCoordinate, 'loading:', loadingHeightMap)
       return
     }
 
-    console.log(`🔘 DOORGEVEN AAN showParcelHeightMap: [${parcelCoordinate[0]}, ${parcelCoordinate[1]}]`)
+    heightMapAbortRef.current?.abort()
+    const controller = new AbortController()
+    heightMapAbortRef.current = controller
+    setHeightMapError(null)
     setLoadingHeightMap(true)
+
     try {
-      const success = await showParcelHeightMap(map, parcelCoordinate)
-      if (success) {
+      const result = await showParcelHeightMap(map, parcelCoordinate, controller.signal)
+      if (controller.signal.aborted) return
+
+      if (result.status === 'shown') {
         setShowingHeightMap(true)
+        return
+      }
+
+      if (result.status === 'not-found') {
+        setHeightMapError('Op deze plek is geen landbouwperceel gevonden.')
+      } else if (result.status === 'outside-netherlands') {
+        setHeightMapError('De perceelhoogtekaart is alleen in Nederland beschikbaar.')
+      } else if (result.status === 'image-error') {
+        setHeightMapError(navigator.onLine
+          ? 'Het hoogtebeeld kon niet worden geladen. Probeer het opnieuw.'
+          : 'Het hoogtebeeld is hier nog niet offline opgeslagen.')
+      } else if (result.status === 'connection-error') {
+        setHeightMapError(navigator.onLine
+          ? 'De perceelgegevens konden niet worden geladen. Probeer het opnieuw.'
+          : 'Geen verbinding en dit perceel is nog niet offline opgeslagen.')
       }
     } catch (error) {
       console.error('Failed to load height map:', error)
+      if (!controller.signal.aborted) {
+        setHeightMapError('De hoogtekaart kon niet worden geladen. Probeer het opnieuw.')
+      }
     } finally {
-      setLoadingHeightMap(false)
+      if (heightMapAbortRef.current === controller) {
+        heightMapAbortRef.current = null
+        setLoadingHeightMap(false)
+      }
     }
   }
 
   const handleHideHeightMap = () => {
+    heightMapAbortRef.current?.abort()
+    heightMapAbortRef.current = null
     if (map) {
       clearParcelHighlight(map)
       setShowingHeightMap(false)
     }
+    setLoadingHeightMap(false)
+    setHeightMapError(null)
   }
 
   const openPopup = (
@@ -427,7 +465,6 @@ export function Popup() {
 
     console.log(`📌 KLIK OPGESLAGEN: [${coordinate[0].toFixed(0)}, ${coordinate[1].toFixed(0)}]`)
     setParcelCoordinate(coordinate)
-    setShowingHeightMap(false)
     setShowLayerPicker(false)
     setShowNewLayerInput(false)
     setNewLayerName('')
@@ -2184,10 +2221,31 @@ export function Popup() {
       return layerResults.flat()
     }
 
-    // Handle map clicks
+    let lastPointerDragAt = Number.NEGATIVE_INFINITY
+    const handlePointerDrag = () => {
+      lastPointerDragAt = performance.now()
+    }
+
+    // Handle deliberate map taps. Small pan gestures and kinetic movement
+    // must not open the blocking bottom sheet.
     const handleClick = async (evt: MapBrowserEvent<any>) => {
       // Don't show popups when in drawing/measuring mode
       if (useUIStore.getState().isDrawingMode) return
+
+      const view = map.getView()
+      if (!isMapPopupGestureAllowed({
+        now: performance.now(),
+        lastPointerDragAt,
+        viewInteracting: view.getInteracting(),
+        viewAnimating: view.getAnimating(),
+      })) return
+
+      heightMapAbortRef.current?.abort()
+      heightMapAbortRef.current = null
+      clearParcelHighlight(map)
+      setShowingHeightMap(false)
+      setLoadingHeightMap(false)
+      setHeightMapError(null)
 
       // Collect all popup contents from all sources
       const collectedContents: string[] = []
@@ -3849,21 +3907,27 @@ export function Popup() {
       }
     }
 
-    map.on('click', handleClick)
+    map.on('pointerdrag', handlePointerDrag)
+    map.on('singleclick', handleClick)
 
     return () => {
-      map.un('click', handleClick)
+      map.un('pointerdrag', handlePointerDrag)
+      map.un('singleclick', handleClick)
     }
   }, [map])
 
   const handleClose = () => {
     popupRequestIdRef.current += 1
+    heightMapAbortRef.current?.abort()
+    heightMapAbortRef.current = null
     setVisible(false)
     setPopupHeight('half') // Reset to half height for next popup
     setEditingCustomPoint(null)
     setConfirmCustomPointDelete(false)
-    // Clear height map when closing popup
-    if (map && showingHeightMap) {
+    setLoadingHeightMap(false)
+    setHeightMapError(null)
+    // Clear a visible or still-loading height map when closing the popup.
+    if (map && (showingHeightMap || loadingHeightMap)) {
       clearParcelHighlight(map)
       setShowingHeightMap(false)
     }
@@ -4310,8 +4374,9 @@ export function Popup() {
               </div>
             )}
 
-            {/* Height map button for parcels */}
-            {isParcel && parcelCoordinate && (
+            {/* Height map button stays available while the parcel layer is active,
+                even when the live parcel-info request is slow or unavailable. */}
+            {canShowHeightMap && (
               <div className="px-4 pb-4 border-t border-gray-100">
                 {showingHeightMap ? (
                   <button
@@ -4337,10 +4402,15 @@ export function Popup() {
                     ) : (
                       <>
                         <Mountain size={16} />
-                        <span>Hoogtekaart tonen</span>
+                        <span>{heightMapError ? 'Opnieuw proberen' : 'Hoogtekaart tonen'}</span>
                       </>
                     )}
                   </button>
+                )}
+                {heightMapError && !showingHeightMap && (
+                  <p className="mt-2 text-xs text-amber-700 text-center" role="status" aria-live="polite">
+                    {heightMapError}
+                  </p>
                 )}
               </div>
             )}

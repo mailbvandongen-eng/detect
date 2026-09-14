@@ -5,8 +5,7 @@ import { fromLonLat } from 'ol/proj'
 import { Attribution, ScaleLine } from 'ol/control'
 import { useMapStore, useSettingsStore } from '../store'
 import type { MapViewOptions } from '../types/map'
-
-const MAP_CLICK_MOVE_TOLERANCE_PX = 8
+import { MAP_CLICK_MOVE_TOLERANCE_PX } from '../utils/fieldReliability'
 
 interface UseMapOptions {
   target: string

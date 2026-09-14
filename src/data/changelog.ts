@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.43',
+    date: '14 september 2026',
+    title: 'Rustiger tikken en betrouwbare perceelhoogte',
+    changes: [
+      'Een kleine schuifbeweging, dubbel tikken of een kaart die nog beweegt opent niet langer onbedoeld een popup; gewone tikken en de ruime raakzone van punten blijven behouden.',
+      'De knop Hoogtekaart tonen blijft beschikbaar wanneer Gewaspercelen actief is, ook als de live perceelinformatie vertraagd of tijdelijk onbereikbaar is.',
+      'Recent gebruikte perceelgrenzen worden lokaal hergebruikt. PDOK- en AHN-opvragen krijgen één automatische herkansing en een duidelijke melding met Opnieuw proberen als laden niet lukt.',
+      'Detect meldt de hoogtekaart pas als zichtbaar nadat het AHN-beeld werkelijk is geladen.'
+    ]
+  },
+  {
     version: '2.33.42',
     date: '14 september 2026',
     title: 'Mijn lagen opgeschoond',
