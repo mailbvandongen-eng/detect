@@ -42,7 +42,7 @@ function preservePublishedFirebaseConfig() {
   if (!existsSync(indexPath)) return
 
   const indexHtml = readFileSync(indexPath, 'utf8')
-  const bundleMatch = indexHtml.match(/src=["']\/detect\/(assets\/index-[^"']+\.js)["']/)
+  const bundleMatch = indexHtml.match(/src=["'](?:\/detect\/|\.\/|\/)?(assets\/index-[^"']+\.js)["']/)
   if (!bundleMatch) return
 
   const bundlePath = resolve('docs', bundleMatch[1])

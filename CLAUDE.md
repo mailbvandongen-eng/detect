@@ -3,7 +3,7 @@
 ## PROJECT IDENTIFICATIE
 **Dit is: DETECT** - Bobs persoonlijke onderzoeksapp
 - GitHub repo: `detect`
-- Vite base path: `/detect/`
+- Vite base path: `./` (geschikt voor detectapp.nl en de GitHub Pages-project-URL)
 
 ## VASTE PRODUCTKOERS
 - Geen commercieel product, abonnementen, premiumlagen of betaalmuren.
@@ -36,7 +36,7 @@ npm run build && git add -A && git commit -m "vX.X.X: beschrijving" && git push
 - **ALTIJD pushen naar GitHub na elke wijziging + versie bump**
 - Een push met broncode naar `main` laat GitHub Actions automatisch `docs/` bouwen en publiceren.
 - Iedere gebruikerswijziging krijgt een vermelding in `src/data/changelog.ts` in gewone taal.
-- Vite base path is `/detect/` - alle data paden moeten `/detect/data/...` zijn
+- Vite base path is relatief (`./`) - alle lokale data paden moeten `./data/...` zijn
 
 ## Firebase Setup
 Dit project gebruikt het Firebase-project `detect-personal`.
@@ -72,7 +72,7 @@ const source = new VectorSource({
 StrictMode is UITGESCHAKELD in `main.tsx` omdat het OpenLayers breekt (double-render van effects).
 
 ## Layer Paden
-Alle layer files moeten `/detect/data/...` gebruiken, NIET `/data/...`
+Alle layer files moeten `./data/...` gebruiken, niet een domein- of projectpad hardcoderen.
 
 ## MODAL TEMPLATE - ALTIJD GEBRUIKEN!
 

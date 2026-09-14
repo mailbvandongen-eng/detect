@@ -29,7 +29,7 @@
 - `uiTheme` biedt vier rustige accentkleuren en wordt lokaal en via cloud-sync bewaard.
 
 ### Migratie voltooid (feb 2026):
-- [x] Base path gewijzigd: `/detectorapp-nl/` -> `/detect/`
+- [x] Base path gewijzigd naar `./` voor detectapp.nl en GitHub Pages
 - [x] Alle 24 layer files geüpdatet
 - [x] Config files geüpdatet (vite.config.ts, package.json, index.html)
 - [x] Firebase deprecated API gefixed
@@ -97,7 +97,7 @@ npm run build && git add -A && git commit -m "vX.X.X: beschrijving" && git push
 
 | Bestand | Doel |
 |---------|------|
-| `vite.config.ts` | Base path `/detect/`, PWA config |
+| `vite.config.ts` | Relatieve base path `./`, PWA config |
 | `package.json` | Naam "detect", scripts |
 | `src/lib/firebase.ts` | Firebase initialisatie |
 | `CLAUDE.md` | Project instructies |
@@ -122,4 +122,4 @@ npm run build && git add -A && git commit -m "vX.X.X: beschrijving" && git push
 
 - Repo: `mailbvandongen-eng/detect`
 - Branch: `main`
-- GitHub Pages: `https://mailbvandongen-eng.github.io/detect/`
+- Productie: `https://detectapp.nl/` (GitHub Pages)

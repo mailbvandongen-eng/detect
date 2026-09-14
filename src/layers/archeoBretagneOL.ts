@@ -9,7 +9,7 @@ import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style'
 
 export async function createArcheoBretagneLayerOL() {
   try {
-    const response = await fetch('/detect/data/archeo_bretagne_fr.geojson')
+    const response = await fetch('./data/archeo_bretagne_fr.geojson')
 
     if (!response.ok) {
       throw new Error(`Bretagne archeo fetch error: ${response.status}`)

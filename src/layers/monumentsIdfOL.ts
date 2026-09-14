@@ -9,7 +9,7 @@ import GeoJSON from 'ol/format/GeoJSON'
 import { Style, Circle, Fill, Stroke } from 'ol/style'
 
 export async function createMonumentsIdfLayerOL(): Promise<VectorLayer<VectorSource>> {
-  const response = await fetch('/detect/data/monuments_idf.geojson')
+    const response = await fetch('./data/monuments_idf.geojson')
   const geojson = await response.json()
 
   console.log(`📍 Monuments IDF: ${geojson.features?.length || 0} monumenten`)

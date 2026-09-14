@@ -32,7 +32,7 @@ export async function createSitesClassesRegionLayerOL(
 ): Promise<VectorLayer<VectorSource>> {
   const config = SITES_CLASSES_REGIONS[regionName]
 
-  const response = await fetch(`/detect/data/${config.file}`)
+  const response = await fetch(`./data/${config.file}`)
   const geojson = await response.json()
 
   console.log(`📍 ${regionName}: ${geojson.features?.length || 0} sites`)

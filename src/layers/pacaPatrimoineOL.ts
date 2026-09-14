@@ -9,7 +9,7 @@ import { Style, Fill, Stroke } from 'ol/style'
 
 export async function createPacaPatrimoineLayerOL() {
   try {
-    const response = await fetch('/detect/data/sites_patrimoine_paca.geojson')
+    const response = await fetch('./data/sites_patrimoine_paca.geojson')
 
     if (!response.ok) {
       throw new Error(`PACA patrimoine fetch error: ${response.status}`)

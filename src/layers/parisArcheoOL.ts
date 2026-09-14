@@ -9,7 +9,7 @@ import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style'
 
 export async function createParisArcheoLayerOL() {
   try {
-    const response = await fetch('/detect/data/paris_archeo_fr.geojson')
+    const response = await fetch('./data/paris_archeo_fr.geojson')
 
     if (!response.ok) {
       throw new Error(`Paris archeo fetch error: ${response.status}`)

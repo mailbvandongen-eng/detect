@@ -32,7 +32,7 @@ const IGN_WMS = 'https://data.geopf.fr/wms-r/wms'
 const BRGM_GEOLOGY_WMS = 'https://geoservices.brgm.fr/geologie'
 const BRGM_RISKS_WMS = 'https://geoservices.brgm.fr/risques'
 const TOPAGE_2026_WMS = 'https://services.sandre.eaufrance.fr/geo/topage2026?'
-const TOPAGE_THEDIRAC_DATA = '/detect/data/topage_thedirac_2026.geojson'
+const TOPAGE_THEDIRAC_DATA = './data/topage_thedirac_2026.geojson'
 
 function queryableWmsLayer(title: string, url: string, layerName: string, opacity: number, attribution: string) {
   return new TileLayer({

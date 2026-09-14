@@ -147,7 +147,7 @@ export default defineConfig({
             }
           },
           {
-            urlPattern: /\/detect\/data\/.*/i,
+            urlPattern: /\/data\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'geojson-data',
@@ -170,8 +170,8 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/detect/',
-        scope: '/detect/',
+        start_url: './',
+        scope: './',
         icons: [
           {
             src: 'icon-192-23334.png',
@@ -188,7 +188,8 @@ export default defineConfig({
       }
     })
   ],
-  base: '/detect/',
+  // Relatieve basis werkt zowel op detectapp.nl als op de oude GitHub Pages-project-URL.
+  base: './',
   build: {
     outDir: 'docs',
     assetsDir: 'assets',

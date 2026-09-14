@@ -34,4 +34,4 @@ Een broncode-update op `main` wordt door GitHub Actions gebouwd en naar `docs/` 
 
 ## Online
 
-[Detect openen](https://mailbvandongen-eng.github.io/detect/)
+[Detect openen](https://detectapp.nl/)

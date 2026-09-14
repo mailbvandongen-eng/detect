@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.41',
+    date: '13 september 2026',
+    title: 'Detect op zijn eigen adres',
+    changes: [
+      'Detect is voorbereid op https://detectapp.nl, zodat dit adres in de browser blijft staan terwijl de app rechtstreeks uit dezelfde GitHub-repository komt.',
+      'Bestanden, kaartlagen, PWA-startadres en offline-cache gebruiken voortaan relatieve paden en werken daardoor zowel op het nieuwe domein als tijdens de overgang via GitHub Pages.'
+    ]
+  },
+  {
     version: '2.33.40',
     date: '13 september 2026',
     title: 'Mijn lagen terug naar de basis',

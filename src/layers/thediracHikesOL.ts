@@ -9,7 +9,7 @@ import {
   type ThediracHikeDifficulty
 } from '../data/thediracHikes'
 
-const HIKE_DATA_URL = '/detect/data/thedirac_spectacular_hikes.geojson'
+const HIKE_DATA_URL = './data/thedirac_spectacular_hikes.geojson'
 
 const difficultyColors: Record<ThediracHikeDifficulty, string> = {
   makkelijk: '#16a34a',

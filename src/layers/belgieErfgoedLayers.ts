@@ -9,7 +9,7 @@ import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style'
 // Protected Archaeological Sites Belgium
 export async function createBeschermdeMonumentenBELayerOL() {
   try {
-    const response = await fetch('/detect/data/bes_monument_be.geojson')
+    const response = await fetch('./data/bes_monument_be.geojson')
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const geojson = await response.json()
     console.log(`🏛️ BE Monumenten: loaded ${geojson.features?.length || 0} protected monuments`)
@@ -50,7 +50,7 @@ export async function createBeschermdeMonumentenBELayerOL() {
 // Archaeological Zones Belgium
 export async function createArcheoZonesBELayerOL() {
   try {
-    const response = await fetch('/detect/data/vast_az_be.geojson')
+    const response = await fetch('./data/vast_az_be.geojson')
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const geojson = await response.json()
     console.log(`🗺️ BE Archeo Zones: loaded ${geojson.features?.length || 0} zones`)
@@ -86,7 +86,7 @@ export async function createArcheoZonesBELayerOL() {
 // Protected Archaeological Sites Belgium
 export async function createBeschArchSitesBELayerOL() {
   try {
-    const response = await fetch('/detect/data/bes_arch_site_be.geojson')
+    const response = await fetch('./data/bes_arch_site_be.geojson')
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const geojson = await response.json()
     console.log(`⛏️ BE Arch Sites: loaded ${geojson.features?.length || 0} sites`)
@@ -127,7 +127,7 @@ export async function createBeschArchSitesBELayerOL() {
 // Heritage Landscapes Belgium
 export async function createErfgoedLandschappenBELayerOL() {
   try {
-    const response = await fetch('/detect/data/bes_landschap_be.geojson')
+    const response = await fetch('./data/bes_landschap_be.geojson')
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const geojson = await response.json()
     console.log(`🌳 BE Erfgoed Landschap: loaded ${geojson.features?.length || 0} landscapes`)
@@ -163,7 +163,7 @@ export async function createErfgoedLandschappenBELayerOL() {
 // CAI Archaeological Elements (expanded - 7000+ elements)
 export async function createCAIElementenBELayerOL() {
   try {
-    const response = await fetch('/detect/data/cai_elementen_be.geojson')
+    const response = await fetch('./data/cai_elementen_be.geojson')
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const geojson = await response.json()
     console.log(`📍 CAI Elementen: loaded ${geojson.features?.length || 0} archaeological elements`)
