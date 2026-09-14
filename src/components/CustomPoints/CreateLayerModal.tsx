@@ -57,7 +57,7 @@ export function CreateLayerModal() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="bijv. Vakantie Frankrijk 2026"
+                  placeholder="bijv. Contactpunten"
                   className="w-full px-3 py-2 bg-white rounded-lg border-0 outline-none hover:bg-blue-50 transition-colors"
                   style={{ fontSize: '1em' }}
                   autoFocus

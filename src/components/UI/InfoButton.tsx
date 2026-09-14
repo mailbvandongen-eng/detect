@@ -257,7 +257,7 @@ function FunctiesTab() {
           <li><strong>Toevoegen:</strong> Tik op + in popup om monument/locatie aan laag toe te voegen</li>
           <li><strong>Polygonen:</strong> Hele monumentgebieden worden opgeslagen, niet alleen een punt</li>
           <li><strong>Originele info:</strong> Popup content blijft behouden</li>
-          <li><strong>Kleuren:</strong> Elke laag krijgt eigen kleur (aanpasbaar)</li>
+          <li><strong>Kleuren:</strong> Nieuwe lagen krijgen automatisch een eigen kleur; bij import kies je de kleur vooraf</li>
           <li><strong>Import:</strong> Laad GeoJSON, KML of GPX bestanden</li>
           <li><strong>Export:</strong> Exporteer lagen als GeoJSON</li>
         </ul>

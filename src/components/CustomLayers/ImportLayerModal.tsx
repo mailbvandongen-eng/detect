@@ -303,7 +303,7 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
                     <div className="rounded-lg border border-cyan-100 p-3 space-y-3">
                       <div>
                         <p className="text-sm font-medium text-gray-700">Weergave</p>
-                        <p className="text-xs text-gray-500">Zichtbaarheid en kleur kun je later ook via Kaartlagen wijzigen.</p>
+                        <p className="text-xs text-gray-500">Kies hier de zichtbaarheid en kleur; daarna houd je de laag simpel aan of uit via Kaartlagen.</p>
                       </div>
 
                       {previewCounts.points > 0 && (

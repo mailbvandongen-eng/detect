@@ -158,7 +158,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
   const [saving, setSaving] = useState(false)
   const [weight, setWeight] = useState<number | undefined>(undefined)
   const [length, setLength] = useState<number | undefined>(undefined)
-  const [saveTarget, setSaveTarget] = useState<SaveTarget>(DEFAULT_VONDSTEN_LAYER_ID)
+  const [saveTarget, setSaveTarget] = useState<SaveTarget>(() => customLayers[0]?.id || '')
 
   // Photo state - initialize from store
   const [photo, setPhoto] = useState<File | null>(vondstFormPhoto)
@@ -203,6 +203,12 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
   }
 
   const effectiveLocation = getEffectiveLocation()
+
+  useEffect(() => {
+    if (!customLayers.some(layer => layer.id === saveTarget)) {
+      setSaveTarget(customLayers[0]?.id || '')
+    }
+  }, [customLayers, saveTarget])
 
   // Handle map click when picking location
   useEffect(() => {
@@ -254,6 +260,11 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
 
     if (!objectType) {
       alert('Vul een naam/type in')
+      return
+    }
+
+    if (!saveTarget) {
+      alert('Maak eerst een laag via Kaartlagen → Mijn lagen')
       return
     }
 
@@ -389,7 +400,7 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
           <button
             type="submit"
             form="detect-vondst-form"
-            disabled={saving || !effectiveLocation || pickingLocation || !objectType}
+            disabled={saving || !effectiveLocation || pickingLocation || !objectType || !saveTarget}
             className="detect-window-primary-button flex-1 disabled:opacity-50"
           >
             {saving ? 'Opslaan...' : 'Opslaan'}
@@ -491,6 +502,11 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
                     {option.name}
                   </button>
                 ))}
+                {saveTargetOptions.length === 0 && (
+                  <p className="text-sm text-gray-500">
+                    Maak eerst een laag via Kaartlagen → Mijn lagen.
+                  </p>
+                )}
               </div>
             </div>
 

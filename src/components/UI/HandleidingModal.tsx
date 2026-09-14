@@ -241,8 +241,8 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     <li>Iedere laag heeft een eigen aan/uitknop.</li>
                     <li>Detect toont vóór het opslaan hoeveel punten, lijnen en vlakken zijn gevonden.</li>
                     <li>Bij een gemengd bestand blijven punten zichtbaar en staan vlakken standaard uit.</li>
-                    <li>Punten en vlakken kun je per import apart tonen en een kleur geven.</li>
-                    <li>Het Naamveld en de zichtbare popupvelden blijven instelbaar.</li>
+                    <li>Kleur en geometriesoorten kies je tijdens het importeren.</li>
+                    <li>Het tandwiel bevat alleen Laag verwijderen, met een bevestiging tegen per ongeluk wissen.</li>
                   </ul>
                   <ol className="text-xs text-gray-600 space-y-1 ml-4 mt-3 list-decimal">
                     <li>Houd je vinger op de gewenste kaartplek.</li>

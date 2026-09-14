@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight } from 'lucide-react'
+import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight, Settings2, Trash2 } from 'lucide-react'
 import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
 import { useCustomLayerStore } from '../../store/customLayerStore'
@@ -25,45 +25,67 @@ const HERITAGE_PLATFORMS = [
   { name: 'Google Open Heritage', url: 'https://artsandculture.google.com/project/openheritage', desc: '26+ UNESCO sites in 3D' },
 ]
 
-function PointLayerItem({ layer, onToggle, onColorChange }: {
+function PointLayerItem({ layer, onToggle, onDelete }: {
   layer: CustomPointLayer
   onToggle: () => void
-  onColorChange: (color: string) => void
+  onDelete: () => void
 }) {
+  const [expanded, setExpanded] = useState(false)
+
+  const handleDelete = () => {
+    const pointLabel = layer.points.length === 1 ? '1 punt' : `${layer.points.length} punten`
+    if (!window.confirm(
+      `Laag “${layer.name}” met ${pointLabel} verwijderen? Dit kan niet ongedaan worden gemaakt.`
+    )) return
+
+    onDelete()
+    setExpanded(false)
+  }
+
   return (
-    <div className="flex items-center gap-2 rounded px-1 py-1 hover:bg-purple-50">
-      <button
-        onClick={(event) => { event.stopPropagation(); onToggle() }}
-        className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0"
-        style={{
-          backgroundColor: layer.visible ? layer.color : 'white',
-          border: `2px solid ${layer.visible ? layer.color : '#9ca3af'}`,
-        }}
-        title={layer.visible ? 'Laag verbergen' : 'Laag tonen'}
-      >
-        {layer.visible && <Check size={11} strokeWidth={3} color="white" />}
-      </button>
-      <button
-        onClick={(event) => { event.stopPropagation(); onToggle() }}
-        className="min-w-0 flex-1 truncate text-left text-gray-700"
-        style={{ fontSize: '0.9em' }}
-        title={layer.name}
-      >
-        {layer.name}
-      </button>
-      <span className="text-[10px] text-gray-400">{layer.points.length}</span>
-      <label
-        className="flex h-7 w-8 items-center justify-center"
-        title="Puntkleur"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <input
-          type="color"
-          value={layer.color}
-          onChange={(event) => onColorChange(event.target.value)}
-          className="h-7 w-8 border-0 bg-transparent p-0"
-        />
-      </label>
+    <div className="border-b border-gray-100 py-0.5">
+      <div className="flex items-center gap-2 rounded px-1 py-1 hover:bg-purple-50">
+        <button
+          onClick={(event) => { event.stopPropagation(); onToggle() }}
+          className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0"
+          style={{
+            backgroundColor: layer.visible ? layer.color : 'white',
+            border: `2px solid ${layer.visible ? layer.color : '#9ca3af'}`,
+          }}
+          title={layer.visible ? 'Laag verbergen' : 'Laag tonen'}
+        >
+          {layer.visible && <Check size={11} strokeWidth={3} color="white" />}
+        </button>
+        <button
+          onClick={(event) => { event.stopPropagation(); onToggle() }}
+          className="min-w-0 flex-1 truncate text-left text-gray-700"
+          style={{ fontSize: '0.9em' }}
+          title={layer.name}
+        >
+          {layer.name}
+        </button>
+        <span className="flex-shrink-0 text-[10px] text-gray-400">{layer.points.length}</span>
+        <button
+          onClick={(event) => { event.stopPropagation(); setExpanded(value => !value) }}
+          className={`p-1 ${expanded ? 'text-red-600' : 'text-purple-700'}`}
+          title="Laaginstellingen"
+          aria-expanded={expanded}
+        >
+          <Settings2 size={14} />
+        </button>
+      </div>
+
+      {expanded && (
+        <div className="mx-1 mb-2 mt-1 rounded-lg border border-red-100 bg-white p-2 shadow-sm">
+          <button
+            onClick={handleDelete}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
+          >
+            <Trash2 size={15} />
+            Laag verwijderen
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -72,7 +94,7 @@ export function ThemesPanel() {
   const themesPanelOpen = useUIStore(state => state.activeWindow === 'layers')
   const toggleThemesPanel = useUIStore(state => state.toggleThemesPanel)
   const openWindow = useUIStore(state => state.openWindow)
-  const { layers: customLayers, toggleVisibility, updateLayer } = useCustomPointLayerStore()
+  const { layers: customLayers, toggleVisibility, removeLayer } = useCustomPointLayerStore()
   const importedLayers = useCustomLayerStore(state => state.layers)
   const standalonePointLayers = getStandalonePointLayers(customLayers, importedLayers)
 
@@ -99,7 +121,7 @@ export function ThemesPanel() {
                   key={layer.id}
                   layer={layer}
                   onToggle={() => toggleVisibility(layer.id)}
-                  onColorChange={color => updateLayer(layer.id, { color })}
+                  onDelete={() => removeLayer(layer.id)}
                 />
               ))}
               {importedLayers.map(layer => (

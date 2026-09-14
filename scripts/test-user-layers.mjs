@@ -17,6 +17,7 @@ function loadTypeScriptModule(path) {
 
 const catalogModule = loadTypeScriptModule('src/utils/userLayerCatalog.ts')
 const popupModule = loadTypeScriptModule('src/utils/importedLayerPopup.ts')
+const cleanupModule = loadTypeScriptModule('src/utils/pointLayerCleanup.ts')
 
 const pointLayers = [
   { id: 'standalone', name: 'Losse punten', color: '#ff0000', points: [{}], archived: false },
@@ -73,4 +74,27 @@ assert.ok(
   'Laagnaam moet vóór objectnaam staan',
 )
 
-console.log('Mijn lagen: catalogus, overlay en popupvolgorde zijn goed.')
+const cleanup = cleanupModule.reconcilePointLayerDeletions([
+  { id: 'default-vondsten', name: 'Mijn vondsten' },
+  { id: 'vakantie', name: 'Vakantie Frankrijk 2026' },
+  { id: 'haaien', name: 'Haaientanden zoeken' },
+  { id: 'test', name: 'Testlaag om te archiveren' },
+  { id: 'keep', name: 'Toestemming' },
+], [], 0)
+assert.deepEqual(cleanup.layers.map(layer => layer.name), ['Toestemming'])
+assert.deepEqual(new Set(cleanup.deletedLayerIds), new Set([
+  'default-vondsten', 'vakantie', 'haaien', 'test',
+]))
+
+const afterCleanup = cleanupModule.reconcilePointLayerDeletions([
+  ...cleanup.layers,
+  { id: 'later', name: 'Vakantie Frankrijk 2026' },
+  { id: 'vakantie', name: 'Vakantie Frankrijk 2026' },
+], cleanup.deletedLayerIds, cleanup.cleanupVersion)
+assert.deepEqual(
+  afterCleanup.layers.map(layer => layer.id),
+  ['keep', 'later'],
+  'Een tombstone houdt de verwijderde laag weg, maar de eenmalige naamopschoning wordt niet herhaald',
+)
+
+console.log('Mijn lagen: catalogus, popupvolgorde en blijvende verwijdering zijn goed.')

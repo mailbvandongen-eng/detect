@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.42',
+    date: '14 september 2026',
+    title: 'Mijn lagen opgeschoond',
+    changes: [
+      'De vier oude puntlagen Mijn vondsten, Vakantie Frankrijk 2026, Haaientanden zoeken en Testlaag om te archiveren worden eenmalig verwijderd; Toestemming en Vondsten en locaties blijven staan.',
+      'Iedere eigen of geïmporteerde laag houdt een directe aan/uit-schakelaar. Het tandwiel bevat voortaan alleen Laag verwijderen, met een duidelijke bevestiging tegen per ongeluk wissen.',
+      'Verwijderde puntlagen krijgen een synchronisatiemarkering, zodat cloud-sync ze niet bij een volgende start opnieuw terugzet.',
+      'De tremissis uit de profielfoto is nu het vrijstaande, transparante favicon en PWA-icoon van Detect.'
+    ]
+  },
+  {
     version: '2.33.41',
     date: '13 september 2026',
     title: 'Detect op zijn eigen adres',

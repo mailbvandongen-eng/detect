@@ -1,5 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import {
+  POINT_LAYER_CLEANUP_VERSION,
+  reconcilePointLayerDeletions,
+} from '../utils/pointLayerCleanup'
 
 // Color cycle for new layers
 const LAYER_COLORS = [
@@ -22,20 +26,8 @@ export const DEFAULT_CATEGORIES = [
   'Overig'
 ]
 
-// Default "Vondsten" layer ID - always present
+// Legacy ID: blijft alleen bestaan om oude vondstvelden correct te lezen.
 export const DEFAULT_VONDSTEN_LAYER_ID = 'default-vondsten'
-
-// Default Vondsten layer - created on first load
-const DEFAULT_VONDSTEN_LAYER: CustomPointLayer = {
-  id: DEFAULT_VONDSTEN_LAYER_ID,
-  name: 'Mijn vondsten',
-  color: '#f97316', // orange
-  categories: ['Munt', 'Aardewerk', 'Gesp', 'Fibula', 'Ring', 'Speld', 'Sieraad', 'Gereedschap', 'Wapen', 'Anders'],
-  points: [],
-  visible: true,
-  archived: false,
-  createdAt: new Date().toISOString()
-}
 
 export type PointStatus = 'todo' | 'completed' | 'skipped'
 
@@ -99,6 +91,8 @@ export interface CustomPointLayer {
 interface CustomPointLayerStore {
   layers: CustomPointLayer[]
   colorIndex: number
+  deletedLayerIds: string[]
+  layerCleanupVersion: number
 
   // Layer operations
   addLayer: (name: string, categories?: string[]) => string
@@ -134,20 +128,13 @@ interface CustomPointLayerStore {
   clearAll: () => void
 }
 
-// Ensure default Vondsten layer exists
-const ensureDefaultVondstenLayer = (layers: CustomPointLayer[]): CustomPointLayer[] => {
-  const hasDefaultLayer = layers.some(l => l.id === DEFAULT_VONDSTEN_LAYER_ID)
-  if (!hasDefaultLayer) {
-    return [{ ...DEFAULT_VONDSTEN_LAYER, createdAt: new Date().toISOString() }, ...layers]
-  }
-  return layers
-}
-
 export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
   persist(
     (set, get) => ({
-      layers: [{ ...DEFAULT_VONDSTEN_LAYER }],
+      layers: [],
       colorIndex: 0,
+      deletedLayerIds: [],
+      layerCleanupVersion: POINT_LAYER_CLEANUP_VERSION,
 
       addLayer: (name, categories = DEFAULT_CATEGORIES) => {
         const id = crypto.randomUUID()
@@ -178,7 +165,9 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
         if (existing) return existing.id
 
         const preferredId = `import-overlay-${importedLayerId}`
-        const id = get().layers.some(layer => layer.id === preferredId) ? crypto.randomUUID() : preferredId
+        const id = get().layers.some(layer => layer.id === preferredId) || get().deletedLayerIds.includes(preferredId)
+          ? crypto.randomUUID()
+          : preferredId
         set(state => ({
           layers: [
             ...state.layers,
@@ -200,7 +189,10 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
 
       removeLayer: (id) => {
         set(state => ({
-          layers: state.layers.filter(l => l.id !== id)
+          layers: state.layers.filter(l => l.id !== id),
+          deletedLayerIds: state.deletedLayerIds.includes(id)
+            ? state.deletedLayerIds
+            : [...state.deletedLayerIds, id],
         }))
       },
 
@@ -475,49 +467,46 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
       },
 
       clearAll: () => {
-        // Keep the default Vondsten layer, just clear its points
         set(state => ({
-          layers: state.layers.map(l =>
-            l.id === DEFAULT_VONDSTEN_LAYER_ID
-              ? { ...l, points: [] }
-              : l
-          ).filter(l => l.id === DEFAULT_VONDSTEN_LAYER_ID),
+          layers: [],
+          deletedLayerIds: [...new Set([
+            ...state.deletedLayerIds,
+            ...state.layers.map(layer => layer.id),
+          ])],
           colorIndex: 0
         }))
       }
     }),
     {
       name: 'detectorapp-custom-point-layers',
-      version: 4,
-      // Ensure default layer exists after rehydration
+      version: 5,
       onRehydrateStorage: () => (state) => {
         if (state) {
-          const hasDefaultLayer = state.layers.some(l => l.id === DEFAULT_VONDSTEN_LAYER_ID)
-          if (!hasDefaultLayer) {
-            // Add default layer if missing
-            state.layers = [{ ...DEFAULT_VONDSTEN_LAYER, createdAt: new Date().toISOString() }, ...state.layers]
-          }
+          const reconciled = reconcilePointLayerDeletions(
+            state.layers || [],
+            state.deletedLayerIds || [],
+            state.layerCleanupVersion || 0
+          )
+          state.layers = reconciled.layers
+          state.deletedLayerIds = reconciled.deletedLayerIds
+          state.layerCleanupVersion = reconciled.cleanupVersion
         }
       },
-      migrate: (persistedState: unknown, version: number) => {
-        const state = persistedState as { layers: CustomPointLayer[], colorIndex: number }
-        if (version < 2) {
-          // Ensure default Vondsten layer exists for existing users
-          return {
-            ...state,
-            layers: ensureDefaultVondstenLayer(state.layers || [])
-          }
+      migrate: (persistedState: unknown) => {
+        const state = persistedState as Partial<CustomPointLayerStore>
+        const reconciled = reconcilePointLayerDeletions(
+          Array.isArray(state.layers) ? state.layers : [],
+          Array.isArray(state.deletedLayerIds) ? state.deletedLayerIds : [],
+          typeof state.layerCleanupVersion === 'number' ? state.layerCleanupVersion : 0
+        )
+
+        return {
+          ...state,
+          layers: reconciled.layers,
+          deletedLayerIds: reconciled.deletedLayerIds,
+          layerCleanupVersion: reconciled.cleanupVersion,
+          colorIndex: typeof state.colorIndex === 'number' ? state.colorIndex : 0,
         }
-        if (version < 3) {
-          // Rename "Vondsten" to "Mijn vondsten"
-          return {
-            ...state,
-            layers: (state.layers || []).map(l =>
-              l.id === DEFAULT_VONDSTEN_LAYER_ID ? { ...l, name: 'Mijn vondsten' } : l
-            )
-          }
-        }
-        return state
       }
     }
   )
