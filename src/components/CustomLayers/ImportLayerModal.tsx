@@ -10,6 +10,7 @@ import {
 import { parseFile, validateFile, getAcceptedExtensions, getSupportedFormatsText, detectFileType } from '../../utils/fileImport'
 import type { ParseResult } from '../../utils/fileImport'
 import { AppWindow } from '../UI/AppWindow'
+import { fingerprintFeatureCollection } from '../../services/importedLayerCloud'
 
 interface Props {
   isOpen: boolean
@@ -20,7 +21,9 @@ type ImportState = 'idle' | 'parsing' | 'preview' | 'error'
 
 export function ImportLayerModal({ isOpen, onClose }: Props) {
   const addLayer = useCustomLayerStore(state => state.addLayer)
-  const importedLayerCount = useCustomLayerStore(state => state.layers.length)
+  const updateLayer = useCustomLayerStore(state => state.updateLayer)
+  const existingLayers = useCustomLayerStore(state => state.layers)
+  const importedLayerCount = existingLayers.length
   const importDefaults = useCustomLayerStore(state => state.importDefaults)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -131,15 +134,25 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
     } as CustomLayerStyle) : current)
   }, [])
 
-  const handleImport = useCallback(() => {
+  const handleImport = useCallback(async () => {
     if (!parseResult || !styleDraft || !layerName.trim()) return
 
     const fileType = selectedFile ? detectFileType(selectedFile.name) : 'geojson'
     const color = styleDraft.points.color || styleDraft.lines.color || styleDraft.polygons.strokeColor
+    const contentHash = await fingerprintFeatureCollection(parseResult.features)
+    const sourceFileName = selectedFile?.name || 'unknown'
+    const existing = existingLayers.find(layer =>
+      layer.contentHash === contentHash ||
+      (
+        !layer.contentHash &&
+        layer.sourceFileName === sourceFileName &&
+        JSON.stringify(layer.features) === JSON.stringify(parseResult.features)
+      )
+    )
 
-    addLayer({
+    const nextLayer = {
       name: layerName.trim(),
-      type: fileType === 'unsupported' ? 'geojson' : fileType,
+      type: fileType === 'unsupported' ? 'geojson' as const : fileType,
       features: parseResult.features,
       visible: true,
       opacity: 1,
@@ -150,8 +163,15 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
         hiddenFields: [],
         showTechnicalFields: importDefaults.popup.showTechnicalFields,
       },
-      sourceFileName: selectedFile?.name || 'unknown'
-    })
+      sourceFileName,
+      contentHash,
+    }
+
+    if (existing) {
+      updateLayer(existing.id, nextLayer)
+    } else {
+      addLayer(nextLayer)
+    }
 
     handleClose()
   }, [
@@ -159,7 +179,9 @@ export function ImportLayerModal({ isOpen, onClose }: Props) {
     styleDraft,
     layerName,
     selectedFile,
+    existingLayers,
     addLayer,
+    updateLayer,
     importDefaults.popup.showTechnicalFields,
     handleClose,
   ])
