@@ -7,6 +7,18 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.47',
+    date: '19 september 2026',
+    title: 'Geïmporteerde lagen nu echt in de cloud',
+    changes: [
+      'Geïmporteerde lagen synchroniseren voortaan met hun volledige GeoJSON-inhoud via Firebase Storage; Firestore bewaart alleen lichte metadata en instellingen.',
+      'Een bestaand apparaat met de volledige laag, zoals je oude telefoon, uploadt die inhoud automatisch zodra Detect met Google is ingelogd.',
+      'Andere apparaten downloaden dezelfde laag daarna automatisch en tonen weer alle punten, vlakken en popupinformatie zonder opnieuw te importeren.',
+      'Dezelfde import wordt voortaan herkend aan een inhoudshash en bijgewerkt in plaats van als tweede, dubbele laag toegevoegd.',
+      'Verwijderingen van geïmporteerde lagen worden apart bijgehouden zodat een oude cloudkopie niet opnieuw kan terugkomen.'
+    ]
+  },
+  {
     version: '2.33.46',
     date: '18 september 2026',
     title: 'Echte donkere modus',
