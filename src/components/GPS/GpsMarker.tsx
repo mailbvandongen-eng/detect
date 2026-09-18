@@ -66,7 +66,7 @@ export function GpsMarker() {
     markerRef.current = new Feature({
       geometry: new Point(coords)
     })
-    markerRef.current.setStyle(isHeadingUp ? createArrowStyle(initialRotation) : DOT_STYLE)
+    markerRef.current.setStyle(tracking ? createArrowStyle(initialRotation) : DOT_STYLE)
 
     accuracyRef.current = new Feature({
       geometry: new Point(coords)
@@ -88,17 +88,19 @@ export function GpsMarker() {
     }
   }, [map, !!position, createArrowStyle]) // Only re-create layer when map loads or position first appears
 
-  // First GPS state is always a dot; only heading-up mode shows the direction arrow.
+  // Passive location is a blue dot. As soon as active GPS tracking starts,
+  // show the blue direction arrow. In free mode the map remains north-up;
+  // heading-up mode keeps the same arrow while rotating the map.
   useEffect(() => {
     if (!markerRef.current) return
 
-    if (isHeadingUp) {
+    if (tracking) {
       const rotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
       markerRef.current.setStyle(createArrowStyle(rotation))
     } else {
       markerRef.current.setStyle(DOT_STYLE)
     }
-  }, [isHeadingUp, createArrowStyle])
+  }, [tracking, smoothHeading, createArrowStyle])
 
   // Update position and center map
   useEffect(() => {
@@ -149,14 +151,15 @@ export function GpsMarker() {
     }
   }, [map, tracking, position, accuracy, firstFix, resetFirstFix, centerOnUser, showAccuracyCircle, navigationMode, navigationMoving])
 
-  // Update arrow rotation only while actually moving. When speed drops below
-  // the stop threshold the last reliable direction remains visible.
+  // Keep the active GPS arrow pointed at the current heading. In free mode
+  // this is the viewing direction on a north-up map. In heading-up mode the
+  // map rotation and rotateWithView keep the arrow pointing forward.
   useEffect(() => {
-    if (!markerRef.current || !isHeadingUp || !navigationMoving) return
+    if (!markerRef.current || !tracking || smoothHeading === null) return
 
-    const rotation = smoothHeading !== null ? (smoothHeading * Math.PI) / 180 : 0
+    const rotation = (smoothHeading * Math.PI) / 180
     markerRef.current.setStyle(createArrowStyle(rotation))
-  }, [smoothHeading, createArrowStyle, isHeadingUp, navigationMoving])
+  }, [tracking, smoothHeading, createArrowStyle])
 
   // Heading-up mode: rotate map so heading direction is "up" while moving.
   // At standstill both course and rotation stay frozen.
