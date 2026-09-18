@@ -95,6 +95,15 @@ export async function getOutgoingShares(ownerUid: string, layerId: string): Prom
   return snap.docs.map(item => item.data() as SharedImportedLayerRecord)
 }
 
+export async function getOwnedShares(ownerUid: string): Promise<SharedImportedLayerRecord[]> {
+  const q = query(
+    collection(db, 'sharedImportedLayers'),
+    where('ownerUid', '==', ownerUid)
+  )
+  const snap = await getDocs(q)
+  return snap.docs.map(item => item.data() as SharedImportedLayerRecord)
+}
+
 export async function getIncomingShares(email: string): Promise<SharedImportedLayerRecord[]> {
   const q = query(
     collection(db, 'sharedImportedLayers'),
