@@ -10,6 +10,12 @@ import {
   uploadImportedLayerPayload,
   type CloudImportedLayerMetadata
 } from '../services/importedLayerCloud'
+import {
+  downloadSharedLayer,
+  getIncomingShares,
+  getOwnedShares,
+  syncEditedSharedLayer,
+} from '../services/sharedImportedLayers'
 import { useLocalVondstenStore, type LocalVondst } from '../store/localVondstenStore'
 import { useRouteRecordingStore, type RecordedRoute } from '../store/routeRecordingStore'
 import {
@@ -181,8 +187,10 @@ export function useCloudSync() {
     if (!user) return { layers: localLayers, metadata: cloudMetadata, uploaded: 0, downloaded: 0 }
 
     const deleted = new Set(deletedIds)
+    const sharedLocalLayers = localLayers.filter(layer => !!layer.shareId)
+    const ownLocalLayers = localLayers.filter(layer => !layer.shareId)
     const cloudById = new Map(cloudMetadata.filter(meta => !deleted.has(meta.id)).map(meta => [meta.id, meta]))
-    const localById = new Map(localLayers.filter(layer => !deleted.has(layer.id)).map(layer => [layer.id, layer]))
+    const localById = new Map(ownLocalLayers.filter(layer => !deleted.has(layer.id)).map(layer => [layer.id, layer]))
     const nextLayers = [...localById.values()]
     const nextMetadata = new Map<string, CloudImportedLayerMetadata>()
     let uploaded = 0
@@ -233,7 +241,7 @@ export function useCloudSync() {
     }
 
     return {
-      layers: nextLayers.filter(layer => !deleted.has(layer.id)),
+      layers: [...nextLayers.filter(layer => !deleted.has(layer.id)), ...sharedLocalLayers],
       metadata: [...nextMetadata.values()],
       uploaded,
       downloaded
@@ -241,10 +249,52 @@ export function useCloudSync() {
   }, [user, reportSyncError])
 
 
+  const refreshSharedImportedLayers = useCallback(async () => {
+    if (!user?.email) return
+
+    const store = useCustomLayerStore.getState()
+    let ownLayers = store.layers.filter(layer => !layer.shareId)
+    const incomingRecords = await getIncomingShares(user.email)
+    const incomingLayers = await Promise.all(incomingRecords.map(downloadSharedLayer))
+
+    const ownedShares = await getOwnedShares(user.uid)
+    for (const record of ownedShares) {
+      const index = ownLayers.findIndex(layer => layer.id === record.layerId)
+      if (index < 0) continue
+      const local = ownLayers[index]
+      if (record.contentHash !== local.contentHash) {
+        const edited = await downloadSharedLayer(record)
+        ownLayers[index] = {
+          ...local,
+          name: edited.name,
+          features: edited.features,
+          visible: edited.visible,
+          opacity: edited.opacity,
+          color: edited.color,
+          style: edited.style,
+          popupConfig: edited.popupConfig,
+          sourceFileName: edited.sourceFileName,
+          contentHash: edited.contentHash,
+        }
+      }
+    }
+
+    useCustomLayerStore.setState({
+      layers: [...ownLayers, ...incomingLayers],
+    })
+  }, [user])
+
   const syncImportedLayersToCloud = useCallback(async () => {
     if (!user) return false
 
     try {
+      const sharedEditableLayers = useCustomLayerStore.getState().layers.filter(
+        layer => layer.shareId && layer.sharePermission === 'edit'
+      )
+      for (const layer of sharedEditableLayers) {
+        await syncEditedSharedLayer(user, layer)
+      }
+
       const userDocRef = doc(db, 'users', user.uid)
       const docSnap = await getDoc(userDocRef)
       const cloudData = docSnap.exists() ? docSnap.data() : {}
@@ -520,6 +570,8 @@ export function useCloudSync() {
         console.log('☁️ Eerste cloudkopie aangemaakt')
       }
 
+      await refreshSharedImportedLayers()
+
       const syncedPointLayerState = useCustomPointLayerStore.getState()
       const syncedImportedState = useCustomLayerStore.getState()
       lastSyncedImportedLayersRef.current = JSON.stringify({
@@ -541,7 +593,7 @@ export function useCloudSync() {
     } finally {
       isInitialLoadRef.current = false
     }
-  }, [user, markSynced, reportSyncError, reconcileImportedLayers])
+  }, [user, markSynced, reportSyncError, reconcileImportedLayers, refreshSharedImportedLayers])
 
   useEffect(() => {
     if (!isHydrated) return
@@ -668,6 +720,13 @@ export function useCloudSync() {
     setSyncError(null)
 
     try {
+      const editableShared = useCustomLayerStore.getState().layers.filter(
+        layer => layer.shareId && layer.sharePermission === 'edit'
+      )
+      for (const layer of editableShared) {
+        await syncEditedSharedLayer(user, layer)
+      }
+      await refreshSharedImportedLayers()
       const currentLayers = useCustomPointLayerStore.getState().layers
       const currentImportedState = useCustomLayerStore.getState()
       const currentDeletedLayerIds = useCustomPointLayerStore.getState().deletedLayerIds
@@ -798,7 +857,7 @@ export function useCloudSync() {
         error: reportSyncError(error, 'handmatige synchronisatie')
       }
     }
-  }, [user, markSynced, reportSyncError, reconcileImportedLayers])
+  }, [user, markSynced, reportSyncError, reconcileImportedLayers, refreshSharedImportedLayers])
 
   return {
     isLoggedIn: !!user,
