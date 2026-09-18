@@ -7,6 +7,18 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.48',
+    date: '19 september 2026',
+    title: 'Geïmporteerde lagen delen met andere accounts',
+    changes: [
+      'Bij de instellingen van een geïmporteerde laag staat nu Laag delen met een Google-e-mailadres.',
+      'Per ontvanger kun je kiezen tussen Alleen lezen en Bewerken; delen kan later ook weer worden ingetrokken.',
+      'Ontvangen lagen verschijnen via cloud-synchronisatie op het andere Google-account en blijven herkenbaar als gedeelde laag met eigenaar en rechten.',
+      'Bewerkbare gedeelde lagen kunnen door de ontvanger worden aangepast; wijzigingen worden teruggekoppeld naar dezelfde centrale laag.',
+      'Eigen en ontvangen imports blijven technisch gescheiden zodat gedeelde lagen niet per ongeluk als dubbele eigen import worden opgeslagen.'
+    ]
+  },
+  {
     version: '2.33.47',
     date: '19 september 2026',
     title: 'Geïmporteerde lagen nu echt in de cloud',
