@@ -66,6 +66,33 @@ function App() {
   // Get font scale setting (80-150%)
   const fontScale = useSettingsStore(state => state.fontScale)
   const uiTheme = useSettingsStore(state => state.uiTheme)
+  const colorScheme = useSettingsStore(state => state.colorScheme)
+  const [systemDark, setSystemDark] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
+  const resolvedColorScheme = colorScheme === 'system' ? (systemDark ? 'dark' : 'light') : colorScheme
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleChange = (event: MediaQueryListEvent) => setSystemDark(event.matches)
+    setSystemDark(media.matches)
+    media.addEventListener?.('change', handleChange)
+    return () => media.removeEventListener?.('change', handleChange)
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.dataset.detectColorScheme = resolvedColorScheme
+    document.documentElement.style.colorScheme = resolvedColorScheme
+
+    let metaTheme = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null
+    if (!metaTheme) {
+      metaTheme = document.createElement('meta')
+      metaTheme.name = 'theme-color'
+      document.head.appendChild(metaTheme)
+    }
+    metaTheme.content = resolvedColorScheme === 'dark' ? '#111827' : '#ffffff'
+  }, [resolvedColorScheme])
+
   // Base size is 14px, scale it based on setting
   const baseFontSize = 14 * fontScale / 100
 
@@ -131,7 +158,7 @@ function App() {
   }
 
   return (
-    <div data-detect-theme={uiTheme} style={{ fontSize: `${baseFontSize}px` }}>
+    <div data-detect-theme={uiTheme} data-detect-color-scheme={resolvedColorScheme} style={{ fontSize: `${baseFontSize}px` }}>
       <OfflineIndicator />
       <MapContainer />
       <GpsMarker />
