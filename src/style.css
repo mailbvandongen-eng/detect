@@ -1086,3 +1086,163 @@ input[type="range"]:not(.header-slider)::-moz-range-thumb {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   cursor: pointer;
 }
+
+
+/* ============================================================
+   DARK MODE
+   Native Detect UI only: map imagery and thematic layers are not filtered.
+   ============================================================ */
+[data-detect-color-scheme="dark"] {
+  --detect-window-surface: #111827;
+  --detect-window-subtle: #0f172a;
+  --detect-window-text: #e5e7eb;
+  --detect-window-muted: #9ca3af;
+  --detect-window-border: #374151;
+  --detect-window-shadow: 0 18px 45px rgba(0, 0, 0, 0.46);
+  --detect-accent-soft: color-mix(in srgb, var(--detect-accent) 20%, #111827);
+  --detect-accent-text: color-mix(in srgb, var(--detect-accent) 72%, white);
+}
+
+[data-detect-color-scheme="dark"] .detect-window {
+  border-color: #374151;
+}
+
+[data-detect-color-scheme="dark"] .detect-window :is(
+  .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600
+) {
+  color: #e5e7eb !important;
+}
+
+[data-detect-color-scheme="dark"] .detect-window :is(
+  .text-gray-500, .text-gray-400
+) {
+  color: #9ca3af !important;
+}
+
+[data-detect-color-scheme="dark"] .detect-window :is(
+  .bg-white, .bg-gray-50, .bg-gray-100
+) {
+  background-color: var(--detect-window-surface) !important;
+}
+
+[data-detect-color-scheme="dark"] .detect-window :is(
+  .border-gray-100, .border-gray-200, .border-gray-300
+) {
+  border-color: var(--detect-window-border) !important;
+}
+
+[data-detect-color-scheme="dark"] .detect-window input:not([type="checkbox"]):not([type="range"]),
+[data-detect-color-scheme="dark"] .detect-window select,
+[data-detect-color-scheme="dark"] .detect-window textarea {
+  color: #f3f4f6;
+  background: #1f2937;
+  border-color: #4b5563;
+}
+
+[data-detect-color-scheme="dark"] .detect-window select option {
+  color: #f3f4f6;
+  background: #1f2937;
+}
+
+[data-detect-color-scheme="dark"] .detect-window-icon-button {
+  color: #d1d5db;
+  background: #1f2937;
+  border-color: #4b5563;
+}
+
+[data-detect-color-scheme="dark"] .detect-window-secondary-button {
+  color: var(--detect-accent-text);
+  background: var(--detect-accent-soft);
+}
+
+/* Floating map controls: darken their chrome but never alter map pixels. */
+[data-detect-color-scheme="dark"] button[class*="bg-white"]:not(.detect-window-primary-button),
+[data-detect-color-scheme="dark"] .time-travel-panel,
+[data-detect-color-scheme="dark"] .time-travel-reopen {
+  color: #e5e7eb !important;
+  background: rgba(31, 41, 55, 0.94) !important;
+  border-color: #4b5563 !important;
+}
+
+[data-detect-color-scheme="dark"] button[class*="bg-white"] svg {
+  color: #d1d5db;
+}
+
+/* Search */
+[data-detect-color-scheme="dark"] .search-input-wrapper,
+[data-detect-color-scheme="dark"] .search-results,
+[data-detect-color-scheme="dark"] .search-loading {
+  color: #e5e7eb;
+  background: #1f2937;
+}
+
+[data-detect-color-scheme="dark"] .search-input,
+[data-detect-color-scheme="dark"] .search-result-text {
+  color: #f3f4f6;
+}
+
+[data-detect-color-scheme="dark"] .search-result-item {
+  border-bottom-color: #374151;
+}
+
+[data-detect-color-scheme="dark"] .search-result-item:hover,
+[data-detect-color-scheme="dark"] .search-clear:hover {
+  background: #374151;
+}
+
+/* OpenLayers popup chrome */
+[data-detect-color-scheme="dark"] .ol-popup {
+  color: #e5e7eb;
+  background: #1f2937 !important;
+  border-color: #4b5563 !important;
+}
+
+[data-detect-color-scheme="dark"] .ol-popup::after {
+  border-top-color: #1f2937;
+}
+
+[data-detect-color-scheme="dark"] .ol-popup::before {
+  border-top-color: #4b5563;
+}
+
+[data-detect-color-scheme="dark"] .ol-popup-closer {
+  color: #d1d5db;
+}
+
+/* Scale stays readable without touching the map layer underneath. */
+[data-detect-color-scheme="dark"] .ol-scale-line-inner {
+  color: #e5e7eb !important;
+  background: rgba(31, 41, 55, 0.92) !important;
+  border-color: #9ca3af !important;
+}
+
+/* Legend / information panels that are not AppWindow-based yet. */
+[data-detect-color-scheme="dark"] .legend-control,
+[data-detect-color-scheme="dark"] .legend-amk-colors {
+  color: #e5e7eb;
+  background: #1f2937;
+  border-color: #4b5563;
+}
+
+[data-detect-color-scheme="dark"] .legend-control h4,
+[data-detect-color-scheme="dark"] .legend-category-header,
+[data-detect-color-scheme="dark"] .legend-total,
+[data-detect-color-scheme="dark"] .legend-label-name {
+  color: #e5e7eb;
+}
+
+[data-detect-color-scheme="dark"] .legend-category-header,
+[data-detect-color-scheme="dark"] .legend-control h4:hover,
+[data-detect-color-scheme="dark"] .legend-item.clickable:hover {
+  background: #374151;
+}
+
+[data-detect-color-scheme="dark"] .legend-label-period,
+[data-detect-color-scheme="dark"] .legend-count,
+[data-detect-color-scheme="dark"] .legend-amk-colors .amk-color-item {
+  color: #9ca3af;
+}
+
+[data-detect-color-scheme="dark"] .legend-total {
+  border-top-color: #4b5563;
+}
