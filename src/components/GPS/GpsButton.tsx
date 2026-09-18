@@ -43,7 +43,10 @@ export function GpsButton() {
       setNavigationMode('free')
       void requestOrientationPermission()
     } else if (navigationMode === 'free') {
-      // TRACKING → HEADING-UP
+      // TRACKING → HEADING-UP.
+      // Ensure iOS motion/orientation permission is requested from this user
+      // gesture as well. GPS itself keeps working even when this is denied.
+      await requestOrientationPermission()
       setNavigationMode('headingUp')
     } else {
       // HEADING-UP → OFF
