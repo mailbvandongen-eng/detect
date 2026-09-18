@@ -88,11 +88,12 @@ export async function revokeImportedLayerShare(shareId: string): Promise<void> {
 export async function getOutgoingShares(ownerUid: string, layerId: string): Promise<SharedImportedLayerRecord[]> {
   const q = query(
     collection(db, 'sharedImportedLayers'),
-    where('ownerUid', '==', ownerUid),
-    where('layerId', '==', layerId)
+    where('ownerUid', '==', ownerUid)
   )
   const snap = await getDocs(q)
-  return snap.docs.map(item => item.data() as SharedImportedLayerRecord)
+  return snap.docs
+    .map(item => item.data() as SharedImportedLayerRecord)
+    .filter(item => item.layerId === layerId)
 }
 
 export async function getOwnedShares(ownerUid: string): Promise<SharedImportedLayerRecord[]> {
