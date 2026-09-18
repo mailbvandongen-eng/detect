@@ -76,6 +76,10 @@ export interface CustomLayer {
   createdAt: string
   sourceFileName: string
   contentHash?: string
+  shareId?: string
+  shareOwnerUid?: string
+  shareOwnerEmail?: string
+  sharePermission?: 'read' | 'edit'
 }
 
 type NewCustomLayer = Omit<CustomLayer, 'id' | 'createdAt' | 'style' | 'popupConfig'> & {
