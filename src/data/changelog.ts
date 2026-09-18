@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.46',
+    date: '18 september 2026',
+    title: 'Echte donkere modus',
+    changes: [
+      'Onder Instellingen → Algemeen → Weergave staat nu Kleurmodus met Systeem, Licht en Donker. Systeem volgt automatisch de iPhone- of browserinstelling.',
+      'Vensters, zoekfunctie, popups, kaartknoppen, schaalbalk en overige Detect-bediening krijgen een eigen donkere vormgeving zonder kaartlagen, luchtfoto’s of themakleuren te vervormen.',
+      'Detect past in donkere modus ook de browser theme-color en color-scheme aan, zodat Safari waar mogelijk beter aansluit op de donkere app.',
+      'De gekozen kleurmodus wordt lokaal opgeslagen en meegenomen in de bestaande cloudinstellingen.'
+    ]
+  },
+  {
     version: '2.33.45',
     date: '18 september 2026',
     title: 'iPhone-GPS en navigatiemodus hersteld',
