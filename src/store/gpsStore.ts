@@ -145,38 +145,23 @@ export const useGPSStore = create<GPSState>()(
           state.navigationMoving = false
         }
 
-        // Determine heading source based on GPS quality and movement.
+        // Heading source:
+        // - while driving, prefer the GPS course when it is reliable;
+        // - at low speed / standstill, use the phone compass so heading-up mode
+        //   can still rotate the map and the north-up blue arrow shows viewing direction.
         const GPS_ACCURACY_THRESHOLD = 20
         const SPEED_THRESHOLD = 0.5 // ~1.8 km/h
 
         const isGPSReliable =
           pos.coords.accuracy !== null &&
           pos.coords.accuracy < GPS_ACCURACY_THRESHOLD
-
-        if (!isGPSReliable) {
-          // Poor GPS - no reliable heading source
-          state.headingSource = null
-        } else if (state.navigationMode === 'headingUp') {
-          if (!state.navigationMoving) {
-            // Freeze the last reliable course while stationary.
-            state.headingSource = null
-          } else if (pos.coords.heading !== null) {
-            state.headingSource = 'gps'
-          } else {
-            // Moving but GPS bearing unavailable: compass is the fallback.
-            state.headingSource = 'compass'
-          }
-        } else if (
+        const hasReliableGpsCourse =
+          isGPSReliable &&
           pos.coords.heading !== null &&
           pos.coords.speed !== null &&
           pos.coords.speed > SPEED_THRESHOLD
-        ) {
-          // Moving with good GPS - use GPS bearing
-          state.headingSource = 'gps'
-        } else {
-          // North-up tracking can keep the compass warm without affecting the map.
-          state.headingSource = 'compass'
-        }
+
+        state.headingSource = hasReliableGpsCourse ? 'gps' : 'compass'
       })
     },
 
@@ -205,8 +190,10 @@ export const useGPSStore = create<GPSState>()(
 
         if (mode === 'headingUp') {
           state.navigationMoving = state.speed !== null && state.speed > NAVIGATION_START_SPEED
+          // Navigation mode must also work while stationary: compass supplies heading
+          // until a reliable moving GPS course is available.
           if (!state.navigationMoving) {
-            state.headingSource = null
+            state.headingSource = 'compass'
           }
         } else {
           state.navigationMoving = false
@@ -222,7 +209,7 @@ export const useGPSStore = create<GPSState>()(
         if (nextMode === 'headingUp') {
           state.navigationMoving = state.speed !== null && state.speed > NAVIGATION_START_SPEED
           if (!state.navigationMoving) {
-            state.headingSource = null
+            state.headingSource = 'compass'
           }
         } else {
           state.navigationMoving = false
