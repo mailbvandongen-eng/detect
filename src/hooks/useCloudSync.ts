@@ -487,10 +487,19 @@ export function useCloudSync() {
           await setDoc(userDocRef, missingCloudData, { merge: true })
         }
       } else {
+        const initialImported = await reconcileImportedLayers(
+          [],
+          localImportedState.layers,
+          localImportedState.deletedLayerIds
+        )
+        useCustomLayerStore.setState({
+          layers: initialImported.layers,
+          deletedLayerIds: localImportedState.deletedLayerIds
+        })
         await setDoc(userDocRef, {
           layers: localLayers,
           deletedLayerIds: localDeletedLayerIds,
-          importedLayers: [],
+          importedLayers: initialImported.metadata,
           deletedImportedLayerIds: localImportedState.deletedLayerIds,
           layerCleanupVersion: localLayerCleanupVersion,
           vondsten: localVondsten,
@@ -498,7 +507,7 @@ export function useCloudSync() {
           settings: getCloudSettings(),
           presetSettings: getPresetCloudState(),
           layersUpdatedAt: serverTimestamp(),
-        importedLayersUpdatedAt: serverTimestamp(),
+          importedLayersUpdatedAt: serverTimestamp(),
           vondstenUpdatedAt: serverTimestamp(),
           routesUpdatedAt: serverTimestamp(),
           settingsUpdatedAt: serverTimestamp(),
@@ -528,7 +537,7 @@ export function useCloudSync() {
     } finally {
       isInitialLoadRef.current = false
     }
-  }, [user, markSynced, reportSyncError])
+  }, [user, markSynced, reportSyncError, reconcileImportedLayers])
 
   useEffect(() => {
     if (!isHydrated) return
@@ -705,8 +714,6 @@ export function useCloudSync() {
       useCustomPointLayerStore.setState({
         layers: reconciledLayers.layers,
         deletedLayerIds: reconciledLayers.deletedLayerIds,
-        importedLayers: importedReconcile.metadata,
-        deletedImportedLayerIds: mergedDeletedImportedLayerIds,
         layerCleanupVersion: reconciledLayers.cleanupVersion,
       })
       useLocalVondstenStore.setState({ vondsten: vondstMerge.merged })
@@ -731,12 +738,15 @@ export function useCloudSync() {
       await setDoc(userDocRef, {
         layers: reconciledLayers.layers,
         deletedLayerIds: reconciledLayers.deletedLayerIds,
+        importedLayers: importedReconcile.metadata,
+        deletedImportedLayerIds: mergedDeletedImportedLayerIds,
         layerCleanupVersion: reconciledLayers.cleanupVersion,
         vondsten: vondstMerge.merged,
         routes: routeMerge.merged,
         settings: settingsToSync,
         presetSettings: presetsToSync,
         layersUpdatedAt: serverTimestamp(),
+        importedLayersUpdatedAt: serverTimestamp(),
         vondstenUpdatedAt: serverTimestamp(),
         routesUpdatedAt: serverTimestamp(),
         settingsUpdatedAt: serverTimestamp(),
@@ -784,7 +794,7 @@ export function useCloudSync() {
         error: reportSyncError(error, 'handmatige synchronisatie')
       }
     }
-  }, [user, markSynced, reportSyncError])
+  }, [user, markSynced, reportSyncError, reconcileImportedLayers])
 
   return {
     isLoggedIn: !!user,
