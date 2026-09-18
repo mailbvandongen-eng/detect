@@ -43,10 +43,24 @@ function App() {
   // Initialize hooks
   useHeading()
   useDynamicAHN()
-  // Fetch passive position once on app start (shows blue dot)
+  // Keep a passive current position available for the blue startup dot.
+  // iOS standalone PWAs can resume without remounting the React tree, so
+  // refresh it on pageshow / when the app becomes visible again as well.
   const fetchPassivePosition = useGPSStore(state => state.fetchPassivePosition)
   useEffect(() => {
-    fetchPassivePosition()
+    const refreshPassivePosition = () => fetchPassivePosition()
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') refreshPassivePosition()
+    }
+
+    refreshPassivePosition()
+    window.addEventListener('pageshow', refreshPassivePosition)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('pageshow', refreshPassivePosition)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [fetchPassivePosition])
 
   // Get font scale setting (80-150%)
