@@ -75,6 +75,7 @@ export interface CustomLayer {
   popupConfig: ImportedLayerPopupConfig
   createdAt: string
   sourceFileName: string
+  contentHash?: string
 }
 
 type NewCustomLayer = Omit<CustomLayer, 'id' | 'createdAt' | 'style' | 'popupConfig'> & {
@@ -84,6 +85,7 @@ type NewCustomLayer = Omit<CustomLayer, 'id' | 'createdAt' | 'style' | 'popupCon
 
 interface CustomLayerState {
   layers: CustomLayer[]
+  deletedLayerIds: string[]
   importDefaults: ImportStyleDefaults
 
   addLayer: (layer: NewCustomLayer) => string
@@ -276,14 +278,18 @@ export function migrateCustomLayerState(persistedState: unknown): {
   const layers = Array.isArray(oldState.layers)
     ? oldState.layers.map(layer => normalizeLayer(layer, importDefaults))
     : []
+  const deletedLayerIds = Array.isArray(oldState.deletedLayerIds)
+    ? oldState.deletedLayerIds.filter((id): id is string => typeof id === 'string')
+    : []
 
-  return { ...oldState, importDefaults, layers }
+  return { ...oldState, importDefaults, layers, deletedLayerIds }
 }
 
 export const useCustomLayerStore = create<CustomLayerState>()(
   persist(
     (set, get) => ({
       layers: [],
+      deletedLayerIds: [],
       importDefaults: DEFAULT_IMPORT_STYLE_DEFAULTS,
 
       addLayer: (layer) => {
@@ -313,7 +319,10 @@ export const useCustomLayerStore = create<CustomLayerState>()(
       },
 
       removeLayer: (id) => set(state => ({
-        layers: state.layers.filter(layer => layer.id !== id)
+        layers: state.layers.filter(layer => layer.id !== id),
+        deletedLayerIds: state.deletedLayerIds.includes(id)
+          ? state.deletedLayerIds
+          : [...state.deletedLayerIds, id],
       })),
 
       updateLayer: (id, updates) => set(state => ({
@@ -417,11 +426,14 @@ export const useCustomLayerStore = create<CustomLayerState>()(
         })
       })),
 
-      clearAll: () => set({ layers: [] }),
+      clearAll: () => set(state => ({
+        layers: [],
+        deletedLayerIds: [...new Set([...state.deletedLayerIds, ...state.layers.map(layer => layer.id)])],
+      })),
     }),
     {
       name: 'detectorapp-custom-layers',
-      version: 2,
+      version: 3,
       migrate: migrateCustomLayerState,
     }
   )
