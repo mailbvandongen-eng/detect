@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 
 export type DefaultBackground = 'Esri (licht)' | 'Luchtfoto' | 'OpenStreetMap'
 export type DetectTheme = 'blue' | 'forest' | 'earth' | 'purple'
+export type ColorSchemePreference = 'system' | 'light' | 'dark'
 
 export interface SettingsState {
   // Kaart
@@ -34,6 +35,7 @@ export interface SettingsState {
   // Weergave
   fontScale: number  // 80-150, percentage scale for app text
   uiTheme: DetectTheme  // Gedeeld kleurenschema voor alle vensters
+  colorScheme: ColorSchemePreference  // Systeem, licht of donker
   layerPanelFontScale: number  // 80-150, for Kaartlagen panel
   presetPanelFontScale: number  // 80-150, for Presets panel
   menuFontScale: number  // 80-130, for Hamburger menu
@@ -74,6 +76,7 @@ export interface SettingsState {
   setShowCustomPointLayers: (value: boolean) => void
   setFontScale: (value: number) => void
   setUiTheme: (value: DetectTheme) => void
+  setColorScheme: (value: ColorSchemePreference) => void
   setLayerPanelFontScale: (value: number) => void
   setPresetPanelFontScale: (value: number) => void
   setMenuFontScale: (value: number) => void
@@ -103,6 +106,7 @@ export const CLOUD_SETTINGS_KEYS = [
   'showCustomPointLayers',
   'fontScale',
   'uiTheme',
+  'colorScheme',
   'layerPanelFontScale',
   'presetPanelFontScale',
   'menuFontScale',
@@ -153,6 +157,7 @@ export const useSettingsStore = create<SettingsState>()(
       showCustomPointLayers: true,  // Show custom point layers by default
       fontScale: 100,           // Default 100% = 14px base
       uiTheme: 'blue',          // Rustige Detect-huisstijl
+      colorScheme: 'system',    // Volg standaard de telefoon/browser
       layerPanelFontScale: 100, // Default 100%
       presetPanelFontScale: 100, // Default 100%
       menuFontScale: 100,       // Default 100%
@@ -181,6 +186,7 @@ export const useSettingsStore = create<SettingsState>()(
       setShowCustomPointLayers: (showCustomPointLayers) => set({ showCustomPointLayers }),
       setFontScale: (fontScale) => set({ fontScale }),
       setUiTheme: (uiTheme) => set({ uiTheme }),
+      setColorScheme: (colorScheme) => set({ colorScheme }),
       setLayerPanelFontScale: (layerPanelFontScale) => set({ layerPanelFontScale }),
       setPresetPanelFontScale: (presetPanelFontScale) => set({ presetPanelFontScale }),
       setMenuFontScale: (menuFontScale) => set({ menuFontScale }),
@@ -196,7 +202,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'detectorapp-settings',
-      version: 5,
+      version: 6,
       migrate: (persistedState: any, version: number) => {
         const migratedState = { ...persistedState }
 
@@ -220,6 +226,11 @@ export const useSettingsStore = create<SettingsState>()(
         // v5: één vensterhuisstijl met een gedeeld kleurenschema.
         if (version < 5) {
           migratedState.uiTheme = 'blue'
+        }
+
+        // v6: echte licht/donker/systeem-weergave.
+        if (version < 6) {
+          migratedState.colorScheme = 'system'
         }
 
         return migratedState
