@@ -35,11 +35,13 @@ export function GpsButton() {
 
   const handleClick = async () => {
     if (!tracking) {
-      // OFF → TRACKING (north-up)
-      // Request iOS compass permission on first GPS activation
-      await requestOrientationPermission()
+      // OFF → TRACKING (north-up).
+      // Start GPS immediately; iOS motion/orientation permission must never
+      // block geolocation. Request the compass separately so the blue arrow
+      // can show the viewing direction while the map itself stays north-up.
       start()
       setNavigationMode('free')
+      void requestOrientationPermission()
     } else if (navigationMode === 'free') {
       // TRACKING → HEADING-UP
       setNavigationMode('headingUp')
