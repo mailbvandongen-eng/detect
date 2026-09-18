@@ -1,0 +1,2 @@
+import{V as n,G as o,c as r}from"./index-BnWhpZj0.js";import{L as s}from"./iconStyles-B7z395uz.js";async function u(){const e=await(await fetch("./data/steentijd/hunebedden.geojson")).json(),t=new n({features:new o().readFeatures(e,{dataProjection:"EPSG:4326",featureProjection:"EPSG:3857"})});return new r({source:t,properties:{title:"Hunebedden"},visible:!1,zIndex:25,style:s.hunebed()})}export{u as createHunebeddenLayerOL};
+//# sourceMappingURL=hunebeddenOL-BgsGeC24.js.map
