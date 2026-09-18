@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.45',
+    date: '18 september 2026',
+    title: 'iPhone-GPS en navigatiemodus hersteld',
+    changes: [
+      'Bij het openen toont Detect weer de passieve actuele locatie als blauwe stip en ververst die locatie wanneer de app opnieuw zichtbaar wordt.',
+      'De eerste GPS-stand toont de blauwe richtingspijl op een noord-boven kaart; GPS start op iPhone direct en kan niet meer vastlopen op toestemming voor Beweging en Richting.',
+      'De tweede GPS-stand is weer echte navigatiemodus: een groene pijl blijft gecentreerd en recht omhoog terwijl de kaart eronder meedraait met kompasrichting bij lage snelheid en GPS-koers tijdens het rijden.',
+      'Functionele wijzigingen krijgen voortaan altijd een nieuw versienummer en een wijzigingsbericht dat na de update één keer automatisch verschijnt.'
+    ]
+  },
+  {
     version: '2.33.43',
     date: '14 september 2026',
     title: 'Rustiger tikken en betrouwbare perceelhoogte',
