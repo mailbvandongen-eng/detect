@@ -77,6 +77,10 @@ function getFriendlySyncError(error: unknown): string {
     return 'Cloudtoegang geweigerd. De Firestore-beveiligingsregels moeten worden bijgewerkt.'
   }
 
+  if (code === 'storage/unauthorized') {
+    return 'Opslagtoegang voor geïmporteerde lagen is geweigerd. Firebase Storage-regels moeten toegang tot je eigen gebruikersmap toestaan.'
+  }
+
   if (code === 'unavailable' || code === 'firestore/unavailable') {
     return 'Cloud tijdelijk niet bereikbaar. Je lokale gegevens blijven bewaard.'
   }
