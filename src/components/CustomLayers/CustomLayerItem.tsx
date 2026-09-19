@@ -41,7 +41,10 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
   const toggleVisibility = useCustomLayerStore(state => state.toggleVisibility)
   const removeImportedLayer = useCustomLayerStore(state => state.removeLayer)
   const linkedPointLayer = useCustomPointLayerStore(state =>
-    state.layers.find(pointLayer => pointLayer.linkedImportedLayerId === layer.id)
+    state.layers.find(pointLayer =>
+      pointLayer.linkedImportedLayerId === layer.id ||
+      (!!layer.contentHash && pointLayer.linkedImportedLayerHash === layer.contentHash)
+    )
   )
   const removePointLayer = useCustomPointLayerStore(state => state.removeLayer)
   const [expanded, setExpanded] = useState(false)
@@ -53,11 +56,11 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
   const [shareError, setShareError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!expanded || !user || layer.shareId) return
-    getOutgoingShares(user.uid, layer.id)
+    if (!expanded || !user || !layer.contentHash) return
+    getOutgoingShares(user.uid, layer.contentHash)
       .then(setShares)
       .catch(error => setShareError(error instanceof Error ? error.message : 'Delen kon niet worden geladen'))
-  }, [expanded, user, layer.id, layer.shareId])
+  }, [expanded, user, layer.contentHash])
 
   const handleShare = async () => {
     if (!user || !shareEmail.trim() || shareBusy) return
@@ -65,7 +68,9 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
     setShareError(null)
     try {
       await shareImportedLayer(user, layer, shareEmail, sharePermission)
-      setShares(await getOutgoingShares(user.uid, layer.id))
+      if (layer.contentHash) {
+        setShares(await getOutgoingShares(user.uid, layer.contentHash))
+      }
       setShareEmail('')
     } catch (error) {
       setShareError(error instanceof Error ? error.message : 'Delen mislukt')
@@ -140,14 +145,10 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
 
       {expanded && (
         <div className="mx-1 mb-2 mt-1 space-y-2 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
-          {layer.shareId ? (
-            <div className="rounded-lg bg-cyan-50 p-2 text-xs text-cyan-800">
-              <div className="flex items-center gap-1.5 font-medium"><Share2 size={13} /> Gedeelde laag</div>
-              <div className="mt-1">Van {layer.shareOwnerEmail || 'een ander account'} · {layer.sharePermission === 'edit' ? 'bewerken toegestaan' : 'alleen lezen'}</div>
-            </div>
-          ) : user ? (
+          {user ? (
             <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-gray-700"><Share2 size={13} /> Laag delen</div>
+              <div className="flex items-center gap-1.5 text-xs font-medium text-gray-700"><Share2 size={13} /> Nieuwe punten synchroniseren</div>
+              <div className="text-[11px] text-gray-500">Stuur de basislaag zelf naar de ander. Na import koppelt Detect dezelfde laag automatisch en worden alleen nieuwe punten gedeeld.</div>
               <input
                 type="email"
                 value={shareEmail}
@@ -166,7 +167,7 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
                 </select>
                 <button
                   onClick={handleShare}
-                  disabled={!shareEmail.trim() || shareBusy}
+                  disabled={!shareEmail.trim() || shareBusy || !layer.contentHash}
                   className="rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
                 >
                   {shareBusy ? 'Bezig…' : 'Delen'}
@@ -189,15 +190,13 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
             <div className="rounded-lg bg-amber-50 p-2 text-xs text-amber-800">Log in met Google om deze laag te delen.</div>
           )}
 
-          {!layer.shareId && (
-            <button
+          <button
               onClick={handleDelete}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
             >
               <Trash2 size={15} />
               Laag verwijderen
             </button>
-          )}
         </div>
       )}
     </div>
