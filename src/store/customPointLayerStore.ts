@@ -86,6 +86,7 @@ export interface CustomPointLayer {
   // Handmatige punten die logisch bij een geïmporteerde laag horen.
   // De zware importgeometrie blijft lokaal; deze punten blijven cloud-synchroniseerbaar.
   linkedImportedLayerId?: string
+  linkedImportedLayerHash?: string
   shareId?: string
   shareOwnerUid?: string
   shareOwnerEmail?: string
@@ -100,7 +101,7 @@ interface CustomPointLayerStore {
 
   // Layer operations
   addLayer: (name: string, categories?: string[]) => string
-  ensureImportedLayerOverlay: (importedLayerId: string, name: string, color: string) => string
+  ensureImportedLayerOverlay: (importedLayerId: string, importedLayerHash: string | undefined, name: string, color: string) => string
   removeLayer: (id: string) => void
   updateLayer: (id: string, updates: Partial<Omit<CustomPointLayer, 'id' | 'points' | 'createdAt'>>) => void
   toggleVisibility: (id: string) => void
@@ -164,8 +165,11 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
         return id
       },
 
-      ensureImportedLayerOverlay: (importedLayerId, name, color) => {
-        const existing = get().layers.find(layer => layer.linkedImportedLayerId === importedLayerId)
+      ensureImportedLayerOverlay: (importedLayerId, importedLayerHash, name, color) => {
+        const existing = get().layers.find(layer =>
+          layer.linkedImportedLayerId === importedLayerId ||
+          (!!importedLayerHash && layer.linkedImportedLayerHash === importedLayerHash)
+        )
         if (existing) return existing.id
 
         const preferredId = `import-overlay-${importedLayerId}`
@@ -185,6 +189,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               archived: false,
               createdAt: new Date().toISOString(),
               linkedImportedLayerId: importedLayerId,
+              linkedImportedLayerHash: importedLayerHash,
             }
           ]
         }))
