@@ -163,16 +163,17 @@ export async function syncEditedSharedLayer(user: User, layer: CustomLayer): Pro
   const snap = await getDoc(ref)
   if (!snap.exists()) return
   const current = snap.data() as SharedImportedLayerRecord
+  const overlayLayer = useCustomPointLayerStore.getState().layers.find(
+    pointLayer => pointLayer.linkedImportedLayerId === layer.id && pointLayer.shareId === layer.shareId
+  ) || null
   const hash = await fingerprintFeatureCollection(layer.features)
   if (hash === current.contentHash &&
       JSON.stringify(layer.style) === JSON.stringify(current.style) &&
       JSON.stringify(layer.popupConfig) === JSON.stringify(current.popupConfig) &&
+      JSON.stringify(overlayLayer) === JSON.stringify(current.overlayLayer || null) &&
       layer.name === current.layerName) return
 
   const { downloadUrl, contentHash } = await uploadSharedPayload(user, layer.shareId, layer.features)
-  const overlayLayer = useCustomPointLayerStore.getState().layers.find(
-    pointLayer => pointLayer.linkedImportedLayerId === layer.id && pointLayer.shareId === layer.shareId
-  ) || null
   await setDoc(ref, {
     ...current,
     layerName: layer.name,
