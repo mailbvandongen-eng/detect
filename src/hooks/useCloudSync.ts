@@ -32,6 +32,7 @@ type SyncStatus = 'signed-out' | 'connecting' | 'synced' | 'error'
 interface CloudPresetState {
   presets: Preset[]
   customDefaults: Preset[] | null
+  updatedAt: number
 }
 
 interface SyncCounts {
@@ -52,10 +53,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function getPresetCloudState(): CloudPresetState {
-  const { presets, customDefaults } = usePresetStore.getState()
+  const { presets, customDefaults, updatedAt } = usePresetStore.getState()
 
   // Strip optional undefined values because Firestore only accepts JSON-like data.
-  return JSON.parse(JSON.stringify({ presets, customDefaults })) as CloudPresetState
+  return JSON.parse(JSON.stringify({ presets, customDefaults, updatedAt })) as CloudPresetState
 }
 
 function applyPresetCloudState(value: unknown): boolean {
@@ -66,7 +67,8 @@ function applyPresetCloudState(value: unknown): boolean {
     ? normalizePresetCollection(value.customDefaults as Preset[])
     : null
 
-  usePresetStore.setState({ presets, customDefaults })
+  const updatedAt = typeof value.updatedAt === 'number' ? value.updatedAt : 0
+  usePresetStore.setState({ presets, customDefaults, updatedAt })
   return true
 }
 
@@ -371,16 +373,28 @@ export function useCloudSync() {
           missingCloudData.settingsUpdatedAt = serverTimestamp()
         }
 
-        if (applyPresetCloudState(data.presetSettings)) {
-          console.log('☁️ Presets geladen uit cloud')
+        const localPresetSettings = getPresetCloudState()
+        const cloudPresetSettings = isRecord(data.presetSettings) && Array.isArray(data.presetSettings.presets)
+          ? data.presetSettings
+          : null
+        const cloudPresetUpdatedAt = cloudPresetSettings && typeof cloudPresetSettings.updatedAt === 'number'
+          ? cloudPresetSettings.updatedAt
+          : 0
+
+        if (cloudPresetSettings && (cloudPresetUpdatedAt > localPresetSettings.updatedAt || localPresetSettings.updatedAt === 0)) {
+          applyPresetCloudState(cloudPresetSettings)
+          console.log('☁️ Nieuwere presets geladen uit cloud')
           const repairedPresetSettings = getPresetCloudState()
           if (JSON.stringify(data.presetSettings) !== JSON.stringify(repairedPresetSettings)) {
             missingCloudData.presetSettings = repairedPresetSettings
             missingCloudData.presetsUpdatedAt = serverTimestamp()
           }
         } else {
-          missingCloudData.presetSettings = getPresetCloudState()
+          missingCloudData.presetSettings = localPresetSettings
           missingCloudData.presetsUpdatedAt = serverTimestamp()
+          if (localPresetSettings.updatedAt > cloudPresetUpdatedAt) {
+            console.log('☁️ Lokale presetwijzigingen zijn nieuwer en worden naar cloud gestuurd')
+          }
         }
 
         if (Object.keys(missingCloudData).length > 0) {
