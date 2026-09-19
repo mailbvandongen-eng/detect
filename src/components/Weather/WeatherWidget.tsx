@@ -88,21 +88,21 @@ export function WeatherWidget() {
 
   useEffect(() => {
     if (!showWeatherButton) return
-    const loc = gpsPosition || DEFAULT_LOCATION
+    const loc = gpsPosition ? { lat: gpsPosition.lat, lon: gpsPosition.lng } : DEFAULT_LOCATION
     const cached = weather.weatherData
     const stale = !cached || Date.now() - cached.lastUpdated > TEN_MINUTES
     const moved = cached ? distanceKm(loc, cached.location) >= LOCATION_REFRESH_KM : true
     if (stale || moved) weather.fetchWeather(loc.lat, loc.lon, gpsPosition ? 'GPS-locatie' : 'Nederland')
-  }, [showWeatherButton, gpsPosition?.lat, gpsPosition?.lon])
+  }, [showWeatherButton, gpsPosition?.lat, gpsPosition?.lng])
 
   useEffect(() => {
     if (!showWeatherButton) return
     const interval = window.setInterval(() => {
-      const loc = gpsPosition || weather.weatherData?.location || DEFAULT_LOCATION
+      const loc = gpsPosition ? { lat: gpsPosition.lat, lon: gpsPosition.lng } : (weather.weatherData?.location || DEFAULT_LOCATION)
       weather.fetchWeather(loc.lat, loc.lon, weather.weatherData?.location.name)
     }, TEN_MINUTES)
     return () => window.clearInterval(interval)
-  }, [showWeatherButton, gpsPosition?.lat, gpsPosition?.lon])
+  }, [showWeatherButton, gpsPosition?.lat, gpsPosition?.lng])
 
   const current = weather.weatherData?.current
   const hourly = weather.weatherData?.hourly || []
@@ -120,7 +120,7 @@ export function WeatherWidget() {
   }
 
   const fetchGps = () => {
-    const loc = gpsPosition || DEFAULT_LOCATION
+    const loc = gpsPosition ? { lat: gpsPosition.lat, lon: gpsPosition.lng } : DEFAULT_LOCATION
     weather.fetchWeather(loc.lat, loc.lon, gpsPosition ? 'GPS-locatie' : 'Nederland')
   }
 
