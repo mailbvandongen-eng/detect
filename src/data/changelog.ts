@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.54',
+    date: '19 september 2026',
+    title: 'Frankrijk-preset blijft staan en krijgt gedeelde eigen laag',
+    changes: [
+      'Wijzigingen aan Frankrijk · Thédirac krijgen nu een lokale wijzigingstijd. Bij synchroniseren wint de nieuwste versie in plaats van dat een oudere cloudkopie de preset bij herstart terugzet.',
+      'Bij het openen van de Frankrijk-preset wordt onder Mijn lagen automatisch de vaste laag Frankrijk · Thédirac aangemaakt.',
+      'Die laag gebruikt op ieder apparaat dezelfde inhoudshash en kan via Laaginstellingen met Bewerken worden gedeeld. Daardoor kunnen jij en Linda punten aan dezelfde Frankrijk-laag toevoegen en synchroniseren zonder de ingebouwde onderzoeks­lagen zelf te wijzigen.'
+    ]
+  },
+  {
     version: '2.33.53',
     date: '19 september 2026',
     title: 'Meten, tekenen en weer hersteld op mobiel',
