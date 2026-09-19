@@ -3,6 +3,7 @@ import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage
 import { db, storage } from '../lib/firebase'
 import type { User } from 'firebase/auth'
 import type { CustomLayer, CustomFeatureCollection } from '../store/customLayerStore'
+import { useCustomPointLayerStore, type CustomPointLayer } from '../store/customPointLayerStore'
 import { fingerprintFeatureCollection } from './importedLayerCloud'
 
 export type SharePermission = 'read' | 'edit'
@@ -25,6 +26,7 @@ export interface SharedImportedLayerRecord {
   createdAt: string
   contentHash: string
   downloadUrl: string
+  overlayLayer?: CustomPointLayer | null
 }
 
 function normalizeEmail(email: string): string {
@@ -58,6 +60,10 @@ export async function shareImportedLayer(
 
   const shareId = shareIdFor(user.uid, layer.id, normalized)
   const { downloadUrl, contentHash } = await uploadSharedPayload(user, shareId, layer.features)
+  const overlayLayer = useCustomPointLayerStore.getState().layers.find(
+    pointLayer => pointLayer.linkedImportedLayerId === layer.id && !pointLayer.shareId
+  ) || null
+
   await setDoc(doc(db, 'sharedImportedLayers', shareId), {
     shareId,
     ownerUid: user.uid,
@@ -76,6 +82,7 @@ export async function shareImportedLayer(
     createdAt: layer.createdAt,
     contentHash,
     downloadUrl,
+    overlayLayer,
     updatedAt: serverTimestamp(),
   })
   return shareId
@@ -112,6 +119,18 @@ export async function getIncomingShares(email: string): Promise<SharedImportedLa
   )
   const snap = await getDocs(q)
   return snap.docs.map(item => item.data() as SharedImportedLayerRecord)
+}
+
+export function getSharedOverlayLayer(record: SharedImportedLayerRecord): CustomPointLayer | null {
+  if (!record.overlayLayer) return null
+  return {
+    ...record.overlayLayer,
+    linkedImportedLayerId: record.layerId,
+    shareId: record.shareId,
+    shareOwnerUid: record.ownerUid,
+    shareOwnerEmail: record.ownerEmail,
+    sharePermission: record.permission,
+  }
 }
 
 export async function downloadSharedLayer(record: SharedImportedLayerRecord): Promise<CustomLayer> {
@@ -151,6 +170,9 @@ export async function syncEditedSharedLayer(user: User, layer: CustomLayer): Pro
       layer.name === current.layerName) return
 
   const { downloadUrl, contentHash } = await uploadSharedPayload(user, layer.shareId, layer.features)
+  const overlayLayer = useCustomPointLayerStore.getState().layers.find(
+    pointLayer => pointLayer.linkedImportedLayerId === layer.id && pointLayer.shareId === layer.shareId
+  ) || null
   await setDoc(ref, {
     ...current,
     layerName: layer.name,
@@ -162,6 +184,7 @@ export async function syncEditedSharedLayer(user: User, layer: CustomLayer): Pro
     sourceFileName: layer.sourceFileName,
     contentHash,
     downloadUrl,
+    overlayLayer,
     updatedAt: serverTimestamp(),
     lastEditorUid: user.uid,
   })
