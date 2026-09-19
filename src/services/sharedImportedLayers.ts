@@ -1,10 +1,9 @@
 import { collection, deleteDoc, doc, getDoc, getDocs, query, serverTimestamp, setDoc, where } from 'firebase/firestore'
-import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage'
-import { db, storage } from '../lib/firebase'
+import { db } from '../lib/firebase'
 import type { User } from 'firebase/auth'
 import type { CustomLayer, CustomFeatureCollection } from '../store/customLayerStore'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../store/customPointLayerStore'
-import { fingerprintFeatureCollection } from './importedLayerCloud'
+import { fingerprintFeatureCollection, readFeatureChunks, writeFeatureChunks } from './importedLayerCloud'
 
 export type SharePermission = 'read' | 'edit'
 
@@ -25,7 +24,7 @@ export interface SharedImportedLayerRecord {
   sourceFileName: string
   createdAt: string
   contentHash: string
-  downloadUrl: string
+  chunkCount: number
   overlayLayer?: CustomPointLayer | null
 }
 
@@ -38,13 +37,10 @@ function shareIdFor(ownerUid: string, layerId: string, recipientEmail: string): 
   return `${ownerUid}__${layerId}__${safeEmail}`
 }
 
-async function uploadSharedPayload(user: User, shareId: string, features: CustomFeatureCollection): Promise<{ downloadUrl: string; contentHash: string }> {
+async function uploadSharedPayload(shareId: string, features: CustomFeatureCollection): Promise<{ chunkCount: number; contentHash: string }> {
   const contentHash = await fingerprintFeatureCollection(features)
-  const path = `users/${user.uid}/shared-imports/${shareId}.geojson`
-  const blob = new Blob([JSON.stringify(features)], { type: 'application/geo+json' })
-  const ref = storageRef(storage, path)
-  await uploadBytes(ref, blob, { contentType: 'application/geo+json' })
-  return { downloadUrl: await getDownloadURL(ref), contentHash }
+  const chunkCount = await writeFeatureChunks(`sharedImportedLayers/${shareId}`, features)
+  return { chunkCount, contentHash }
 }
 
 export async function shareImportedLayer(
@@ -59,7 +55,7 @@ export async function shareImportedLayer(
   }
 
   const shareId = shareIdFor(user.uid, layer.id, normalized)
-  const { downloadUrl, contentHash } = await uploadSharedPayload(user, shareId, layer.features)
+  const { chunkCount, contentHash } = await uploadSharedPayload(shareId, layer.features)
   const overlayLayer = useCustomPointLayerStore.getState().layers.find(
     pointLayer => pointLayer.linkedImportedLayerId === layer.id && !pointLayer.shareId
   ) || null
@@ -81,7 +77,7 @@ export async function shareImportedLayer(
     sourceFileName: layer.sourceFileName,
     createdAt: layer.createdAt,
     contentHash,
-    downloadUrl,
+    chunkCount,
     overlayLayer,
     updatedAt: serverTimestamp(),
   })
@@ -89,6 +85,8 @@ export async function shareImportedLayer(
 }
 
 export async function revokeImportedLayerShare(shareId: string): Promise<void> {
+  const chunks = await getDocs(collection(db, `sharedImportedLayers/${shareId}/chunks`))
+  await Promise.all(chunks.docs.map(item => deleteDoc(item.ref)))
   await deleteDoc(doc(db, 'sharedImportedLayers', shareId))
 }
 
@@ -134,9 +132,7 @@ export function getSharedOverlayLayer(record: SharedImportedLayerRecord): Custom
 }
 
 export async function downloadSharedLayer(record: SharedImportedLayerRecord): Promise<CustomLayer> {
-  const response = await fetch(record.downloadUrl)
-  if (!response.ok) throw new Error(`Gedeelde laag “${record.layerName}” kon niet worden geladen.`)
-  const features = await response.json() as CustomFeatureCollection
+  const features = await readFeatureChunks(`sharedImportedLayers/${record.shareId}`)
   return {
     id: record.layerId,
     name: record.layerName,
@@ -173,7 +169,7 @@ export async function syncEditedSharedLayer(user: User, layer: CustomLayer): Pro
       JSON.stringify(overlayLayer) === JSON.stringify(current.overlayLayer || null) &&
       layer.name === current.layerName) return
 
-  const { downloadUrl, contentHash } = await uploadSharedPayload(user, layer.shareId, layer.features)
+  const { chunkCount, contentHash } = await uploadSharedPayload(layer.shareId, layer.features)
   await setDoc(ref, {
     ...current,
     layerName: layer.name,
@@ -184,7 +180,7 @@ export async function syncEditedSharedLayer(user: User, layer: CustomLayer): Pro
     visible: layer.visible,
     sourceFileName: layer.sourceFileName,
     contentHash,
-    downloadUrl,
+    chunkCount,
     overlayLayer,
     updatedAt: serverTimestamp(),
     lastEditorUid: user.uid,
