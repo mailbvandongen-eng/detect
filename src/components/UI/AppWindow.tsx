@@ -19,6 +19,7 @@ interface AppWindowProps {
   bodyClassName?: string
   className?: string
   ariaLabel?: string
+  allowMapInteraction?: boolean
 }
 
 const placementClasses: Record<AppWindowPlacement, string> = {
@@ -41,7 +42,8 @@ export function AppWindow({
   showScaleControl = true,
   bodyClassName = '',
   className = '',
-  ariaLabel
+  ariaLabel,
+  allowMapInteraction = false
 }: AppWindowProps) {
   const fontScale = useSettingsStore(state => state.fontScale)
   const setFontScale = useSettingsStore(state => state.setFontScale)
@@ -61,15 +63,17 @@ export function AppWindow({
 
   return (
     <>
-      <motion.button
-        type="button"
-        className={`detect-window-backdrop ${isSideWindow ? 'detect-window-backdrop--clear' : ''}`}
-        aria-label={`${title} sluiten`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.15 }}
-        onClick={onClose}
-      />
+{!allowMapInteraction && (
+        <motion.button
+          type="button"
+          className={`detect-window-backdrop ${isSideWindow ? 'detect-window-backdrop--clear' : ''}`}
+          aria-label={`${title} sluiten`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
+          onClick={onClose}
+        />
+      )}
 
       <motion.section
         className={`detect-window ${placementClasses[placement]} ${className}`}
