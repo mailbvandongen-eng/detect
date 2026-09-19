@@ -37,16 +37,14 @@ function findLocalOverlay(layer: CustomLayer): CustomPointLayer | null {
 
 function cleanOverlayForCloud(overlay: CustomPointLayer | null, layerHash: string): CustomPointLayer | null {
   if (!overlay) return null
-  const {
-    shareId: _shareId,
-    shareOwnerUid: _shareOwnerUid,
-    shareOwnerEmail: _shareOwnerEmail,
-    sharePermission: _sharePermission,
-    ...rest
-  } = overlay
+  const cleaned: CustomPointLayer = { ...overlay }
+  delete cleaned.shareId
+  delete cleaned.shareOwnerUid
+  delete cleaned.shareOwnerEmail
+  delete cleaned.sharePermission
 
   return {
-    ...rest,
+    ...cleaned,
     linkedImportedLayerId: undefined,
     linkedImportedLayerHash: layerHash,
   }
