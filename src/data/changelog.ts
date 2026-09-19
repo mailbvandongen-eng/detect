@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.50',
+    date: '19 september 2026',
+    title: 'Cloudsync zonder Firebase Storage',
+    changes: [
+      'Geïmporteerde en gedeelde lagen gebruiken voortaan alleen Firestore; een Blaze-betaalaccount voor Firebase Storage is niet meer nodig.',
+      'Grote lagen worden automatisch opgesplitst in kleine Firestore-documenten, zodat synchronisatie binnen de documentlimieten blijft.',
+      'Gedeelde lagen met Linda blijven inclusief handmatig toegevoegde punten synchroniseerbaar met alleen Firestore-regels.',
+      'De Firebase-configuratie gebruikt weer uitsluitend Firestore, passend bij de huidige kleine gebruikersgroep.'
+    ]
+  },
+  {
     version: '2.33.49',
     date: '19 september 2026',
     title: 'Gedeelde lagen blijven echt gelijk',
