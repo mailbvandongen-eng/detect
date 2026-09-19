@@ -3,20 +3,12 @@ import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuthStore } from '../store/authStore'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../store/customPointLayerStore'
-import { useCustomLayerStore, type CustomLayer } from '../store/customLayerStore'
+import { useCustomLayerStore } from '../store/customLayerStore'
 import {
-  deleteImportedLayerPayload,
-  downloadImportedLayerPayload,
-  uploadImportedLayerPayload,
-  type CloudImportedLayerMetadata
-} from '../services/importedLayerCloud'
-import {
-  downloadSharedLayer,
   getIncomingShares,
-  getOwnedShares,
-  getSharedOverlayLayer,
-  shareImportedLayer,
-  syncEditedSharedLayer,
+  materializeSharedOverlay,
+  syncOwnedShares,
+  syncRecipientOverlay,
 } from '../services/sharedImportedLayers'
 import { useLocalVondstenStore, type LocalVondst } from '../store/localVondstenStore'
 import { useRouteRecordingStore, type RecordedRoute } from '../store/routeRecordingStore'
@@ -85,10 +77,6 @@ function getFriendlySyncError(error: unknown): string {
     return 'Cloudtoegang geweigerd. De Firestore-beveiligingsregels moeten worden bijgewerkt.'
   }
 
-  if (code === 'storage/unauthorized') {
-    return 'Opslagtoegang voor geïmporteerde lagen is geweigerd. Firebase Storage-regels moeten toegang tot je eigen gebruikersmap toestaan.'
-  }
-
   if (code === 'unavailable' || code === 'firestore/unavailable') {
     return 'Cloud tijdelijk niet bereikbaar. Je lokale gegevens blijven bewaard.'
   }
@@ -136,7 +124,6 @@ export function useCloudSync() {
   const layers = useCustomPointLayerStore(state => state.layers)
   const deletedLayerIds = useCustomPointLayerStore(state => state.deletedLayerIds)
   const importedLayers = useCustomLayerStore(state => state.layers)
-  const deletedImportedLayerIds = useCustomLayerStore(state => state.deletedLayerIds)
   const layerCleanupVersion = useCustomPointLayerStore(state => state.layerCleanupVersion)
   const vondsten = useLocalVondstenStore(state => state.vondsten)
   const savedRoutes = useRouteRecordingStore(state => state.savedRoutes)
@@ -144,14 +131,12 @@ export function useCloudSync() {
   const presetState = usePresetStore()
 
   const layerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const importedLayerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const vondstTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const routeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const settingsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const presetsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isInitialLoadRef = useRef(true)
   const lastSyncedLayersRef = useRef('')
-  const lastSyncedImportedLayersRef = useRef('')
   const lastSyncedVondstenRef = useRef('')
   const lastSyncedRoutesRef = useRef('')
   const lastSyncedSettingsRef = useRef('')
@@ -180,223 +165,57 @@ export function useCloudSync() {
     })
   }, [])
 
-
-  const reconcileImportedLayers = useCallback(async (
-    cloudMetadata: CloudImportedLayerMetadata[],
-    localLayers: CustomLayer[],
-    deletedIds: string[]
-  ) => {
-    if (!user) return { layers: localLayers, metadata: cloudMetadata, uploaded: 0, downloaded: 0 }
-
-    const deleted = new Set(deletedIds)
-    const sharedLocalLayers = localLayers.filter(layer => !!layer.shareId)
-    const ownLocalLayers = localLayers.filter(layer => !layer.shareId)
-    const cloudById = new Map(cloudMetadata.filter(meta => !deleted.has(meta.id)).map(meta => [meta.id, meta]))
-    const localById = new Map(ownLocalLayers.filter(layer => !deleted.has(layer.id)).map(layer => [layer.id, layer]))
-    const nextLayers = [...localById.values()]
-    const nextMetadata = new Map<string, CloudImportedLayerMetadata>()
-    let uploaded = 0
-    let downloaded = 0
-
-    for (const meta of cloudById.values()) {
-      if (localById.has(meta.id)) continue
-      try {
-        const downloadedLayer = await downloadImportedLayerPayload(user.uid, meta)
-        nextLayers.push(downloadedLayer)
-        localById.set(downloadedLayer.id, downloadedLayer)
-        nextMetadata.set(meta.id, meta)
-        downloaded += 1
-      } catch (error) {
-        reportSyncError(error, `geïmporteerde laag ${meta.name}`)
-      }
-    }
-
-    for (const layer of nextLayers) {
-      const cloud = cloudById.get(layer.id)
-      const needsUpload = !cloud || !layer.contentHash || cloud.contentHash !== layer.contentHash
-      if (needsUpload) {
-        const metadata = await uploadImportedLayerPayload(user.uid, layer)
-        nextMetadata.set(layer.id, metadata)
-        if (layer.contentHash !== metadata.contentHash) {
-          layer.contentHash = metadata.contentHash
-        }
-        uploaded += 1
-      } else {
-        nextMetadata.set(layer.id, {
-          ...cloud,
-          name: layer.name,
-          visible: layer.visible,
-          opacity: layer.opacity,
-          color: layer.color,
-          style: layer.style,
-          popupConfig: layer.popupConfig,
-          sourceFileName: layer.sourceFileName,
-        })
-      }
-    }
-
-    for (const id of deleted) {
-      if (cloudById.has(id)) {
-        await deleteImportedLayerPayload(user.uid, id)
-      }
-      nextMetadata.delete(id)
-    }
-
-    return {
-      layers: [...nextLayers.filter(layer => !deleted.has(layer.id)), ...sharedLocalLayers],
-      metadata: [...nextMetadata.values()],
-      uploaded,
-      downloaded
-    }
-  }, [user, reportSyncError])
-
-
-  const refreshSharedImportedLayers = useCallback(async () => {
+  const refreshSharedOverlays = useCallback(async () => {
     if (!user?.email) return
 
-    const importedStore = useCustomLayerStore.getState()
-    const pointStore = useCustomPointLayerStore.getState()
-    let ownLayers = importedStore.layers.filter(layer => !layer.shareId)
-    let ownPointLayers = pointStore.layers.filter(layer => !layer.shareId)
+    const incoming = await getIncomingShares(user.email)
+    const localImported = useCustomLayerStore.getState().layers
+    const pointState = useCustomPointLayerStore.getState()
+    const ownPointLayers = pointState.layers.filter(layer => !layer.shareId)
 
-    const incomingRecords = await getIncomingShares(user.email)
-    const incomingLayers = await Promise.all(incomingRecords.map(downloadSharedLayer))
-    const incomingOverlays = incomingRecords
-      .map(getSharedOverlayLayer)
-      .filter((layer): layer is CustomPointLayer => !!layer)
-
-    const ownedShares = await getOwnedShares(user.uid)
-    for (const record of ownedShares) {
-      const index = ownLayers.findIndex(layer => layer.id === record.layerId)
-      if (index >= 0) {
-        const local = ownLayers[index]
-        if (record.contentHash !== local.contentHash) {
-          const edited = await downloadSharedLayer(record)
-          ownLayers[index] = {
-            ...local,
-            name: edited.name,
-            features: edited.features,
-            visible: edited.visible,
-            opacity: edited.opacity,
-            color: edited.color,
-            style: edited.style,
-            popupConfig: edited.popupConfig,
-            sourceFileName: edited.sourceFileName,
-            contentHash: edited.contentHash,
-          }
-        }
-      }
-
-      if (record.overlayLayer) {
-        const overlayIndex = ownPointLayers.findIndex(
-          layer => layer.linkedImportedLayerId === record.layerId
-        )
-        if (overlayIndex >= 0) {
-          ownPointLayers[overlayIndex] = {
-            ...record.overlayLayer,
-            linkedImportedLayerId: record.layerId,
-          }
-        } else {
-          ownPointLayers.push({
-            ...record.overlayLayer,
-            linkedImportedLayerId: record.layerId,
-          })
-        }
-      }
-    }
-
-    useCustomLayerStore.setState({
-      layers: [...ownLayers, ...incomingLayers],
+    const sharedOverlays = incoming.flatMap(record => {
+      const imported = localImported.find(layer => layer.contentHash === record.layerHash)
+      if (!imported) return []
+      const overlay = materializeSharedOverlay(record, imported.id)
+      return overlay ? [overlay] : []
     })
+
     useCustomPointLayerStore.setState({
-      layers: [...ownPointLayers, ...incomingOverlays],
+      layers: [...ownPointLayers, ...sharedOverlays]
     })
   }, [user])
-
-  const syncImportedLayersToCloud = useCallback(async () => {
-    if (!user) return false
-
-    try {
-      const sharedEditableLayers = useCustomLayerStore.getState().layers.filter(
-        layer => layer.shareId && layer.sharePermission === 'edit'
-      )
-      for (const layer of sharedEditableLayers) {
-        await syncEditedSharedLayer(user, layer)
-      }
-
-      const userDocRef = doc(db, 'users', user.uid)
-      const docSnap = await getDoc(userDocRef)
-      const cloudData = docSnap.exists() ? docSnap.data() : {}
-      const cloudMetadata = Array.isArray(cloudData.importedLayers)
-        ? cloudData.importedLayers as CloudImportedLayerMetadata[]
-        : []
-      const localState = useCustomLayerStore.getState()
-      const reconciled = await reconcileImportedLayers(
-        cloudMetadata,
-        localState.layers,
-        localState.deletedLayerIds
-      )
-
-      useCustomLayerStore.setState({ layers: reconciled.layers })
-      await setDoc(userDocRef, {
-        importedLayers: reconciled.metadata,
-        deletedImportedLayerIds: localState.deletedLayerIds,
-        importedLayersUpdatedAt: serverTimestamp()
-      }, { merge: true })
-
-      lastSyncedImportedLayersRef.current = JSON.stringify({
-        layers: reconciled.layers,
-        deletedLayerIds: localState.deletedLayerIds
-      })
-      markSynced()
-      return true
-    } catch (error) {
-      reportSyncError(error, 'geïmporteerde lagen')
-      return false
-    }
-  }, [user, reconcileImportedLayers, markSynced, reportSyncError])
 
   const syncLayersToCloud = useCallback(async (layersData: CustomPointLayer[]) => {
     if (!user) return false
 
     try {
-      const sharedPointLayers = layersData.filter(layer => !!layer.shareId)
-      const ownPointLayers = layersData.filter(layer => !layer.shareId)
+      const sharedLayers = layersData.filter(layer => !!layer.shareId)
+      const ownLayers = layersData.filter(layer => !layer.shareId)
 
-      for (const sharedPointLayer of sharedPointLayers) {
-        if (sharedPointLayer.sharePermission !== 'edit') continue
-        const importedLayer = useCustomLayerStore.getState().layers.find(
-          layer => layer.id === sharedPointLayer.linkedImportedLayerId && layer.shareId === sharedPointLayer.shareId
-        )
-        if (importedLayer) await syncEditedSharedLayer(user, importedLayer)
-      }
-
-      const ownedShares = await getOwnedShares(user.uid)
-      const importedLayersState = useCustomLayerStore.getState().layers
-      for (const share of ownedShares) {
-        const importedLayer = importedLayersState.find(
-          layer => layer.id === share.layerId && !layer.shareId
-        )
-        if (importedLayer) {
-          await shareImportedLayer(user, importedLayer, share.recipientEmail, share.permission)
+      for (const sharedLayer of sharedLayers) {
+        if (sharedLayer.sharePermission === 'edit') {
+          await syncRecipientOverlay(user, sharedLayer)
         }
       }
 
+      await syncOwnedShares(user)
+
       const pointLayerState = useCustomPointLayerStore.getState()
       await setDoc(doc(db, 'users', user.uid), {
-        layers: ownPointLayers,
+        layers: ownLayers,
         deletedLayerIds: pointLayerState.deletedLayerIds,
         layerCleanupVersion: pointLayerState.layerCleanupVersion,
         layersUpdatedAt: serverTimestamp()
       }, { merge: true })
       markSynced()
-      console.log('☁️ Lagen gesynchroniseerd naar cloud')
+      console.log('☁️ Eigen lagen en gedeelde punten gesynchroniseerd')
       return true
     } catch (error) {
       reportSyncError(error, 'lagen')
       return false
     }
   }, [user, markSynced, reportSyncError])
+
   const syncVondstenToCloud = useCallback(async (vondstenData: LocalVondst[]) => {
     if (!user) return false
 
@@ -474,8 +293,8 @@ export function useCloudSync() {
     try {
       const userDocRef = doc(db, 'users', user.uid)
       const docSnap = await getDoc(userDocRef)
-      const localLayers = useCustomPointLayerStore.getState().layers
-      const localImportedState = useCustomLayerStore.getState()
+      const allLocalLayers = useCustomPointLayerStore.getState().layers
+      const localLayers = allLocalLayers.filter(layer => !layer.shareId)
       const localDeletedLayerIds = useCustomPointLayerStore.getState().deletedLayerIds
       const localLayerCleanupVersion = useCustomPointLayerStore.getState().layerCleanupVersion
       const localVondsten = useLocalVondstenStore.getState().vondsten
@@ -485,30 +304,6 @@ export function useCloudSync() {
       if (docSnap.exists()) {
         const data = docSnap.data()
 
-
-        const cloudImportedMetadata = Array.isArray(data.importedLayers)
-          ? data.importedLayers as CloudImportedLayerMetadata[]
-          : []
-        const cloudDeletedImportedLayerIds = Array.isArray(data.deletedImportedLayerIds)
-          ? data.deletedImportedLayerIds.filter((id): id is string => typeof id === 'string')
-          : []
-        const mergedDeletedImportedLayerIds = [...new Set([
-          ...cloudDeletedImportedLayerIds,
-          ...localImportedState.deletedLayerIds
-        ])]
-        const reconciledImported = await reconcileImportedLayers(
-          cloudImportedMetadata,
-          localImportedState.layers,
-          mergedDeletedImportedLayerIds
-        )
-        useCustomLayerStore.setState({
-          layers: reconciledImported.layers,
-          deletedLayerIds: mergedDeletedImportedLayerIds
-        })
-        missingCloudData.importedLayers = reconciledImported.metadata
-        missingCloudData.deletedImportedLayerIds = mergedDeletedImportedLayerIds
-        missingCloudData.importedLayersUpdatedAt = serverTimestamp()
-
         if (Array.isArray(data.layers)) {
           const cloudDeletedLayerIds = Array.isArray(data.deletedLayerIds)
             ? data.deletedLayerIds.filter((id): id is string => typeof id === 'string')
@@ -516,7 +311,8 @@ export function useCloudSync() {
           const cloudCleanupVersion = typeof data.layerCleanupVersion === 'number'
             ? data.layerCleanupVersion
             : 0
-          const rawMerged = mergeById(data.layers as CustomPointLayer[], localLayers).merged
+          const cloudOwnLayers = (data.layers as CustomPointLayer[]).filter(layer => !layer.shareId)
+          const rawMerged = mergeById(cloudOwnLayers, localLayers).merged
           const reconciled = reconcilePointLayerDeletions(
             rawMerged,
             [...cloudDeletedLayerIds, ...localDeletedLayerIds],
@@ -591,27 +387,15 @@ export function useCloudSync() {
           await setDoc(userDocRef, missingCloudData, { merge: true })
         }
       } else {
-        const initialImported = await reconcileImportedLayers(
-          [],
-          localImportedState.layers,
-          localImportedState.deletedLayerIds
-        )
-        useCustomLayerStore.setState({
-          layers: initialImported.layers,
-          deletedLayerIds: localImportedState.deletedLayerIds
-        })
         await setDoc(userDocRef, {
           layers: localLayers,
           deletedLayerIds: localDeletedLayerIds,
-          importedLayers: initialImported.metadata,
-          deletedImportedLayerIds: localImportedState.deletedLayerIds,
           layerCleanupVersion: localLayerCleanupVersion,
           vondsten: localVondsten,
           routes: localRoutes,
           settings: getCloudSettings(),
           presetSettings: getPresetCloudState(),
           layersUpdatedAt: serverTimestamp(),
-          importedLayersUpdatedAt: serverTimestamp(),
           vondstenUpdatedAt: serverTimestamp(),
           routesUpdatedAt: serverTimestamp(),
           settingsUpdatedAt: serverTimestamp(),
@@ -620,14 +404,12 @@ export function useCloudSync() {
         console.log('☁️ Eerste cloudkopie aangemaakt')
       }
 
-      await refreshSharedImportedLayers()
+      await refreshSharedOverlays()
 
       const syncedPointLayerState = useCustomPointLayerStore.getState()
-      const syncedImportedState = useCustomLayerStore.getState()
-      lastSyncedImportedLayersRef.current = JSON.stringify({
-        layers: syncedImportedState.layers,
-        deletedLayerIds: syncedImportedState.deletedLayerIds,
-      })
+      await refreshSharedOverlays()
+
+      const finalPointLayerState = useCustomPointLayerStore.getState()
       lastSyncedLayersRef.current = JSON.stringify({
         layers: syncedPointLayerState.layers,
         deletedLayerIds: syncedPointLayerState.deletedLayerIds,
@@ -643,7 +425,7 @@ export function useCloudSync() {
     } finally {
       isInitialLoadRef.current = false
     }
-  }, [user, markSynced, reportSyncError, reconcileImportedLayers, refreshSharedImportedLayers])
+  }, [user, markSynced, reportSyncError, refreshSharedOverlays])
 
   useEffect(() => {
     if (!isHydrated) return
@@ -654,7 +436,6 @@ export function useCloudSync() {
     } else {
       isInitialLoadRef.current = true
       lastSyncedLayersRef.current = ''
-      lastSyncedImportedLayersRef.current = ''
       lastSyncedVondstenRef.current = ''
       lastSyncedRoutesRef.current = ''
       lastSyncedSettingsRef.current = ''
@@ -681,18 +462,8 @@ export function useCloudSync() {
 
   useEffect(() => {
     if (!user || !isHydrated || isInitialLoadRef.current) return
-    const serialized = JSON.stringify({ layers: importedLayers, deletedLayerIds: deletedImportedLayerIds })
-    if (serialized === lastSyncedImportedLayersRef.current) return
-
-    if (importedLayerTimeoutRef.current) clearTimeout(importedLayerTimeoutRef.current)
-    importedLayerTimeoutRef.current = setTimeout(async () => {
-      await syncImportedLayersToCloud()
-    }, SYNC_DEBOUNCE)
-
-    return () => {
-      if (importedLayerTimeoutRef.current) clearTimeout(importedLayerTimeoutRef.current)
-    }
-  }, [user, isHydrated, importedLayers, deletedImportedLayerIds, syncImportedLayersToCloud])
+    void refreshSharedOverlays()
+  }, [user, isHydrated, importedLayers, refreshSharedOverlays])
 
   useEffect(() => {
     if (!user || !isHydrated || isInitialLoadRef.current) return
@@ -770,15 +541,13 @@ export function useCloudSync() {
     setSyncError(null)
 
     try {
-      const editableShared = useCustomLayerStore.getState().layers.filter(
-        layer => layer.shareId && layer.sharePermission === 'edit'
-      )
-      for (const layer of editableShared) {
-        await syncEditedSharedLayer(user, layer)
+      const allCurrentLayers = useCustomPointLayerStore.getState().layers
+      for (const sharedLayer of allCurrentLayers.filter(layer => layer.shareId && layer.sharePermission === 'edit')) {
+        await syncRecipientOverlay(user, sharedLayer)
       }
-      await refreshSharedImportedLayers()
-      const currentLayers = useCustomPointLayerStore.getState().layers
-      const currentImportedState = useCustomLayerStore.getState()
+      await syncOwnedShares(user)
+
+      const currentLayers = allCurrentLayers.filter(layer => !layer.shareId)
       const currentDeletedLayerIds = useCustomPointLayerStore.getState().deletedLayerIds
       const currentVondsten = useLocalVondstenStore.getState().vondsten
       const currentRoutes = useRouteRecordingStore.getState().savedRoutes
@@ -788,27 +557,9 @@ export function useCloudSync() {
       const docSnap = await getDoc(userDocRef)
       const cloudData = docSnap.exists() ? docSnap.data() : {}
 
-      const cloudImportedMetadata = Array.isArray(cloudData.importedLayers)
-        ? cloudData.importedLayers as CloudImportedLayerMetadata[]
+      const cloudLayers = Array.isArray(cloudData.layers)
+        ? (cloudData.layers as CustomPointLayer[]).filter(layer => !layer.shareId)
         : []
-      const cloudDeletedImportedLayerIds = Array.isArray(cloudData.deletedImportedLayerIds)
-        ? cloudData.deletedImportedLayerIds.filter((id): id is string => typeof id === 'string')
-        : []
-      const mergedDeletedImportedLayerIds = [...new Set([
-        ...cloudDeletedImportedLayerIds,
-        ...currentImportedState.deletedLayerIds
-      ])]
-      const importedReconcile = await reconcileImportedLayers(
-        cloudImportedMetadata,
-        currentImportedState.layers,
-        mergedDeletedImportedLayerIds
-      )
-      useCustomLayerStore.setState({
-        layers: importedReconcile.layers,
-        deletedLayerIds: mergedDeletedImportedLayerIds
-      })
-
-      const cloudLayers = Array.isArray(cloudData.layers) ? cloudData.layers as CustomPointLayer[] : []
       const cloudDeletedLayerIds = Array.isArray(cloudData.deletedLayerIds)
         ? cloudData.deletedLayerIds.filter((id): id is string => typeof id === 'string')
         : []
@@ -851,25 +602,18 @@ export function useCloudSync() {
       await setDoc(userDocRef, {
         layers: reconciledLayers.layers,
         deletedLayerIds: reconciledLayers.deletedLayerIds,
-        importedLayers: importedReconcile.metadata,
-        deletedImportedLayerIds: mergedDeletedImportedLayerIds,
         layerCleanupVersion: reconciledLayers.cleanupVersion,
         vondsten: vondstMerge.merged,
         routes: routeMerge.merged,
         settings: settingsToSync,
         presetSettings: presetsToSync,
         layersUpdatedAt: serverTimestamp(),
-        importedLayersUpdatedAt: serverTimestamp(),
         vondstenUpdatedAt: serverTimestamp(),
         routesUpdatedAt: serverTimestamp(),
         settingsUpdatedAt: serverTimestamp(),
         presetsUpdatedAt: serverTimestamp()
       }, { merge: true })
 
-      lastSyncedImportedLayersRef.current = JSON.stringify({
-        layers: importedReconcile.layers,
-        deletedLayerIds: mergedDeletedImportedLayerIds,
-      })
       lastSyncedLayersRef.current = JSON.stringify({
         layers: reconciledLayers.layers,
         deletedLayerIds: reconciledLayers.deletedLayerIds,
@@ -887,14 +631,14 @@ export function useCloudSync() {
         uploaded: {
           layers: layerMerge.newLocalItems.filter(item =>
             reconciledLayers.layers.some(layer => layer.id === item.id)
-          ).length + importedReconcile.uploaded,
+          ).length,
           vondsten: vondstMerge.newLocalItems.length,
           routes: routeMerge.newLocalItems.length
         },
         downloaded: {
           layers: layerMerge.newCloudItems.filter(item =>
             reconciledLayers.layers.some(layer => layer.id === item.id)
-          ).length + importedReconcile.downloaded,
+          ).length,
           vondsten: vondstMerge.newCloudItems.length,
           routes: routeMerge.newCloudItems.length
         }
@@ -907,14 +651,13 @@ export function useCloudSync() {
         error: reportSyncError(error, 'handmatige synchronisatie')
       }
     }
-  }, [user, markSynced, reportSyncError, reconcileImportedLayers, refreshSharedImportedLayers])
+  }, [user, markSynced, reportSyncError, refreshSharedOverlays])
 
   return {
     isLoggedIn: !!user,
     syncStatus,
     syncError,
     syncLayersToCloud,
-    syncImportedLayersToCloud,
     syncVondstenToCloud,
     syncRoutesToCloud,
     syncNow
