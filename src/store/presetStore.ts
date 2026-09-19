@@ -10,6 +10,7 @@ import {
 } from '../data/thediracGeologySites'
 import { useLayerStore } from './layerStore'
 import { useMapStore } from './mapStore'
+import { useCustomLayerStore } from './customLayerStore'
 
 export interface Preset {
   id: string
@@ -27,6 +28,8 @@ export interface Preset {
 
 const THEDIRAC_CENTER: [number, number] = [1.34, 44.625]
 const THEDIRAC_ARCHAEOLOGY_LAYER = THEDIRAC_RESEARCH_LAYER_NAME
+const FRANCE_COLLAB_LAYER_NAME = 'Frankrijk · Thédirac'
+const FRANCE_COLLAB_LAYER_HASH = 'detect-frankrijk-thedirac-collab-v1'
 
 const FRANCE_FIELD_LAYERS = [
   'LiDAR HD terrein FR',
@@ -192,6 +195,7 @@ const BUILT_IN_PRESETS: Preset[] = [
 interface PresetState {
   presets: Preset[]
   customDefaults: Preset[] | null
+  updatedAt: number
   applyPreset: (id: string) => void
   createPreset: (name: string, icon: string) => void
   updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer'>>) => void
@@ -300,6 +304,27 @@ function isOverlayLayer(layerName: string): boolean {
   return !BASE_LAYER_NAMES.includes(layerName)
 }
 
+function ensureFranceCollaborationLayer() {
+  const store = useCustomLayerStore.getState()
+  const existing = store.layers.find(layer => layer.contentHash === FRANCE_COLLAB_LAYER_HASH)
+
+  if (existing) {
+    if (!existing.visible) store.updateLayer(existing.id, { visible: true })
+    return existing.id
+  }
+
+  return store.addLayer({
+    name: FRANCE_COLLAB_LAYER_NAME,
+    type: 'geojson',
+    features: { type: 'FeatureCollection', features: [] },
+    visible: true,
+    opacity: 1,
+    color: '#8b5cf6',
+    sourceFileName: 'Detect · Frankrijk · Thédirac',
+    contentHash: FRANCE_COLLAB_LAYER_HASH,
+  })
+}
+
 function activateFranceResearchLayer(layerName: string) {
   if (!FRANCE_RESEARCH_LAYER_NAMES.has(layerName)) return false
 
@@ -340,10 +365,13 @@ export const usePresetStore = create<PresetState>()(
     (set, get) => ({
       presets: [...BUILT_IN_PRESETS],
       customDefaults: null,
+      updatedAt: 0,
 
       applyPreset: (id: string) => {
         const rawPreset = get().presets.find(p => p.id === id)
         if (!rawPreset) return
+
+        if (id === 'frankrijk') ensureFranceCollaborationLayer()
 
         const preset = normalizePreset(rawPreset)
         const layerStore = useLayerStore.getState()
@@ -407,7 +435,8 @@ export const usePresetStore = create<PresetState>()(
         }
 
         set(state => ({
-          presets: [...state.presets, newPreset]
+          presets: [...state.presets, newPreset],
+          updatedAt: Date.now()
         }))
 
         console.log(`✨ Preset aangemaakt: ${name} met ${visibleLayers.length} lagen`)
@@ -417,46 +446,49 @@ export const usePresetStore = create<PresetState>()(
         set(state => ({
           presets: state.presets.map(p =>
             p.id === id ? { ...p, ...changes } : p
-          )
+          ),
+          updatedAt: Date.now()
         }))
       },
 
       deletePreset: (id: string) => {
         set(state => ({
-          presets: state.presets.filter(p => p.id !== id || p.isBuiltIn)
+          presets: state.presets.filter(p => p.id !== id || p.isBuiltIn),
+          updatedAt: Date.now()
         }))
       },
 
       saveAsDefaults: () => {
         const currentPresets = get().presets
-        set({ customDefaults: [...currentPresets] })
+        set({ customDefaults: [...currentPresets], updatedAt: Date.now() })
         console.log('💾 Presets opgeslagen als standaard')
       },
 
       resetToDefaults: () => {
         const { customDefaults } = get()
         if (customDefaults) {
-          set({ presets: normalizePresetCollection(customDefaults) })
+          set({ presets: normalizePresetCollection(customDefaults), updatedAt: Date.now() })
           console.log('🔄 Presets hersteld naar eigen standaard')
         } else {
-          set({ presets: [...BUILT_IN_PRESETS] })
+          set({ presets: [...BUILT_IN_PRESETS], updatedAt: Date.now() })
           console.log('🔄 Presets hersteld naar originele standaard')
         }
       },
 
       resetToBuiltIn: () => {
-        set({ presets: [...BUILT_IN_PRESETS], customDefaults: null })
+        set({ presets: [...BUILT_IN_PRESETS], customDefaults: null, updatedAt: Date.now() })
         console.log('🔄 Presets gereset naar originele instellingen')
       }
     }),
     {
       name: 'detectorapp-presets',
-      version: 27,
+      version: 28,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {
             presets: [...BUILT_IN_PRESETS],
-            customDefaults: null
+            customDefaults: null,
+            updatedAt: 0
           }
         }
 
@@ -480,7 +512,8 @@ export const usePresetStore = create<PresetState>()(
             ? version < 19
               ? addMissingResearchPresets(state.customDefaults)
               : normalizePresetCollection(state.customDefaults)
-            : null
+            : null,
+          updatedAt: typeof state.updatedAt === 'number' ? state.updatedAt : 0
         }
       }
     }
