@@ -70,7 +70,8 @@ export function MeasureTool() {
       const draw = new Draw({
         source: sourceRef.current,
         type: 'LineString',
-        style: createDrawingStyle
+        style: createDrawingStyle,
+        stopClick: true
       })
       drawRef.current = draw
 
@@ -166,6 +167,7 @@ export function MeasureTool() {
         title="Meten"
         icon={<Ruler size={18} />}
         placement="left"
+        allowMapInteraction
         onClose={toggleMeasure}
         footer={totalMeasurements > 0 ? (
           <button
