@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.52',
+    date: '19 september 2026',
+    title: 'Cloudsync blokkeert niet meer op lege optionele velden',
+    changes: [
+      'Firestore negeert voortaan optionele velden met waarde undefined in plaats van de volledige synchronisatie af te keuren.',
+      'Hiermee wordt de fout “Function setDoc() called with invalid data” bij cloudsync opgelost.',
+      'Deze aanpassing geldt centraal voor alle Detect-cloudwrites, zodat hetzelfde probleem niet op een ander optioneel veld terugkomt.'
+    ]
+  },
+  {
     version: '2.33.51',
     date: '19 september 2026',
     title: 'Basislagen lokaal, nieuwe punten samen',
