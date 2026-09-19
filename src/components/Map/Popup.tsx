@@ -352,7 +352,7 @@ export function Popup() {
     const importedLayer = importedLayers.find(layer => layer.id === target.id)
     if (!importedLayer) return
     const color = importedLayer.style.points.color || importedLayer.color
-    const overlayId = ensureImportedLayerOverlay(importedLayer.id, importedLayer.name, color)
+    const overlayId = ensureImportedLayerOverlay(importedLayer.id, importedLayer.contentHash, importedLayer.name, color)
     updateImportedGeometryStyle(importedLayer.id, 'points', { visible: true })
     updateImportedLayer(importedLayer.id, { visible: true })
     addPopupPointToLayer(overlayId, layerName)
