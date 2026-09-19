@@ -132,7 +132,8 @@ export function DrawTool() {
       const draw = new Draw({
         source: sourceRef.current,
         type: drawType,
-        style: createDrawingStyle
+        style: createDrawingStyle,
+        stopClick: true
       })
       drawRef.current = draw
 
@@ -313,6 +314,7 @@ export function DrawTool() {
         title="Tekenen"
         icon={<Pencil size={18} />}
         placement="left"
+        allowMapInteraction
         onClose={toggleDraw}
         footer={featureCount > 0 ? (
           <div className="flex gap-2">
