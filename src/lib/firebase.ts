@@ -20,6 +20,7 @@ export const googleProvider = new GoogleAuthProvider()
 
 // Initialize Firestore with persistent cache (modern API - replaces deprecated enableIndexedDbPersistence)
 export const db = initializeFirestore(app, {
+  ignoreUndefinedProperties: true,
   localCache: persistentLocalCache({
     tabManager: persistentMultipleTabManager()
   })
