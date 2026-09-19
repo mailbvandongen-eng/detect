@@ -14,6 +14,8 @@ import {
   downloadSharedLayer,
   getIncomingShares,
   getOwnedShares,
+  getSharedOverlayLayer,
+  shareImportedLayer,
   syncEditedSharedLayer,
 } from '../services/sharedImportedLayers'
 import { useLocalVondstenStore, type LocalVondst } from '../store/localVondstenStore'
@@ -252,35 +254,62 @@ export function useCloudSync() {
   const refreshSharedImportedLayers = useCallback(async () => {
     if (!user?.email) return
 
-    const store = useCustomLayerStore.getState()
-    let ownLayers = store.layers.filter(layer => !layer.shareId)
+    const importedStore = useCustomLayerStore.getState()
+    const pointStore = useCustomPointLayerStore.getState()
+    let ownLayers = importedStore.layers.filter(layer => !layer.shareId)
+    let ownPointLayers = pointStore.layers.filter(layer => !layer.shareId)
+
     const incomingRecords = await getIncomingShares(user.email)
     const incomingLayers = await Promise.all(incomingRecords.map(downloadSharedLayer))
+    const incomingOverlays = incomingRecords
+      .map(getSharedOverlayLayer)
+      .filter((layer): layer is CustomPointLayer => !!layer)
 
     const ownedShares = await getOwnedShares(user.uid)
     for (const record of ownedShares) {
       const index = ownLayers.findIndex(layer => layer.id === record.layerId)
-      if (index < 0) continue
-      const local = ownLayers[index]
-      if (record.contentHash !== local.contentHash) {
-        const edited = await downloadSharedLayer(record)
-        ownLayers[index] = {
-          ...local,
-          name: edited.name,
-          features: edited.features,
-          visible: edited.visible,
-          opacity: edited.opacity,
-          color: edited.color,
-          style: edited.style,
-          popupConfig: edited.popupConfig,
-          sourceFileName: edited.sourceFileName,
-          contentHash: edited.contentHash,
+      if (index >= 0) {
+        const local = ownLayers[index]
+        if (record.contentHash !== local.contentHash) {
+          const edited = await downloadSharedLayer(record)
+          ownLayers[index] = {
+            ...local,
+            name: edited.name,
+            features: edited.features,
+            visible: edited.visible,
+            opacity: edited.opacity,
+            color: edited.color,
+            style: edited.style,
+            popupConfig: edited.popupConfig,
+            sourceFileName: edited.sourceFileName,
+            contentHash: edited.contentHash,
+          }
+        }
+      }
+
+      if (record.overlayLayer) {
+        const overlayIndex = ownPointLayers.findIndex(
+          layer => layer.linkedImportedLayerId === record.layerId
+        )
+        if (overlayIndex >= 0) {
+          ownPointLayers[overlayIndex] = {
+            ...record.overlayLayer,
+            linkedImportedLayerId: record.layerId,
+          }
+        } else {
+          ownPointLayers.push({
+            ...record.overlayLayer,
+            linkedImportedLayerId: record.layerId,
+          })
         }
       }
     }
 
     useCustomLayerStore.setState({
       layers: [...ownLayers, ...incomingLayers],
+    })
+    useCustomPointLayerStore.setState({
+      layers: [...ownPointLayers, ...incomingOverlays],
     })
   }, [user])
 
@@ -331,9 +360,31 @@ export function useCloudSync() {
     if (!user) return false
 
     try {
+      const sharedPointLayers = layersData.filter(layer => !!layer.shareId)
+      const ownPointLayers = layersData.filter(layer => !layer.shareId)
+
+      for (const sharedPointLayer of sharedPointLayers) {
+        if (sharedPointLayer.sharePermission !== 'edit') continue
+        const importedLayer = useCustomLayerStore.getState().layers.find(
+          layer => layer.id === sharedPointLayer.linkedImportedLayerId && layer.shareId === sharedPointLayer.shareId
+        )
+        if (importedLayer) await syncEditedSharedLayer(user, importedLayer)
+      }
+
+      const ownedShares = await getOwnedShares(user.uid)
+      const importedLayersState = useCustomLayerStore.getState().layers
+      for (const share of ownedShares) {
+        const importedLayer = importedLayersState.find(
+          layer => layer.id === share.layerId && !layer.shareId
+        )
+        if (importedLayer) {
+          await shareImportedLayer(user, importedLayer, share.recipientEmail, share.permission)
+        }
+      }
+
       const pointLayerState = useCustomPointLayerStore.getState()
       await setDoc(doc(db, 'users', user.uid), {
-        layers: layersData,
+        layers: ownPointLayers,
         deletedLayerIds: pointLayerState.deletedLayerIds,
         layerCleanupVersion: pointLayerState.layerCleanupVersion,
         layersUpdatedAt: serverTimestamp()
@@ -346,7 +397,6 @@ export function useCloudSync() {
       return false
     }
   }, [user, markSynced, reportSyncError])
-
   const syncVondstenToCloud = useCallback(async (vondstenData: LocalVondst[]) => {
     if (!user) return false
 
