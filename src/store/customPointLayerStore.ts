@@ -86,6 +86,10 @@ export interface CustomPointLayer {
   // Handmatige punten die logisch bij een geïmporteerde laag horen.
   // De zware importgeometrie blijft lokaal; deze punten blijven cloud-synchroniseerbaar.
   linkedImportedLayerId?: string
+  shareId?: string
+  shareOwnerUid?: string
+  shareOwnerEmail?: string
+  sharePermission?: 'read' | 'edit'
 }
 
 interface CustomPointLayerStore {
