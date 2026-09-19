@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.49',
+    date: '19 september 2026',
+    title: 'Gedeelde lagen blijven echt gelijk',
+    changes: [
+      'Handmatig toegevoegde punten bij een gedeelde geïmporteerde laag worden nu samen met die laag gesynchroniseerd.',
+      'Als jij bijvoorbeeld een nieuwe toestemming toevoegt, ziet een medebewerker die na synchroniseren ook; andersom werkt hetzelfde.',
+      'Ontvangen gedeelde puntenlagen worden niet meer als eigen persoonlijke cloudlaag opgeslagen, zodat er geen dubbele kopieën ontstaan.',
+      'Eigen lagen van andere gebruikers blijven volledig gescheiden en worden alleen gedeeld wanneer de eigenaar dat expliciet instelt.'
+    ]
+  },
+  {
     version: '2.33.48',
     date: '19 september 2026',
     title: 'Geïmporteerde lagen delen met andere accounts',
