@@ -1,9 +1,8 @@
 import { collection, deleteDoc, doc, getDoc, getDocs, query, serverTimestamp, setDoc, where } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import type { User } from 'firebase/auth'
-import type { CustomLayer, CustomFeatureCollection } from '../store/customLayerStore'
+import { useCustomLayerStore, type CustomLayer } from '../store/customLayerStore'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../store/customPointLayerStore'
-import { fingerprintFeatureCollection, readFeatureChunks, writeFeatureChunks } from './importedLayerCloud'
 
 export type SharePermission = 'read' | 'edit'
 
@@ -13,34 +12,43 @@ export interface SharedImportedLayerRecord {
   ownerEmail: string
   recipientEmail: string
   permission: SharePermission
-  layerId: string
+  layerHash: string
   layerName: string
-  type: CustomLayer['type']
-  color: string
-  style: CustomLayer['style']
-  popupConfig: CustomLayer['popupConfig']
-  opacity: number
-  visible: boolean
-  sourceFileName: string
-  createdAt: string
-  contentHash: string
-  chunkCount: number
-  overlayLayer?: CustomPointLayer | null
+  overlayLayer: CustomPointLayer | null
 }
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase()
 }
 
-function shareIdFor(ownerUid: string, layerId: string, recipientEmail: string): string {
+function shareIdFor(ownerUid: string, layerHash: string, recipientEmail: string): string {
   const safeEmail = normalizeEmail(recipientEmail).replace(/[^a-z0-9._@-]/g, '_')
-  return `${ownerUid}__${layerId}__${safeEmail}`
+  return `${ownerUid}__${layerHash.slice(0, 24)}__${safeEmail}`
 }
 
-async function uploadSharedPayload(shareId: string, features: CustomFeatureCollection): Promise<{ chunkCount: number; contentHash: string }> {
-  const contentHash = await fingerprintFeatureCollection(features)
-  const chunkCount = await writeFeatureChunks(`sharedImportedLayers/${shareId}`, features)
-  return { chunkCount, contentHash }
+function findLocalOverlay(layer: CustomLayer): CustomPointLayer | null {
+  const pointLayers = useCustomPointLayerStore.getState().layers
+  return pointLayers.find(pointLayer =>
+    pointLayer.linkedImportedLayerId === layer.id ||
+    (!!layer.contentHash && pointLayer.linkedImportedLayerHash === layer.contentHash)
+  ) || null
+}
+
+function cleanOverlayForCloud(overlay: CustomPointLayer | null, layerHash: string): CustomPointLayer | null {
+  if (!overlay) return null
+  const {
+    shareId: _shareId,
+    shareOwnerUid: _shareOwnerUid,
+    shareOwnerEmail: _shareOwnerEmail,
+    sharePermission: _sharePermission,
+    ...rest
+  } = overlay
+
+  return {
+    ...rest,
+    linkedImportedLayerId: undefined,
+    linkedImportedLayerHash: layerHash,
+  }
 }
 
 export async function shareImportedLayer(
@@ -53,12 +61,12 @@ export async function shareImportedLayer(
   if (!normalized || normalized === normalizeEmail(user.email || '')) {
     throw new Error('Kies een ander Google-e-mailadres.')
   }
+  if (!layer.contentHash) {
+    throw new Error('Importeer deze laag opnieuw zodat Detect hem betrouwbaar kan koppelen.')
+  }
 
-  const shareId = shareIdFor(user.uid, layer.id, normalized)
-  const { chunkCount, contentHash } = await uploadSharedPayload(shareId, layer.features)
-  const overlayLayer = useCustomPointLayerStore.getState().layers.find(
-    pointLayer => pointLayer.linkedImportedLayerId === layer.id && !pointLayer.shareId
-  ) || null
+  const shareId = shareIdFor(user.uid, layer.contentHash, normalized)
+  const overlayLayer = cleanOverlayForCloud(findLocalOverlay(layer), layer.contentHash)
 
   await setDoc(doc(db, 'sharedImportedLayers', shareId), {
     shareId,
@@ -66,46 +74,29 @@ export async function shareImportedLayer(
     ownerEmail: normalizeEmail(user.email || ''),
     recipientEmail: normalized,
     permission,
-    layerId: layer.id,
+    layerHash: layer.contentHash,
     layerName: layer.name,
-    type: layer.type,
-    color: layer.color,
-    style: layer.style,
-    popupConfig: layer.popupConfig,
-    opacity: layer.opacity,
-    visible: layer.visible,
-    sourceFileName: layer.sourceFileName,
-    createdAt: layer.createdAt,
-    contentHash,
-    chunkCount,
     overlayLayer,
     updatedAt: serverTimestamp(),
   })
+
   return shareId
 }
 
 export async function revokeImportedLayerShare(shareId: string): Promise<void> {
-  const chunks = await getDocs(collection(db, `sharedImportedLayers/${shareId}/chunks`))
-  await Promise.all(chunks.docs.map(item => deleteDoc(item.ref)))
   await deleteDoc(doc(db, 'sharedImportedLayers', shareId))
 }
 
-export async function getOutgoingShares(ownerUid: string, layerId: string): Promise<SharedImportedLayerRecord[]> {
-  const q = query(
-    collection(db, 'sharedImportedLayers'),
-    where('ownerUid', '==', ownerUid)
-  )
+export async function getOutgoingShares(ownerUid: string, layerHash: string): Promise<SharedImportedLayerRecord[]> {
+  const q = query(collection(db, 'sharedImportedLayers'), where('ownerUid', '==', ownerUid))
   const snap = await getDocs(q)
   return snap.docs
     .map(item => item.data() as SharedImportedLayerRecord)
-    .filter(item => item.layerId === layerId)
+    .filter(item => item.layerHash === layerHash)
 }
 
 export async function getOwnedShares(ownerUid: string): Promise<SharedImportedLayerRecord[]> {
-  const q = query(
-    collection(db, 'sharedImportedLayers'),
-    where('ownerUid', '==', ownerUid)
-  )
+  const q = query(collection(db, 'sharedImportedLayers'), where('ownerUid', '==', ownerUid))
   const snap = await getDocs(q)
   return snap.docs.map(item => item.data() as SharedImportedLayerRecord)
 }
@@ -119,11 +110,17 @@ export async function getIncomingShares(email: string): Promise<SharedImportedLa
   return snap.docs.map(item => item.data() as SharedImportedLayerRecord)
 }
 
-export function getSharedOverlayLayer(record: SharedImportedLayerRecord): CustomPointLayer | null {
+export function materializeSharedOverlay(
+  record: SharedImportedLayerRecord,
+  localImportedLayerId: string
+): CustomPointLayer | null {
   if (!record.overlayLayer) return null
+
   return {
     ...record.overlayLayer,
-    linkedImportedLayerId: record.layerId,
+    id: `shared-overlay-${record.shareId}`,
+    linkedImportedLayerId: localImportedLayerId,
+    linkedImportedLayerHash: record.layerHash,
     shareId: record.shareId,
     shareOwnerUid: record.ownerUid,
     shareOwnerEmail: record.ownerEmail,
@@ -131,58 +128,44 @@ export function getSharedOverlayLayer(record: SharedImportedLayerRecord): Custom
   }
 }
 
-export async function downloadSharedLayer(record: SharedImportedLayerRecord): Promise<CustomLayer> {
-  const features = await readFeatureChunks(`sharedImportedLayers/${record.shareId}`)
-  return {
-    id: record.layerId,
-    name: record.layerName,
-    type: record.type,
-    features,
-    visible: record.visible,
-    opacity: record.opacity,
-    color: record.color,
-    style: record.style,
-    popupConfig: record.popupConfig,
-    createdAt: record.createdAt,
-    sourceFileName: record.sourceFileName,
-    contentHash: record.contentHash,
-    shareId: record.shareId,
-    shareOwnerUid: record.ownerUid,
-    shareOwnerEmail: record.ownerEmail,
-    sharePermission: record.permission,
-  }
-}
+export async function syncRecipientOverlay(user: User, overlay: CustomPointLayer): Promise<void> {
+  if (!overlay.shareId || overlay.sharePermission !== 'edit') return
 
-export async function syncEditedSharedLayer(user: User, layer: CustomLayer): Promise<void> {
-  if (!layer.shareId || layer.sharePermission !== 'edit') return
-  const ref = doc(db, 'sharedImportedLayers', layer.shareId)
+  const ref = doc(db, 'sharedImportedLayers', overlay.shareId)
   const snap = await getDoc(ref)
   if (!snap.exists()) return
-  const current = snap.data() as SharedImportedLayerRecord
-  const overlayLayer = useCustomPointLayerStore.getState().layers.find(
-    pointLayer => pointLayer.linkedImportedLayerId === layer.id && pointLayer.shareId === layer.shareId
-  ) || null
-  const hash = await fingerprintFeatureCollection(layer.features)
-  if (hash === current.contentHash &&
-      JSON.stringify(layer.style) === JSON.stringify(current.style) &&
-      JSON.stringify(layer.popupConfig) === JSON.stringify(current.popupConfig) &&
-      JSON.stringify(overlayLayer) === JSON.stringify(current.overlayLayer || null) &&
-      layer.name === current.layerName) return
 
-  const { chunkCount, contentHash } = await uploadSharedPayload(layer.shareId, layer.features)
+  const record = snap.data() as SharedImportedLayerRecord
+  if (normalizeEmail(record.recipientEmail) !== normalizeEmail(user.email || '')) return
+
   await setDoc(ref, {
-    ...current,
-    layerName: layer.name,
-    color: layer.color,
-    style: layer.style,
-    popupConfig: layer.popupConfig,
-    opacity: layer.opacity,
-    visible: layer.visible,
-    sourceFileName: layer.sourceFileName,
-    contentHash,
-    chunkCount,
-    overlayLayer,
+    overlayLayer: cleanOverlayForCloud(overlay, record.layerHash),
     updatedAt: serverTimestamp(),
     lastEditorUid: user.uid,
-  })
+  }, { merge: true })
+}
+
+export async function syncOwnedShares(user: User): Promise<void> {
+  const shares = await getOwnedShares(user.uid)
+  if (shares.length === 0) return
+
+  const importedLayers = useCustomLayerStore.getState().layers
+  const pointLayers = useCustomPointLayerStore.getState().layers
+
+  for (const share of shares) {
+    const importedLayer = importedLayers.find(layer => layer.contentHash === share.layerHash)
+    if (!importedLayer) continue
+
+    const overlay = pointLayers.find(pointLayer =>
+      pointLayer.linkedImportedLayerHash === share.layerHash ||
+      pointLayer.linkedImportedLayerId === importedLayer.id
+    ) || null
+
+    await setDoc(doc(db, 'sharedImportedLayers', share.shareId), {
+      layerName: importedLayer.name,
+      overlayLayer: cleanOverlayForCloud(overlay, share.layerHash),
+      updatedAt: serverTimestamp(),
+      lastEditorUid: user.uid,
+    }, { merge: true })
+  }
 }
