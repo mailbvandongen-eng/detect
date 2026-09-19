@@ -7,6 +7,18 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.51',
+    date: '19 september 2026',
+    title: 'Basislagen lokaal, nieuwe punten samen',
+    changes: [
+      'Geïmporteerde basislagen blijven voortaan volledig lokaal; Detect synchroniseert de zware importbestanden niet meer naar de cloud.',
+      'Dezelfde basislaag kan je gewoon per mail delen en op ieder apparaat apart importeren.',
+      'Detect herkent twee imports van hetzelfde bestand aan dezelfde inhoudshash en koppelt daar automatisch dezelfde gedeelde puntenlaag aan.',
+      'Alleen punten die je later aan zo’n laag toevoegt worden met de gekozen medebewerker gesynchroniseerd.',
+      'Jij en Linda kunnen daardoor dezelfde Toestemmingen- en Vondstenlaag lokaal hebben terwijl nieuwe punten na synchroniseren bij allebei verschijnen.'
+    ]
+  },
+  {
     version: '2.33.50',
     date: '19 september 2026',
     title: 'Cloudsync zonder Firebase Storage',
