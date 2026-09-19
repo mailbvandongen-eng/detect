@@ -14,6 +14,7 @@ export interface SharedImportedLayerRecord {
   permission: SharePermission
   layerHash: string
   layerName: string
+  layerColor: string
   overlayLayer: CustomPointLayer | null
 }
 
@@ -76,6 +77,7 @@ export async function shareImportedLayer(
     permission,
     layerHash: layer.contentHash,
     layerName: layer.name,
+    layerColor: layer.style.points.color || layer.color,
     overlayLayer,
     updatedAt: serverTimestamp(),
   })
@@ -113,11 +115,21 @@ export async function getIncomingShares(email: string): Promise<SharedImportedLa
 export function materializeSharedOverlay(
   record: SharedImportedLayerRecord,
   localImportedLayerId: string
-): CustomPointLayer | null {
-  if (!record.overlayLayer) return null
+): CustomPointLayer {
+  const base: CustomPointLayer = record.overlayLayer || {
+    id: `shared-overlay-${record.shareId}`,
+    name: record.layerName,
+    color: record.layerColor || '#3b82f6',
+    categories: [],
+    points: [],
+    visible: true,
+    archived: false,
+    createdAt: new Date(0).toISOString(),
+    linkedImportedLayerHash: record.layerHash,
+  }
 
   return {
-    ...record.overlayLayer,
+    ...base,
     id: `shared-overlay-${record.shareId}`,
     linkedImportedLayerId: localImportedLayerId,
     linkedImportedLayerHash: record.layerHash,
@@ -163,6 +175,7 @@ export async function syncOwnedShares(user: User): Promise<void> {
 
     await setDoc(doc(db, 'sharedImportedLayers', share.shareId), {
       layerName: importedLayer.name,
+      layerColor: importedLayer.style.points.color || importedLayer.color,
       overlayLayer: cleanOverlayForCloud(overlay, share.layerHash),
       updatedAt: serverTimestamp(),
       lastEditorUid: user.uid,
