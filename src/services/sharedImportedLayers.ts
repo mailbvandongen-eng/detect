@@ -42,12 +42,9 @@ function cleanOverlayForCloud(overlay: CustomPointLayer | null, layerHash: strin
   delete cleaned.shareOwnerUid
   delete cleaned.shareOwnerEmail
   delete cleaned.sharePermission
-
-  return {
-    ...cleaned,
-    linkedImportedLayerId: undefined,
-    linkedImportedLayerHash: layerHash,
-  }
+  delete cleaned.linkedImportedLayerId
+  cleaned.linkedImportedLayerHash = layerHash
+  return cleaned
 }
 
 export async function shareImportedLayer(
