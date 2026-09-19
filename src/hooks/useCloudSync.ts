@@ -407,9 +407,6 @@ export function useCloudSync() {
       await refreshSharedOverlays()
 
       const syncedPointLayerState = useCustomPointLayerStore.getState()
-      await refreshSharedOverlays()
-
-      const finalPointLayerState = useCustomPointLayerStore.getState()
       lastSyncedLayersRef.current = JSON.stringify({
         layers: syncedPointLayerState.layers,
         deletedLayerIds: syncedPointLayerState.deletedLayerIds,
@@ -614,17 +611,20 @@ export function useCloudSync() {
         presetsUpdatedAt: serverTimestamp()
       }, { merge: true })
 
+      await refreshSharedOverlays()
+      const finalPointLayerState = useCustomPointLayerStore.getState()
+
       lastSyncedLayersRef.current = JSON.stringify({
-        layers: reconciledLayers.layers,
-        deletedLayerIds: reconciledLayers.deletedLayerIds,
-        layerCleanupVersion: reconciledLayers.cleanupVersion,
+        layers: finalPointLayerState.layers,
+        deletedLayerIds: finalPointLayerState.deletedLayerIds,
+        layerCleanupVersion: finalPointLayerState.layerCleanupVersion,
       })
       lastSyncedVondstenRef.current = JSON.stringify(vondstMerge.merged)
       lastSyncedRoutesRef.current = JSON.stringify(routeMerge.merged)
       lastSyncedSettingsRef.current = JSON.stringify(settingsToSync)
       lastSyncedPresetsRef.current = JSON.stringify(presetsToSync)
       markSynced()
-      console.log('☁️ Handmatige sync voltooid, inclusief instellingen en presets')
+      console.log('☁️ Handmatige sync voltooid, inclusief gedeelde punten')
 
       return {
         success: true,
