@@ -201,7 +201,7 @@ export function useCloudSync() {
     for (const meta of cloudById.values()) {
       if (localById.has(meta.id)) continue
       try {
-        const downloadedLayer = await downloadImportedLayerPayload(meta)
+        const downloadedLayer = await downloadImportedLayerPayload(user.uid, meta)
         nextLayers.push(downloadedLayer)
         localById.set(downloadedLayer.id, downloadedLayer)
         nextMetadata.set(meta.id, meta)
