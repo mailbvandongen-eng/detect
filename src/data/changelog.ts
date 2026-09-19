@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.53',
+    date: '19 september 2026',
+    title: 'Meten, tekenen en weer hersteld op mobiel',
+    changes: [
+      'Meten en Tekenen laten kaarttikken weer door naar OpenLayers; het transparante zijvenster legde onzichtbaar een schermvullende kliklaag over de kaart.',
+      'Tijdens meten en tekenen worden gewone kaartklikken niet meer tegelijk als popupklik afgehandeld, zodat touchbediening op Safari en Chrome voorspelbaar blijft.',
+      'De weerwidget gebruikt bij GPS-locaties weer de juiste lengtegraad. GPS bewaart lng; de widget las per ongeluk lon en stuurde daardoor op telefoons een ongeldige longitude naar de weerbron.'
+    ]
+  },
+  {
     version: '2.33.52',
     date: '19 september 2026',
     title: 'Cloudsync blokkeert niet meer op lege optionele velden',
