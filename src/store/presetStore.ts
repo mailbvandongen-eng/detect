@@ -198,7 +198,7 @@ interface PresetState {
   updatedAt: number
   applyPreset: (id: string) => void
   createPreset: (name: string, icon: string) => void
-  updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer'>>) => void
+  updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'layerOpacities' | 'mapView'>>) => void
   deletePreset: (id: string) => void
   saveAsDefaults: () => void
   resetToDefaults: () => void
@@ -442,7 +442,7 @@ export const usePresetStore = create<PresetState>()(
         console.log(`✨ Preset aangemaakt: ${name} met ${visibleLayers.length} lagen`)
       },
 
-      updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer'>>) => {
+      updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'layerOpacities' | 'mapView'>>) => {
         set(state => ({
           presets: state.presets.map(p =>
             p.id === id ? { ...p, ...changes } : p
