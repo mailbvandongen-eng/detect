@@ -80,6 +80,7 @@ export interface CustomLayer {
   shareOwnerUid?: string
   shareOwnerEmail?: string
   sharePermission?: 'read' | 'edit'
+  sharedRecipientEmail?: string
 }
 
 type NewCustomLayer = Omit<CustomLayer, 'id' | 'createdAt' | 'style' | 'popupConfig'> & {
