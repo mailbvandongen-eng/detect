@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.60',
+    date: '29 september 2026',
+    title: 'Kaartpositie alleen als je dat wilt',
+    changes: [
+      'Een nieuwe preset bewaart standaard geen kaartpositie of zoom.',
+      'Bij het toevoegen van een preset kun je nu bewust Locatie & zoom onthouden aanvinken.',
+      'Zonder vinkje werkt de preset zoals de normale Detect-presets en blijft de kaart staan waar je bent.'
+    ]
+  },
+  {
     version: '2.33.59',
     date: '29 september 2026',
     title: 'Eigen presets onthouden ook de plek',
