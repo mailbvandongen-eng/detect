@@ -7,6 +7,19 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.61',
+    date: '30 september 2026',
+    title: 'Buddy-lagen',
+    changes: [
+      'Nieuwe eigen lagen kunnen nu als privélaag of als buddy-laag worden aangemaakt.',
+      'Buddy-lagen zijn één gezamenlijke Firestore-laag: punten worden per punt realtime gedeeld en overschrijven niet de hele laag.',
+      'De eigenaar kan buddies via Google-e-mailadres toevoegen met bekijken- of bewerkrechten.',
+      'Naam en kleur van een buddy-laag worden gedeeld; read-only buddies kunnen geen punten toevoegen, wijzigen of verwijderen.',
+      'Buddy-lagen blijven buiten de oude users-sync en de bestaande import-deelfunctie.',
+      'Presets onthouden nu ook gewone puntlagen en buddy-lagen.'
+    ]
+  },
+  {
     version: '2.33.60',
     date: '29 september 2026',
     title: 'Kaartpositie alleen als je dat wilt',
