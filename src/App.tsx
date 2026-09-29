@@ -33,6 +33,7 @@ import { DrawTool } from './components/UI/DrawTool'
 import { PrintTool } from './components/UI/PrintTool'
 import { useHeading } from './hooks/useHeading'
 import { useDynamicAHN } from './hooks/useDynamicAHN'
+import { useBuddyLayers } from './hooks/useBuddyLayers'
 import { useSettingsStore, useUIStore, useWeatherStore, useGPSStore } from './store'
 import { AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
@@ -43,6 +44,7 @@ function App() {
   // Initialize hooks
   useHeading()
   useDynamicAHN()
+  useBuddyLayers()
   // Keep a passive current position available for the blue startup dot.
   // iOS standalone PWAs can resume without remounting the React tree, so
   // refresh it on pageshow / when the app becomes visible again as well.
