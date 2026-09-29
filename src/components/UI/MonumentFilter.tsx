@@ -58,15 +58,15 @@ export function MonumentFilter() {
         }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        title="AMK verfijnen"
-        aria-label="AMK verfijnen"
+        title="AMK doorzoeken"
+        aria-label="AMK doorzoeken"
       >
         <Filter size={20} />
       </motion.button>
 
       <AppWindow
         isOpen={isExpanded}
-        title="AMK verfijnen"
+        title="AMK doorzoeken"
         icon={<Filter size={18} />}
         placement="left"
         onClose={closeMonumentFilter}
