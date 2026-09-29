@@ -173,6 +173,11 @@ export function useCloudSync() {
     if (!user?.email) return
 
     const incoming = await getIncomingShares(user.email)
+    const incomingShareIds = new Set(incoming.map(record => record.shareId))
+    useCustomLayerStore.setState(state => ({
+      layers: state.layers.filter(layer => !layer.shareId || incomingShareIds.has(layer.shareId))
+    }))
+
     const customStore = useCustomLayerStore.getState()
     let localImported = customStore.layers
 
