@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { fromLonLat } from 'ol/proj'
+import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { useLayerStore } from './layerStore'
 import { useMapStore } from './mapStore'
 import { useCustomLayerStore } from './customLayerStore'
@@ -121,6 +122,8 @@ const BUILT_IN_PRESETS: Preset[] = [
     isBuiltIn: true
   }
 ]
+
+const THEDIRAC_ARCHAEOLOGY_LAYER = THEDIRAC_RESEARCH_LAYER_NAME
 
 const LEGACY_STANDARD_PRESET_IDS = new Set([
   'detectie',
