@@ -203,7 +203,7 @@ export function useCloudSync() {
     }
 
     const pointState = useCustomPointLayerStore.getState()
-    const ownPointLayers = pointState.layers.filter(layer => !layer.shareId)
+    const ownPointLayers = pointState.layers.filter(layer => !layer.shareId && !layer.buddyLayerId)
     const sharedOverlays = incoming.flatMap(record => {
       const imported = useCustomLayerStore.getState().layers.find(layer =>
         layer.shareId === record.shareId || layer.contentHash === record.layerHash
@@ -222,7 +222,7 @@ export function useCloudSync() {
 
     try {
       const sharedLayers = layersData.filter(layer => !!layer.shareId)
-      const ownLayers = layersData.filter(layer => !layer.shareId)
+      const ownLayers = layersData.filter(layer => !layer.shareId && !layer.buddyLayerId)
 
       for (const sharedLayer of sharedLayers) {
         if (sharedLayer.sharePermission === 'edit') {
@@ -326,7 +326,7 @@ export function useCloudSync() {
       const userDocRef = doc(db, 'users', user.uid)
       const docSnap = await getDoc(userDocRef)
       const allLocalLayers = useCustomPointLayerStore.getState().layers
-      const localLayers = allLocalLayers.filter(layer => !layer.shareId)
+      const localLayers = allLocalLayers.filter(layer => !layer.shareId && !layer.buddyLayerId)
       const localDeletedLayerIds = useCustomPointLayerStore.getState().deletedLayerIds
       const localLayerCleanupVersion = useCustomPointLayerStore.getState().layerCleanupVersion
       const localVondsten = useLocalVondstenStore.getState().vondsten
@@ -343,15 +343,16 @@ export function useCloudSync() {
           const cloudCleanupVersion = typeof data.layerCleanupVersion === 'number'
             ? data.layerCleanupVersion
             : 0
-          const cloudOwnLayers = (data.layers as CustomPointLayer[]).filter(layer => !layer.shareId)
+          const cloudOwnLayers = (data.layers as CustomPointLayer[]).filter(layer => !layer.shareId && !layer.buddyLayerId)
           const rawMerged = mergeById(cloudOwnLayers, localLayers).merged
           const reconciled = reconcilePointLayerDeletions(
             rawMerged,
             [...cloudDeletedLayerIds, ...localDeletedLayerIds],
             cloudCleanupVersion
           )
+          const buddyLayers = useCustomPointLayerStore.getState().layers.filter(layer => !!layer.buddyLayerId)
           useCustomPointLayerStore.setState({
-            layers: reconciled.layers,
+            layers: [...reconciled.layers, ...buddyLayers],
             deletedLayerIds: reconciled.deletedLayerIds,
             layerCleanupVersion: reconciled.cleanupVersion,
           })
@@ -452,7 +453,7 @@ export function useCloudSync() {
 
       const syncedPointLayerState = useCustomPointLayerStore.getState()
       lastSyncedLayersRef.current = JSON.stringify({
-        layers: syncedPointLayerState.layers,
+        layers: syncedPointLayerState.layers.filter(layer => !layer.buddyLayerId),
         deletedLayerIds: syncedPointLayerState.deletedLayerIds,
         layerCleanupVersion: syncedPointLayerState.layerCleanupVersion,
       })
@@ -488,7 +489,11 @@ export function useCloudSync() {
 
   useEffect(() => {
     if (!user || !isHydrated || isInitialLoadRef.current) return
-    const serialized = JSON.stringify({ layers, deletedLayerIds, layerCleanupVersion })
+    const serialized = JSON.stringify({
+      layers: layers.filter(layer => !layer.buddyLayerId),
+      deletedLayerIds,
+      layerCleanupVersion
+    })
     if (serialized === lastSyncedLayersRef.current) return
 
     if (layerTimeoutRef.current) clearTimeout(layerTimeoutRef.current)
@@ -588,7 +593,7 @@ export function useCloudSync() {
       }
       await syncOwnedShares(user)
 
-      const currentLayers = allCurrentLayers.filter(layer => !layer.shareId)
+      const currentLayers = allCurrentLayers.filter(layer => !layer.shareId && !layer.buddyLayerId)
       const currentDeletedLayerIds = useCustomPointLayerStore.getState().deletedLayerIds
       const currentVondsten = useLocalVondstenStore.getState().vondsten
       const currentRoutes = useRouteRecordingStore.getState().savedRoutes
@@ -599,7 +604,7 @@ export function useCloudSync() {
       const cloudData = docSnap.exists() ? docSnap.data() : {}
 
       const cloudLayers = Array.isArray(cloudData.layers)
-        ? (cloudData.layers as CustomPointLayer[]).filter(layer => !layer.shareId)
+        ? (cloudData.layers as CustomPointLayer[]).filter(layer => !layer.shareId && !layer.buddyLayerId)
         : []
       const cloudDeletedLayerIds = Array.isArray(cloudData.deletedLayerIds)
         ? cloudData.deletedLayerIds.filter((id): id is string => typeof id === 'string')
