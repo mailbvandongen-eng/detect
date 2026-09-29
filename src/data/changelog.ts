@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.57',
+    date: '29 september 2026',
+    title: 'Presets en gedeelde lagen',
+    changes: [
+      'De standaardpresets zijn teruggebracht tot Detectie Basis, Detectie Uitgebreid en Terreinanalyse.',
+      'Presets bewaren voortaan de volledige kaartstatus, inclusief Mijn lagen en transparantie-instellingen.',
+      'Een laag uit Mijn lagen kan nu via een Google-e-mailadres worden gedeeld als alleen bekijken of samen bewerken.',
+      'De ontvanger krijgt de volledige gedeelde laag automatisch onder Mijn lagen na synchronisatie; opnieuw importeren is niet meer nodig.'
+    ]
+  },
+  {
     version: '2.33.56',
     date: '29 september 2026',
     title: 'AMK verfijnen zonder gedoe',
