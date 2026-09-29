@@ -9,6 +9,7 @@ interface PointLayerLike {
   points: unknown[]
   archived: boolean
   linkedImportedLayerId?: string
+  buddyRole?: 'owner' | 'edit' | 'read'
 }
 
 interface ImportedLayerLike {
@@ -40,7 +41,9 @@ export function getStandalonePointLayers<T extends PointLayerLike, U extends Imp
 ): T[] {
   const importedIds = new Set(importedLayers.map(layer => layer.id))
   return pointLayers.filter(layer =>
-    !layer.archived && (!layer.linkedImportedLayerId || !importedIds.has(layer.linkedImportedLayerId))
+    !layer.archived &&
+    layer.buddyRole !== 'read' &&
+    (!layer.linkedImportedLayerId || !importedIds.has(layer.linkedImportedLayerId))
   )
 }
 
