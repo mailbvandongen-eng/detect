@@ -1,19 +1,18 @@
 import TileLayer from 'ol/layer/Tile'
-import ImageLayer from 'ol/layer/Image'
 import LayerGroup from 'ol/layer/Group'
 import TileWMS from 'ol/source/TileWMS'
 import XYZ from 'ol/source/XYZ'
-import ImageArcGISRest from 'ol/source/ImageArcGISRest'
+import TileArcGISRest from 'ol/source/TileArcGISRest'
 
 // AHN4 Hoogtekaart Kleur - 50cm resolutie met dynamische kleuren
 // Toont hoogteverschillen in kleur (blauw=laag → groen → oranje/bruin=hoog)
 // Dynamische color ramp past zich aan aan lokale hoogteverschillen
 export function createAHN4ColorElevationLayerOL() {
-  const layer = new ImageLayer({
+  const layer = new TileLayer({
     properties: { title: 'AHN4 Hoogtekaart Kleur', type: 'arcgis' },
     visible: false,
     opacity: 1.0,  // Volle dekking voor beste kleuren
-    source: new ImageArcGISRest({
+    source: new TileArcGISRest({
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({
@@ -33,10 +32,10 @@ export function createAHN4ColorElevationLayerOL() {
 // Geeft 3D-effect door hillshade over de kleurlaag te leggen met multiply blend
 export function createAHN4ShadedReliefLayerOL() {
   // Onderlaag: Kleur gebaseerd op hoogte
-  const colorLayer = new ImageLayer({
+  const colorLayer = new TileLayer({
     properties: { title: 'Color Base' },
     opacity: 1.0,
-    source: new ImageArcGISRest({
+    source: new TileArcGISRest({
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({
@@ -49,10 +48,10 @@ export function createAHN4ShadedReliefLayerOL() {
   })
 
   // Bovenlaag: Hillshade met multiply blend
-  const hillshadeLayer = new ImageLayer({
+  const hillshadeLayer = new TileLayer({
     properties: { title: 'Hillshade Overlay' },
     opacity: 0.7,
-    source: new ImageArcGISRest({
+    source: new TileArcGISRest({
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({
@@ -90,11 +89,11 @@ export function createAHN4ShadedReliefLayerOL() {
 // AHN4 Hillshade Netherlands - Esri Nederland ImageServer
 // Uses dynamic hillshade rendering from AHN4 DTM data
 export function createAHN4HillshadeLayerOL() {
-  const layer = new ImageLayer({
+  const layer = new TileLayer({
     properties: { title: 'AHN4 Hillshade NL', type: 'arcgis' },
     visible: false,
     opacity: 0.7,
-    source: new ImageArcGISRest({
+    source: new TileArcGISRest({
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_5m/ImageServer',
       params: {
         renderingRule: JSON.stringify({
@@ -111,11 +110,11 @@ export function createAHN4HillshadeLayerOL() {
 
 // AHN4 Multidirectional Hillshade - Better for subtle relief
 export function createAHN4MultiHillshadeLayerOL() {
-  const layer = new ImageLayer({
+  const layer = new TileLayer({
     properties: { title: 'AHN4 Multi-Hillshade NL', type: 'arcgis' },
     visible: false,
     opacity: 0.7,
-    source: new ImageArcGISRest({
+    source: new TileArcGISRest({
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_5m/ImageServer',
       params: {
         renderingRule: JSON.stringify({
@@ -132,11 +131,11 @@ export function createAHN4MultiHillshadeLayerOL() {
 
 // AHN4 Slope visualization - Shows steepness
 export function createAHN4SlopeLayerOL() {
-  const layer = new ImageLayer({
+  const layer = new TileLayer({
     properties: { title: 'AHN4 Helling NL', type: 'arcgis' },
     visible: false,
     opacity: 0.6,
-    source: new ImageArcGISRest({
+    source: new TileArcGISRest({
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_5m/ImageServer',
       params: {
         renderingRule: JSON.stringify({
