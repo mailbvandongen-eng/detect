@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { fromLonLat } from 'ol/proj'
+import { fromLonLat, toLonLat } from 'ol/proj'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { useLayerStore } from './layerStore'
 import { useMapStore } from './mapStore'
@@ -352,12 +352,23 @@ export const usePresetStore = create<PresetState>()(
 
       createPreset: (name: string, icon: string) => {
         const snapshot = captureCurrentPresetSnapshot()
+        const map = useMapStore.getState().map
+        const view = map?.getView()
+        const center = view?.getCenter()
+        const zoom = view?.getZoom()
+        const mapView = center && typeof zoom === 'number'
+          ? {
+              center: toLonLat(center) as [number, number],
+              zoom
+            }
+          : undefined
 
         const newPreset: Preset = {
           id: `custom-${Date.now()}`,
           name,
           icon,
           ...snapshot,
+          mapView,
           isBuiltIn: false
         }
 
@@ -369,7 +380,7 @@ export const usePresetStore = create<PresetState>()(
         console.log(`✨ Preset aangemaakt: ${name} als volledige kaartsnapshot`)
       },
 
-      updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'layerOpacities' | 'mapView'>>) => {
+      updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'layerOpacities' | 'layerStates' | 'customLayerStates' | 'mapView'>>) => {
         set(state => ({
           presets: state.presets.map(p =>
             p.id === id ? { ...p, ...changes } : p
