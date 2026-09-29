@@ -3,7 +3,7 @@ import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Searc
 import { motion } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore, useMapStore } from '../../store'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
-import type { Preset } from '../../store/presetStore'
+import { captureCurrentPresetSnapshot, type Preset } from '../../store/presetStore'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { AppWindow } from './AppWindow'
 
@@ -63,7 +63,6 @@ export function PresetButtons() {
   const closeAllPanels = useUIStore(state => state.closeAllPanels)
   const { presets, applyPreset, updatePreset, createPreset, resetToDefaults } = usePresetStore()
   const visible = useLayerStore(state => state.visible)
-  const opacity = useLayerStore(state => state.opacity)
 
   const fontScale = useSettingsStore(state => state.fontScale)
   const baseFontSize = 14 * fontScale / 100
@@ -113,13 +112,7 @@ export function PresetButtons() {
 
     if (!confirm(`Preset "${presetName}" overschrijven met huidige lagen?`)) return
 
-    const currentLayers = Object.entries(visible)
-      .filter(([layerName, isVisible]) => isVisible && !BASE_LAYERS.includes(layerName))
-      .map(([layerName]) => layerName)
-    const currentBaseLayer = BASE_LAYERS.find(layerName => visible[layerName])
-    const currentLayerOpacities = Object.fromEntries(
-      currentLayers.map(layerName => [layerName, opacity[layerName] ?? 1])
-    )
+    const snapshot = captureCurrentPresetSnapshot()
     const existingPreset = presets.find(preset => preset.id === presetId)
     const view = map?.getView()
     const center = view?.getCenter()
@@ -132,15 +125,13 @@ export function PresetButtons() {
       : existingPreset?.mapView
 
     updatePreset(presetId, {
-      layers: currentLayers,
-      baseLayer: currentBaseLayer || 'Esri (licht)',
-      layerOpacities: currentLayerOpacities,
+      ...snapshot,
       mapView: currentMapView
     })
 
     setSavedPresetId(presetId)
     setTimeout(() => setSavedPresetId(null), 2000)
-    console.log('💾 Preset volledig opgeslagen: lagen, basiskaart, transparantie en bestaande kaartstand')
+    console.log('💾 Preset volledig opgeslagen: vaste lagen, Mijn lagen, basiskaart en transparantie')
   }
 
   const handleAddPreset = () => {
