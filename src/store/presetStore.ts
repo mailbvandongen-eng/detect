@@ -147,7 +147,7 @@ interface PresetState {
   customDefaults: Preset[] | null
   updatedAt: number
   applyPreset: (id: string) => void
-  createPreset: (name: string, icon: string) => void
+  createPreset: (name: string, icon: string, rememberMapView?: boolean) => void
   updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'layerOpacities' | 'layerStates' | 'customLayerStates' | 'mapView'>>) => void
   deletePreset: (id: string) => void
   saveAsDefaults: () => void
@@ -350,13 +350,13 @@ export const usePresetStore = create<PresetState>()(
         console.log(`🎨 Preset toegepast: ${preset.name} (${nextBaseLayer})`)
       },
 
-      createPreset: (name: string, icon: string) => {
+      createPreset: (name: string, icon: string, rememberMapView = false) => {
         const snapshot = captureCurrentPresetSnapshot()
         const map = useMapStore.getState().map
         const view = map?.getView()
         const center = view?.getCenter()
         const zoom = view?.getZoom()
-        const mapView = center && typeof zoom === 'number'
+        const mapView = rememberMapView && center && typeof zoom === 'number'
           ? {
               center: toLonLat(center) as [number, number],
               zoom
@@ -368,7 +368,7 @@ export const usePresetStore = create<PresetState>()(
           name,
           icon,
           ...snapshot,
-          mapView,
+          ...(mapView ? { mapView } : {}),
           isBuiltIn: false
         }
 
