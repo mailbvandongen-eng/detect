@@ -7,7 +7,6 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
-  writeBatch,
 } from 'firebase/firestore'
 import type { User } from 'firebase/auth'
 import { db } from '../lib/firebase'
@@ -135,8 +134,6 @@ export async function deleteBuddyLayer(user: User, buddyLayerId: string): Promis
   if (data.ownerUid !== user.uid) throw new Error('Alleen de eigenaar kan deze buddy-laag verwijderen.')
 
   const points = await getDocs(collection(db, 'buddyLayers', buddyLayerId, 'points'))
-  const batch = writeBatch(db)
-  points.docs.forEach(point => batch.delete(point.ref))
-  batch.delete(ref)
-  await batch.commit()
+  await Promise.all(points.docs.map(point => deleteDoc(point.ref)))
+  await deleteDoc(ref)
 }
