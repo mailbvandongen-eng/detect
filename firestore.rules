@@ -39,5 +39,24 @@ service cloud.firestore {
 
       allow delete: if isOwner();
     }
+
+    match /sharedImportedLayers/{shareId}/chunks/{chunkId} {
+      function parentShare() {
+        return get(/databases/$(database)/documents/sharedImportedLayers/$(shareId)).data;
+      }
+
+      function parentOwner() {
+        return signedIn() && parentShare().ownerUid == request.auth.uid;
+      }
+
+      function parentRecipient() {
+        return signedIn()
+          && request.auth.token.email != null
+          && parentShare().recipientEmail == request.auth.token.email;
+      }
+
+      allow read: if parentOwner() || parentRecipient();
+      allow create, update, delete: if parentOwner();
+    }
   }
 }
