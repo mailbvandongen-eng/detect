@@ -20,6 +20,7 @@ export function LayerDashboard() {
   const layer = layerDashboardLayerId ? getLayer(layerDashboardLayerId) : null
 
   if (!layer) return null
+  const readOnly = layer.buddyRole === 'read'
 
   // Filter points
   const filteredPoints = layer.points.filter(p => {
@@ -119,7 +120,7 @@ export function LayerDashboard() {
                       <div className="flex items-start gap-3">
                         {/* Status toggle */}
                         <div className="flex flex-col gap-1 pt-0.5">
-                          <button
+                          {!readOnly && <button
                             onClick={() => handleStatusChange(point.id, point.status === 'completed' ? 'todo' : 'completed')}
                             className={`w-6 h-6 flex items-center justify-center rounded border-0 outline-none transition-colors ${
                               point.status === 'completed'
@@ -129,8 +130,8 @@ export function LayerDashboard() {
                             title={point.status === 'completed' ? 'Markeer als te doen' : 'Markeer als voltooid'}
                           >
                             <Check size={14} className={point.status === 'completed' ? 'text-green-600' : 'text-gray-400'} />
-                          </button>
-                          <button
+                          </button>}
+                          {!readOnly && <button
                             onClick={() => handleStatusChange(point.id, point.status === 'skipped' ? 'todo' : 'skipped')}
                             className={`w-6 h-6 flex items-center justify-center rounded border-0 outline-none transition-colors ${
                               point.status === 'skipped'
@@ -140,7 +141,7 @@ export function LayerDashboard() {
                             title={point.status === 'skipped' ? 'Markeer als te doen' : 'Overslaan'}
                           >
                             <Ban size={14} className={point.status === 'skipped' ? 'text-gray-600' : 'text-gray-400'} />
-                          </button>
+                          </button>}
                         </div>
 
                         {/* Photo thumbnail */}
@@ -222,7 +223,7 @@ export function LayerDashboard() {
 
                         {/* Actions */}
                         <div className="flex flex-col gap-1">
-                          <button
+                          {!readOnly && <button
                             onClick={() => {
                               setEditingNotes(point.id)
                               setNotesValue(point.notes)
@@ -231,7 +232,7 @@ export function LayerDashboard() {
                             title="Notities bewerken"
                           >
                             <Edit2 size={14} />
-                          </button>
+                          </button>}
                           <button
                             onClick={() => {
                               // Open in Google Maps
@@ -242,7 +243,7 @@ export function LayerDashboard() {
                           >
                             <MapPin size={14} />
                           </button>
-                          <button
+                          {!readOnly && <button
                             onClick={() => handleDelete(point.id)}
                             className={`w-6 h-6 flex items-center justify-center rounded border-0 outline-none ${
                               confirmDelete === point.id
@@ -252,7 +253,7 @@ export function LayerDashboard() {
                             title={confirmDelete === point.id ? 'Klik nogmaals' : 'Verwijderen'}
                           >
                             <Trash2 size={14} />
-                          </button>
+                          </button>}
                         </div>
                       </div>
                     </div>
