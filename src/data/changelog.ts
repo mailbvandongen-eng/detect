@@ -11,7 +11,7 @@ export const CHANGELOG: ChangeLogEntry[] = [
     date: '29 september 2026',
     title: 'AMK verfijnen zonder gedoe',
     changes: [
-      'Monumentfilter heet voortaan AMK verfijnen en filtert direct tijdens typen; de overbodige aan/uit-schakelaar is verwijderd.',
+      'Monumentfilter heet voortaan AMK doorzoeken en filtert direct tijdens typen; de overbodige aan/uit-schakelaar is verwijderd.',
       'Het venster opent niet meer automatisch het toetsenbord, waardoor iOS geen onnodige plak- en foto-opties meer over de kaart legt.',
       'De teller laat direct zien hoeveel monumenten van het totaal zichtbaar blijven en wissen staat op een logische plek.',
       'Het trefwoordfilter werkt nu ook echt op AMK Romeins, Steentijd, Vroege ME, Late ME en Overig; voorheen verscheen de knop daar wel maar werd alleen AMK Monumenten gefilterd.'
