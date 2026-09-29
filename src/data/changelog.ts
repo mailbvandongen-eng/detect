@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.59',
+    date: '29 september 2026',
+    title: 'Eigen presets onthouden ook de plek',
+    changes: [
+      'Een nieuw aangemaakte preset bewaart voortaan automatisch de huidige kaartpositie en zoom.',
+      'Daardoor kan een vakantie- of projectpreset met één tik zowel de juiste lagen als de juiste regio openen.'
+    ]
+  },
+  {
     version: '2.33.58',
     date: '29 september 2026',
     title: 'LiDAR blijft op zijn plek',
