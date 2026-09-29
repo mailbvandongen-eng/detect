@@ -54,6 +54,7 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
   const [shares, setShares] = useState<SharedImportedLayerRecord[]>([])
   const [shareBusy, setShareBusy] = useState(false)
   const [shareError, setShareError] = useState<string | null>(null)
+  const isIncomingShare = !!layer.shareId && !!layer.shareOwnerUid && layer.shareOwnerUid !== user?.uid
 
   useEffect(() => {
     if (!expanded || !user || !layer.contentHash) return
@@ -132,6 +133,11 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
           {layer.name}
         </button>
 
+        {isIncomingShare && (
+          <span className="flex-shrink-0 rounded bg-cyan-50 px-1.5 py-0.5 text-[9px] font-medium text-cyan-700">
+            gedeeld
+          </span>
+        )}
         <span className="flex-shrink-0 text-[10px] text-gray-400">{featureCount}</span>
         <button
           onClick={() => setExpanded(value => !value)}
@@ -146,57 +152,73 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
       {expanded && (
         <div className="mx-1 mb-2 mt-1 space-y-2 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
           {user ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-gray-700"><Share2 size={13} /> Nieuwe punten synchroniseren</div>
-              <div className="text-[11px] text-gray-500">Stuur de basislaag zelf naar de ander. Na import koppelt Detect dezelfde laag automatisch en worden alleen nieuwe punten gedeeld.</div>
-              <input
-                type="email"
-                value={shareEmail}
-                onChange={event => setShareEmail(event.target.value)}
-                placeholder="Google-e-mailadres"
-                className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs"
-              />
-              <div className="flex gap-2">
-                <select
-                  value={sharePermission}
-                  onChange={event => setSharePermission(event.target.value as SharePermission)}
-                  className="min-w-0 flex-1 rounded-lg border border-gray-300 px-2 py-1.5 text-xs"
-                >
-                  <option value="read">Alleen lezen</option>
-                  <option value="edit">Bewerken</option>
-                </select>
-                <button
-                  onClick={handleShare}
-                  disabled={!shareEmail.trim() || shareBusy || !layer.contentHash}
-                  className="rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
-                >
-                  {shareBusy ? 'Bezig…' : 'Delen'}
-                </button>
-              </div>
-              {shares.length > 0 && (
-                <div className="space-y-1">
-                  {shares.map(share => (
-                    <div key={share.shareId} className="flex items-center gap-2 rounded bg-gray-50 px-2 py-1.5 text-[11px]">
-                      <span className="min-w-0 flex-1 truncate">{share.recipientEmail}</span>
-                      <span className="text-gray-500">{share.permission === 'edit' ? 'bewerken' : 'lezen'}</span>
-                      <button onClick={() => handleRevokeShare(share.shareId)} title="Delen stoppen" className="text-gray-400 hover:text-red-600"><X size={13} /></button>
-                    </div>
-                  ))}
+            isIncomingShare ? (
+              <div className="space-y-1.5 rounded-lg bg-cyan-50 p-2 text-xs text-cyan-900">
+                <div className="flex items-center gap-1.5 font-medium"><Share2 size={13} /> Gedeelde laag</div>
+                <div className="text-[11px]">
+                  Gedeeld door {layer.shareOwnerEmail || 'een zoekmaatje'} · {layer.sharePermission === 'edit' ? 'jij mag bewerken' : 'alleen bekijken'}.
                 </div>
-              )}
-              {shareError && <div className="rounded bg-red-50 p-2 text-[11px] text-red-700">{shareError}</div>}
-            </div>
+                <div className="text-[11px] text-cyan-700">
+                  De volledige laag verschijnt automatisch op je apparaten zodra je met dit Google-account synchroniseert.
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-gray-700"><Share2 size={13} /> Laag delen</div>
+                <div className="text-[11px] text-gray-500">
+                  Vul het Google-e-mailadres van je zoekmaatje in. De volledige laag verschijnt automatisch onder Mijn lagen; opnieuw importeren is niet nodig.
+                </div>
+                <input
+                  type="email"
+                  value={shareEmail}
+                  onChange={event => setShareEmail(event.target.value)}
+                  placeholder="Google-e-mailadres"
+                  className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs"
+                />
+                <div className="flex gap-2">
+                  <select
+                    value={sharePermission}
+                    onChange={event => setSharePermission(event.target.value as SharePermission)}
+                    className="min-w-0 flex-1 rounded-lg border border-gray-300 px-2 py-1.5 text-xs"
+                  >
+                    <option value="read">Alleen bekijken</option>
+                    <option value="edit">Samen bewerken</option>
+                  </select>
+                  <button
+                    onClick={handleShare}
+                    disabled={!shareEmail.trim() || shareBusy || !layer.contentHash}
+                    className="rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+                  >
+                    {shareBusy ? 'Delen…' : 'Delen'}
+                  </button>
+                </div>
+                {shares.length > 0 && (
+                  <div className="space-y-1">
+                    {shares.map(share => (
+                      <div key={share.shareId} className="flex items-center gap-2 rounded bg-gray-50 px-2 py-1.5 text-[11px]">
+                        <span className="min-w-0 flex-1 truncate">{share.recipientEmail}</span>
+                        <span className="text-gray-500">{share.permission === 'edit' ? 'samen bewerken' : 'bekijken'}</span>
+                        <button onClick={() => handleRevokeShare(share.shareId)} title="Delen stoppen" className="text-gray-400 hover:text-red-600"><X size={13} /></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {shareError && <div className="rounded bg-red-50 p-2 text-[11px] text-red-700">{shareError}</div>}
+              </div>
+            )
           ) : (
             <div className="rounded-lg bg-amber-50 p-2 text-xs text-amber-800">Log in met Google om deze laag te delen.</div>
           )}
 
-          <button
+          {!isIncomingShare && (
+            <button
               onClick={handleDelete}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
             >
               <Trash2 size={15} />
               Laag verwijderen
             </button>
+          )}
         </div>
       )}
     </div>
