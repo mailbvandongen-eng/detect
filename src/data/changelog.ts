@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.58',
+    date: '29 september 2026',
+    title: 'LiDAR blijft op zijn plek',
+    changes: [
+      'De Nederlandse AHN/LiDAR-lagen gebruiken voortaan tegelweergave in plaats van één groot ArcGIS-beeld.',
+      'Daardoor schiet LiDAR bij in- en uitzoomen niet meer terug naar de vorige beeldpositie.',
+      'Dezelfde fix geldt voor AHN hoogtekaart, hillshade, multi-hillshade, shaded relief en helling.'
+    ]
+  },
+  {
     version: '2.33.57',
     date: '29 september 2026',
     title: 'Presets en gedeelde lagen',
