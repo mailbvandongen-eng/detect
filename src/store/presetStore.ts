@@ -1,16 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { fromLonLat } from 'ol/proj'
-import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
-import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
-import { THEDIRAC_HIKES_LAYER_NAME } from '../data/thediracHikes'
-import {
-  THEDIRAC_FOSSILS_LAYER_NAME,
-  THEDIRAC_MINERALS_LAYER_NAME
-} from '../data/thediracGeologySites'
 import { useLayerStore } from './layerStore'
 import { useMapStore } from './mapStore'
 import { useCustomLayerStore } from './customLayerStore'
+
+export interface PresetLayerState {
+  visible: boolean
+  opacity: number
+}
 
 export interface Preset {
   id: string
@@ -19,6 +17,8 @@ export interface Preset {
   layers: string[]
   baseLayer?: string
   layerOpacities?: Record<string, number>
+  layerStates?: Record<string, PresetLayerState>
+  customLayerStates?: Record<string, PresetLayerState>
   mapView?: {
     center: [number, number]
     zoom: number
@@ -26,171 +26,118 @@ export interface Preset {
   isBuiltIn: boolean
 }
 
-const THEDIRAC_CENTER: [number, number] = [1.34, 44.625]
-const THEDIRAC_ARCHAEOLOGY_LAYER = THEDIRAC_RESEARCH_LAYER_NAME
-const FRANCE_COLLAB_LAYER_NAME = 'Frankrijk · Thédirac'
-const FRANCE_COLLAB_LAYER_HASH = 'detect-frankrijk-thedirac-collab-v1'
-
-const FRANCE_FIELD_LAYERS = [
-  'LiDAR HD terrein FR',
-  'Waterlopen BD TOPAGE 2026',
-  'OCS GE landbedekking 2021-2023',
-  'Bodem/geologie 1:50.000 FR',
-  'Oude bossen · Forêts anciennes',
-  THEDIRAC_ARCHAEOLOGY_LAYER,
-  THEDIRAC_MINERALS_LAYER_NAME,
-  THEDIRAC_FOSSILS_LAYER_NAME,
-  THEDIRAC_SIGHTS_LAYER_NAME,
-  THEDIRAC_HIKES_LAYER_NAME
-] as const
-
-const FRANCE_RESEARCH_LAYER_NAMES = new Set([
-  'LiDAR HD terrein FR',
-  'Bodem/geologie 1:50.000 FR',
-  'Geologie + reliëf FR',
-  'BRGM boringen · BSS',
-  'BRGM IDPR · infiltratie/afstroming',
-  'BRGM cavités · ondergrondse holtes',
-  'Waterlopen BD TOPAGE 2026',
-  'OCS GE landbedekking 2021-2023',
-  'Oude bossen · Forêts anciennes',
-  THEDIRAC_ARCHAEOLOGY_LAYER,
-  THEDIRAC_MINERALS_LAYER_NAME,
-  THEDIRAC_FOSSILS_LAYER_NAME,
-  THEDIRAC_SIGHTS_LAYER_NAME,
-  THEDIRAC_HIKES_LAYER_NAME
-])
-
 const BUILT_IN_PRESETS: Preset[] = [
   {
-    id: 'detectie',
-    name: 'Detectie',
+    id: 'detectie-basis',
+    name: 'Detectie Basis',
     icon: 'Compass',
-    layers: ['AMK Monumenten', 'Gewaspercelen', 'Geomorfologie', 'AHN4 Hoogtekaart Kleur', 'Kadastrale Grenzen'],
-    baseLayer: 'Esri (licht)',
-    layerOpacities: {
-      'AMK Monumenten': 0.50,
-      'Gewaspercelen': 0.25,
-      'Geomorfologie': 0.25,
-      'AHN4 Hoogtekaart Kleur': 0.25
-    },
-    isBuiltIn: false
-  },
-  {
-    id: 'lidar-hoogte',
-    name: 'LiDAR & hoogte',
-    icon: 'Mountain',
-    layers: ['AHN4 Multi-Hillshade NL', 'AHN4 Hoogtekaart Kleur'],
-    baseLayer: 'Esri (licht)',
-    layerOpacities: {
-      'AHN4 Multi-Hillshade NL': 0.70,
-      'AHN4 Hoogtekaart Kleur': 0.35
-    },
-    isBuiltIn: false
-  },
-  {
-    id: 'bodem-landschap',
-    name: 'Bodem & landschap',
-    icon: 'Layers',
-    layers: ['Geomorfologie', 'Bodemkaart', 'Veengebieden'],
-    baseLayer: 'Esri (licht)',
-    layerOpacities: {
-      'Geomorfologie': 0.55,
-      'Bodemkaart': 0.35,
-      'Veengebieden': 0.45
-    },
-    isBuiltIn: false
-  },
-  {
-    id: 'percelen-historie',
-    name: 'Percelen & historie',
-    icon: 'Grid',
-    layers: ['Gewaspercelen', 'Kadastrale Grenzen', 'Oude Kernen', 'Essen'],
-    baseLayer: 'Luchtfoto',
-    layerOpacities: {
-      'Gewaspercelen': 0.35,
-      'Kadastrale Grenzen': 0.75,
-      'Oude Kernen': 0.50,
-      'Essen': 0.45
-    },
-    isBuiltIn: false
-  },
-  {
-    id: 'steentijd',
-    name: 'Steentijd',
-    icon: 'Mountain',
     layers: [
-      'Hunebedden', 'Grafheuvels', 'Terpen', 'FAMKE Steentijd', 'AMK Steentijd',
-      'AHN4 Multi-Hillshade NL', 'Labels Overlay'
+      'AHN4 Hoogtekaart Kleur',
+      'Geomorfologie',
+      'AMK Monumenten',
+      'Gewaspercelen',
+      'Kadastrale Grenzen',
+      'AHN4 Multi-Hillshade NL',
+      'Romeinse wegen (regio)'
     ],
     baseLayer: 'Luchtfoto',
-    isBuiltIn: false
+    layerOpacities: {
+      'AHN4 Hoogtekaart Kleur': 0.20,
+      'Geomorfologie': 0.80,
+      'AMK Monumenten': 0.60,
+      'Gewaspercelen': 0.10,
+      'Kadastrale Grenzen': 0.50,
+      'AHN4 Multi-Hillshade NL': 0.20,
+      'Romeinse wegen (regio)': 1
+    },
+    isBuiltIn: true
   },
   {
-    id: 'romeins-midvroeg',
-    name: 'Romeins - Mid vroeg',
+    id: 'detectie-uitgebreid',
+    name: 'Detectie Uitgebreid',
     icon: 'Layers',
     layers: [
-      'Romeinse wegen (regio)', 'Romeinse Forten', 'AMK Romeins', 'AMK Vroege ME',
-      'Gewaspercelen', 'Kadastrale Grenzen'
+      'AHN4 Hoogtekaart Kleur',
+      'Geomorfologie',
+      'AMK Monumenten',
+      'Gewaspercelen',
+      'Kadastrale Grenzen',
+      'AHN4 Multi-Hillshade NL',
+      'Romeinse wegen (regio)',
+      'Essen',
+      'Bodemkaart',
+      'IKAW',
+      'UIKAV Punten',
+      'UIKAV Vlakken',
+      'UIKAV Buffer',
+      'UIKAV Expert',
+      'UIKAV Indeling',
+      'Parken',
+      'Speeltuinen',
+      'Strandjes'
     ],
-    isBuiltIn: false
+    baseLayer: 'Luchtfoto',
+    layerOpacities: {
+      'AHN4 Hoogtekaart Kleur': 0.20,
+      'Geomorfologie': 0.80,
+      'AMK Monumenten': 0.60,
+      'Gewaspercelen': 0.10,
+      'Kadastrale Grenzen': 0.50,
+      'AHN4 Multi-Hillshade NL': 0.20,
+      'Romeinse wegen (regio)': 1,
+      'Essen': 0.10,
+      'Bodemkaart': 0.10,
+      'IKAW': 0.10,
+      'UIKAV Punten': 0.10,
+      'UIKAV Vlakken': 0.10,
+      'UIKAV Buffer': 0.10,
+      'UIKAV Expert': 0.10,
+      'UIKAV Indeling': 0.10,
+      'Parken': 0.10,
+      'Speeltuinen': 0.10,
+      'Strandjes': 0.10
+    },
+    isBuiltIn: true
   },
   {
-    id: 'midlaat-nieuwetijd',
-    name: 'Mid laat - Nieuwe tijd',
-    icon: 'Grid',
-    layers: [
-      'AMK Late ME', 'Kastelen', 'Essen', 'Rijksmonumenten',
-      'Gewaspercelen', 'Kadastrale Grenzen', 'Oude Kernen'
-    ],
-    isBuiltIn: false
-  },
-  {
-    id: 'woii-militair',
-    name: 'WOII & Militair',
-    icon: 'Target',
-    layers: [
-      'WWII Bunkers', 'Slagvelden', 'Militaire Vliegvelden',
-      'Verdedigingslinies', 'Inundatiegebieden', 'Militaire Objecten'
-    ],
-    isBuiltIn: false
-  },
-  {
-    id: 'analyse',
-    name: 'Terrein Analyse',
+    id: 'terreinanalyse',
+    name: 'Terreinanalyse',
     icon: 'Search',
     layers: [
-      'IKAW', 'Geomorfologie', 'Bodemkaart',
-      'AHN4 Multi-Hillshade NL', 'AHN4 Hoogtekaart Kleur'
+      'AHN4 Multi-Hillshade NL',
+      'AHN4 Hoogtekaart Kleur',
+      'AMK Monumenten',
+      'Geomorfologie',
+      'Bodemkaart'
     ],
-    isBuiltIn: false
-  },
-  {
-    id: 'frankrijk',
-    name: 'Frankrijk · Thédirac',
-    icon: 'Compass',
-    layers: [...FRANCE_FIELD_LAYERS],
-    baseLayer: 'Hybride (wereld)',
-    mapView: {
-      center: THEDIRAC_CENTER,
-      zoom: 10.7
-    },
+    baseLayer: 'Luchtfoto',
     layerOpacities: {
-      'LiDAR HD terrein FR': 0.48,
-      'Waterlopen BD TOPAGE 2026': 0.92,
-      'OCS GE landbedekking 2021-2023': 0.24,
-      'Bodem/geologie 1:50.000 FR': 0.28,
-      'Oude bossen · Forêts anciennes': 0.38,
-      [THEDIRAC_ARCHAEOLOGY_LAYER]: 1,
-      [THEDIRAC_MINERALS_LAYER_NAME]: 1,
-      [THEDIRAC_FOSSILS_LAYER_NAME]: 1,
-      [THEDIRAC_SIGHTS_LAYER_NAME]: 1,
-      [THEDIRAC_HIKES_LAYER_NAME]: 1
+      'AHN4 Multi-Hillshade NL': 0.75,
+      'AHN4 Hoogtekaart Kleur': 0.45,
+      'AMK Monumenten': 0.65,
+      'Geomorfologie': 0.10,
+      'Bodemkaart': 0.10
     },
-    isBuiltIn: false
+    isBuiltIn: true
   }
 ]
+
+const LEGACY_STANDARD_PRESET_IDS = new Set([
+  'detectie',
+  'lidar-hoogte',
+  'bodem-landschap',
+  'percelen-historie',
+  'steentijd',
+  'romeins-midvroeg',
+  'midlaat-nieuwetijd',
+  'woii-militair',
+  'analyse',
+  'frankrijk'
+])
+
+function customLayerSnapshotKey(layer: { id: string; contentHash?: string }): string {
+  return layer.contentHash ? `hash:${layer.contentHash}` : `id:${layer.id}`
+}
 
 interface PresetState {
   presets: Preset[]
@@ -198,7 +145,7 @@ interface PresetState {
   updatedAt: number
   applyPreset: (id: string) => void
   createPreset: (name: string, icon: string) => void
-  updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'layerOpacities' | 'mapView'>>) => void
+  updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'layerOpacities' | 'layerStates' | 'customLayerStates' | 'mapView'>>) => void
   deletePreset: (id: string) => void
   saveAsDefaults: () => void
   resetToDefaults: () => void
@@ -216,8 +163,6 @@ const BASE_LAYER_NAMES = [
 ]
 
 const BUILT_IN_PRESET_MAP = new Map(BUILT_IN_PRESETS.map((preset) => [preset.id, preset]))
-const NEW_RESEARCH_PRESET_IDS = new Set(['lidar-hoogte', 'bodem-landschap', 'percelen-historie', 'frankrijk'])
-const ALWAYS_AVAILABLE_PRESET_IDS = new Set(['frankrijk'])
 const REMOVED_LAYERS = new Set([
   'Kringloopwinkels',
   'Ruiterpaden',
@@ -281,84 +226,64 @@ function normalizePreset(preset: Preset): Preset {
 }
 
 export function normalizePresetCollection(presets: Preset[]): Preset[] {
-  const normalized = presets.map(normalizePreset)
-  const existingIds = new Set(normalized.map((preset) => preset.id))
-  const requiredPresets = BUILT_IN_PRESETS.filter(
-    (preset) => ALWAYS_AVAILABLE_PRESET_IDS.has(preset.id) && !existingIds.has(preset.id)
-  )
+  const withoutLegacyStandards = presets.filter(preset => !LEGACY_STANDARD_PRESET_IDS.has(preset.id))
+  const normalized = withoutLegacyStandards.map(normalizePreset)
+  const byId = new Map(normalized.map(preset => [preset.id, preset]))
 
-  return [...normalized, ...requiredPresets]
-}
+  const standards = BUILT_IN_PRESETS.map(preset => {
+    const existing = byId.get(preset.id)
+    return existing ? normalizePreset(existing) : preset
+  })
+  const custom = normalized.filter(preset => !BUILT_IN_PRESET_MAP.has(preset.id))
 
-function addMissingResearchPresets(presets: Preset[]): Preset[] {
-  const normalized = normalizePresetCollection(presets)
-  const existingIds = new Set(normalized.map((preset) => preset.id))
-  const additions = BUILT_IN_PRESETS.filter(
-    (preset) => NEW_RESEARCH_PRESET_IDS.has(preset.id) && !existingIds.has(preset.id)
-  )
-
-  return [...normalized, ...additions]
+  return [...standards, ...custom]
 }
 
 function isOverlayLayer(layerName: string): boolean {
   return !BASE_LAYER_NAMES.includes(layerName)
 }
 
-function ensureFranceCollaborationLayer() {
-  const store = useCustomLayerStore.getState()
-  const existing = store.layers.find(layer => layer.contentHash === FRANCE_COLLAB_LAYER_HASH)
-
-  if (existing) {
-    if (!existing.visible) store.updateLayer(existing.id, { visible: true })
-    return existing.id
-  }
-
-  return store.addLayer({
-    name: FRANCE_COLLAB_LAYER_NAME,
-    type: 'geojson',
-    features: { type: 'FeatureCollection', features: [] },
-    visible: true,
-    opacity: 1,
-    color: '#8b5cf6',
-    sourceFileName: 'Detect · Frankrijk · Thédirac',
-    contentHash: FRANCE_COLLAB_LAYER_HASH,
-  })
-}
-
-function activateFranceResearchLayer(layerName: string) {
-  if (!FRANCE_RESEARCH_LAYER_NAMES.has(layerName)) return false
-
+export function captureCurrentPresetSnapshot() {
   const layerStore = useLayerStore.getState()
-  const registeredLayer = layerStore.layers[layerName]
-  if (registeredLayer) {
-    layerStore.setLayerVisibility(layerName, true)
-    return true
+  const customLayerStore = useCustomLayerStore.getState()
+  const activeBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
+
+  const layerStates = Object.fromEntries(
+    Object.keys(layerStore.visible)
+      .filter(isOverlayLayer)
+      .map(layerName => [
+        layerName,
+        {
+          visible: !!layerStore.visible[layerName],
+          opacity: layerStore.opacity[layerName] ?? 1
+        }
+      ])
+  )
+
+  const customLayerStates = Object.fromEntries(
+    customLayerStore.layers.map(layer => [
+      customLayerSnapshotKey(layer),
+      {
+        visible: layer.visible,
+        opacity: layer.opacity
+      }
+    ])
+  )
+
+  return {
+    layers: Object.entries(layerStates)
+      .filter(([, state]) => state.visible)
+      .map(([layerName]) => layerName),
+    baseLayer: activeBaseLayer || 'Esri (licht)',
+    layerOpacities: Object.fromEntries(
+      Object.entries(layerStates).map(([layerName, state]) => [layerName, state.opacity])
+    ),
+    layerStates,
+    customLayerStates
   }
-
-  const map = useMapStore.getState().map
-  if (!map) return true
-
-  void import('../layers/franceResearchOL').then(({ FRANCE_RESEARCH_FACTORIES }) => {
-    const latestStore = useLayerStore.getState()
-    if (latestStore.layers[layerName]) {
-      latestStore.setLayerVisibility(layerName, true)
-      return
-    }
-
-    const factory = FRANCE_RESEARCH_FACTORIES[layerName]
-    if (!factory) {
-      console.warn(`France-laag niet gevonden: ${layerName}`)
-      return
-    }
-
-    const layer = factory()
-    map.addLayer(layer)
-    latestStore.registerLayer(layerName, layer)
-    latestStore.setLayerVisibility(layerName, true)
-  }).catch(error => console.error(`France-laag kon niet worden geladen: ${layerName}`, error))
-
-  return true
 }
+
+
 
 export const usePresetStore = create<PresetState>()(
   persist(
@@ -371,8 +296,6 @@ export const usePresetStore = create<PresetState>()(
         const rawPreset = get().presets.find(p => p.id === id)
         if (!rawPreset) return
 
-        if (id === 'frankrijk') ensureFranceCollaborationLayer()
-
         const preset = normalizePreset(rawPreset)
         const layerStore = useLayerStore.getState()
         const currentBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
@@ -382,18 +305,25 @@ export const usePresetStore = create<PresetState>()(
 
         Object.keys(layerStore.visible)
           .filter(isOverlayLayer)
-          .forEach(layerName => layerStore.setLayerVisibility(layerName, false))
+          .forEach(layerName => {
+            const snapshot = preset.layerStates?.[layerName]
+            const shouldShow = snapshot ? snapshot.visible : preset.layers.includes(layerName)
+            const opacity = snapshot?.opacity ?? preset.layerOpacities?.[layerName]
 
-        if (preset.layerOpacities) {
-          Object.entries(preset.layerOpacities).forEach(([layerName, opacity]) => {
-            layerStore.setLayerOpacity(layerName, opacity)
+            if (typeof opacity === 'number') {
+              layerStore.setLayerOpacity(layerName, opacity)
+            }
+            layerStore.setLayerVisibility(layerName, shouldShow)
           })
-        }
 
-        preset.layers.forEach(layerName => {
-          if (!activateFranceResearchLayer(layerName)) {
-            layerStore.setLayerVisibility(layerName, true)
-          }
+        const customLayerStore = useCustomLayerStore.getState()
+        customLayerStore.layers.forEach(layer => {
+          const snapshot = preset.customLayerStates?.[customLayerSnapshotKey(layer)]
+          if (!snapshot) return
+          customLayerStore.updateLayer(layer.id, {
+            visible: snapshot.visible,
+            opacity: snapshot.opacity
+          })
         })
 
         BASE_LAYER_NAMES.forEach((layerName) => {
@@ -418,19 +348,13 @@ export const usePresetStore = create<PresetState>()(
       },
 
       createPreset: (name: string, icon: string) => {
-        const layerStore = useLayerStore.getState()
-        const activeBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
-
-        const visibleLayers = Object.entries(layerStore.visible)
-          .filter(([layerName, isVisible]) => isVisible && isOverlayLayer(layerName))
-          .map(([layerName]) => layerName)
+        const snapshot = captureCurrentPresetSnapshot()
 
         const newPreset: Preset = {
           id: `custom-${Date.now()}`,
           name,
           icon,
-          layers: visibleLayers,
-          baseLayer: activeBaseLayer || 'Esri (licht)',
+          ...snapshot,
           isBuiltIn: false
         }
 
@@ -439,7 +363,7 @@ export const usePresetStore = create<PresetState>()(
           updatedAt: Date.now()
         }))
 
-        console.log(`✨ Preset aangemaakt: ${name} met ${visibleLayers.length} lagen`)
+        console.log(`✨ Preset aangemaakt: ${name} als volledige kaartsnapshot`)
       },
 
       updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'layerOpacities' | 'mapView'>>) => {
@@ -482,7 +406,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
-      version: 28,
+      version: 29,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {
@@ -504,14 +428,10 @@ export const usePresetStore = create<PresetState>()(
         return {
           ...state,
           presets: Array.isArray(state.presets)
-            ? version < 19
-              ? addMissingResearchPresets(state.presets)
-              : normalizePresetCollection(state.presets)
+            ? normalizePresetCollection(state.presets)
             : [...BUILT_IN_PRESETS],
           customDefaults: Array.isArray(state.customDefaults)
-            ? version < 19
-              ? addMissingResearchPresets(state.customDefaults)
-              : normalizePresetCollection(state.customDefaults)
+            ? normalizePresetCollection(state.customDefaults)
             : null,
           updatedAt: typeof state.updatedAt === 'number' ? state.updatedAt : 0
         }
