@@ -35,15 +35,16 @@ export function AddPointModal() {
     : null
   const layerName = pointLayer?.name || importedLayer?.name || ''
   const layerColor = pointLayer?.color || importedLayer?.style.points.color || importedLayer?.color || '#3b82f6'
+  const readOnly = pointLayer?.buddyRole === 'read'
 
   const handleSubmit = () => {
-    if (!name.trim() || !addPointModalLayerTarget || !addPointModalLocation || !layerName) return
+    if (!name.trim() || !addPointModalLayerTarget || !addPointModalLocation || !layerName || readOnly) return
     const trimmedPhone = phone.trim()
     const trimmedUrl = url.trim()
 
     const targetLayerId = addPointModalLayerTarget.kind === 'point'
       ? addPointModalLayerTarget.id
-      : ensureImportedLayerOverlay(addPointModalLayerTarget.id, layerName, layerColor)
+      : ensureImportedLayerOverlay(addPointModalLayerTarget.id, importedLayer?.contentHash, layerName, layerColor)
 
     if (addPointModalLayerTarget.kind === 'imported') {
       updateImportedGeometryStyle(addPointModalLayerTarget.id, 'points', { visible: true })
@@ -107,10 +108,10 @@ export function AddPointModal() {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!name.trim()}
+            disabled={!name.trim() || readOnly}
             className="detect-window-primary-button flex-1 disabled:opacity-50"
           >
-            Toevoegen
+            {readOnly ? 'Alleen bekijken' : 'Toevoegen'}
           </button>
         </div>
       }
