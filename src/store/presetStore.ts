@@ -5,6 +5,7 @@ import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { useLayerStore } from './layerStore'
 import { useMapStore } from './mapStore'
 import { useCustomLayerStore } from './customLayerStore'
+import { useCustomPointLayerStore } from './customPointLayerStore'
 
 export interface PresetLayerState {
   visible: boolean
@@ -142,6 +143,10 @@ function customLayerSnapshotKey(layer: { id: string; contentHash?: string }): st
   return layer.contentHash ? `hash:${layer.contentHash}` : `id:${layer.id}`
 }
 
+function pointLayerSnapshotKey(layer: { id: string; buddyLayerId?: string }): string {
+  return layer.buddyLayerId ? `buddy:${layer.buddyLayerId}` : `point:${layer.id}`
+}
+
 interface PresetState {
   presets: Preset[]
   customDefaults: Preset[] | null
@@ -249,6 +254,7 @@ function isOverlayLayer(layerName: string): boolean {
 export function captureCurrentPresetSnapshot() {
   const layerStore = useLayerStore.getState()
   const customLayerStore = useCustomLayerStore.getState()
+  const pointLayerStore = useCustomPointLayerStore.getState()
   const activeBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
 
   const layerStates = Object.fromEntries(
@@ -263,15 +269,22 @@ export function captureCurrentPresetSnapshot() {
       ])
   )
 
-  const customLayerStates = Object.fromEntries(
-    customLayerStore.layers.map(layer => [
+  const customLayerStates = Object.fromEntries([
+    ...customLayerStore.layers.map(layer => [
       customLayerSnapshotKey(layer),
       {
         visible: layer.visible,
         opacity: layer.opacity
       }
-    ])
-  )
+    ] as const),
+    ...pointLayerStore.layers.map(layer => [
+      pointLayerSnapshotKey(layer),
+      {
+        visible: layer.visible,
+        opacity: 1
+      }
+    ] as const)
+  ])
 
   return {
     layers: Object.entries(layerStates)
@@ -327,6 +340,13 @@ export const usePresetStore = create<PresetState>()(
             visible: snapshot.visible,
             opacity: snapshot.opacity
           })
+        })
+
+        const pointLayerStore = useCustomPointLayerStore.getState()
+        pointLayerStore.layers.forEach(layer => {
+          const snapshot = preset.customLayerStates?.[pointLayerSnapshotKey(layer)]
+          if (!snapshot) return
+          pointLayerStore.updateLayer(layer.id, { visible: snapshot.visible })
         })
 
         BASE_LAYER_NAMES.forEach((layerName) => {
