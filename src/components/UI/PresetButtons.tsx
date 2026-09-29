@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore, useMapStore } from '../../store'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
 import type { Preset } from '../../store/presetStore'
-import { fromLonLat } from 'ol/proj'
+import { fromLonLat, toLonLat } from 'ol/proj'
 import { AppWindow } from './AppWindow'
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -63,6 +63,7 @@ export function PresetButtons() {
   const closeAllPanels = useUIStore(state => state.closeAllPanels)
   const { presets, applyPreset, updatePreset, createPreset, resetToDefaults } = usePresetStore()
   const visible = useLayerStore(state => state.visible)
+  const opacity = useLayerStore(state => state.opacity)
 
   const fontScale = useSettingsStore(state => state.fontScale)
   const baseFontSize = 14 * fontScale / 100
@@ -116,15 +117,30 @@ export function PresetButtons() {
       .filter(([layerName, isVisible]) => isVisible && !BASE_LAYERS.includes(layerName))
       .map(([layerName]) => layerName)
     const currentBaseLayer = BASE_LAYERS.find(layerName => visible[layerName])
+    const currentLayerOpacities = Object.fromEntries(
+      currentLayers.map(layerName => [layerName, opacity[layerName] ?? 1])
+    )
+    const existingPreset = presets.find(preset => preset.id === presetId)
+    const view = map?.getView()
+    const center = view?.getCenter()
+    const zoom = view?.getZoom()
+    const currentMapView = existingPreset?.mapView && center && typeof zoom === 'number'
+      ? {
+          center: toLonLat(center) as [number, number],
+          zoom
+        }
+      : existingPreset?.mapView
 
     updatePreset(presetId, {
       layers: currentLayers,
-      baseLayer: currentBaseLayer || 'Esri (licht)'
+      baseLayer: currentBaseLayer || 'Esri (licht)',
+      layerOpacities: currentLayerOpacities,
+      mapView: currentMapView
     })
 
     setSavedPresetId(presetId)
     setTimeout(() => setSavedPresetId(null), 2000)
-    console.log('💾 Lagen opgeslagen naar preset')
+    console.log('💾 Preset volledig opgeslagen: lagen, basiskaart, transparantie en bestaande kaartstand')
   }
 
   const handleAddPreset = () => {
