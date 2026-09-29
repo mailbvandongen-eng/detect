@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.64',
+    date: '30 september 2026',
+    title: 'Buddy-laag blijft echt staan',
+    changes: [
+      'Buddy-lagen blijven nu ook lokaal behouden wanneer de oude import-deelsynchronisatie ververst.',
+      'De buddy-laag blijft volledig buiten de privé users-sync en gebruikt alleen de eigen buddyLayers-collectie.',
+      'Hiermee is de route voor één gezamenlijke laag met meerdere gebruikers technisch gescheiden van de oude importdeling.'
+    ]
+  },
+  {
     version: '2.33.63',
     date: '30 september 2026',
     title: 'Buddy-laag veilig afgerond',
