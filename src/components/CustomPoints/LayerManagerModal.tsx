@@ -4,6 +4,7 @@ import { Plus, Trash2, Download, Eye, EyeOff, ChevronDown, ChevronRight, Upload,
 import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
 import { AppWindow } from '../UI/AppWindow'
+import { BuddyLayerPanel } from './BuddyLayerPanel'
 
 export function LayerManagerModal() {
   const layerManagerModalOpen = useUIStore(state => state.activeWindow === 'layerManager')
@@ -277,7 +278,10 @@ function LayerItem({
         {/* Color dot - clickable */}
         <div className="relative">
           <button
-            onClick={() => setShowColorPicker(!showColorPicker)}
+            onClick={() => {
+              if (layer.buddyLayerId && layer.buddyRole !== 'owner') return
+              setShowColorPicker(!showColorPicker)
+            }}
             className="w-5 h-5 rounded-full flex-shrink-0 border-2 border-white shadow-sm hover:scale-110 transition-transform cursor-pointer"
             style={{ backgroundColor: layer.color }}
             title="Kleur wijzigen"
@@ -328,7 +332,10 @@ function LayerItem({
             className="flex-1 min-w-0 text-left border-0 outline-none bg-transparent hover:bg-orange-50 rounded px-2 py-1 -ml-2 transition-colors"
             title="Bekijk dashboard"
           >
-            <div className="font-medium text-gray-800 truncate hover:text-orange-600">{layer.name}</div>
+            <div className="flex items-center gap-2">
+              <div className="font-medium text-gray-800 truncate hover:text-orange-600">{layer.name}</div>
+              {layer.buddyLayerId && <span className="rounded bg-cyan-50 px-1.5 py-0.5 text-[9px] font-medium text-cyan-700">buddy</span>}
+            </div>
             <div className="text-xs text-gray-500">
               {totalCount > 0 ? (
                 <span className={completedCount === totalCount ? 'text-green-600' : ''}>
@@ -342,7 +349,7 @@ function LayerItem({
         )}
 
         {/* Edit name button */}
-        {!isEditing && (
+        {!isEditing && (!layer.buddyLayerId || layer.buddyRole === 'owner') && (
           <button
             onClick={handleStartEdit}
             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors border-0 outline-none"
@@ -375,7 +382,7 @@ function LayerItem({
         )}
 
         {/* Archive/Unarchive */}
-        <button
+        {!layer.buddyLayerId && <button
           onClick={onToggleArchived}
           className={`p-2 rounded transition-colors border-0 outline-none ${
             layer.archived
@@ -385,7 +392,7 @@ function LayerItem({
           title={layer.archived ? 'Herstellen' : 'Archiveren'}
         >
           {layer.archived ? <ArchiveRestore size={18} /> : <Archive size={18} />}
-        </button>
+        </button>}
 
         {/* Export */}
         <button
@@ -397,7 +404,7 @@ function LayerItem({
         </button>
 
         {/* Delete */}
-        <button
+        {(!layer.buddyLayerId || layer.buddyRole === 'owner') && <button
           onClick={onDelete}
           className={`p-2 rounded transition-colors border-0 outline-none ${
             confirmDelete
@@ -407,7 +414,7 @@ function LayerItem({
           title={confirmDelete ? 'Klik nogmaals om te verwijderen' : 'Verwijderen'}
         >
           <Trash2 size={18} />
-        </button>
+        </button>}
       </div>
 
       {/* Expanded content */}
@@ -420,6 +427,7 @@ function LayerItem({
             className="overflow-hidden"
           >
             <div className="px-4 pb-3 pl-12 space-y-2">
+              {layer.buddyLayerId && <BuddyLayerPanel layer={layer} />}
               {/* Categories */}
               {layer.categories.length > 0 && (
                 <div className="flex flex-wrap gap-1">
