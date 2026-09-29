@@ -1,17 +1,14 @@
 /**
- * Monument Filter Component
- * Only visible when AMK monument layers are active
- * Compact design with inline toggle
+ * Compact AMK keyword filter.
+ * Visible while one or more AMK layers are active.
  */
 
-import { useEffect, useRef } from 'react'
-import { Filter } from 'lucide-react'
+import { Filter, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
 import { useLayerStore, useUIStore } from '../../store'
 import { AppWindow } from './AppWindow'
 
-// AMK layers that trigger filter visibility
 const AMK_LAYERS = [
   'AMK Monumenten',
   'AMK Romeins',
@@ -22,8 +19,6 @@ const AMK_LAYERS = [
 ]
 
 export function MonumentFilter() {
-  const inputRef = useRef<HTMLInputElement>(null)
-
   const {
     keyword,
     isActive,
@@ -34,47 +29,26 @@ export function MonumentFilter() {
     clearFilter
   } = useMonumentFilterStore()
 
-  // Use UIStore for panel state (closes other panels)
   const isExpanded = useUIStore(state => state.activeWindow === 'monumentFilter')
   const toggleMonumentFilter = useUIStore(state => state.toggleMonumentFilter)
   const closeMonumentFilter = useUIStore(state => state.closeMonumentFilter)
 
-  // Check if any AMK layer is visible
   const visible = useLayerStore(state => state.visible)
   const isAMKVisible = AMK_LAYERS.some(layer => visible[layer])
 
-  // Focus input when expanded
-  useEffect(() => {
-    if (isExpanded && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 100)
-    }
-  }, [isExpanded])
-
-  // Toggle filter on/off
-  const handleToggle = () => {
-    if (keyword.length >= 2) {
-      setActive(!isActive)
-    }
+  const handleKeywordChange = (value: string) => {
+    setKeyword(value)
+    setActive(value.trim().length >= 2)
   }
 
-  // Clear everything
   const handleClear = () => {
     clearFilter()
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
   }
 
-  const hasKeyword = keyword.length >= 2
-
-  // Don't render if no AMK layer is visible
-  if (!isAMKVisible) {
-    return null
-  }
+  if (!isAMKVisible) return null
 
   return (
     <div>
-      {/* Button - same style as preset buttons, positioned above them */}
       <motion.button
         onClick={toggleMonumentFilter}
         className={`fixed bottom-[116px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
@@ -84,68 +58,67 @@ export function MonumentFilter() {
         }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        title="Monument filter"
+        title="AMK verfijnen"
+        aria-label="AMK verfijnen"
       >
         <Filter size={20} />
       </motion.button>
 
       <AppWindow
         isOpen={isExpanded}
-        title="Monumentfilter"
+        title="AMK verfijnen"
         icon={<Filter size={18} />}
         placement="left"
         onClose={closeMonumentFilter}
-        footer={hasKeyword ? (
-          <button onClick={handleClear} className="detect-window-secondary-button w-full">
-            Filter wissen
-          </button>
-        ) : undefined}
       >
-              <div className="p-3 space-y-3">
-                {/* Search + toggle row */}
-                <div className="flex items-center gap-2">
-                  {/* Search input */}
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                    placeholder="Filter..."
-                    className="w-24 px-2 py-1.5 text-sm bg-gray-100 rounded border-0 outline-none focus:ring-2 focus:ring-purple-400"
-                  />
+        <div className="p-3 space-y-3">
+          <div className="relative">
+            <input
+              type="search"
+              value={keyword}
+              onChange={(event) => handleKeywordChange(event.target.value)}
+              placeholder="bijv. grafveld, Romeins, terp…"
+              autoComplete="off"
+              enterKeyHint="search"
+              className="w-full pl-3 pr-9 py-2.5 text-sm bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-purple-400"
+              aria-label="Doorzoek AMK op trefwoord"
+            />
+            {keyword && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-700 bg-transparent border-0 outline-none"
+                title="Wissen"
+                aria-label="AMK-filter wissen"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
 
-                  {/* Toggle switch */}
-                  <button
-                    onClick={handleToggle}
-                    disabled={!hasKeyword}
-                    className={`relative w-10 h-5 rounded-full transition-colors border-0 outline-none ${
-                      isActive
-                        ? 'bg-purple-500'
-                        : hasKeyword
-                          ? 'bg-gray-300'
-                          : 'bg-gray-200 cursor-not-allowed'
-                    }`}
-                    title={isActive ? 'Filter uit' : 'Filter aan'}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                        isActive ? 'translate-x-5' : 'translate-x-0.5'
-                      }`}
-                    />
-                  </button>
-                </div>
+          <p className="text-xs text-gray-500 leading-relaxed">
+            Typ minimaal 2 tekens. Meerdere woorden moeten allemaal in het monument voorkomen.
+          </p>
 
-                {/* Count indicator - always visible when there's data */}
-                {totalCount > 0 && (
-                  <div className="text-xs text-gray-500 text-center">
-                    {isActive ? (
-                      <span className="text-purple-600 font-medium">{filteredCount} van {totalCount}</span>
-                    ) : (
-                      <span>{totalCount} monumenten</span>
-                    )}
-                  </div>
-                )}
-              </div>
+          {totalCount > 0 && (
+            <div className="flex items-center justify-between gap-3 text-xs">
+              <span className={isActive ? 'text-purple-600 font-medium' : 'text-gray-500'}>
+                {isActive
+                  ? `${filteredCount} van ${totalCount} monumenten zichtbaar`
+                  : `${totalCount} monumenten zichtbaar`}
+              </span>
+              {keyword && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="text-purple-600 hover:text-purple-700 bg-transparent border-0 outline-none font-medium"
+                >
+                  Wissen
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </AppWindow>
     </div>
   )
