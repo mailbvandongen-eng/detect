@@ -133,7 +133,7 @@ export async function getIncomingShares(email: string): Promise<SharedImportedLa
 }
 
 export async function materializeSharedImportedLayer(record: SharedImportedLayerRecord): Promise<CustomLayer | null> {
-  if (record.ready === false) return null
+  if (record.ready !== true) return null
 
   const features = await readFeatureChunks(`sharedImportedLayers/${record.shareId}`)
   return {
