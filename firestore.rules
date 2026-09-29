@@ -58,5 +58,58 @@ service cloud.firestore {
       allow read: if parentOwner() || parentRecipient();
       allow create, update, delete: if parentOwner();
     }
+    match /buddyLayers/{layerId} {
+      function buddyEmail() {
+        return signedIn() && request.auth.token.email != null
+          ? request.auth.token.email
+          : '';
+      }
+
+      function buddyMember() {
+        return signedIn()
+          && request.auth.token.email != null
+          && resource.data.memberEmails.hasAny([request.auth.token.email]);
+      }
+
+      function buddyOwner() {
+        return signedIn() && resource.data.ownerUid == request.auth.uid;
+      }
+
+      allow create: if signedIn()
+        && request.auth.token.email != null
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerEmail == request.auth.token.email
+        && request.resource.data.memberEmails.hasAny([request.auth.token.email]);
+
+      allow read: if buddyMember();
+      allow update, delete: if buddyOwner();
+    }
+
+    match /buddyLayers/{layerId}/points/{pointId} {
+      function buddyParent() {
+        return get(/databases/$(database)/documents/buddyLayers/$(layerId)).data;
+      }
+
+      function buddyPointMember() {
+        return signedIn()
+          && request.auth.token.email != null
+          && buddyParent().memberEmails.hasAny([request.auth.token.email]);
+      }
+
+      function buddyPointEditor() {
+        return signedIn()
+          && (
+            buddyParent().ownerUid == request.auth.uid
+            || (
+              request.auth.token.email != null
+              && buddyParent().editEmails.hasAny([request.auth.token.email])
+            )
+          );
+      }
+
+      allow read: if buddyPointMember();
+      allow create, update, delete: if buddyPointEditor();
+    }
+
   }
 }
