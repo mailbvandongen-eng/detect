@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.63',
+    date: '30 september 2026',
+    title: 'Buddy-laag veilig afgerond',
+    changes: [
+      'Buddy-lagen gebruiken één gedeelde Firestore-bron voor alle deelnemers; eindgebruikers hoeven zelf geen Firebase-project in te richten.',
+      'Alleen de eigenaar beheert naam, kleur en leden; bewerk-buddies mogen punten toevoegen, wijzigen en verwijderen en kijkers zijn echt read-only.',
+      'Buddy-lagen blijven volledig buiten de oude privé- en importlaag-sync.',
+      'De Firestore-regels beschermen het eigenaarschap en geven puntrechten alleen aan eigenaar en expliciete bewerkers.'
+    ]
+  },
+  {
     version: '2.33.62',
     date: '30 september 2026',
     title: 'Buddy-laag klaar voor de eerste test',
