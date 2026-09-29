@@ -69,6 +69,66 @@ async function loadAMKData(): Promise<Feature[]> {
   return cachedFeatures
 }
 
+function featureMatchesCurrentFilter(feature: Feature): boolean {
+  const filterState = useMonumentFilterStore.getState()
+
+  if (!filterState.isActive || (filterState.keyword.trim().length < 2 && filterState.province === 'all')) {
+    return true
+  }
+
+  const omschrijving = feature.get('omschrijving') || ''
+  const toponiem = feature.get('toponiem') || ''
+  const txtLabel = feature.get('txt_label') || ''
+
+  const geometry = feature.getGeometry()
+  let lng = 5.5
+  let lat = 52.0
+
+  if (geometry) {
+    const center = getCenter(geometry.getExtent())
+    const lonLat = transform(center, 'EPSG:3857', 'EPSG:4326')
+    lng = lonLat[0]
+    lat = lonLat[1]
+  }
+
+  return featureMatchesFilter(
+    omschrijving,
+    toponiem,
+    txtLabel,
+    lng,
+    lat,
+    filterState.keyword,
+    filterState.province
+  )
+}
+
+function subscribeLayerToMonumentFilter(layer: VectorLayer<VectorSource>, features: Feature[]) {
+  let prevKeyword = ''
+  let prevProvince = 'all'
+  let prevIsActive = false
+
+  return useMonumentFilterStore.subscribe((state) => {
+    if (
+      state.keyword === prevKeyword &&
+      state.province === prevProvince &&
+      state.isActive === prevIsActive
+    ) {
+      return
+    }
+
+    prevKeyword = state.keyword
+    prevProvince = state.province
+    prevIsActive = state.isActive
+    layer.changed()
+
+    const filtered = state.isActive
+      ? features.filter(feature => featureMatchesCurrentFilter(feature)).length
+      : features.length
+
+    useMonumentFilterStore.getState().updateCounts(features.length, filtered)
+  })
+}
+
 // Original AMK layer with all monuments
 export async function createAMKLayerOL() {
   try {
@@ -81,40 +141,7 @@ export async function createAMKLayerOL() {
       title: 'AMK Monumenten',
       source: new VectorSource({ features }),
       style: (feature) => {
-        // Check filter state
-        const filterState = useMonumentFilterStore.getState()
-
-        if (filterState.isActive && (filterState.keyword.length >= 2 || filterState.province !== 'all')) {
-          // Get feature properties
-          const omschrijving = feature.get('omschrijving') || ''
-          const toponiem = feature.get('toponiem') || ''
-          const txtLabel = feature.get('txt_label') || ''
-
-          // Get coordinates for province check
-          const geometry = feature.getGeometry()
-          let lng = 5.5, lat = 52.0 // Default center of NL
-          if (geometry) {
-            const center = getCenter(geometry.getExtent())
-            const lonLat = transform(center, 'EPSG:3857', 'EPSG:4326')
-            lng = lonLat[0]
-            lat = lonLat[1]
-          }
-
-          // Check if feature matches filter
-          const matches = featureMatchesFilter(
-            omschrijving,
-            toponiem,
-            txtLabel,
-            lng,
-            lat,
-            filterState.keyword,
-            filterState.province
-          )
-
-          if (!matches) {
-            return null // Hide feature
-          }
-        }
+        if (!featureMatchesCurrentFilter(feature)) return null
 
         const waarde = (feature.get('kwaliteitswaarde') || '').trim()
         const color = AMK_COLORS[waarde] || '#ddd'
@@ -128,48 +155,7 @@ export async function createAMKLayerOL() {
       zIndex: 10
     })
 
-    // Subscribe to filter changes to update count and refresh layer
-    // Track previous values to avoid infinite loop
-    let prevKeyword = ''
-    let prevIsActive = false
-
-    useMonumentFilterStore.subscribe((state) => {
-      // Only recalculate if keyword or isActive changed (not when counts change)
-      if (state.keyword === prevKeyword && state.isActive === prevIsActive) {
-        return
-      }
-      prevKeyword = state.keyword
-      prevIsActive = state.isActive
-
-      // Force layer to re-render with new styles
-      layer.changed()
-
-      if (state.isActive && state.keyword.length >= 2) {
-        // Count matching features
-        let matchCount = 0
-        features.forEach(feature => {
-          const omschrijving = feature.get('omschrijving') || ''
-          const toponiem = feature.get('toponiem') || ''
-          const txtLabel = feature.get('txt_label') || ''
-
-          const geometry = feature.getGeometry()
-          let lng = 5.5, lat = 52.0
-          if (geometry) {
-            const center = getCenter(geometry.getExtent())
-            const lonLat = transform(center, 'EPSG:3857', 'EPSG:4326')
-            lng = lonLat[0]
-            lat = lonLat[1]
-          }
-
-          if (featureMatchesFilter(omschrijving, toponiem, txtLabel, lng, lat, state.keyword, state.province)) {
-            matchCount++
-          }
-        })
-        useMonumentFilterStore.getState().updateCounts(features.length, matchCount)
-      } else {
-        useMonumentFilterStore.getState().updateCounts(features.length, features.length)
-      }
-    })
+    subscribeLayerToMonumentFilter(layer, features)
 
     console.log(`✓ AMK Monumenten loaded (${features.length} features)`)
     return layer
@@ -199,6 +185,8 @@ async function createFilteredAMKLayer(
       title,
       source: new VectorSource({ features: filteredFeatures }),
       style: (feature) => {
+        if (!featureMatchesCurrentFilter(feature)) return null
+
         const waarde = (feature.get('kwaliteitswaarde') || '').trim()
         // Use period color with opacity based on quality
         const opacity = waarde === 'zeer hoge archeologische waarde' ? 0.9 :
@@ -212,6 +200,8 @@ async function createFilteredAMKLayer(
       opacity: 0.6,
       zIndex: 11
     })
+
+    subscribeLayerToMonumentFilter(layer, filteredFeatures)
 
     console.log(`✓ ${title} loaded (${filteredFeatures.length} features)`)
     return layer
