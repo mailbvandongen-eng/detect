@@ -82,7 +82,11 @@ service cloud.firestore {
         && request.resource.data.memberEmails.hasAny([request.auth.token.email]);
 
       allow read: if buddyMember();
-      allow update, delete: if buddyOwner();
+      allow update: if buddyOwner()
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.ownerEmail == resource.data.ownerEmail;
+
+      allow delete: if buddyOwner();
     }
 
     match /buddyLayers/{layerId}/points/{pointId} {
