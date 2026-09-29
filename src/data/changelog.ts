@@ -5,7 +5,17 @@ export interface ChangeLogEntry {
   changes: string[]
 }
 
-export const CHANGELOG: ChangeLogEntry[] = [
+export const CHANGELOG: ChangeLogEntry[
+  {
+    version: '2.33.55',
+    date: '29 september 2026',
+    title: 'Rustige updates en betrouwbare presets',
+    changes: [
+      'Detect neemt een nieuwe PWA-versie niet meer tijdens gebruik over; een update wordt pas actief na een normale volgende start.',
+      'Preset opslaan bewaart nu ook de transparantie van de actieve lagen.',
+      'Presets met een vaste kaartstand, zoals Frankrijk, bewaren bij overschrijven ook hun actuele kaartpositie en zoom.'
+    ]
+  },] = [
   {
     version: '2.33.54',
     date: '19 september 2026',
