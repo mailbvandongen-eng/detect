@@ -5,7 +5,9 @@ import { useAuthStore } from '../store/authStore'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../store/customPointLayerStore'
 import { useCustomLayerStore } from '../store/customLayerStore'
 import {
+  attachShareMetadata,
   getIncomingShares,
+  materializeSharedImportedLayer,
   materializeSharedOverlay,
   syncOwnedShares,
   syncRecipientOverlay,
@@ -171,15 +173,38 @@ export function useCloudSync() {
     if (!user?.email) return
 
     const incoming = await getIncomingShares(user.email)
-    const localImported = useCustomLayerStore.getState().layers
+    const customStore = useCustomLayerStore.getState()
+    let localImported = customStore.layers
+
+    for (const record of incoming) {
+      let imported = localImported.find(layer =>
+        layer.shareId === record.shareId || layer.contentHash === record.layerHash
+      )
+
+      if (imported) {
+        const updated = attachShareMetadata(imported, record)
+        useCustomLayerStore.getState().updateLayer(imported.id, updated)
+        imported = updated
+      } else {
+        const sharedLayer = await materializeSharedImportedLayer(record)
+        if (!sharedLayer) continue
+        useCustomLayerStore.setState(state => ({
+          layers: [...state.layers, sharedLayer]
+        }))
+        imported = sharedLayer
+      }
+
+      localImported = useCustomLayerStore.getState().layers
+    }
+
     const pointState = useCustomPointLayerStore.getState()
     const ownPointLayers = pointState.layers.filter(layer => !layer.shareId)
-
     const sharedOverlays = incoming.flatMap(record => {
-      const imported = localImported.find(layer => layer.contentHash === record.layerHash)
+      const imported = useCustomLayerStore.getState().layers.find(layer =>
+        layer.shareId === record.shareId || layer.contentHash === record.layerHash
+      )
       if (!imported) return []
-      const overlay = materializeSharedOverlay(record, imported.id)
-      return overlay ? [overlay] : []
+      return [materializeSharedOverlay(record, imported.id)]
     })
 
     useCustomPointLayerStore.setState({
