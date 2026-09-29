@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.62',
+    date: '30 september 2026',
+    title: 'Buddy-laag klaar voor de eerste test',
+    changes: [
+      'Read-only buddies krijgen nergens bewerk- of verwijderknoppen voor gedeelde punten.',
+      'Foto’s zijn in de eerste buddy-versie bewust uitgeschakeld totdat gedeelde foto-opslag apart is geregeld.',
+      'Buddy-lagen blijven behouden wanneer de oude import-deelsynchronisatie ververst.',
+      'Verwijderen van grote buddy-lagen heeft geen Firestore batchlimiet meer.'
+    ]
+  },
+  {
     version: '2.33.61',
     date: '30 september 2026',
     title: 'Buddy-lagen',
