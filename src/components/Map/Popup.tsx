@@ -261,10 +261,11 @@ export function Popup() {
   // Get current feature data based on index
   const currentFeatureData = allFeatureData[currentIndex] || null
   const currentCustomPointRef = currentFeatureData?.customPointRef || null
+  const currentCustomPointLayer = currentCustomPointRef
+    ? customLayers.find(layer => layer.id === currentCustomPointRef.layerId)
+    : undefined
   const currentCustomPoint = currentCustomPointRef
-    ? customLayers
-        .find(layer => layer.id === currentCustomPointRef.layerId)
-        ?.points.find(point => point.id === currentCustomPointRef.pointId)
+    ? currentCustomPointLayer?.points.find(point => point.id === currentCustomPointRef.pointId)
     : undefined
   // Popup text scale: 100 = normal, 120 = 20% bigger, etc
   const [textScale, setTextScale] = useState(() => {
@@ -4178,7 +4179,7 @@ export function Popup() {
             </div>
 
             {/* Handmatig toegevoegde punten worden rechtstreeks vanuit hun popup beheerd. */}
-            {currentCustomPointRef && currentCustomPoint && !editingCustomPoint && (
+            {currentCustomPointRef && currentCustomPoint && !editingCustomPoint && currentCustomPointLayer?.buddyRole !== 'read' && (
               <div className="px-4 pb-4 flex gap-2 flex-shrink-0">
                 <button
                   onClick={() => {
@@ -4215,7 +4216,7 @@ export function Popup() {
               </div>
             )}
 
-            {editingCustomPoint && currentCustomPointRef && (
+            {editingCustomPoint && currentCustomPointRef && currentCustomPointLayer?.buddyRole !== 'read' && (
               <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3 flex-shrink-0 overflow-y-auto max-h-[50vh]">
                 <div className="text-sm font-medium text-blue-600">Punt bewerken</div>
                 <div>
