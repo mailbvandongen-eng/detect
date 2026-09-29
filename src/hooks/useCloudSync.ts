@@ -203,7 +203,7 @@ export function useCloudSync() {
     }
 
     const pointState = useCustomPointLayerStore.getState()
-    const ownPointLayers = pointState.layers.filter(layer => !layer.shareId && !layer.buddyLayerId)
+    const ownPointLayers = pointState.layers.filter(layer => !layer.shareId)
     const sharedOverlays = incoming.flatMap(record => {
       const imported = useCustomLayerStore.getState().layers.find(layer =>
         layer.shareId === record.shareId || layer.contentHash === record.layerHash
