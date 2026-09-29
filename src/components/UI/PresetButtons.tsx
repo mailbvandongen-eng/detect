@@ -71,6 +71,7 @@ export function PresetButtons() {
   const [savedPresetId, setSavedPresetId] = useState<string | null>(null)
   const [showAddPreset, setShowAddPreset] = useState(false)
   const [newPresetName, setNewPresetName] = useState('')
+  const [rememberMapView, setRememberMapView] = useState(false)
 
   const resetAll = () => {
     closeAllPanels()
@@ -136,8 +137,9 @@ export function PresetButtons() {
 
   const handleAddPreset = () => {
     if (!newPresetName.trim()) return
-    createPreset(newPresetName.trim(), 'Layers')
+    createPreset(newPresetName.trim(), 'Layers', rememberMapView)
     setNewPresetName('')
+    setRememberMapView(false)
     setShowAddPreset(false)
   }
 
@@ -179,27 +181,41 @@ export function PresetButtons() {
         onClose={togglePresetsPanel}
         footer={
           showAddPreset ? (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newPresetName}
-                onChange={(event) => setNewPresetName(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') handleAddPreset()
-                  if (event.key === 'Escape') setShowAddPreset(false)
-                }}
-                placeholder="Naam preset..."
-                autoFocus
-                className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 outline-none focus:border-blue-400"
-              />
-              <button
-                onClick={handleAddPreset}
-                disabled={!newPresetName.trim()}
-                className="detect-window-primary-button px-3 disabled:opacity-50"
-                aria-label="Preset toevoegen"
-              >
-                <Check size={16} />
-              </button>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newPresetName}
+                  onChange={(event) => setNewPresetName(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') handleAddPreset()
+                    if (event.key === 'Escape') {
+                      setRememberMapView(false)
+                      setShowAddPreset(false)
+                    }
+                  }}
+                  placeholder="Naam preset..."
+                  autoFocus
+                  className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 outline-none focus:border-blue-400"
+                />
+                <button
+                  onClick={handleAddPreset}
+                  disabled={!newPresetName.trim()}
+                  className="detect-window-primary-button px-3 disabled:opacity-50"
+                  aria-label="Preset toevoegen"
+                >
+                  <Check size={16} />
+                </button>
+              </div>
+              <label className="flex items-center gap-2 text-xs text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={rememberMapView}
+                  onChange={(event) => setRememberMapView(event.target.checked)}
+                  className="h-4 w-4 accent-blue-600"
+                />
+                <span>Locatie & zoom onthouden</span>
+              </label>
             </div>
           ) : (
             <div className="flex items-center justify-between gap-2">
