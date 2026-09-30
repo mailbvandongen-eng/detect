@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import 'ol/ol.css'
 import { Tile as TileLayer } from 'ol/layer'
 import VectorTileLayer from 'ol/layer/VectorTile'
@@ -7,7 +7,8 @@ import { OSM, XYZ } from 'ol/source'
 import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS'
 import { applyStyle } from 'ol-mapbox-style'
 import { useMap } from '../../hooks/useMap'
-import { useLayerStore, useMapStore, useSettingsStore, useGPSStore, useUIStore } from '../../store'
+import { useLayerStore, useMapStore, useSettingsStore, useGPSStore } from '../../store'
+import { TimeTravelControl } from '../UI/TimeTravelControl'
 import { normalizeWaybackCapabilitiesXml } from '../../utils/wmtsCapabilities'
 
 const ESRI_WORLD_IMAGERY_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
@@ -196,7 +197,6 @@ function shouldShowRichReference(): boolean {
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
   const initialBgApplied = useRef(false)
-  const timeTravelDragStartY = useRef<number | null>(null)
   const pdokLayerRef = useRef<TileLayer | null>(null)
   const worldArchiveLayerRef = useRef<TileLayer | null>(null)
   const pdokCapabilitiesRef = useRef<any>(null)
@@ -208,14 +208,12 @@ export function MapContainer() {
   const [worldReleases, setWorldReleases] = useState<ArchiveRelease[]>([])
   const [worldYear, setWorldYear] = useState(2026)
   const [worldStatus, setWorldStatus] = useState<ArchiveStatus>('loading')
-  const [timeTravelCollapsed, setTimeTravelCollapsed] = useState(false)
 
   useMap({ target: 'map' })
   const map = useMapStore(state => state.map)
   const registerLayer = useLayerStore(state => state.registerLayer)
   const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
   const visibleLayers = useLayerStore(state => state.visible)
-  const opacityWindowOpen = useUIStore(state => state.activeWindow === 'opacity')
   const defaultBackground = useSettingsStore(state => state.defaultBackground)
   const fieldModeEnabled = useSettingsStore(state => state.fieldModeEnabled)
   const fieldModeOfflineLabels = useSettingsStore(state => state.fieldModeOfflineLabels)
@@ -520,30 +518,11 @@ export function MapContainer() {
 
   const selectedPdokIndex = Math.max(0, pdokReleases.findIndex(release => release.year === pdokYear))
   const selectedWorldIndex = Math.max(0, worldReleases.findIndex(release => release.year === worldYear))
-  const selectedWorldRelease = worldReleases.find(release => release.year === worldYear)
   const timeTravelVisible = activeBaseLayer === 'Luchtfoto' || activeBaseLayer === 'Satelliet (wereld)'
   const timeTravelYear = activeBaseLayer === 'Luchtfoto'
     ? pdokStatus === 'ready' ? String(pdokYear) : 'actueel'
     : worldStatus === 'ready' ? String(worldYear) : 'actueel'
   const timeTravelName = activeBaseLayer === 'Luchtfoto' ? 'Luchtfoto NL' : 'Satelliet wereld'
-
-  const handleTimeTravelGripPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    timeTravelDragStartY.current = event.clientY
-    event.currentTarget.setPointerCapture(event.pointerId)
-  }
-
-  const handleTimeTravelGripPointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    const startY = timeTravelDragStartY.current
-    timeTravelDragStartY.current = null
-
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId)
-    }
-
-    if (startY !== null && event.clientY - startY >= 24) {
-      setTimeTravelCollapsed(true)
-    }
-  }
 
   return (
     <div className="detect-map-viewport">
@@ -552,109 +531,23 @@ export function MapContainer() {
         ref={containerRef}
       />
 
-      {timeTravelVisible && !opacityWindowOpen && timeTravelCollapsed && (
-        <button
-          type="button"
-          className="time-travel-reopen"
-          aria-label={`${timeTravelName} tijdreis openen, huidig jaar ${timeTravelYear}`}
-          aria-expanded="false"
-          title="Tijdreis openen"
-          onPointerDown={event => event.stopPropagation()}
-          onClick={event => {
-            event.stopPropagation()
-            setTimeTravelCollapsed(false)
-          }}
-        >
-          <span>{timeTravelYear}</span>
-          <span aria-hidden="true">▲</span>
-        </button>
-      )}
-
-      {timeTravelVisible && !opacityWindowOpen && !timeTravelCollapsed && (
-        <div
-          className="time-travel-panel"
-          role="region"
-          aria-label={`${timeTravelName} tijdreis`}
-          onPointerDown={event => event.stopPropagation()}
-          onClick={event => event.stopPropagation()}
-        >
-          <button
-            type="button"
-            className="time-travel-collapse-handle"
-            aria-label="Tijdreisbalk minimaliseren"
-            aria-expanded="true"
-            title="Tik of veeg omlaag om te minimaliseren"
-            onPointerDown={handleTimeTravelGripPointerDown}
-            onPointerUp={handleTimeTravelGripPointerUp}
-            onPointerCancel={() => { timeTravelDragStartY.current = null }}
-            onClick={event => {
-              event.stopPropagation()
-              setTimeTravelCollapsed(true)
-            }}
-          >
-            <span className="time-travel-grip" aria-hidden="true" />
-          </button>
-
-          {activeBaseLayer === 'Luchtfoto' && (
-            <>
-              <div className="flex items-center justify-between gap-3 text-sm font-medium text-gray-800">
-                <span>Luchtfoto NL · tijdreis</span>
-                <strong className="text-[var(--detect-accent-text)]">{pdokStatus === 'ready' ? pdokYear : 'actueel'}</strong>
-              </div>
-              <input
-                aria-label="Luchtfoto jaargang Nederland"
-                type="range"
-                min={0}
-                max={Math.max(0, pdokReleases.length - 1)}
-                step={1}
-                value={selectedPdokIndex}
-                disabled={pdokStatus !== 'ready' || pdokReleases.length < 2}
-                onChange={event => {
-                  const release = pdokReleases[Number(event.target.value)]
-                  if (release) setPdokYear(release.year)
-                }}
-                className="w-full mt-2 accent-[var(--detect-accent)]"
-              />
-              <div className="flex justify-between text-[11px] text-gray-500">
-                <span>{pdokReleases[0]?.year ?? '2016'}</span>
-                <span>{pdokStatus === 'loading' ? 'Archief laden…' : pdokStatus === 'error' ? 'Archief niet bereikbaar · actuele foto' : 'PDOK · officiële jaargang'}</span>
-                <span>{pdokReleases[pdokReleases.length - 1]?.year ?? '2026'}</span>
-              </div>
-            </>
-          )}
-
-          {activeBaseLayer === 'Satelliet (wereld)' && (
-            <>
-              <div className="flex items-center justify-between gap-3 text-sm font-medium text-gray-800">
-                <span>Satelliet wereld · tijdreis</span>
-                <strong className="text-[var(--detect-accent-text)]">{worldStatus === 'ready' ? worldYear : 'actueel'}</strong>
-              </div>
-              <input
-                aria-label="Satelliet archiefjaar wereld"
-                type="range"
-                min={0}
-                max={Math.max(0, worldReleases.length - 1)}
-                step={1}
-                value={selectedWorldIndex}
-                disabled={worldStatus !== 'ready' || worldReleases.length < 2}
-                onChange={event => {
-                  const release = worldReleases[Number(event.target.value)]
-                  if (release) setWorldYear(release.year)
-                }}
-                className="w-full mt-2 accent-[var(--detect-accent)]"
-              />
-              <div className="flex justify-between text-[11px] text-gray-500">
-                <span>{worldReleases[0]?.year ?? '2014'}</span>
-                <span>{worldStatus === 'loading' ? 'Wayback laden…' : worldStatus === 'error' ? 'Wayback niet bereikbaar · actuele satelliet' : selectedWorldRelease?.date ? `Esri Wayback · ${selectedWorldRelease.date}` : 'Esri Wayback'}</span>
-                <span>{worldReleases[worldReleases.length - 1]?.year ?? '2026'}</span>
-              </div>
-              {worldStatus === 'ready' && (
-                <p className="mt-1 text-[10px] leading-tight text-gray-400">Archiefjaar is de publicatieversie; de lokale opname kan ouder zijn.</p>
-              )}
-            </>
-          )}
-        </div>
-      )}
+      <TimeTravelControl
+        visible={timeTravelVisible}
+        name={timeTravelName}
+        years={(activeBaseLayer === 'Luchtfoto' ? pdokReleases : worldReleases).map(release => release.year)}
+        selectedIndex={activeBaseLayer === 'Luchtfoto' ? selectedPdokIndex : selectedWorldIndex}
+        year={timeTravelYear}
+        status={activeBaseLayer === 'Luchtfoto' ? pdokStatus : worldStatus}
+        onSelect={index => {
+          if (activeBaseLayer === 'Luchtfoto') {
+            const release = pdokReleases[index]
+            if (release) setPdokYear(release.year)
+          } else {
+            const release = worldReleases[index]
+            if (release) setWorldYear(release.year)
+          }
+        }}
+      />
     </div>
   )
 }

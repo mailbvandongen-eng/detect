@@ -6,7 +6,7 @@ export type UIWindowId =
   | 'info' | 'manual' | 'welcome' | 'presets' | 'changeLog' | 'monumentSearch'
   | 'monumentFilter' | 'vondstForm' | 'vondstDashboard' | 'createLayer' | 'addPoint'
   | 'layerManager' | 'layerDashboard' | 'routeDashboard' | 'importLayer' | 'print'
-  | 'opacity' | 'measure' | 'draw'
+  | 'opacity' | 'timeTravel' | 'measure' | 'draw'
 
 interface UIState {
   activeWindow: UIWindowId | null

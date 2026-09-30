@@ -1,101 +1,80 @@
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import { ChevronDown, ChevronUp, SlidersHorizontal } from 'lucide-react'
+import { useEffect } from 'react'
+import { SlidersHorizontal } from 'lucide-react'
 import { useLayerStore } from '../../store/layerStore'
+import { useCustomLayerStore } from '../../store/customLayerStore'
 import { useUIStore } from '../../store/uiStore'
+import { getActiveOpacityLayers } from '../../utils/opacityLayers'
 import { AppWindow } from './AppWindow'
+import { MapControlButton } from './MapControlButton'
 
 export function OpacitySliders() {
-  const [isExpanded, setIsExpanded] = useState(false)
   const isOpen = useUIStore(state => state.activeWindow === 'opacity')
   const toggleWindow = useUIStore(state => state.toggleWindow)
   const closeWindow = useUIStore(state => state.closeWindow)
   const visibleLayers = useLayerStore(state => state.visible)
   const opacities = useLayerStore(state => state.opacity)
+  const registeredLayers = useLayerStore(state => state.layers)
   const setLayerOpacity = useLayerStore(state => state.setLayerOpacity)
-
-  // De opacity-store is de bron van waarheid: iedere zichtbare laag met een
-  // opacity-instelling krijgt automatisch een slider. Zo kan de lijst niet
-  // meer achterlopen op nieuwe of hernoemde kaartlagen.
-  const activeSliders = Object.keys(opacities).filter(layerName => visibleLayers[layerName])
+  const customLayers = useCustomLayerStore(state => state.layers)
+  const setCustomOpacity = useCustomLayerStore(state => state.setOpacity)
+  const activeSliders = getActiveOpacityLayers(visibleLayers, opacities, registeredLayers, customLayers)
 
   useEffect(() => {
     if (isOpen && activeSliders.length === 0) closeWindow()
   }, [activeSliders.length, closeWindow, isOpen])
 
   useEffect(() => {
-    if (!isOpen || activeSliders.length <= 3) setIsExpanded(false)
-  }, [activeSliders.length, isOpen])
+    if (!isOpen) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeWindow()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [isOpen, closeWindow])
 
   if (activeSliders.length === 0) return null
 
-  const displayedSliders = isExpanded ? activeSliders : activeSliders.slice(0, 3)
-  const hiddenSliderCount = activeSliders.length - displayedSliders.length
-  const hasMore = activeSliders.length > 3
-
   return (
-    <div className="fixed bottom-[56px] right-2 z-[900]">
-      <motion.button
+    <div className="detect-opacity-control">
+      <MapControlButton
+        label="Transparantie"
+        controls="opacity-slider-list"
+        isOpen={isOpen}
         onClick={() => toggleWindow('opacity')}
-        className="w-11 h-11 bg-white/80 rounded-xl backdrop-blur-sm shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none hover:bg-white/90 transition-colors"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        aria-label="Transparantie"
-        title={isOpen ? 'Sluit transparantie' : 'Open transparantie'}
       >
-        <SlidersHorizontal size={22} strokeWidth={2} className="text-gray-500 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
-        <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-[10px] rounded-full flex items-center justify-center">
-          {activeSliders.length}
-        </span>
-      </motion.button>
-
+        <SlidersHorizontal size={22} strokeWidth={2} aria-hidden="true" />
+      </MapControlButton>
       <AppWindow
         isOpen={isOpen}
         title="Transparantie"
-        icon={<SlidersHorizontal size={18} />}
         placement="right"
+        showScaleControl={false}
         className="detect-window--compact-bottom-right"
         onClose={closeWindow}
-        footer={hasMore ? (
-          <button
-            type="button"
-            className="detect-window-secondary-button w-full"
-            aria-expanded={isExpanded}
-            aria-controls="opacity-slider-list"
-            onClick={() => setIsExpanded(expanded => !expanded)}
-          >
-            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            {isExpanded ? 'Minder tonen' : `${hiddenSliderCount} meer tonen`}
-          </button>
-        ) : undefined}
       >
-        <div className="p-3">
-          <div id="opacity-slider-list" className="space-y-2.5">
-            {displayedSliders.map(layerName => {
-              const opacity = opacities[layerName]
-              return (
-                <div key={layerName}>
-                  <label className="text-xs font-medium text-gray-700 mb-0.5 block truncate" title={layerName}>
-                    {layerName}
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={opacity * 100}
-                      onChange={(event) => setLayerOpacity(layerName, parseInt(event.target.value) / 100)}
-                      className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                      style={{ accentColor: 'var(--detect-accent)' }}
-                    />
-                    <span className="text-xs text-gray-500 w-8 text-right select-none pointer-events-none">
-                      {Math.round(opacity * 100)}%
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+        <div id="opacity-slider-list" className="detect-opacity-list">
+          {activeSliders.map(layer => (
+            <div key={layer.id} className="detect-opacity-row">
+              <label className="detect-opacity-label" htmlFor={`opacity-${layer.id}`}>
+                <span>{layer.name}</span>
+                <output>{Math.round(layer.opacity * 100)}%</output>
+              </label>
+              <input
+                id={`opacity-${layer.id}`}
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value={Math.round(layer.opacity * 100)}
+                aria-valuetext={`${Math.round(layer.opacity * 100)}%`}
+                onChange={event => {
+                  const opacity = Number(event.target.value) / 100
+                  if (layer.kind === 'imported') setCustomOpacity(layer.layerKey, opacity)
+                  else setLayerOpacity(layer.layerKey, opacity)
+                }}
+              />
+            </div>
+          ))}
         </div>
       </AppWindow>
     </div>

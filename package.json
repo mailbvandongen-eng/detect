@@ -1,7 +1,7 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.64",
+  "version": "2.33.65",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,8 @@
     "build:dist": "vite build --outDir dist",
     "test:field": "node scripts/test-field-reliability.mjs",
     "test:user-layers": "node scripts/test-user-layers.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:controls": "node scripts/test-map-controls.mjs"
   },
   "devDependencies": {
     "@types/react": "^18.3.27",

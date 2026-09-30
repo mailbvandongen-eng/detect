@@ -7,6 +7,18 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.65',
+    date: '30 september 2026',
+    title: 'Rustige kaartbediening en complete transparantie',
+    changes: [
+      'Luchtfoto en satelliet beginnen met een vaste vierkante tijdreisknop. De smalle jaarkeuze opent omhoog naast de kaartknoppen.',
+      'Transparantie toont alle actieve regelbare lagen, inclusief eigen importlagen; lange lijsten scrollen binnen het paneel.',
+      'Alle schuiven, ook tekstgrootte, gebruiken grotere afgeronde vierkante grepen en een ruimer aanraakgebied in de gekozen huisstijl.',
+      'Jaarkeuze en transparantie volgen de één-venster-regel en ondersteunen lichte en donkere modus.',
+      'Zoomen overschrijft de ingestelde AHN/LiDAR-transparantie niet meer.'
+    ]
+  },
+  {
     version: '2.33.64',
     date: '30 september 2026',
     title: 'Buddy-laag blijft echt staan',

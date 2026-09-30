@@ -86,9 +86,10 @@
 /* Transparantie is een compacte werkbalk rechtsonder, gespiegeld aan Presets. */
 [data-detect-theme] .detect-window--compact-bottom-right {
   top: auto;
-  right: 56px;
-  bottom: max(60px, calc(env(safe-area-inset-bottom, 0px) + 60px));
-  max-height: min(65dvh, 520px);
+  right: 64px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 116px);
+  width: min(300px, calc(100vw - 128px));
+  max-height: min(60dvh, calc(100dvh - 188px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)));
 }
 
 /* In het hamburgermenu hoort het versienummer op dezelfde regel als Instellingen. */
@@ -106,4 +107,14 @@
   right: 8px;
   transform: translateY(-50%);
   white-space: nowrap;
+}
+
+[data-detect-theme] .detect-window--compact-bottom-right .detect-window__icon-button {
+  width: 44px;
+  height: 44px;
+}
+
+[data-detect-theme] .detect-window--compact-bottom-right .detect-window__header {
+  gap: 4px;
+  padding: 6px 8px;
 }

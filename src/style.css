@@ -372,31 +372,6 @@ html, body, #root {
   background: var(--detect-accent-soft);
 }
 
-.detect-window__scale input[type="range"]::-webkit-slider-runnable-track {
-  height: 5px;
-  background: rgba(255, 255, 255, 0.42);
-}
-
-.detect-window__scale input[type="range"]::-webkit-slider-thumb {
-  width: 16px;
-  height: 16px;
-  margin-top: -5.5px;
-  background: #fff;
-  border: 2px solid rgba(255, 255, 255, 0.78);
-}
-
-.detect-window__scale input[type="range"]::-moz-range-track {
-  height: 5px;
-  background: rgba(255, 255, 255, 0.42);
-}
-
-.detect-window__scale input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: #fff;
-  border: 2px solid rgba(255, 255, 255, 0.78);
-}
-
 .detect-window .text-xs {
   font-size: 0.82em;
   line-height: 1.4;
@@ -718,80 +693,6 @@ html, body, #root {
 }
 
 /* ============================================================
-   TIJDREIS - zwevend paneel met een compacte parkeerstand
-   ============================================================ */
-.time-travel-panel {
-  position: fixed;
-  left: 50%;
-  bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 16px));
-  z-index: 1200;
-  width: min(430px, 92vw);
-  padding: 2px 12px 10px;
-  transform: translateX(-50%);
-  border: 1px solid rgba(148, 163, 184, 0.45);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.22);
-  backdrop-filter: blur(8px);
-}
-
-.time-travel-collapse-handle {
-  display: flex;
-  width: 100%;
-  min-height: 22px;
-  align-items: center;
-  justify-content: center;
-  margin: 0 0 1px;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  color: inherit;
-  background: transparent;
-  cursor: pointer;
-  touch-action: none;
-}
-
-.time-travel-grip {
-  width: 42px;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(100, 116, 139, 0.55);
-}
-
-.time-travel-collapse-handle:focus-visible {
-  border-radius: 6px;
-  box-shadow: 0 0 0 2px var(--detect-accent, #3b82f6);
-}
-
-.time-travel-reopen {
-  position: fixed;
-  right: 8px;
-  bottom: max(108px, calc(env(safe-area-inset-bottom, 0px) + 108px));
-  z-index: 1200;
-  display: flex;
-  min-width: 74px;
-  height: 44px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 12px;
-  outline: 0;
-  color: var(--detect-accent-text, #1d4ed8);
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
-  backdrop-filter: blur(8px);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.time-travel-reopen:focus-visible {
-  box-shadow: 0 0 0 2px var(--detect-accent, #3b82f6), 0 2px 8px rgba(15, 23, 42, 0.2);
-}
-
-/* ============================================================
    OpenLayers Popup
    ============================================================ */
 .ol-popup {
@@ -996,97 +897,243 @@ html, body, #root {
   color: #b91c1c;
 }
 
-/* ============================================================
-   RANGE SLIDER STYLING - for font size sliders in panels
-   ============================================================ */
+/* Shared square map controls and compact panels. */
+.detect-opacity-control > .detect-map-control,
+.detect-time-travel-control > .detect-map-control {
+  position: fixed;
+  right: 8px;
+  z-index: 900;
+}
 
-/* Header sliders (white on blue background) */
-.header-slider {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  background: transparent !important;
+.detect-opacity-control > .detect-map-control {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+}
+
+.detect-time-travel-control > .detect-map-control {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 108px);
+}
+
+.detect-map-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--detect-window-border);
+  border-radius: 8px;
+  color: var(--detect-window-muted);
+  background: var(--detect-window-surface);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.14);
   cursor: pointer;
-  height: 16px;
+  font: inherit;
 }
 
-.header-slider::-webkit-slider-runnable-track {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.4) !important;
-  border-radius: 2px;
+.detect-map-control:hover,
+.detect-map-control[aria-expanded="true"] {
+  color: var(--detect-accent-text);
+  border-color: var(--detect-accent);
+  background: var(--detect-accent-soft);
 }
 
-.header-slider::-webkit-slider-thumb {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  width: 14px;
-  height: 14px;
-  background: white !important;
-  border-radius: 50%;
-  border: none !important;
-  margin-top: -5px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
+.detect-map-control:focus-visible,
+.detect-time-travel-close:focus-visible {
+  outline: 2px solid var(--detect-accent);
+  outline-offset: 2px;
 }
 
-.header-slider::-moz-range-track {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.4) !important;
-  border-radius: 2px;
+.detect-time-travel-panel {
+  position: fixed;
+  right: 64px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 108px);
+  z-index: 1600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(112px * var(--detect-ui-scale, 1));
+  max-width: calc(100vw - 80px);
+  padding: 4px 8px 10px;
+  border: 1px solid var(--detect-window-border);
+  border-radius: 10px;
+  color: var(--detect-window-text);
+  background: var(--detect-window-surface);
+  box-shadow: var(--detect-window-shadow);
+  font: inherit;
+  font-size: calc(14px * var(--detect-ui-scale, 1));
+  line-height: 1.3;
+  animation: detect-control-rise 0.16s ease-out;
 }
 
-.header-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  background: white !important;
-  border-radius: 50%;
-  border: none !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
+.detect-time-travel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
-/* Standard sliders (gray background in settings) */
-input[type="range"]:not(.header-slider) {
-  -webkit-appearance: none;
-  appearance: none;
+.detect-time-travel-heading output {
+  color: var(--detect-accent-text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.detect-time-travel-close {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  color: var(--detect-window-muted);
   background: transparent;
+  border: 0;
+  border-radius: 8px;
   cursor: pointer;
 }
 
-input[type="range"]:not(.header-slider)::-webkit-slider-runnable-track {
-  height: 6px;
-  background: #e5e7eb;
-  border-radius: 3px;
+.detect-time-travel-endpoint {
+  color: var(--detect-window-muted);
+  font-size: 0.86em;
+  font-variant-numeric: tabular-nums;
 }
 
-input[type="range"]:not(.header-slider)::-webkit-slider-thumb {
+.detect-time-travel-status {
+  padding: 8px 0;
+  overflow-wrap: anywhere;
+  text-align: center;
+  font-size: 0.86em;
+}
+
+.detect-opacity-list {
+  padding: 8px 12px;
+}
+
+.detect-opacity-row + .detect-opacity-row {
+  margin-top: 8px;
+}
+
+.detect-opacity-label {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.94em;
+  font-weight: 500;
+}
+
+.detect-opacity-label span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.detect-opacity-label output {
+  flex: 0 0 auto;
+  color: var(--detect-window-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.detect-opacity-row input {
+  width: 100%;
+}
+
+/* One grip geometry for opacity, time travel, font size and other ranges. */
+input[type="range"] {
+  --detect-range-track: var(--detect-window-border);
+  --detect-range-thumb: var(--detect-accent);
+  --detect-range-thumb-border: var(--detect-window-surface);
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
-  background: #3b82f6;
-  border-radius: 50%;
-  border: 2px solid white;
-  margin-top: -5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  min-height: 44px;
+  height: 44px;
+  background: transparent;
+  accent-color: var(--detect-accent);
   cursor: pointer;
+  touch-action: pan-y;
 }
 
-input[type="range"]:not(.header-slider)::-moz-range-track {
+input[type="range"]::-webkit-slider-runnable-track {
   height: 6px;
-  background: #e5e7eb;
+  background: var(--detect-range-track);
   border-radius: 3px;
 }
 
-input[type="range"]:not(.header-slider)::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: #3b82f6;
-  border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  margin-top: -9px;
+  border: 2px solid var(--detect-range-thumb-border);
+  border-radius: 5px;
+  background: var(--detect-range-thumb);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: var(--detect-range-track);
+  border-radius: 3px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--detect-range-thumb-border);
+  border-radius: 5px;
+  background: var(--detect-range-thumb);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.header-slider,
+.detect-window__scale input[type="range"] {
+  --detect-range-track: rgba(255, 255, 255, 0.42);
+  --detect-range-thumb: #ffffff;
+  --detect-range-thumb-border: var(--detect-accent);
+}
+
+input[type="range"].detect-range-vertical {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 44px;
+  height: clamp(44px, calc(100dvh - 350px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)), 180px);
+  margin: 6px 0;
+  touch-action: none;
+}
+
+input[type="range"].detect-range-vertical::-webkit-slider-runnable-track {
+  width: 6px;
+  height: 100%;
+}
+
+input[type="range"].detect-range-vertical::-webkit-slider-thumb {
+  margin-top: 0;
+  margin-left: -9px;
+}
+
+input[type="range"].detect-range-vertical::-moz-range-track {
+  width: 6px;
+  height: 100%;
+}
+
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--detect-accent);
+  outline-offset: 2px;
+}
+
+input[type="range"]:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+@keyframes detect-control-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detect-time-travel-panel { animation: none; }
+}
 
 /* ============================================================
    DARK MODE
@@ -1156,9 +1203,7 @@ input[type="range"]:not(.header-slider)::-moz-range-thumb {
 }
 
 /* Floating map controls: darken their chrome but never alter map pixels. */
-[data-detect-color-scheme="dark"] button[class*="bg-white"]:not(.detect-window-primary-button),
-[data-detect-color-scheme="dark"] .time-travel-panel,
-[data-detect-color-scheme="dark"] .time-travel-reopen {
+[data-detect-color-scheme="dark"] button[class*="bg-white"]:not(.detect-window-primary-button) {
   color: #e5e7eb !important;
   background: rgba(31, 41, 55, 0.94) !important;
   border-color: #4b5563 !important;
