@@ -34,6 +34,8 @@ import { PrintTool } from './components/UI/PrintTool'
 import { useHeading } from './hooks/useHeading'
 import { useBuddyLayers } from './hooks/useBuddyLayers'
 import { useSettingsStore, useUIStore, useWeatherStore, useGPSStore } from './store'
+import { useCustomLayerStore } from './store/customLayerStore'
+import { seedFrance2026LayerIfPresent } from './utils/france2026Seed'
 import { AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { version } from '../package.json'
@@ -43,6 +45,11 @@ function App() {
   // Initialize hooks
   useHeading()
   useBuddyLayers()
+
+  const customLayers = useCustomLayerStore(state => state.layers)
+  useEffect(() => {
+    seedFrance2026LayerIfPresent()
+  }, [customLayers])
   // Keep a passive current position available for the blue startup dot.
   // iOS standalone PWAs can resume without remounting the React tree, so
   // refresh it on pageshow / when the app becomes visible again as well.
