@@ -43,8 +43,8 @@ export function BackgroundsPanel() {
               <LayerItem name="OpenStreetMap" type="base" />
               <LayerItem name="Luchtfoto" type="base" />
               <LayerItem name="Labels Overlay" type="overlay" />
-              <LayerItem name="TMK 1850" type="base" />
-              <LayerItem name="Bonnebladen 1900" type="base" />
+              <LayerItem name="TMK 1850" type="overlay" />
+              <LayerItem name="Bonnebladen 1900" type="overlay" />
             </div>
           </motion.div>
         </>
