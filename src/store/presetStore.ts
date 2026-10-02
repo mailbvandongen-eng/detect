@@ -154,6 +154,22 @@ const BUILT_IN_PRESETS: Preset[] = [
       'Geomorfologie': 1
     },
     isBuiltIn: true
+  },
+  {
+    id: 'veld-tmk-1850',
+    name: '1850',
+    icon: 'Map',
+    layers: [],
+    baseLayer: 'TMK 1850',
+    isBuiltIn: true
+  },
+  {
+    id: 'veld-bonnebladen-1900',
+    name: '1900',
+    icon: 'Map',
+    layers: [],
+    baseLayer: 'Bonnebladen 1900',
+    isBuiltIn: true
   }
 ]
 
