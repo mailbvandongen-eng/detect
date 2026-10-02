@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.66',
+    date: '2 oktober 2026',
+    title: 'Mijn lagen eenvoudiger beheren',
+    changes: [
+      'Eigen puntlagen en buddy-lagen kunnen nu direct onder Mijn lagen worden hernoemd en van kleur veranderd.',
+      'Buddybeheer staat voortaan direct bij de buddy-laag; alleen de eigenaar kan naam, kleur, leden en verwijderen beheren.',
+      'Geïmporteerde lagen kunnen nu direct onder Mijn lagen worden hernoemd; gekoppelde handmatige punten volgen dezelfde naam.',
+      'Gedeelde importlagen van iemand anders blijven lokaal beschermd tegen hernoemen of verwijderen.'
+    ]
+  },
+  {
     version: '2.33.65',
     date: '30 september 2026',
     title: 'Rustige kaartbediening en complete transparantie',
