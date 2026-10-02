@@ -162,9 +162,10 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'veld-tmk-1850',
     name: '1850',
     icon: 'Map',
-    layers: ['AMK Monumenten'],
-    baseLayer: 'TMK 1850',
+    layers: ['TMK 1850', 'AMK Monumenten'],
+    baseLayer: 'Luchtfoto',
     layerOpacities: {
+      'TMK 1850': 0.8,
       'AMK Monumenten': 1
     },
     isBuiltIn: true
@@ -173,9 +174,10 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'veld-bonnebladen-1900',
     name: '1900',
     icon: 'Map',
-    layers: ['AMK Monumenten'],
-    baseLayer: 'Bonnebladen 1900',
+    layers: ['Bonnebladen 1900', 'AMK Monumenten'],
+    baseLayer: 'Luchtfoto',
     layerOpacities: {
+      'Bonnebladen 1900': 0.8,
       'AMK Monumenten': 1
     },
     isBuiltIn: true
@@ -223,9 +225,7 @@ const BASE_LAYER_NAMES = [
   'OpenStreetMap',
   'Luchtfoto',
   'Satelliet (wereld)',
-  'Hybride (wereld)',
-  'TMK 1850',
-  'Bonnebladen 1900'
+  'Hybride (wereld)'
 ]
 
 const BUILT_IN_PRESET_MAP = new Map(BUILT_IN_PRESETS.map((preset) => [preset.id, preset]))
