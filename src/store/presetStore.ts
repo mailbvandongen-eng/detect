@@ -121,6 +121,39 @@ const BUILT_IN_PRESETS: Preset[] = [
       'Bodemkaart': 0.10
     },
     isBuiltIn: true
+  },
+  {
+    id: 'veld-hoogtekaart',
+    name: 'Hoogtekaart',
+    icon: 'Mountain',
+    layers: ['AHN4 Hoogtekaart Kleur'],
+    baseLayer: 'Esri (licht)',
+    layerOpacities: {
+      'AHN4 Hoogtekaart Kleur': 1
+    },
+    isBuiltIn: true
+  },
+  {
+    id: 'veld-lidar',
+    name: 'LiDAR',
+    icon: 'Grid',
+    layers: ['AHN4 Multi-Hillshade NL'],
+    baseLayer: 'Esri (licht)',
+    layerOpacities: {
+      'AHN4 Multi-Hillshade NL': 1
+    },
+    isBuiltIn: true
+  },
+  {
+    id: 'veld-geomorfologie',
+    name: 'Geomorfologie',
+    icon: 'Layers',
+    layers: ['Geomorfologie'],
+    baseLayer: 'Esri (licht)',
+    layerOpacities: {
+      'Geomorfologie': 1
+    },
+    isBuiltIn: true
   }
 ]
 
