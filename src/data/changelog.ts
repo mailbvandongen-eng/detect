@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.71',
+    date: '3 oktober 2026',
+    title: 'AMK altijd zichtbaar in veldpresets',
+    changes: [
+      'Hoogtekaart, LiDAR, Geomorfologie, 1850 en 1900 tonen altijd ook AMK Monumenten.',
+      'De gekozen terrein- of historische laag staat op 100%; AMK blijft als leidende referentielaag actief.',
+      'Wisselen tussen presets houdt dezelfde locatie en zoom vast.'
+    ]
+  },
+  {
     version: '2.33.70',
     date: '3 oktober 2026',
     title: 'Snelle veldpresets voor akkerniveau',
