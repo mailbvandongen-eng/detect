@@ -126,10 +126,11 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'veld-hoogtekaart',
     name: 'Hoogtekaart',
     icon: 'Mountain',
-    layers: ['AHN4 Hoogtekaart Kleur'],
+    layers: ['AHN4 Hoogtekaart Kleur', 'AMK Monumenten'],
     baseLayer: 'Esri (licht)',
     layerOpacities: {
-      'AHN4 Hoogtekaart Kleur': 1
+      'AHN4 Hoogtekaart Kleur': 1,
+      'AMK Monumenten': 1
     },
     isBuiltIn: true
   },
@@ -137,10 +138,11 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'veld-lidar',
     name: 'LiDAR',
     icon: 'Grid',
-    layers: ['AHN4 Multi-Hillshade NL'],
+    layers: ['AHN4 Multi-Hillshade NL', 'AMK Monumenten'],
     baseLayer: 'Esri (licht)',
     layerOpacities: {
-      'AHN4 Multi-Hillshade NL': 1
+      'AHN4 Multi-Hillshade NL': 1,
+      'AMK Monumenten': 1
     },
     isBuiltIn: true
   },
@@ -148,10 +150,11 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'veld-geomorfologie',
     name: 'Geomorfologie',
     icon: 'Layers',
-    layers: ['Geomorfologie'],
+    layers: ['Geomorfologie', 'AMK Monumenten'],
     baseLayer: 'Esri (licht)',
     layerOpacities: {
-      'Geomorfologie': 1
+      'Geomorfologie': 1,
+      'AMK Monumenten': 1
     },
     isBuiltIn: true
   },
@@ -159,16 +162,22 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'veld-tmk-1850',
     name: '1850',
     icon: 'Map',
-    layers: [],
+    layers: ['AMK Monumenten'],
     baseLayer: 'TMK 1850',
+    layerOpacities: {
+      'AMK Monumenten': 1
+    },
     isBuiltIn: true
   },
   {
     id: 'veld-bonnebladen-1900',
     name: '1900',
     icon: 'Map',
-    layers: [],
+    layers: ['AMK Monumenten'],
     baseLayer: 'Bonnebladen 1900',
+    layerOpacities: {
+      'AMK Monumenten': 1
+    },
     isBuiltIn: true
   }
 ]
