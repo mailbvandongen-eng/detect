@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.69',
+    date: '3 oktober 2026',
+    title: 'Eigen presets kunnen weg',
+    changes: [
+      'Zelfgemaakte presets hebben nu een verwijderknop in het presetvenster.',
+      'Na bevestiging wordt alleen die eigen preset verwijderd; de drie standaardpresets blijven beschermd.'
+    ]
+  },
+  {
     version: '2.33.68',
     date: '3 oktober 2026',
     title: 'Frankrijk 2026 krijgt de al uitgezochte punten terug',
