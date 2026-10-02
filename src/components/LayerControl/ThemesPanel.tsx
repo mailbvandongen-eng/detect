@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight, Settings2, Trash2 } from 'lucide-react'
 import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
+import { BuddyLayerPanel } from '../CustomPoints/BuddyLayerPanel'
 import { useCustomLayerStore } from '../../store/customLayerStore'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
@@ -25,12 +26,28 @@ const HERITAGE_PLATFORMS = [
   { name: 'Google Open Heritage', url: 'https://artsandculture.google.com/project/openheritage', desc: '26+ UNESCO sites in 3D' },
 ]
 
-function PointLayerItem({ layer, onToggle, onDelete }: {
+function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: {
   layer: CustomPointLayer
   onToggle: () => void
   onDelete: () => void
+  onRename: (name: string) => void
+  onChangeColor: (color: string) => void
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [nameDraft, setNameDraft] = useState(layer.name)
+
+  const editableMetadata = !layer.buddyLayerId || layer.buddyRole === 'owner'
+  const canDelete = !layer.buddyLayerId || layer.buddyRole === 'owner'
+  const layerColors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899']
+
+  const saveName = () => {
+    const nextName = nameDraft.trim()
+    if (!editableMetadata || !nextName) {
+      setNameDraft(layer.name)
+      return
+    }
+    if (nextName !== layer.name) onRename(nextName)
+  }
 
   const handleDelete = () => {
     const pointLabel = layer.points.length === 1 ? '1 punt' : `${layer.points.length} punten`
@@ -76,14 +93,61 @@ function PointLayerItem({ layer, onToggle, onDelete }: {
       </div>
 
       {expanded && (
-        <div className="mx-1 mb-2 mt-1 rounded-lg border border-red-100 bg-white p-2 shadow-sm">
-          <button
-            onClick={handleDelete}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
-          >
-            <Trash2 size={15} />
-            Laag verwijderen
-          </button>
+        <div className="mx-1 mb-2 mt-1 space-y-2 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
+          {editableMetadata && (
+            <>
+              <div className="space-y-1">
+                <div className="text-[11px] font-medium text-gray-600">Naam</div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={nameDraft}
+                    onChange={event => setNameDraft(event.target.value)}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter') saveName()
+                      if (event.key === 'Escape') setNameDraft(layer.name)
+                    }}
+                    className="min-w-0 flex-1 rounded-lg bg-gray-100 px-2 py-1.5 text-xs border-0 outline-none focus:ring-2 focus:ring-purple-500"
+                    aria-label="Laagnaam"
+                  />
+                  <button
+                    onClick={saveName}
+                    disabled={!nameDraft.trim() || nameDraft.trim() === layer.name}
+                    className="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+                  >
+                    Opslaan
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-[11px] font-medium text-gray-600">Kleur</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {layerColors.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => onChangeColor(color)}
+                      className={`h-6 w-6 rounded-full border-2 ${color === layer.color ? 'border-gray-700' : 'border-white'} shadow-sm`}
+                      style={{ backgroundColor: color }}
+                      aria-label={`Kleur ${color}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {layer.buddyLayerId && <BuddyLayerPanel layer={layer} />}
+
+          {canDelete && (
+            <button
+              onClick={handleDelete}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
+            >
+              <Trash2 size={15} />
+              Laag verwijderen
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -94,7 +158,7 @@ export function ThemesPanel() {
   const themesPanelOpen = useUIStore(state => state.activeWindow === 'layers')
   const toggleThemesPanel = useUIStore(state => state.toggleThemesPanel)
   const openWindow = useUIStore(state => state.openWindow)
-  const { layers: customLayers, toggleVisibility, removeLayer } = useCustomPointLayerStore()
+  const { layers: customLayers, toggleVisibility, removeLayer, updateLayer } = useCustomPointLayerStore()
   const importedLayers = useCustomLayerStore(state => state.layers)
   const standalonePointLayers = getStandalonePointLayers(customLayers, importedLayers)
 
@@ -122,6 +186,8 @@ export function ThemesPanel() {
                   layer={layer}
                   onToggle={() => toggleVisibility(layer.id)}
                   onDelete={() => removeLayer(layer.id)}
+                  onRename={(name) => updateLayer(layer.id, { name })}
+                  onChangeColor={(color) => updateLayer(layer.id, { color })}
                 />
               ))}
               {importedLayers.map(layer => (
