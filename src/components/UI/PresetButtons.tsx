@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Bookmark } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Bookmark, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore, useMapStore } from '../../store'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
@@ -61,7 +61,7 @@ export function PresetButtons() {
   const presetsPanelOpen = useUIStore(state => state.activeWindow === 'presets')
   const togglePresetsPanel = useUIStore(state => state.togglePresetsPanel)
   const closeAllPanels = useUIStore(state => state.closeAllPanels)
-  const { presets, applyPreset, updatePreset, createPreset, resetToDefaults } = usePresetStore()
+  const { presets, applyPreset, updatePreset, createPreset, deletePreset, resetToDefaults } = usePresetStore()
   const visible = useLayerStore(state => state.visible)
 
   const fontScale = useSettingsStore(state => state.fontScale)
@@ -141,6 +141,13 @@ export function PresetButtons() {
     setNewPresetName('')
     setRememberMapView(false)
     setShowAddPreset(false)
+  }
+
+  const handleDeletePreset = (event: React.MouseEvent, preset: Preset) => {
+    event.stopPropagation()
+    if (preset.isBuiltIn) return
+    if (!confirm(`Preset "${preset.name}" verwijderen?`)) return
+    deletePreset(preset.id)
   }
 
   const handleResetPresets = () => {
@@ -269,6 +276,16 @@ export function PresetButtons() {
                     title="Huidige lagen opslaan naar deze preset"
                   >
                     <Save size={13} className="text-gray-400 hover:text-blue-500" />
+                  </span>
+                )}
+                {!preset.isBuiltIn && (
+                  <span
+                    onClick={(event) => handleDeletePreset(event, preset)}
+                    className="p-1 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                    title="Preset verwijderen"
+                    aria-label={`Preset ${preset.name} verwijderen`}
+                  >
+                    <Trash2 size={13} className="text-gray-400 hover:text-red-600" />
                   </span>
                 )}
               </button>
