@@ -219,8 +219,8 @@ export function ThemesPanel() {
                 <LayerItem name="OpenStreetMap" type="base" />
                 <LayerItem name="Luchtfoto" type="base" hasOverlay displayName="Luchtfoto (NL)" />
                 <LayerItem name="Satelliet (wereld)" type="base" hasOverlay />
-                <LayerItem name="TMK 1850" type="base" hasOverlay />
-                <LayerItem name="Bonnebladen 1900" type="base" hasOverlay />
+                <LayerItem name="TMK 1850" type="overlay" hasOverlay />
+                <LayerItem name="Bonnebladen 1900" type="overlay" hasOverlay />
               </div>
             </div>
 
