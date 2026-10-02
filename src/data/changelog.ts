@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.70',
+    date: '3 oktober 2026',
+    title: 'Snelle veldpresets voor akkerniveau',
+    changes: [
+      'Nieuwe presets Hoogtekaart, LiDAR en Geomorfologie schakelen direct naar één analysebeeld op 100% dekking.',
+      'Elke veldpreset zet andere overlays uit, zodat wisselen geen handmatig laagbeheer meer vraagt.',
+      'De huidige kaartpositie en zoom blijven staan; de presets zijn bedoeld om op dezelfde akker snel tussen terreinbeelden te wisselen.'
+    ]
+  },
+  {
     version: '2.33.69',
     date: '3 oktober 2026',
     title: 'Eigen presets kunnen weg',
