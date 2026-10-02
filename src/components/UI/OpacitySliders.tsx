@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
 import { useLayerStore } from '../../store/layerStore'
-import { useCustomLayerStore } from '../../store/customLayerStore'
 import { useUIStore } from '../../store/uiStore'
 import { getActiveOpacityLayers } from '../../utils/opacityLayers'
 import { AppWindow } from './AppWindow'
@@ -15,9 +14,7 @@ export function OpacitySliders() {
   const opacities = useLayerStore(state => state.opacity)
   const registeredLayers = useLayerStore(state => state.layers)
   const setLayerOpacity = useLayerStore(state => state.setLayerOpacity)
-  const customLayers = useCustomLayerStore(state => state.layers)
-  const setCustomOpacity = useCustomLayerStore(state => state.setOpacity)
-  const activeSliders = getActiveOpacityLayers(visibleLayers, opacities, registeredLayers, customLayers)
+  const activeSliders = getActiveOpacityLayers(visibleLayers, opacities, registeredLayers)
 
   useEffect(() => {
     if (isOpen && activeSliders.length === 0) closeWindow()
@@ -69,8 +66,7 @@ export function OpacitySliders() {
                 aria-valuetext={`${Math.round(layer.opacity * 100)}%`}
                 onChange={event => {
                   const opacity = Number(event.target.value) / 100
-                  if (layer.kind === 'imported') setCustomOpacity(layer.layerKey, opacity)
-                  else setLayerOpacity(layer.layerKey, opacity)
+                  setLayerOpacity(layer.layerKey, opacity)
                 }}
               />
             </div>
