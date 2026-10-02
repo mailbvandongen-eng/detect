@@ -14,9 +14,7 @@ const BASE_LAYER_NAMES = [
   'OpenStreetMap',
   'Luchtfoto',
   'Satelliet (wereld)',
-  'Hybride (wereld)',
-  'TMK 1850',
-  'Bonnebladen 1900'
+  'Hybride (wereld)'
 ]
 
 const AUTO_REFERENCE_BASE_LAYERS = ['Luchtfoto', 'Satelliet (wereld)', 'Hybride (wereld)']
