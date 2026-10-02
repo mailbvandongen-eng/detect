@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Bookmark, Trash2 } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Bookmark, Trash2, Map } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore, useMapStore } from '../../store'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
@@ -15,7 +15,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Search,
   Target,
   Layers,
-  Grid: Grid3X3
+  Grid: Grid3X3,
+  Map
 }
 
 const ICON_COLORS: Record<string, string> = {
@@ -26,7 +27,8 @@ const ICON_COLORS: Record<string, string> = {
   Search: 'text-amber-600',
   Target: 'text-red-600',
   Layers: 'text-blue-600',
-  Grid: 'text-lime-600'
+  Grid: 'text-lime-600',
+  Map: 'text-amber-700'
 }
 
 const HOVER_COLORS: Record<string, string> = {
@@ -37,7 +39,8 @@ const HOVER_COLORS: Record<string, string> = {
   Search: 'hover:bg-amber-50',
   Target: 'hover:bg-red-50',
   Layers: 'hover:bg-blue-50',
-  Grid: 'hover:bg-lime-50'
+  Grid: 'hover:bg-lime-50',
+  Map: 'hover:bg-amber-50'
 }
 
 const BASE_LAYERS = [
