@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.67',
+    date: '3 oktober 2026',
+    title: 'Transparantie alleen voor kaartlagen',
+    changes: [
+      'Eigen lagen onder Mijn lagen verschijnen niet meer in Transparantie.',
+      'Mijn Vondsten en geïmporteerde lagen zoals Frankrijk 2026 houden hun normale zichtbaarheid zonder overbodige transparantieschuif.',
+      'Transparantie blijft bedoeld voor actieve kaart- en analyselagen zoals LiDAR, geomorfologie en hoogtekaarten.'
+    ]
+  },
+  {
     version: '2.33.66',
     date: '2 oktober 2026',
     title: 'Mijn lagen eenvoudiger beheren',
