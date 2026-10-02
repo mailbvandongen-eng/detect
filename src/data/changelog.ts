@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.72',
+    date: '3 oktober 2026',
+    title: '1850 en 1900 als combineerbare historische lagen',
+    changes: [
+      'TMK 1850 en Bonnebladen 1900 zijn niet langer exclusieve basiskaarten en kunnen tegelijk met Luchtfoto NL worden gebruikt.',
+      'Beide historische lagen hebben een eigen transparantieslider en kunnen desgewenst ook tegelijk zichtbaar zijn.',
+      'De presets 1850 en 1900 gebruiken Luchtfoto NL als onderlaag en houden AMK Monumenten actief.'
+    ]
+  },
+  {
     version: '2.33.71',
     date: '3 oktober 2026',
     title: 'AMK altijd zichtbaar in veldpresets',
