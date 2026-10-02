@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.68',
+    date: '3 oktober 2026',
+    title: 'Frankrijk 2026 krijgt de al uitgezochte punten terug',
+    changes: [
+      'De bestaande laag Frankrijk 2026 wordt éénmalig automatisch gevuld met de eerder samengestelde Thédirac/Quercy-set.',
+      'De set bevat archeologische plekken, bezienswaardigheden, mineralen/geologie, fossielen en startpunten van wandelroutes uit de al aanwezige Detect-data.',
+      'Bestaande eigen objecten blijven staan; alleen ontbrekende vaste punten worden toegevoegd en broninformatie blijft in de popup beschikbaar.'
+    ]
+  },
+  {
     version: '2.33.67',
     date: '3 oktober 2026',
     title: 'Transparantie alleen voor kaartlagen',
