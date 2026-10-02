@@ -39,6 +39,7 @@ function VisibilityButton({ visible, color, onClick, title }: {
 
 export function CustomLayerItem({ layer, compact = false }: Props) {
   const toggleVisibility = useCustomLayerStore(state => state.toggleVisibility)
+  const updateImportedLayer = useCustomLayerStore(state => state.updateLayer)
   const removeImportedLayer = useCustomLayerStore(state => state.removeLayer)
   const linkedPointLayer = useCustomPointLayerStore(state =>
     state.layers.find(pointLayer =>
@@ -47,7 +48,9 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
     )
   )
   const removePointLayer = useCustomPointLayerStore(state => state.removeLayer)
+  const updatePointLayer = useCustomPointLayerStore(state => state.updateLayer)
   const [expanded, setExpanded] = useState(false)
+  const [nameDraft, setNameDraft] = useState(layer.name)
   const user = useAuthStore(state => state.user)
   const [shareEmail, setShareEmail] = useState('')
   const [sharePermission, setSharePermission] = useState<SharePermission>('edit')
@@ -55,6 +58,10 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
   const [shareBusy, setShareBusy] = useState(false)
   const [shareError, setShareError] = useState<string | null>(null)
   const isIncomingShare = !!layer.shareId && !!layer.shareOwnerUid && layer.shareOwnerUid !== user?.uid
+
+  useEffect(() => {
+    setNameDraft(layer.name)
+  }, [layer.name])
 
   useEffect(() => {
     if (!expanded || !user || !layer.contentHash) return
@@ -102,6 +109,18 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
     : counts.lines > 0
       ? layer.style.lines.color
       : layer.style.polygons.strokeColor
+
+  const handleRename = () => {
+    if (isIncomingShare) return
+    const nextName = nameDraft.trim()
+    if (!nextName || nextName === layer.name) {
+      setNameDraft(layer.name)
+      return
+    }
+
+    updateImportedLayer(layer.id, { name: nextName })
+    if (linkedPointLayer) updatePointLayer(linkedPointLayer.id, { name: nextName })
+  }
 
   const handleDelete = () => {
     const objectLabel = featureCount === 1 ? '1 object' : `${featureCount} objecten`
@@ -151,6 +170,32 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
 
       {expanded && (
         <div className="mx-1 mb-2 mt-1 space-y-2 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
+          {!isIncomingShare && (
+            <div className="space-y-1">
+              <div className="text-[11px] font-medium text-gray-600">Naam</div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={nameDraft}
+                  onChange={event => setNameDraft(event.target.value)}
+                  onKeyDown={event => {
+                    if (event.key === 'Enter') handleRename()
+                    if (event.key === 'Escape') setNameDraft(layer.name)
+                  }}
+                  className="min-w-0 flex-1 rounded-lg bg-gray-100 px-2 py-1.5 text-xs border-0 outline-none focus:ring-2 focus:ring-cyan-500"
+                  aria-label="Laagnaam"
+                />
+                <button
+                  onClick={handleRename}
+                  disabled={!nameDraft.trim() || nameDraft.trim() === layer.name}
+                  className="rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+                >
+                  Opslaan
+                </button>
+              </div>
+            </div>
+          )}
+
           {user ? (
             isIncomingShare ? (
               <div className="space-y-1.5 rounded-lg bg-cyan-50 p-2 text-xs text-cyan-900">
