@@ -25,14 +25,6 @@ jobs:
       - name: Broncode ophalen
         uses: actions/checkout@v4
 
-      - name: Aanmelden bij Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DETECT }}
-          token_format: access_token
-          access_token_scopes: https://www.googleapis.com/auth/firebase
-
       - name: Node installeren
         uses: actions/setup-node@v4
         with:
@@ -40,18 +32,50 @@ jobs:
 
       - name: Firestore-regels direct publiceren
         env:
-          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
-          PROJECT_ID: ${{ steps.auth.outputs.project_id }}
+          FIREBASE_SERVICE_ACCOUNT_DETECT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DETECT }}
         run: |
           node <<'NODE'
           const fs = require('fs')
+          const crypto = require('crypto')
 
-          const token = process.env.ACCESS_TOKEN
-          const project = process.env.PROJECT_ID
-          if (!token || !project) throw new Error('Google access token of project-id ontbreekt.')
+          const credentials = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_DETECT || '{}')
+          const project = credentials.project_id
+          const clientEmail = credentials.client_email
+          const privateKey = credentials.private_key
+
+          if (!project || !clientEmail || !privateKey) {
+            throw new Error('GitHub secret FIREBASE_SERVICE_ACCOUNT_DETECT is onvolledig.')
+          }
+
+          const b64url = value => Buffer.from(value).toString('base64url')
+          const now = Math.floor(Date.now() / 1000)
+          const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
+          const payload = b64url(JSON.stringify({
+            iss: clientEmail,
+            scope: 'https://www.googleapis.com/auth/firebase',
+            aud: 'https://oauth2.googleapis.com/token',
+            iat: now,
+            exp: now + 3600
+          }))
+          const unsigned = `${header}.${payload}`
+          const signature = crypto.sign('RSA-SHA256', Buffer.from(unsigned), privateKey).toString('base64url')
+          const assertion = `${unsigned}.${signature}`
+
+          const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+              assertion
+            })
+          })
+          const tokenBody = await tokenResponse.json()
+          if (!tokenResponse.ok || !tokenBody.access_token) {
+            throw new Error(`OAuth token ophalen mislukt: ${JSON.stringify(tokenBody)}`)
+          }
 
           const headers = {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokenBody.access_token}`,
             'Content-Type': 'application/json'
           }
 
@@ -72,42 +96,33 @@ jobs:
             {
               method: 'POST',
               body: JSON.stringify({
-                source: {
-                  files: [{ name: 'firestore.rules', content: rules }]
-                }
+                source: { files: [{ name: 'firestore.rules', content: rules }] }
               })
             }
           )
 
           const releaseName = `projects/${project}/releases/cloud.firestore`
           const releaseUrl = `https://firebaserules.googleapis.com/v1/${releaseName}`
-
           const probe = await fetch(releaseUrl, { headers })
+
           if (probe.status === 404) {
             await api(
               `https://firebaserules.googleapis.com/v1/projects/${project}/releases`,
               {
                 method: 'POST',
-                body: JSON.stringify({
-                  name: releaseName,
-                  rulesetName: ruleset.name
-                })
+                body: JSON.stringify({ name: releaseName, rulesetName: ruleset.name })
               }
             )
           } else if (probe.ok) {
             await api(releaseUrl, {
               method: 'PATCH',
               body: JSON.stringify({
-                release: {
-                  name: releaseName,
-                  rulesetName: ruleset.name
-                },
+                release: { name: releaseName, rulesetName: ruleset.name },
                 updateMask: 'rulesetName'
               })
             })
           } else {
-            const errorText = await probe.text()
-            throw new Error(`Release controleren mislukt: ${probe.status} ${errorText}`)
+            throw new Error(`Release controleren mislukt: ${probe.status} ${await probe.text()}`)
           }
 
           console.log(`Firestore-regels gepubliceerd: ${ruleset.name}`)
