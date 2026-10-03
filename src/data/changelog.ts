@@ -7,6 +7,18 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.73',
+    date: '3 oktober 2026',
+    title: 'Presets opgeschoond en Thédirac terug',
+    changes: [
+      'Detectie Basis en Terreinanalyse zijn verwijderd; Detectie Uitgebreid heet voortaan Detectie en is de vaste detectie-preset.',
+      'Nieuwe en gewijzigde vaste presets verschijnen na een update automatisch; Reset is daarvoor niet meer nodig.',
+      'Hoogtekaart en LiDAR gebruiken één ArcGIS kaartbeeld in plaats van los gestretchte tegels, zodat de zichtbare kleurblokken en naden verdwijnen.',
+      'AMK Monumenten staat in de Nederlandse veldpresets standaard op 60%.',
+      'Thédirac 2026 is terug met de volledige vaste onderzoeksset: archeologie, bezienswaardigheden, mineralen, fossielen, wandelroutes en de relevante terreinlagen.'
+    ]
+  },
+  {
     version: '2.33.72',
     date: '3 oktober 2026',
     title: '1850 en 1900 als combineerbare historische lagen',
