@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.74',
+    date: '3 oktober 2026',
+    title: 'Firebase-regels voortaan automatisch',
+    changes: [
+      'GitHub heeft nu een aparte workflow die Firestore Security Rules automatisch naar Firebase publiceert.',
+      'Na een eenmalige serviceaccount-koppeling hoeft Firebase niet meer handmatig bijgewerkt te worden bij wijzigingen aan firestore.rules.',
+      'Een buddy-laag geeft bij een rechtenfout voortaan een duidelijke melding dat de Firestore-regels niet zijn gepubliceerd.'
+    ]
+  },
+  {
     version: '2.33.73',
     date: '3 oktober 2026',
     title: 'Presets opgeschoond en Thédirac terug',
