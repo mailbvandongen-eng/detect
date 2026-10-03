@@ -20,7 +20,7 @@ jobs:
           distribution: temurin
           java-version: 21
       - name: Installeer testgereedschap
-        run: npm install --prefix "$RUNNER_TEMP/buddy-test" --no-audit --no-fund typescript firebase @firebase/rules-unit-testing firebase-tools
+        run: npm install --prefix "$RUNNER_TEMP/buddy-test" --no-audit --no-fund typescript@5.9.3 firebase@12.7.0 @firebase/rules-unit-testing firebase-tools
       - name: Test echte appfuncties tegen Firebase-emulator
         env:
           BUDDY_TEST_MODULE_ROOT: ${{ runner.temp }}/buddy-test
