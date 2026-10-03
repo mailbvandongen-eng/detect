@@ -2,11 +2,29 @@ name: Test buddy-flow
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/test-buddy-rules.yml', 'scripts/test-buddy-flow.mjs', 'scripts/test-buddy-ui.mjs', 'src/hooks/useBuddyLayers.ts', 'src/utils/buddyLayerState.ts', 'src/utils/userLayerCatalog.ts', 'src/store/buddySyncStore.ts', 'src/components/CustomPoints/CreateLayerModal.tsx', 'src/hooks/useCloudSync.ts', 'src/services/buddyLayers.ts', 'firestore.rules']
+    paths: ['.github/workflows/test-buddy-rules.yml', 'scripts/test-buddy*.mjs', 'src/hooks/useBuddyLayers.ts', 'src/utils/buddyLayerState.ts', 'src/utils/userLayerCatalog.ts', 'src/store/buddySyncStore.ts', 'src/components/CustomPoints/CreateLayerModal.tsx', 'src/components/CustomPoints/BuddyLayerPanel.tsx', 'src/components/LayerControl/ThemesPanel.tsx', 'src/detect-theme.css', 'src/hooks/useCloudSync.ts', 'src/services/buddyLayers.ts', 'firestore.rules']
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  test-buddy-mobile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Installeer WebKit voor telefoonbediening
+        run: |
+          npm install --prefix "$RUNNER_TEMP/buddy-browser" --no-audit --no-fund playwright@1.62.1
+          "$RUNNER_TEMP/buddy-browser/node_modules/.bin/playwright" install --with-deps webkit
+      - name: Test adresinvoer, delen en gekozen kleuren op iPhone-formaat
+        env:
+          BUDDY_BROWSER_MODULE_ROOT: ${{ runner.temp }}/buddy-browser
+        run: node scripts/test-buddy-sharing-browser.mjs
   test-buddy-flow:
     runs-on: ubuntu-latest
     timeout-minutes: 10

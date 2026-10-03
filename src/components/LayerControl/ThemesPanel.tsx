@@ -36,6 +36,7 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
 }) {
   const [expanded, setExpanded] = useState(false)
   const [nameDraft, setNameDraft] = useState(layer.name)
+  const [showColors, setShowColors] = useState(false)
 
   const editableMetadata = !layer.buddyLayerId || layer.buddyRole === 'owner'
   const canDelete = !layer.buddyLayerId || layer.buddyRole === 'owner'
@@ -62,13 +63,13 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
 
   return (
     <div className="border-b border-gray-100 py-0.5">
-      <div className="flex items-center gap-2 rounded px-1 py-1 hover:bg-purple-50">
+      <div className="detect-layer-row flex items-center gap-2 rounded px-1 py-1">
         <button
           onClick={(event) => { event.stopPropagation(); onToggle() }}
-          className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0"
+          className="detect-layer-visibility rounded flex items-center justify-center flex-shrink-0"
           style={{
-            backgroundColor: layer.visible ? layer.color : 'white',
-            border: `2px solid ${layer.visible ? layer.color : '#9ca3af'}`,
+            backgroundColor: layer.visible ? 'var(--detect-accent)' : 'transparent',
+            border: `2px solid ${layer.visible ? 'var(--detect-accent)' : 'var(--detect-window-muted)'}`,
           }}
           title={layer.visible ? 'Laag verbergen' : 'Laag tonen'}
         >
@@ -76,7 +77,7 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
         </button>
         <button
           onClick={(event) => { event.stopPropagation(); onToggle() }}
-          className="min-w-0 flex-1 truncate text-left text-gray-700"
+          className="detect-layer-name min-w-0 flex-1 truncate text-left text-gray-700"
           style={{ fontSize: '0.9em' }}
           title={layer.name}
         >
@@ -85,7 +86,7 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
         <span className="flex-shrink-0 text-[10px] text-gray-400">{layer.points.length}</span>
         <button
           onClick={(event) => { event.stopPropagation(); setExpanded(value => !value) }}
-          className={`p-1 ${expanded ? 'text-red-600' : 'text-purple-700'}`}
+          className="detect-window-icon-button shrink-0"
           title="Laaginstellingen"
           aria-expanded={expanded}
         >
@@ -108,13 +109,13 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
                       if (event.key === 'Enter') saveName()
                       if (event.key === 'Escape') setNameDraft(layer.name)
                     }}
-                    className="min-w-0 flex-1 rounded-lg bg-gray-100 px-2 py-1.5 text-xs border-0 outline-none focus:ring-2 focus:ring-purple-500"
+                    className="detect-form-field min-w-0 flex-1"
                     aria-label="Laagnaam"
                   />
                   <button
                     onClick={saveName}
                     disabled={!nameDraft.trim() || nameDraft.trim() === layer.name}
-                    className="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+                    className="detect-window-primary-button disabled:opacity-40"
                   >
                     Opslaan
                   </button>
@@ -123,7 +124,11 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
 
               <div className="space-y-1">
                 <div className="text-[11px] font-medium text-gray-600">Kleur</div>
-                <div className="flex flex-wrap gap-1.5">
+                <button type="button" onClick={() => setShowColors(value => !value)} aria-expanded={showColors} className="detect-window-secondary-button gap-2">
+                  <span className="h-4 w-4 rounded-full" style={{ backgroundColor: layer.color }} />
+                  Laagkleur kiezen
+                </button>
+                {showColors && <div className="flex flex-wrap gap-1.5">
                   {layerColors.map(color => (
                     <button
                       key={color}
@@ -133,7 +138,7 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
                       aria-label={`Kleur ${color}`}
                     />
                   ))}
-                </div>
+                </div>}
               </div>
             </>
           )}
@@ -143,7 +148,7 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
           {canDelete && (
             <button
               onClick={handleDelete}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100"
+              className="detect-danger-button flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium"
             >
               <Trash2 size={15} />
               Laag verwijderen

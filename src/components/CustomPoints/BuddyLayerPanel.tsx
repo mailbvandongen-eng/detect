@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Share2, X } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
-import type { CustomPointLayer } from '../../store/customPointLayerStore'
-import { addBuddyMember, removeBuddyMember, type BuddyPermission } from '../../services/buddyLayers'
+import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
+import { addBuddyMember, removeBuddyMember, normalizeBuddyEmail, type BuddyPermission } from '../../services/buddyLayers'
 
 export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
   const user = useAuthStore(state => state.user)
@@ -10,6 +10,8 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
   const [permission, setPermission] = useState<BuddyPermission>('edit')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const fieldId = useId()
 
   if (!layer.buddyLayerId) return null
 
@@ -17,12 +19,33 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
   const members = (layer.buddyMemberEmails || []).filter(item => item !== layer.buddyOwnerEmail)
 
   const handleAdd = async () => {
-    if (!user || !email.trim() || busy) return
-    setBusy(true)
+    if (busy) return
     setError(null)
+    setSuccess(null)
+    if (!user) {
+      setError('Log in met Google om deze laag te delen.')
+      return
+    }
+    const recipient = normalizeBuddyEmail(email)
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) {
+      setError('Vul een geldig e-mailadres in.')
+      return
+    }
+    setBusy(true)
     try {
-      await addBuddyMember(user, layer.buddyLayerId!, email, permission)
+      await addBuddyMember(user, layer.buddyLayerId!, recipient, permission)
+      // Show the acknowledged change even before the cloud listener responds.
+      useCustomPointLayerStore.setState(state => ({ layers: state.layers.map(item => {
+        if (item.buddyLayerId !== layer.buddyLayerId) return item
+        const withoutRecipient = (emails: string[] = []) => emails.filter(value => normalizeBuddyEmail(value) !== recipient)
+        return { ...item,
+          buddyMemberEmails: [...withoutRecipient(item.buddyMemberEmails), recipient],
+          buddyEditEmails: [...withoutRecipient(item.buddyEditEmails), ...(permission === 'edit' ? [recipient] : [])],
+          buddyReadEmails: [...withoutRecipient(item.buddyReadEmails), ...(permission === 'read' ? [recipient] : [])],
+        }
+      }) }))
       setEmail('')
+      setSuccess(`Toegang gegeven aan ${recipient}.`)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Buddy toevoegen mislukt.')
     } finally {
@@ -31,11 +54,20 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
   }
 
   const handleRemove = async (memberEmail: string) => {
-    if (!user || busy) return
+    if (busy) return
+    if (!user) { setError('Log in met Google om buddies te beheren.'); return }
     setBusy(true)
     setError(null)
+    setSuccess(null)
     try {
       await removeBuddyMember(user, layer.buddyLayerId!, memberEmail)
+      useCustomPointLayerStore.setState(state => ({ layers: state.layers.map(item => item.buddyLayerId !== layer.buddyLayerId ? item : {
+        ...item,
+        buddyMemberEmails: item.buddyMemberEmails?.filter(value => value !== memberEmail),
+        buddyEditEmails: item.buddyEditEmails?.filter(value => value !== memberEmail),
+        buddyReadEmails: item.buddyReadEmails?.filter(value => value !== memberEmail),
+      }) }))
+      setSuccess(`Toegang ingetrokken voor ${memberEmail}.`)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Buddy verwijderen mislukt.')
     } finally {
@@ -44,44 +76,59 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
   }
 
   return (
-    <div className="rounded-lg border border-cyan-100 bg-cyan-50/60 p-2 text-xs">
-      <div className="mb-1 flex items-center gap-1.5 font-medium text-cyan-800">
+    <div className="detect-sharing-panel rounded-lg p-3 text-xs">
+      <div className="detect-accent-text mb-1 flex items-center gap-1.5 font-medium">
         <Share2 size={13} />
         Buddy-laag
       </div>
-      <div className="mb-2 text-[11px] text-cyan-700">
+      <div className="mb-3 text-xs text-gray-500">
         {owner
-          ? 'Jij bent eigenaar. Punten worden direct met alle buddies gesynchroniseerd.'
+          ? 'Deel met het Google-account waarmee je buddy in Detect inlogt. Er wordt geen e-mail verstuurd.'
           : `Gedeeld door ${layer.buddyOwnerEmail || 'een zoekmaatje'} · ${layer.buddyRole === 'edit' ? 'samen bewerken' : 'alleen bekijken'}.`}
       </div>
 
       {owner && (
-        <>
-          <div className="flex gap-2">
+        <form className="space-y-3" noValidate onSubmit={event => { event.preventDefault(); void handleAdd() }}>
+          <div>
+            <label htmlFor={`${fieldId}-email`} className="mb-1 block font-medium">Google-e-mailadres</label>
             <input
-              type="email"
+              id={`${fieldId}-email`}
+              type="text"
+              inputMode="email"
+              autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               value={email}
-              onChange={event => setEmail(event.target.value)}
-              placeholder="Google-e-mailadres"
-              className="min-w-0 flex-1 rounded-lg border border-cyan-200 bg-white px-2 py-1.5"
+              onChange={event => { setEmail(event.target.value); setError(null); setSuccess(null) }}
+              placeholder="naam@voorbeeld.nl"
+              className="detect-form-field w-full"
+              aria-describedby={`${fieldId}-help`}
+              disabled={busy}
             />
+          </div>
+          <div>
+            <label htmlFor={`${fieldId}-permission`} className="mb-1 block font-medium">Rechten</label>
             <select
+              id={`${fieldId}-permission`}
               value={permission}
               onChange={event => setPermission(event.target.value as BuddyPermission)}
-              className="rounded-lg border border-cyan-200 bg-white px-2 py-1.5"
+              className="detect-form-field w-full"
+              disabled={busy}
             >
               <option value="edit">Samen bewerken</option>
               <option value="read">Alleen bekijken</option>
             </select>
           </div>
           <button
-            onClick={handleAdd}
-            disabled={!email.trim() || busy}
-            className="mt-2 w-full rounded-lg bg-cyan-600 px-3 py-1.5 font-medium text-white disabled:opacity-50"
+            type="submit"
+            disabled={!email.trim() || busy || !user}
+            className="detect-window-primary-button w-full disabled:opacity-50"
           >
             {busy ? 'Bezig…' : 'Buddy toevoegen'}
           </button>
-        </>
+          <p id={`${fieldId}-help`} className="text-xs text-gray-500">Je buddy vindt de laag onder Mijn lagen na inloggen met dit adres.</p>
+        </form>
       )}
 
       {members.length > 0 && (
@@ -89,11 +136,11 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
           {members.map(memberEmail => {
             const canEdit = (layer.buddyEditEmails || []).includes(memberEmail)
             return (
-              <div key={memberEmail} className="flex items-center gap-2 rounded bg-white/80 px-2 py-1.5">
-                <span className="min-w-0 flex-1 truncate">{memberEmail}</span>
+              <div key={memberEmail} className="detect-sharing-member flex items-center gap-2 rounded px-2 py-2">
+                <span className="min-w-0 flex-1 break-all">{memberEmail}</span>
                 <span className="text-[10px] text-gray-500">{canEdit ? 'bewerken' : 'bekijken'}</span>
                 {owner && (
-                  <button onClick={() => handleRemove(memberEmail)} title="Buddy verwijderen" className="text-gray-400 hover:text-red-600">
+                  <button type="button" disabled={busy} onClick={() => handleRemove(memberEmail)} title="Buddy verwijderen" aria-label={`Toegang intrekken voor ${memberEmail}`} className="detect-window-icon-button shrink-0">
                     <X size={13} />
                   </button>
                 )}
@@ -106,7 +153,9 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
       {owner && members.length === 0 && (
         <div className="mt-2 text-[11px] text-gray-500">Nog niet gedeeld.</div>
       )}
-      {error && <div className="mt-2 rounded bg-red-50 p-2 text-[11px] text-red-700">{error}</div>}
+      {success && <div role="status" className="mt-2 text-xs">{success}</div>}
+      {owner && !user && <div role="alert" className="mt-2 text-xs">Log in met Google om deze laag te delen.</div>}
+      {error && <div role="alert" className="mt-2 rounded bg-red-50 p-2 text-xs text-red-700">{error}</div>}
     </div>
   )
 }

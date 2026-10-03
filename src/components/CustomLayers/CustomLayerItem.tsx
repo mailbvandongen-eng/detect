@@ -16,7 +16,7 @@ interface Props {
   compact?: boolean
 }
 
-function VisibilityButton({ visible, color, onClick, title }: {
+function VisibilityButton({ visible, onClick, title }: {
   visible: boolean
   color: string
   onClick: () => void
@@ -25,10 +25,10 @@ function VisibilityButton({ visible, color, onClick, title }: {
   return (
     <button
       onClick={onClick}
-      className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0"
+      className="detect-layer-visibility rounded flex items-center justify-center flex-shrink-0"
       style={{
-        backgroundColor: visible ? color : 'white',
-        border: `2px solid ${visible ? color : '#9ca3af'}`,
+        backgroundColor: visible ? 'var(--detect-accent)' : 'transparent',
+        border: `2px solid ${visible ? 'var(--detect-accent)' : 'var(--detect-window-muted)'}`,
       }}
       title={title}
     >
@@ -145,7 +145,7 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
 
         <button
           onClick={() => toggleVisibility(layer.id)}
-          className="min-w-0 flex-1 truncate text-left text-gray-700"
+          className="detect-layer-name min-w-0 flex-1 truncate text-left text-gray-700"
           style={{ fontSize: '0.9em' }}
           title={layer.name}
         >
@@ -160,7 +160,7 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
         <span className="flex-shrink-0 text-[10px] text-gray-400">{featureCount}</span>
         <button
           onClick={() => setExpanded(value => !value)}
-          className={`p-1 ${expanded ? 'text-red-600' : 'text-cyan-700'}`}
+          className="detect-window-icon-button shrink-0"
           title="Laaginstellingen"
           aria-expanded={expanded}
         >

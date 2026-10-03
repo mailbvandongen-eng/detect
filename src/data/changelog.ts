@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.76',
+    date: '3 oktober 2026',
+    title: 'Delen op mobiel en één gekozen accentkleur',
+    changes: [
+      'Buddy delen heeft een volledig breed adresveld met e-mailtoetsenbord, duidelijke labels en een aparte rechtenkeuze.',
+      'Een geslaagde deelactie toont direct de buddy en een bevestiging. Ongeldige adressen, ontbrekende aanmelding en opslagfouten worden zichtbaar gemeld.',
+      'Bediening en vensters volgen de gekozen accentkleur in lichte en donkere modus. Instellingen zijn neutraal; laagkleuren staan achter Laagkleur kiezen.'
+    ]
+  },
+  {
     version: '2.33.75',
     date: '3 oktober 2026',
     title: 'Buddy-lagen verschijnen na aanmaken',
