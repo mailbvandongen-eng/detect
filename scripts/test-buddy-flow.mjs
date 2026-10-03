@@ -84,9 +84,13 @@ try {
   pass('Owner deletes point')
   await a.saveBuddyPoint(id,{...point,id:'second'})
   await a.deleteBuddyLayer(owner,id)
-  snap = await firestore.getDoc(firestore.doc(a.db,'buddyLayers',id))
-  assert.equal(snap.exists(),false)
-  results = await firestore.getDocs(firestore.collection(a.db,'buddyLayers',id,'points')).catch(()=>null)
+  await env.withSecurityRulesDisabled(async context => {
+    const adminDb = context.firestore()
+    const deleted = await firestore.getDoc(firestore.doc(adminDb,'buddyLayers',id))
+    assert.equal(deleted.exists(),false)
+    const leftover = await firestore.getDocs(firestore.collection(adminDb,'buddyLayers',id,'points'))
+    assert.equal(leftover.size,0)
+  })
   pass('Actual app deleteBuddyLayer removes layer and its points')
   console.log(count + ' integration checks passed. No production database used.')
 } finally { await env.cleanup() }
