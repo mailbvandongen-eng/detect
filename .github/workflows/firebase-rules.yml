@@ -1,0 +1,46 @@
+name: Publiceer Firestore-regels
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'firestore.rules'
+      - 'firebase.json'
+      - '.github/workflows/firebase-rules.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: detect-firestore-rules
+  cancel-in-progress: true
+
+jobs:
+  deploy-rules:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Broncode ophalen
+        uses: actions/checkout@v4
+
+      - name: Aanmelden bij Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DETECT }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Node installeren
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Firestore-regels publiceren
+        run: >
+          npx --yes firebase-tools@latest deploy
+          --only firestore:rules
+          --project "${{ steps.auth.outputs.project_id }}"
+          --non-interactive
