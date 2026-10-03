@@ -30,17 +30,85 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DETECT }}
-          create_credentials_file: true
-          export_environment_variables: true
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/firebase
 
       - name: Node installeren
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Firestore-regels publiceren
-        run: >
-          npx --yes firebase-tools@latest deploy
-          --only firestore:rules
-          --project "${{ steps.auth.outputs.project_id }}"
-          --non-interactive
+      - name: Firestore-regels direct publiceren
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          PROJECT_ID: ${{ steps.auth.outputs.project_id }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs')
+
+          const token = process.env.ACCESS_TOKEN
+          const project = process.env.PROJECT_ID
+          if (!token || !project) throw new Error('Google access token of project-id ontbreekt.')
+
+          const headers = {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+
+          async function api(url, options = {}) {
+            const response = await fetch(url, { ...options, headers: { ...headers, ...(options.headers || {}) } })
+            const text = await response.text()
+            let body = null
+            try { body = text ? JSON.parse(text) : null } catch { body = text }
+            if (!response.ok) {
+              throw new Error(`${options.method || 'GET'} ${url} -> ${response.status}: ${typeof body === 'string' ? body : JSON.stringify(body)}`)
+            }
+            return body
+          }
+
+          const rules = fs.readFileSync('firestore.rules', 'utf8')
+          const ruleset = await api(
+            `https://firebaserules.googleapis.com/v1/projects/${project}/rulesets`,
+            {
+              method: 'POST',
+              body: JSON.stringify({
+                source: {
+                  files: [{ name: 'firestore.rules', content: rules }]
+                }
+              })
+            }
+          )
+
+          const releaseName = `projects/${project}/releases/cloud.firestore`
+          const releaseUrl = `https://firebaserules.googleapis.com/v1/${releaseName}`
+
+          const probe = await fetch(releaseUrl, { headers })
+          if (probe.status === 404) {
+            await api(
+              `https://firebaserules.googleapis.com/v1/projects/${project}/releases`,
+              {
+                method: 'POST',
+                body: JSON.stringify({
+                  name: releaseName,
+                  rulesetName: ruleset.name
+                })
+              }
+            )
+          } else if (probe.ok) {
+            await api(releaseUrl, {
+              method: 'PATCH',
+              body: JSON.stringify({
+                release: {
+                  name: releaseName,
+                  rulesetName: ruleset.name
+                },
+                updateMask: 'rulesetName'
+              })
+            })
+          } else {
+            const errorText = await probe.text()
+            throw new Error(`Release controleren mislukt: ${probe.status} ${errorText}`)
+          }
+
+          console.log(`Firestore-regels gepubliceerd: ${ruleset.name}`)
+          NODE
