@@ -2,24 +2,36 @@ import { useEffect } from 'react'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuthStore } from '../store/authStore'
-import { useCustomPointLayerStore, type CustomPoint, type CustomPointLayer } from '../store/customPointLayerStore'
+import { useCustomPointLayerStore, type CustomPoint } from '../store/customPointLayerStore'
 import { normalizeBuddyEmail, type BuddyLayerRecord } from '../services/buddyLayers'
-
-function localLayerId(buddyLayerId: string): string {
-  return `buddy-${buddyLayerId}`
-}
-
-function roleFor(record: BuddyLayerRecord, uid: string, email: string): 'owner' | 'edit' | 'read' {
-  if (record.ownerUid === uid) return 'owner'
-  const normalized = normalizeBuddyEmail(email)
-  if ((record.editEmails || []).map(normalizeBuddyEmail).includes(normalized)) return 'edit'
-  return 'read'
-}
+import { upsertBuddyLayer } from '../utils/buddyLayerState'
+import { useBuddySyncStore } from '../store/buddySyncStore'
 
 export function useBuddyLayers() {
   const user = useAuthStore(state => state.user)
+  const revision = useBuddySyncStore(state => state.revision)
 
   useEffect(() => {
+    const refresh = () => useBuddySyncStore.getState().refresh()
+    const onVisible = () => { if (document.visibilityState === 'visible') refresh() }
+    window.addEventListener('online', refresh)
+    window.addEventListener('pageshow', refresh)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      window.removeEventListener('online', refresh)
+      window.removeEventListener('pageshow', refresh)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    useBuddySyncStore.setState({ error: null })
+    const reportError = (error: unknown) => {
+      if (!active) return
+      console.error('Buddy-lagen laden mislukt:', error)
+      useBuddySyncStore.setState({ error: 'Buddy-lagen konden niet worden geladen. Probeer opnieuw.' })
+    }
     if (!user?.email) {
       useCustomPointLayerStore.setState(state => ({
         layers: state.layers.filter(layer => !layer.buddyLayerId)
@@ -35,7 +47,9 @@ export function useBuddyLayers() {
       where('memberEmails', 'array-contains', email)
     )
 
-    const metaUnsub = onSnapshot(q, snapshot => {
+    const metaUnsub = onSnapshot(q, { includeMetadataChanges: true }, snapshot => {
+      if (!active) return
+      useBuddySyncStore.setState({ error: null })
       const remoteIds = new Set(snapshot.docs.map(item => item.id))
 
       pointUnsubs.forEach((unsubscribe, buddyLayerId) => {
@@ -45,45 +59,26 @@ export function useBuddyLayers() {
         }
       })
 
-      useCustomPointLayerStore.setState(state => ({
-        layers: state.layers.filter(layer => !layer.buddyLayerId || remoteIds.has(layer.buddyLayerId))
-      }))
+      // An empty cache is not evidence that a freshly created layer was deleted.
+      if (!snapshot.metadata.fromCache) {
+        useCustomPointLayerStore.setState(state => ({
+          layers: state.layers.filter(layer => !layer.buddyLayerId || remoteIds.has(layer.buddyLayerId))
+        }))
+      }
 
       snapshot.docs.forEach(item => {
         const data = item.data() as BuddyLayerRecord
         const buddyLayerId = item.id
-        const id = localLayerId(buddyLayerId)
-        const role = roleFor(data, user.uid, email)
-
-        useCustomPointLayerStore.setState(state => {
-          const existing = state.layers.find(layer => layer.buddyLayerId === buddyLayerId)
-          const next: CustomPointLayer = {
-            id,
-            name: data.name || 'Buddy-laag',
-            color: data.color || '#06b6d4',
-            categories: existing?.categories || [],
-            points: existing?.points || [],
-            visible: existing?.visible ?? true,
-            archived: false,
-            createdAt: existing?.createdAt || new Date().toISOString(),
-            buddyLayerId,
-            buddyOwnerUid: data.ownerUid,
-            buddyOwnerEmail: data.ownerEmail,
-            buddyRole: role,
-            buddyMemberEmails: data.memberEmails || [],
-            buddyEditEmails: data.editEmails || [],
-            buddyReadEmails: data.readEmails || [],
-          }
-
-          const without = state.layers.filter(layer => layer.buddyLayerId !== buddyLayerId)
-          return { layers: [...without, next] }
-        })
+        useCustomPointLayerStore.setState(state => ({
+          layers: upsertBuddyLayer(state.layers, { ...data, id: buddyLayerId }, user.uid, email),
+        }))
 
         if (pointUnsubs.has(buddyLayerId)) return
 
         const unsubscribePoints = onSnapshot(
           collection(db, 'buddyLayers', buddyLayerId, 'points'),
           pointSnapshot => {
+            if (!active) return
             const points = pointSnapshot.docs.map(pointDoc => {
               const raw = pointDoc.data() as CustomPoint
               return { ...raw, id: pointDoc.id } as CustomPoint
@@ -94,15 +89,17 @@ export function useBuddyLayers() {
                 layer.buddyLayerId === buddyLayerId ? { ...layer, points } : layer
               )
             }))
-          }
+          },
+          reportError
         )
         pointUnsubs.set(buddyLayerId, unsubscribePoints)
       })
-    })
+    }, reportError)
 
     return () => {
+      active = false
       metaUnsub()
       pointUnsubs.forEach(unsubscribe => unsubscribe())
     }
-  }, [user])
+  }, [user, revision])
 }

@@ -2,7 +2,7 @@ name: Test buddy-flow
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/test-buddy-rules.yml', 'scripts/test-buddy-flow.mjs', 'src/services/buddyLayers.ts', 'firestore.rules']
+    paths: ['.github/workflows/test-buddy-rules.yml', 'scripts/test-buddy-flow.mjs', 'scripts/test-buddy-ui.mjs', 'src/hooks/useBuddyLayers.ts', 'src/utils/buddyLayerState.ts', 'src/utils/userLayerCatalog.ts', 'src/store/buddySyncStore.ts', 'src/components/CustomPoints/CreateLayerModal.tsx', 'src/hooks/useCloudSync.ts', 'src/services/buddyLayers.ts', 'firestore.rules']
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,6 +21,10 @@ jobs:
           java-version: 21
       - name: Installeer testgereedschap
         run: npm install --prefix "$RUNNER_TEMP/buddy-test" --no-audit --no-fund typescript@5.9.3 firebase@12.7.0 @firebase/rules-unit-testing firebase-tools
+      - name: Test laagweergave en herstel van cloudverbinding
+        env:
+          BUDDY_TEST_MODULE_ROOT: ${{ runner.temp }}/buddy-test
+        run: node scripts/test-buddy-ui.mjs
       - name: Test echte appfuncties tegen Firebase-emulator
         env:
           BUDDY_TEST_MODULE_ROOT: ${{ runner.temp }}/buddy-test

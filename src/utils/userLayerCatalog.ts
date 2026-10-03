@@ -37,12 +37,13 @@ export function getLinkedPointLayer<T extends PointLayerLike>(
 
 export function getStandalonePointLayers<T extends PointLayerLike, U extends ImportedLayerLike>(
   pointLayers: T[],
-  importedLayers: U[]
+  importedLayers: U[],
+  options: { includeReadOnly?: boolean } = {}
 ): T[] {
   const importedIds = new Set(importedLayers.map(layer => layer.id))
   return pointLayers.filter(layer =>
     !layer.archived &&
-    layer.buddyRole !== 'read' &&
+    (options.includeReadOnly || layer.buddyRole !== 'read') &&
     (!layer.linkedImportedLayerId || !importedIds.has(layer.linkedImportedLayerId))
   )
 }

@@ -10,6 +10,7 @@ import { CustomLayerItem } from '../CustomLayers/CustomLayerItem'
 import { isThemeVisible, isSpecialSectionVisible } from '../../config/buildMode'
 import { AppWindow } from '../UI/AppWindow'
 import { getStandalonePointLayers } from '../../utils/userLayerCatalog'
+import { useBuddySyncStore } from '../../store/buddySyncStore'
 
 // Speciale archeologische 3D projecten - externe links
 const SPECIAL_PROJECTS = [
@@ -160,7 +161,9 @@ export function ThemesPanel() {
   const openWindow = useUIStore(state => state.openWindow)
   const { layers: customLayers, toggleVisibility, removeLayer, updateLayer } = useCustomPointLayerStore()
   const importedLayers = useCustomLayerStore(state => state.layers)
-  const standalonePointLayers = getStandalonePointLayers(customLayers, importedLayers)
+  const standalonePointLayers = getStandalonePointLayers(customLayers, importedLayers, { includeReadOnly: true })
+  const buddyError = useBuddySyncStore(state => state.error)
+  const refreshBuddies = useBuddySyncStore(state => state.refresh)
 
   // State for special projects section
   const [specialProjectsOpen, setSpecialProjectsOpen] = useState(false)
@@ -190,6 +193,12 @@ export function ThemesPanel() {
                   onChangeColor={(color) => updateLayer(layer.id, { color })}
                 />
               ))}
+              {buddyError && (
+                <div role="alert" className="rounded-lg bg-red-50 p-2 text-xs text-red-700">
+                  <p>{buddyError}</p>
+                  <button onClick={refreshBuddies} className="mt-1 underline">Opnieuw proberen</button>
+                </div>
+              )}
               {importedLayers.map(layer => (
                 <CustomLayerItem key={layer.id} layer={layer} compact />
               ))}

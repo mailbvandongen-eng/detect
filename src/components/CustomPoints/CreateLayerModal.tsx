@@ -3,7 +3,9 @@ import { Layers } from 'lucide-react'
 import { useUIStore, useAuthStore } from '../../store'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import { AppWindow } from '../UI/AppWindow'
-import { createBuddyLayer } from '../../services/buddyLayers'
+import { createBuddyLayer, normalizeBuddyEmail } from '../../services/buddyLayers'
+import { upsertBuddyLayer } from '../../utils/buddyLayerState'
+import { useBuddySyncStore } from '../../store/buddySyncStore'
 
 export function CreateLayerModal() {
   const createLayerModalOpen = useUIStore(state => state.activeWindow === 'createLayer')
@@ -27,7 +29,17 @@ export function CreateLayerModal() {
       }
       setBusy(true)
       try {
-        await createBuddyLayer(user, name.trim())
+        const id = await createBuddyLayer(user, name.trim())
+        const email = normalizeBuddyEmail(user.email || '')
+        useCustomPointLayerStore.setState(state => ({
+          layers: upsertBuddyLayer(state.layers, {
+            id, name: name.trim(), color: '#06b6d4', ownerUid: user.uid,
+            ownerEmail: email, memberEmails: [email], editEmails: [], readEmails: [],
+          }, user.uid, email),
+        }))
+        // A permission error terminates an onSnapshot listener. Restart it after
+        // a successful write, including when rules were deployed while open.
+        useBuddySyncStore.getState().refresh()
       } catch (submitError: any) {
         const code = typeof submitError?.code === 'string' ? submitError.code : ''
         const message = submitError instanceof Error ? submitError.message : ''

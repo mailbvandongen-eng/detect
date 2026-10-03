@@ -26,6 +26,7 @@ import {
   type Preset
 } from '../store/presetStore'
 import { reconcilePointLayerDeletions } from '../utils/pointLayerCleanup'
+import { preserveBuddyLayers } from '../utils/buddyLayerState'
 
 const SYNC_DEBOUNCE = 2000
 
@@ -622,11 +623,11 @@ export function useCloudSync() {
       const vondstMerge = mergeById((cloudData.vondsten || []) as LocalVondst[], currentVondsten)
       const routeMerge = mergeById((cloudData.routes || []) as RecordedRoute[], currentRoutes)
 
-      useCustomPointLayerStore.setState({
-        layers: reconciledLayers.layers,
+      useCustomPointLayerStore.setState(state => ({
+        layers: preserveBuddyLayers(state.layers, reconciledLayers.layers),
         deletedLayerIds: reconciledLayers.deletedLayerIds,
         layerCleanupVersion: reconciledLayers.cleanupVersion,
-      })
+      }))
       useLocalVondstenStore.setState({ vondsten: vondstMerge.merged })
       useRouteRecordingStore.setState({
         savedRoutes: routeMerge.merged,

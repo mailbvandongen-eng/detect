@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.75',
+    date: '3 oktober 2026',
+    title: 'Buddy-lagen verschijnen na aanmaken',
+    changes: [
+      'Een succesvol aangemaakte buddy-laag verschijnt direct onder Mijn lagen; de cloudverbinding wordt opnieuw gestart.',
+      'Een mislukte buddyverbinding toont een melding met Opnieuw proberen en herstelt bij terugkeer naar de app.',
+      'Handmatig synchroniseren behoudt buddy-lagen. Buddy-lagen met alleen kijkrechten zijn ook zichtbaar in Mijn lagen.'
+    ]
+  },
+  {
     version: '2.33.74',
     date: '3 oktober 2026',
     title: 'Firebase-regels voortaan automatisch',
