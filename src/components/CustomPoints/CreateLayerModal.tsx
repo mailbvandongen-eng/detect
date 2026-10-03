@@ -28,8 +28,14 @@ export function CreateLayerModal() {
       setBusy(true)
       try {
         await createBuddyLayer(user, name.trim())
-      } catch (submitError) {
-        setError(submitError instanceof Error ? submitError.message : 'Buddy-laag aanmaken mislukt.')
+      } catch (submitError: any) {
+        const code = typeof submitError?.code === 'string' ? submitError.code : ''
+        const message = submitError instanceof Error ? submitError.message : ''
+        if (code === 'permission-denied' || /missing or insufficient permissions/i.test(message)) {
+          setError('Firebase weigert deze buddy-laag. Publiceer de actuele Firestore-regels via GitHub Actions.')
+        } else {
+          setError(message || 'Buddy-laag aanmaken mislukt.')
+        }
         setBusy(false)
         return
       }
