@@ -58,6 +58,7 @@ service cloud.firestore {
       allow read: if parentOwner() || parentRecipient();
       allow create, update, delete: if parentOwner();
     }
+    // Buddy-lagen: gedeelde puntlagen voor zoekmaatjes.
     match /buddyLayers/{layerId} {
       function buddyEmail() {
         return signedIn() && request.auth.token.email != null
