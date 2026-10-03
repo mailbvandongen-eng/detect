@@ -1,0 +1,132 @@
+name: Test actieve buddy-regels
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/test-buddy-rules.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Test actieve regels met fictieve accounts
+        env:
+          FIREBASE_SERVICE_ACCOUNT_DETECT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DETECT }}
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
+          import crypto from 'node:crypto'
+
+          const credentials = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_DETECT || '{}')
+          const project = credentials.project_id
+          const clientEmail = credentials.client_email
+          const privateKey = credentials.private_key
+
+          if (!project || !clientEmail || !privateKey) {
+            throw new Error('GitHub secret FIREBASE_SERVICE_ACCOUNT_DETECT is onvolledig.')
+          }
+
+          const b64url = value => Buffer.from(value).toString('base64url')
+          const now = Math.floor(Date.now() / 1000)
+          const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
+          const payload = b64url(JSON.stringify({
+            iss: clientEmail,
+            scope: 'https://www.googleapis.com/auth/firebase',
+            aud: 'https://oauth2.googleapis.com/token',
+            iat: now,
+            exp: now + 3600
+          }))
+          const unsigned = `${header}.${payload}`
+          const signature = crypto.sign('RSA-SHA256', Buffer.from(unsigned), privateKey).toString('base64url')
+          const assertion = `${unsigned}.${signature}`
+
+          const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+              assertion
+            })
+          })
+          const tokenBody = await tokenResponse.json()
+          if (!tokenResponse.ok || !tokenBody.access_token) {
+            throw new Error(`OAuth token ophalen mislukt: ${JSON.stringify(tokenBody)}`)
+          }
+
+          const headers = {
+            Authorization: `Bearer ${tokenBody.access_token}`,
+            'Content-Type': 'application/json'
+          }
+
+          async function api(url, options = {}) {
+            const response = await fetch(url, { ...options, headers: { ...headers, ...(options.headers || {}) } })
+            const text = await response.text()
+            let body = null
+            try { body = text ? JSON.parse(text) : null } catch { body = text }
+            if (!response.ok) {
+              throw new Error(`${options.method || 'GET'} ${url} -> ${response.status}: ${typeof body === 'string' ? body : JSON.stringify(body)}`)
+            }
+            return body
+          }
+
+          const release = await api(`https://firebaserules.googleapis.com/v1/projects/${project}/releases/cloud.firestore`)
+          const deployed = await api(`https://firebaserules.googleapis.com/v1/${release.rulesetName}`)
+          const source = deployed.source
+          if (source.files.find(file => file.name === 'firestore.rules')?.content !== fs.readFileSync('firestore.rules', 'utf8')) {
+            throw new Error('De actieve Firestore-regels wijken af van GitHub.')
+          }
+          const owner = { uid: 'flow-owner', token: { email: 'owner@example.com' } }
+          const editor = { uid: 'flow-editor', token: { email: 'editor@example.com' } }
+          const reader = { uid: 'flow-reader', token: { email: 'reader@example.com' } }
+          const outsider = { uid: 'flow-outsider', token: { email: 'outsider@example.com' } }
+          const layer = { ownerUid: owner.uid, ownerEmail: owner.token.email,
+            memberEmails: [owner.token.email, editor.token.email, reader.token.email],
+            editEmails: [editor.token.email], readEmails: [reader.token.email],
+            name: 'Disposable flow test', color: '#06b6d4' }
+          const path = '/databases/(default)/documents/buddyLayers/flow-test'
+          const cases = []
+          const labels = []
+          function add(label, expectation, method, auth, target, before, after, parent) {
+            labels.push(label)
+            cases.push({ expectation, request: { path: target, method, auth,
+              ...(after ? { resource: { data: after } } : {}) },
+              ...(before ? { resource: { data: before } } : {}),
+              ...(parent ? { functionMocks: [{ function: 'get',
+                args: [{ exact_value: path }], result: { value: { data: layer } } }] } : {}) })
+          }
+          add('Owner creates layer', 'ALLOW', 'create', owner, path, null, layer)
+          add('Anonymous creation denied', 'DENY', 'create', null, path, null, layer)
+          add('Forged ownership denied', 'DENY', 'create', outsider, path, null, layer)
+          for (const [label, auth, allow] of [['owner', owner, true], ['editor', editor, true], ['reader', reader, true], ['outsider', outsider, false]]) {
+            add(label + ' reads layer', allow ? 'ALLOW' : 'DENY', 'get', auth, path, layer)
+          }
+          add('Owner renames layer', 'ALLOW', 'update', owner, path, layer, {...layer, name: 'Renamed'})
+          add('Editor cannot rename layer', 'DENY', 'update', editor, path, layer, {...layer, name: 'Renamed'})
+          add('Owner cannot transfer ownership', 'DENY', 'update', owner, path, layer, {...layer, ownerUid: editor.uid})
+          const point = { id: 'point-test', name: 'Test point', coordinates: [0, 0], category: 'Overig', notes: '', status: 'todo' }
+          for (const [label, auth, read, write] of [['owner', owner, true, true], ['editor', editor, true, true], ['reader', reader, true, false], ['outsider', outsider, false, false]]) {
+            for (const method of ['get', 'create', 'update', 'delete']) {
+              add(label + ' ' + method + ' point', (method === 'get' ? read : write) ? 'ALLOW' : 'DENY',
+                method, auth, path + '/points/point-test', method === 'create' ? null : point,
+                ['create','update'].includes(method) ? point : null, true)
+            }
+          }
+          const report = await api(`https://firebaserules.googleapis.com/v1/projects/${project}:test`, {
+            method: 'POST', body: JSON.stringify({ source, testSuite: { testCases: cases } })
+          })
+          if (report.issues?.some(issue => issue.severity === 'ERROR')) throw new Error(JSON.stringify(report.issues))
+          if (report.testResults?.length !== cases.length) throw new Error('Onvolledig testresultaat: ' + JSON.stringify(report))
+          let failed = 0
+          report.testResults.forEach((result, index) => {
+            console.log(labels[index] + ': ' + result.state)
+            if (result.state !== 'SUCCESS') { failed++; console.log(JSON.stringify(result)) }
+          })
+          if (failed) throw new Error(failed + ' buddy rules tests failed')
+          console.log(cases.length + ' tests passed against active rules: ' + release.rulesetName)
+          
+          NODE
