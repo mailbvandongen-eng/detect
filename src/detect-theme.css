@@ -80,7 +80,7 @@
   .bg-purple-500, .bg-purple-600, .bg-cyan-500, .bg-cyan-600,
   .bg-indigo-500, .bg-indigo-600, .bg-teal-500, .bg-teal-600,
   .bg-orange-500, .bg-orange-600, .bg-green-500, .bg-green-600,
-  [class*="from-orange-"], [class*="from-green-"], [class*="from-cyan-"],
+  [class*="from-blue-"], [class*="from-orange-"], [class*="from-green-"], [class*="from-cyan-"],
   [class*="from-indigo-"], [class*="from-purple-"]
 ) { background: var(--detect-accent) !important; color: white !important; }
 
