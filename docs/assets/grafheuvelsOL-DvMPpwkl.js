@@ -1,0 +1,2 @@
+import{V as a,G as o,e as s}from"./index-RVkLWcoy.js";import{L as t}from"./iconStyles-DBup9vFD.js";async function f(){const r=await(await fetch("./data/grafheuvels.geojson")).json(),e=new a({features:new o().readFeatures(r,{dataProjection:"EPSG:4326",featureProjection:"EPSG:3857"})});return console.log(`📍 Grafheuvels: ${e.getFeatures().length} grafheuvels geladen`),new s({source:e,properties:{title:"Grafheuvels"},visible:!1,zIndex:25,style:t.grafheuvel()})}export{f as createGrafheuvelsLayerOL};
+//# sourceMappingURL=grafheuvelsOL-DvMPpwkl.js.map
