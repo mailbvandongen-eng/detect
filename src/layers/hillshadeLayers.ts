@@ -1,30 +1,33 @@
 import TileLayer from 'ol/layer/Tile'
+import ImageLayer from 'ol/layer/Image'
 import LayerGroup from 'ol/layer/Group'
 import TileWMS from 'ol/source/TileWMS'
 import XYZ from 'ol/source/XYZ'
 import TileArcGISRest from 'ol/source/TileArcGISRest'
+import ImageArcGISRest from 'ol/source/ImageArcGISRest'
 
 // AHN4 Hoogtekaart Kleur - 50cm resolutie met dynamische kleuren
 // Toont hoogteverschillen in kleur (blauw=laag → groen → oranje/bruin=hoog)
 // Dynamische color ramp past zich aan aan lokale hoogteverschillen
 export function createAHN4ColorElevationLayerOL() {
-  const layer = new TileLayer({
+  // Eén export-image voor het volledige kaartbeeld. De ArcGIS kleur-rasterfunctie
+  // rekt anders per tegel afzonderlijk, waardoor zichtbare blokken ontstaan.
+  return new ImageLayer({
     properties: { title: 'AHN4 Hoogtekaart Kleur', type: 'arcgis' },
     visible: false,
-    opacity: 1.0,  // Volle dekking voor beste kleuren
-    source: new TileArcGISRest({
+    opacity: 1.0,
+    source: new ImageArcGISRest({
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({
-          rasterFunction: 'AHN - Color Ramp D'  // Dynamisch! blauw→groen→geel→bruin
+          rasterFunction: 'AHN - Color Ramp D'
         })
       },
+      ratio: 1.25,
       crossOrigin: 'anonymous',
       attributions: '© Esri Nederland, AHN4 50cm'
     })
   })
-
-  return layer
 }
 
 // AHN4 Hillshade Kleur - Combineert kleur + hillshade in één GroupLayer
@@ -110,23 +113,22 @@ export function createAHN4HillshadeLayerOL() {
 
 // AHN4 Multidirectional Hillshade - Better for subtle relief
 export function createAHN4MultiHillshadeLayerOL() {
-  const layer = new TileLayer({
+  return new ImageLayer({
     properties: { title: 'AHN4 Multi-Hillshade NL', type: 'arcgis' },
     visible: false,
     opacity: 0.7,
-    source: new TileArcGISRest({
+    source: new ImageArcGISRest({
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_5m/ImageServer',
       params: {
         renderingRule: JSON.stringify({
           rasterFunction: 'AHN - Hillshade (Multidirectionaal)'
         })
       },
+      ratio: 1.25,
       crossOrigin: 'anonymous',
       attributions: '© Esri Nederland, AHN'
     })
   })
-
-  return layer
 }
 
 // AHN4 Slope visualization - Shows steepness
