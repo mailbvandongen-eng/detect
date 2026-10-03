@@ -34,9 +34,9 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT_DETECT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DETECT }}
         run: |
-          node <<'NODE'
-          const fs = require('fs')
-          const crypto = require('crypto')
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
+          import crypto from 'node:crypto'
 
           const credentials = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_DETECT || '{}')
           const project = credentials.project_id
