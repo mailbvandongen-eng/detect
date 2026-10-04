@@ -17,7 +17,7 @@ export function useStartupWindows() {
   const manualOpen = activeWindow === 'manual'
   const startupInitialized = useRef(false)
   const changeLogOffered = useRef(false)
-  const [startupComplete, setStartupComplete] = useState(hideWelcomeModal)
+  const [startupComplete, setStartupComplete] = useState(false)
 
   // Change log state - shown once after each version, after the welcome screen.
   const changeLogOpen = useUIStore(state => state.activeWindow === 'changeLog')

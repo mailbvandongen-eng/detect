@@ -786,7 +786,8 @@ export function hasSeenChangeLog(version: string): boolean {
   if (seenThisSession.has(version) || typeof window === 'undefined') return true
 
   try {
-    return window.localStorage.getItem(LAST_SEEN_VERSION_KEY) === version
+    return window.localStorage.getItem(`detect-changelog-seen:${version}`) === 'yes'
+      || window.localStorage.getItem(LAST_SEEN_VERSION_KEY) === version
   } catch {
     return false
   }
@@ -797,6 +798,7 @@ export function markChangeLogSeen(version: string): void {
   if (typeof window === 'undefined') return
 
   try {
+    window.localStorage.setItem(`detect-changelog-seen:${version}`, 'yes')
     window.localStorage.setItem(LAST_SEEN_VERSION_KEY, version)
   } catch {
     // De melding kan bij geblokkeerde opslag opnieuw verschijnen; de app blijft werken.

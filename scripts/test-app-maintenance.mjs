@@ -51,6 +51,8 @@ globalThis.window={localStorage:{getItem:key=>entries.get(key)||null,setItem:(ke
 assert.equal(changes.hasSeenChangeLog('new'),false)
 changes.markChangeLogSeen('new');assert.equal(changes.hasSeenChangeLog('new'),true)
 assert.equal(load('src/data/changelog.ts').hasSeenChangeLog('new'),true)
+entries.set('detect-last-seen-version','older-tab')
+assert.equal(load('src/data/changelog.ts').hasSeenChangeLog('new'),true,'Old tab cannot reset a newer version acknowledgement')
 window.localStorage.setItem=()=>{throw Error('quota')}
 changes.markChangeLogSeen('quota');assert.equal(changes.hasSeenChangeLog('quota'),true)
 pass('Seen version survives restart and does not repeat in-session when storage is blocked')

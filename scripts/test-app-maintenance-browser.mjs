@@ -33,7 +33,7 @@ initializeAppUpdates();
 setTimeout(async()=>{
  await activatePrivateAccount('browser-owner');
  if(!localStorage.getItem('fixture-seeded')){
-  settings.setState({hideWelcomeModal:true,uiTheme:'purple'});
+  settings.setState({hideWelcomeModal:false,uiTheme:'purple'});
   points.setState({layers:[{id:'keep-point-layer',name:'Mijn punten',points:[{id:'keep-point',name:'Locatie',notes:'Bewaren',photos:[{id:'keep-photo',thumbnailBase64:'photo-data'}]}],categories:[],color:'#7c5ac7',visible:true,archived:false,createdAt:'2026-10-04'}]});
   imports.setState({layers:[{id:'keep-import',name:'Mijn import',features:{type:'FeatureCollection',features:[]},visible:true}]});
   localStorage.setItem('fixture-seeded','yes');
@@ -63,6 +63,9 @@ try{
  const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message))
  await page.goto(server.resolvedUrls.local[0]+'maintenance-test')
  await page.waitForFunction(()=>window.test?.auth.getState().ready)
+ await page.getByRole('dialog',{name:'Hoe werkt Detect?',exact:true}).waitFor()
+ assert.equal(await page.evaluate(()=>sessionStorage.getItem('change-count')),null,'Welcome must finish before changelog')
+ await page.getByRole('button',{name:'Toon niet meer',exact:true}).tap()
  await page.getByRole('dialog',{name:'Wijzigingen',exact:true}).waitFor()
  assert.equal(await page.evaluate(()=>sessionStorage.getItem('early-window')),null)
  assert.equal(await page.evaluate(()=>sessionStorage.getItem('change-count')),'1')
@@ -109,8 +112,9 @@ try{
  assert.equal(navigations,1)
  await context.setOffline(false)
  await page.getByText('App herstellen',{exact:true}).tap()
+ const repairNavigation=page.waitForEvent('framenavigated',{predicate:frame=>frame===page.mainFrame()})
  await page.getByRole('button',{name:'Appbestanden opnieuw laden',exact:true}).tap()
- await page.waitForFunction(()=>!window.test?.update.getState().busy)
+ await repairNavigation
  await page.waitForFunction(()=>window.test?.auth.getState().ready)
  // Wait for the second explicit navigation, not a potentially already matching URL.
  await page.waitForFunction(()=>!document.querySelector('[role="alert"]'))
