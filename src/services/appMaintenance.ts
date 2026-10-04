@@ -23,7 +23,11 @@ function observeRegistration(next: ServiceWorkerRegistration) {
 export function initializeAppUpdates() {
   if (!('serviceWorker' in navigator) || registrationPromise) return
   // Native registration avoids the plugin's implicit controller-change reload.
-  registrationPromise = navigator.serviceWorker.register(new URL('sw.js', scope).href, { scope, updateViaCache: 'none' })
+  registrationPromise = navigator.serviceWorker.getRegistration(scope).then(existing => {
+    const script = existing?.active?.scriptURL || existing?.waiting?.scriptURL || existing?.installing?.scriptURL
+    if (existing?.scope === scope && script && new URL(script).pathname === new URL('sw.js', scope).pathname) return existing
+    return navigator.serviceWorker.register(new URL('sw.js', scope).href, { scope, updateViaCache: 'none' })
+  })
   void registrationPromise.then(next => {
     observeRegistration(next)
     void next.update().catch(() => {})
@@ -74,11 +78,17 @@ function waitForWorker(worker: ServiceWorker, desired: 'installed' | 'activated'
   })
 }
 
-async function applyUpdate() {
+async function applyUpdate(repair = false) {
   if (!('serviceWorker' in navigator)) return
-  const current = registration || await registrationPromise || await navigator.serviceWorker.getRegistration(scope)
+  let current = registration || await registrationPromise || await navigator.serviceWorker.getRegistration(scope)
+  if (repair) {
+    // Keep the registration: WebKit can discard ALL origin caches on unregister.
+    const script = new URL('sw.js', scope)
+    script.searchParams.set('detect-repair', String(Date.now()))
+    current = await navigator.serviceWorker.register(script.href, { scope, updateViaCache: 'none' })
+    observeRegistration(current)
+  } else if (current) await current.update()
   if (!current) return
-  await current.update()
   if (current.installing) await waitForWorker(current.installing, 'installed')
   assertIdle()
   if (current.waiting) {
@@ -94,8 +104,7 @@ export async function renewApp(repair = false) {
   useAppUpdateStore.setState({ busy: true, error: null })
   try {
     await refreshAppSafely({
-      scope, repair, online: navigator.onLine, assertIdle, verifyNetwork, update: applyUpdate,
-      registrations: () => 'serviceWorker' in navigator ? navigator.serviceWorker.getRegistrations() : Promise.resolve([]),
+      scope, repair, online: navigator.onLine, assertIdle, verifyNetwork, update: () => applyUpdate(repair),
       cacheNames: () => 'caches' in window ? caches.keys() : Promise.resolve([]),
       deleteCache: name => caches.delete(name),
       reload: () => {

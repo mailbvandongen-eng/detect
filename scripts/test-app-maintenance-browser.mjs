@@ -44,7 +44,7 @@ setTimeout(async()=>{
 let swVersion=1
 const fixtureId=resolve('maintenance-fixture.jsx')
 const html='<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><div id="root"></div><script type="module" src="/maintenance-fixture.jsx"></script></body></html>'
-const server=await createServer({configFile:false,optimizeDeps:{entries:[fixtureId],include:['react','react-dom/client','react/jsx-runtime','zustand','zustand/middleware','zustand/middleware/immer','immer','framer-motion','lucide-react','firebase/app','firebase/auth','firebase/firestore']},server:{host:'127.0.0.1',port:0},plugins:[{
+const server=await createServer({configFile:false,optimizeDeps:{entries:[fixtureId],include:['react','react-dom/client','react/jsx-runtime','zustand','zustand/middleware','zustand/middleware/immer','immer','framer-motion','lucide-react','firebase/app','firebase/auth','firebase/firestore','firebase/storage','ol/proj','xlsx','ol','ol/geom','ol/layer/Vector','ol/source/Vector','ol/style','ol/proj/proj4','proj4','ol/format/KML','ol/format/GeoJSON','ol/format/GPX']},server:{host:'127.0.0.1',port:0},plugins:[{
  name:'maintenance-test',enforce:'pre',resolveId(id){if(id==='/maintenance-fixture.jsx')return fixtureId},load(id){if(id===fixtureId)return fixture},
  configureServer(server){server.middlewares.use(async(req,res,next)=>{
   if(req.url?.split('?')[0]==='/sw.js'){
@@ -60,7 +60,7 @@ await server.listen();let browser
 try{
  browser=await webkit.launch({headless:true})
  const context=await browser.newContext({...devices['iPhone 13']})
- const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message))
+ const page=await context.newPage();const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('BROWSER ERROR',e.stack)})
  await page.goto(server.resolvedUrls.local[0]+'maintenance-test')
  await page.waitForFunction(()=>window.test?.auth.getState().ready)
  await page.getByRole('dialog',{name:'Hoe werkt Detect?',exact:true}).waitFor()
@@ -111,6 +111,7 @@ try{
  await page.getByRole('alert').filter({hasText:'internet'}).waitFor()
  assert.equal(navigations,1)
  await context.setOffline(false)
+ assert.equal(await page.evaluate(async()=>await(await caches.match('/offline-tile')).text()),'keep-map','Map cache remains before repair')
  await page.getByText('App herstellen',{exact:true}).tap()
  const repairNavigation=page.waitForEvent('framenavigated',{predicate:frame=>frame===page.mainFrame()})
  await page.getByRole('button',{name:'Appbestanden opnieuw laden',exact:true}).tap()

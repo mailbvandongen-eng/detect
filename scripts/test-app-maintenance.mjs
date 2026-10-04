@@ -16,7 +16,6 @@ const make=()=>{
   const events=[]
   return {events,actions:{scope,online:true,repair:true,
     assertIdle:()=>events.push('guard'),verifyNetwork:async()=>events.push('network'),update:async()=>events.push('update'),
-    registrations:async()=>[{scope,unregister:async()=>{events.push('unregister');return true}},{scope:scope+'other/',unregister:async()=>{throw Error('Other app must survive')}}],
     cacheNames:async()=>[appCache,'geojson-data','osm-tiles','esri-basemap-tiles',`workbox-precache-v2-${scope}other/`],
     deleteCache:async name=>{events.push(name);return true},reload:()=>events.push('reload'),
   }}
@@ -25,18 +24,18 @@ let test=make();await refreshAppSafely(test.actions)
 assert.deepEqual(test.events.filter(e=>e.startsWith('workbox')),[appCache])
 assert.equal(test.events.at(-1),'reload')
 assert.equal(test.events.filter(e=>e==='reload').length,1)
-assert.ok(test.events.indexOf('network')<test.events.indexOf('unregister'))
-pass('Repair replaces only this app precache and registration, after network verification, with one reload')
-for(const scenario of ['offline','network','busy','unregister']) {
+assert.ok(test.events.indexOf('network')<test.events.indexOf(appCache))
+assert.ok(test.events.indexOf(appCache)<test.events.indexOf('update'))
+pass('Repair replaces only this app precache, then reinstalls without unregistering, after network verification, with one reload')
+for(const scenario of ['offline','network','busy']) {
  test=make()
  if(scenario==='offline')test.actions.online=false
  if(scenario==='network')test.actions.verifyNetwork=async()=>{throw Error('no network')}
  if(scenario==='busy')test.actions.assertIdle=()=>{throw Error('recording')}
- if(scenario==='unregister')test.actions.registrations=async()=>[{scope,unregister:async()=>false}]
  await assert.rejects(refreshAppSafely(test.actions))
  assert.ok(!test.events.includes(appCache)&&!test.events.includes('reload'))
 }
-pass('Offline, unreachable server, active work and failed unregister preserve cache and prevent reload')
+pass('Offline, unreachable server, active work  preserve cache and prevent reload')
 test=make();test.actions.repair=false;await refreshAppSafely(test.actions)
 assert.ok(test.events.includes('update'))
 assert.ok(!test.events.includes('unregister')&&!test.events.includes(appCache))
