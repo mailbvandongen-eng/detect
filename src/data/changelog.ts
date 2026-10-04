@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.82', date: '5 oktober 2026', title: 'Veilige pop-ups en betrouwbare foto’s',
+    changes: [
+      'Pop-upinhoud en zoekresultaten worden centraal beveiligd. Tabellen, tekst en veilige links blijven bruikbaar.',
+      'Nieuwe foto’s bewaren eerst het volledige bestand op dit apparaat. Meerdere foto’s tegelijk kiezen verliest geen foto’s meer.',
+      'De fotoviewer opent lokaal bewaarde foto’s en gedeelde foto’s. Uploadstatus, foutmelding en opnieuw proberen zijn zichtbaar bij de lagen en punten.',
+      'Offline uploads blijven bewaard. Accountwisseling en verwijdering blokkeren verouderde uploadresultaten; herstel wist geen foto’s.',
+    ],
+  },
+  {
     version:'2.33.81',date:'4 oktober 2026',title:'Betrouwbaar gedeelde lagen bewerken',
     changes:[
       'Gedeelde punten slaan alleen gewijzigde velden op. Gelijktijdige wijzigingen aan verschillende velden blijven beide behouden.',

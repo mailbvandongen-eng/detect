@@ -1,3 +1,7 @@
+import { PhotoCapture } from '../CustomPoints/PhotoCapture'
+import { PhotoGallery } from '../Photo/PhotoGallery'
+import { PhotoUploadStatus } from '../Photo/PhotoUploadStatus'
+import { sanitizePopupHtml } from '../../utils/safePopupHtml'
 import { BuddyWriteStatus } from '../CustomPoints/BuddyWriteStatus'
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
@@ -319,8 +323,8 @@ export function Popup() {
     return result.replace(/class=""/g, '')
   }
 
-  const { title: extractedTitle, contentWithoutTitle: rawContent } = extractTitleAndContent(content)
-  const contentWithoutTitle = transformForScaling(rawContent)
+  const { title: extractedTitle, contentWithoutTitle: rawContent } = extractTitleAndContent(sanitizePopupHtml(content))
+  const contentWithoutTitle = sanitizePopupHtml(transformForScaling(rawContent))
 
   const addPopupPointToLayer = (layerId: string, layerName: string) => {
     if (!popupCoordinate) return
@@ -2332,21 +2336,6 @@ export function Popup() {
             }
           }
 
-          // Photos display (always show if available)
-          if (point.photos && point.photos.length > 0) {
-            pointHtml += `<div class="flex flex-wrap gap-1 my-2">`
-            for (const photo of point.photos.slice(0, 3)) {
-              const src = photo.thumbnailUrl || photo.thumbnailBase64
-              if (src) {
-                pointHtml += `<img src="${src}" alt="Foto" class="w-16 h-16 object-cover rounded border border-gray-200" />`
-              }
-            }
-            if (point.photos.length > 3) {
-              pointHtml += `<span class="text-xs text-gray-400 self-end">+${point.photos.length - 3} meer</span>`
-            }
-            pointHtml += `</div>`
-          }
-
           if (point.phone) {
             const phoneHref = getPhoneHref(point.phone)
             pointHtml += `<br/><a href="tel:${escapePopupHtml(phoneHref)}" class="text-sm text-blue-600 hover:underline">${escapePopupHtml(point.phone)}</a>`
@@ -4158,6 +4147,8 @@ export function Popup() {
               dangerouslySetInnerHTML={{ __html: contentWithoutTitle }}
             />
 
+            {currentCustomPoint && <div className="px-4 pb-2"><PhotoGallery photos={currentCustomPoint.photos || []} /><PhotoUploadStatus /></div>}
+
             {/* Font size slider */}
             <div className="px-4 py-2 border-t border-gray-100 flex items-center gap-2 flex-shrink-0">
               <Type size={14} className="text-gray-400 flex-shrink-0" />
@@ -4215,6 +4206,10 @@ export function Popup() {
             {editingCustomPoint && currentCustomPointRef && currentCustomPointLayer?.buddyRole !== 'read' && (
               <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3 flex-shrink-0 overflow-y-auto max-h-[50vh]">
                 <div className="text-sm font-medium text-blue-600">Punt bewerken</div>
+              <PhotoCapture photos={currentCustomPoint?.photos || []}
+                onAddPhoto={photo=>useCustomPointLayerStore.getState().addPhotoToPoint(currentCustomPointRef.layerId,currentCustomPointRef.pointId,photo)}
+                onRemovePhoto={id=>useCustomPointLayerStore.getState().removePhotoFromPoint(currentCustomPointRef.layerId,currentCustomPointRef.pointId,id)} />
+              <p className="text-xs">Foto’s worden direct bij het punt opgeslagen.</p>
                 <div>
                   <label className="text-xs text-gray-500">Naam *</label>
                   <input

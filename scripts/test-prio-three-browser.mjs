@@ -1,0 +1,69 @@
+import assert from 'node:assert/strict'
+import {createRequire} from 'node:module'
+import {createServer} from 'vite'
+import react from '@vitejs/plugin-react'
+import {resolve} from 'node:path'
+const require=createRequire(process.env.BUDDY_BROWSER_MODULE_ROOT?process.env.BUDDY_BROWSER_MODULE_ROOT+'/package.json':import.meta.url)
+const {webkit,devices}=require('playwright')
+const fixture=`
+import React from 'react';import {createRoot} from 'react-dom/client';
+import {PhotoCapture} from '/src/components/CustomPoints/PhotoCapture';
+import {PhotoGallery} from '/src/components/Photo/PhotoGallery';
+import {PhotoUploadStatus} from '/src/components/Photo/PhotoUploadStatus';
+import {usePhotoUploads} from '/src/hooks/usePhotoUploads';
+import {useCustomPointLayerStore as points} from '/src/store/customPointLayerStore';
+import {useAuthStore as auth} from '/src/store/authStore';
+import {auth as firebaseAuth} from '/src/lib/firebase';
+import {activatePrivateAccount} from '/src/services/privateAccountData';
+import {accountPhotoKey} from '/src/utils/accountStorage';
+import {getPhoto,savePhoto} from '/src/lib/photoStorage';
+import {sanitizePopupHtml,safeContentUrl} from '/src/utils/safePopupHtml';
+import '/src/style.css';import '/src/detect-theme.css';
+const owner={uid:'photo-owner',email:'owner@example.com'};
+await activatePrivateAccount(owner.uid);firebaseAuth.currentUser=owner;auth.setState({user:owner,ready:true});
+if(!points.getState().layers.some(l=>l.id==='photos'))points.setState(s=>({layers:[...s.layers,{id:'photos',name:'Foto’s',color:'#7c5ac7',visible:true,archived:false,createdAt:'2026-10-04',categories:[],points:[{id:'point',name:'Punt',category:'Overig',coordinates:[1,2],createdAt:'2026-10-04'}]}]}));
+window.test={points,mode:'denied',calls:[],sanitizePopupHtml,safeContentUrl,getLocal:async id=>{const p=await getPhoto(accountPhotoKey(id));return p?{size:p.fullImage.size,width:p.width,height:p.height}:null},quota:async()=>{const put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(...args){const request=put.apply(this,args);this.transaction.abort();return request};try{await savePhoto(accountPhotoKey('quota'),new File([Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAeAAAAFoCAIAAAAAVb93AAAFCklEQVR4nO3UMQEAIAzAMED5pGOAnx6Jgl7ds2YB0HN+BwDwZtAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRB1ARDjA9AGmpnVAAAAAElFTkSuQmCC'),c=>c.charCodeAt(0))],'valid.png',{type:'image/png'}));return false}catch{return true}finally{IDBObjectStore.prototype.put=put}},switch:async uid=>{auth.setState({user:null,ready:false});await activatePrivateAccount(uid);const user={uid,email:uid+'@example.com'};firebaseAuth.currentUser=user;auth.setState({user,ready:true})}};
+document.documentElement.dataset.detectTheme='purple';document.documentElement.dataset.detectColorScheme='dark';
+function Test(){usePhotoUploads();const layer=points(s=>s.layers.find(l=>l.id==='photos')),photos=layer?.points[0].photos||[];return <main style={{padding:20,background:'var(--detect-window-bg)',color:'var(--detect-window-text)'}}><h1>Foto’s en pop-ups</h1>{layer&&<><PhotoCapture photos={photos} onAddPhoto={p=>points.getState().addPhotoToPoint('photos','point',p)} onRemovePhoto={id=>points.getState().removePhotoFromPoint('photos','point',id)}/><PhotoGallery photos={photos}/></>}<PhotoUploadStatus/><div id="safe" dangerouslySetInnerHTML={{__html:sanitizePopupHtml('<table><tr><td>Behoud tabel</td></tr></table><strong style="color:#7c5ac7">Paars</strong><a href="https://example.com" target="_blank">Veilige link</a><img src=x onerror="window.hacked=true"><svg onload="window.hacked=true"></svg><a href="javascript:window.hacked=true">Foute link</a><form><input name=location></form>')}}/></main>}
+createRoot(document.getElementById('root')).render(<Test/>);
+`
+const firebase=`export const auth={currentUser:null};export const googleProvider={};export const db={};export async function uploadPointPhoto(uid,layer,point,id,photo,current){window.test.calls.push({uid,id,size:photo.fullImage.size});await new Promise(r=>setTimeout(r,400));if(!current())throw Object.assign(new Error(),{code:'storage/canceled'});if(window.test.mode==='denied')throw Object.assign(new Error(),{code:'storage/unauthorized'});return {imageUrl:'https://example.com/'+id+'-full.jpg',thumbnailUrl:'https://example.com/'+id+'.jpg'}};`
+const fixtureId=resolve('prio-three-fixture.jsx')
+const server=await createServer({configFile:false,optimizeDeps:{noDiscovery:true,entries:[fixtureId],include:['react','react-dom/client','react/jsx-runtime','zustand','zustand/middleware','zustand/middleware/immer','immer','dompurify','lucide-react','framer-motion','firebase/app','firebase/auth','firebase/firestore','firebase/storage','ol/proj','xlsx']},server:{host:'127.0.0.1',port:0},plugins:[{name:'photo-fixture',enforce:'pre',resolveId(id){if(id.includes('lib/firebase'))return '\0photo-firebase';if(id==='/prio-three-fixture.jsx')return fixtureId},load(id){if(id==='\0photo-firebase')return firebase;if(id===fixtureId)return fixture},configureServer(server){server.middlewares.use('/photo-test',async(_,res)=>{res.setHeader('Content-Type','text/html');res.end(await server.transformIndexHtml('/photo-test','<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/prio-three-fixture.jsx"></script></body></html>'))})}},react()]})
+await server.listen();let browser
+try {
+ browser=await webkit.launch({headless:true});const context=await browser.newContext({...devices['iPhone 13']});const page=await context.newPage(),errors=[]
+ page.on('pageerror',e=>errors.push(e.message));const url=server.resolvedUrls.local[0]+'photo-test'
+ await page.goto(url);await page.getByText('Foto’s en pop-ups',{exact:true}).waitFor()
+ const sanitizing=await page.evaluate(()=>({hacked:window.hacked||false,table:!!document.querySelector('#safe table'),color:document.querySelector('#safe strong').style.color,rel:document.querySelector('#safe a').rel,bad:document.querySelector('#safe a:nth-of-type(2)').hasAttribute('href'),svg:!!document.querySelector('#safe svg'),input:!!document.querySelector('#safe input'),urls:['javascript:alert(1)','data:image/svg+xml;base64,PHN2Zz4=','java\nscript:alert(1)'].map(v=>window.test.safeContentUrl(v,true)),overlay:window.test.sanitizePopupHtml('<div class="fixed inset-0 z-50" style="position:fixed;background-image:url(https://bad.test);color:purple">x</div>')}))
+ assert.equal(sanitizing.hacked,false);assert.equal(sanitizing.table,true);assert.equal(sanitizing.color,'rgb(124, 90, 199)');assert.equal(sanitizing.rel,'noopener noreferrer');assert.equal(sanitizing.bad,false);assert.equal(sanitizing.svg,false);assert.equal(sanitizing.input,false);assert.deepEqual(sanitizing.urls,[undefined,undefined,undefined]);assert.ok(!sanitizing.overlay.includes('fixed'));assert.ok(!sanitizing.overlay.includes('url('))
+ console.log('PASS iPhone WebKit: malicious HTML/URLs/overlay classes rejected; tables, chosen colour and safe external links retained')
+ await context.setOffline(true)
+ const file={name:'foto.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAeAAAAFoCAIAAAAAVb93AAAFCklEQVR4nO3UMQEAIAzAMED5pGOAnx6Jgl7ds2YB0HN+BwDwZtAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRBl0ABRBg0QZdAAUQYNEGXQAFEGDRB1ARDjA9AGmpnVAAAAAElFTkSuQmCC','base64')}
+ await page.locator('input[type=file][multiple]').setInputFiles([file,{...file,name:'tweede.png'}])
+ await page.getByText('Foto’s (2/5)',{exact:true}).waitFor()
+ const ids=await page.evaluate(()=>window.test.points.getState().layers.find(l=>l.id==='photos').points[0].photos.map(p=>p.id))
+ assert.equal(new Set(ids).size,2);assert.equal(await page.evaluate(()=>window.test.calls.length),0)
+ for(const id of ids)assert.ok((await page.evaluate(id=>window.test.getLocal(id),id)).size>0)
+ await context.setOffline(false);await page.getByRole('alert').filter({hasText:'Foto-opslag is niet beschikbaar'}).first().waitFor()
+ await page.reload();await page.getByText('Foto’s (2/5)',{exact:true}).waitFor();await page.getByRole('alert').filter({hasText:'Foto-opslag is niet beschikbaar'}).first().waitFor()
+ assert.ok((await page.evaluate(id=>window.test.getLocal(id),ids[0])).size>0)
+ await page.locator('button').filter({has:page.locator('img')}).first().tap();await page.locator('img[alt="Foto"][src^="blob:"]').waitFor();await page.keyboard.press('Escape')
+ console.log('PASS iPhone WebKit: batch capture preserves both full local images offline, error is visible, reload retains files and viewer opens full image')
+ await page.evaluate(()=>window.test.mode='ok');await page.getByRole('button',{name:'Foto-upload opnieuw proberen'}).tap()
+ await page.waitForFunction(()=>window.test.points.getState().layers.find(l=>l.id==='photos').points[0].photos.every(p=>!p.pendingUpload&&p.imageUrl))
+ await page.reload();await page.waitForFunction(()=>window.test.points.getState().layers.find(l=>l.id==='photos').points[0].photos.every(p=>!p.pendingUpload&&p.imageUrl))
+ assert.ok((await page.evaluate(id=>window.test.getLocal(id),ids[0])).size>0)
+ console.log('PASS iPhone WebKit: explicit retry attaches URLs durably without deleting the full local copy')
+ await page.locator('input[type=file][multiple]').setInputFiles(file);await page.getByText('Foto’s (3/5)',{exact:true}).waitFor()
+ await page.waitForFunction(()=>window.test.calls.length>0)
+ await page.evaluate(()=>window.test.switch('photo-other'));assert.equal(await page.evaluate(id=>window.test.getLocal(id),ids[0]),null);assert.equal(await page.getByText('Foto’s (3/5)',{exact:true}).count(),0)
+ await page.evaluate(()=>window.test.switch('photo-owner'));await page.getByText('Foto’s (3/5)',{exact:true}).waitFor()
+ assert.ok((await page.evaluate(id=>window.test.getLocal(id),ids[0])).size>0)
+ await page.locator('input[type=file][multiple]').setInputFiles({name:'kapot.png',mimeType:'image/png',buffer:Buffer.from('not an image')});await page.getByRole('alert').filter({hasText:'Foto kon niet worden verwerkt'}).waitFor()
+ assert.equal(await page.getByText('Foto’s (3/5)',{exact:true}).count(),1)
+ assert.equal(await page.evaluate(()=>window.test.quota()),true);assert.ok((await page.evaluate(id=>window.test.getLocal(id),ids[0])).size>0)
+ assert.deepEqual(errors,[])
+ console.log('PASS iPhone WebKit: account switch isolates pending photos; invalid image reports failure while existing photos remain')
+} catch(error) {const page=browser?.contexts()[0]?.pages()[0];if(page)console.error('Photo diagnostic:',await page.evaluate(()=>({text:document.body.innerText,calls:window.test?.calls})).catch(()=>null));throw error}
+finally {await browser?.close();await server.close()}

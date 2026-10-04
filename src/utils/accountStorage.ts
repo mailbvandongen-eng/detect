@@ -65,3 +65,10 @@ export function accountStorageNames(prefix: string): string[] {
   }
   return names
 }
+
+// Derive local photo keys from the active workspace; never trust keys from a
+// shared document. The first claimed workspace retains its existing photos.
+export function accountPhotoKey(id: string): string {
+  if (scope === 'locked' || switching) throw new Error('Accountgegevens worden nog geladen.')
+  return key(scope, `detectorapp-photo:${id}`)
+}

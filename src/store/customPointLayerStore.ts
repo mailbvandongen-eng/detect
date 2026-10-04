@@ -53,7 +53,11 @@ export interface PhotoData {
   thumbnailUrl?: string      // Firebase Storage URL (when uploaded)
   thumbnailBase64?: string   // Local base64 fallback (offline/before upload)
   createdAt: string
-  pendingUpload?: boolean    // True when offline, needs sync
+  pendingUpload?: boolean    // Full photo stays local until upload is acknowledged
+  imageUrl?: string
+  uploadOwnerUid?: string
+  uploadError?: string
+  uploadRetryable?: boolean
 }
 
 // Geometry types for storing complex shapes
@@ -144,9 +148,9 @@ interface CustomPointLayerStore {
   removeCategory: (layerId: string, category: string) => void
 
   // Photo operations
-  addPhotoToPoint: (layerId: string, pointId: string, photo: PhotoData) => void
+  addPhotoToPoint: (layerId: string, pointId: string, photo: PhotoData) => boolean
   removePhotoFromPoint: (layerId: string, pointId: string, photoId: string) => void
-  updatePhotoInPoint: (layerId: string, pointId: string, photoId: string, updates: Partial<PhotoData>) => void
+  updatePhotoInPoint: (layerId: string, pointId: string, photoId: string, updates: Partial<PhotoData>) => boolean
 
   // Export/Import
   exportLayerAsGeoJSON: (id: string) => void
@@ -333,9 +337,16 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
       addPhotoToPoint: (layerId, pointId, photo) => {
         const layer=get().layers.find(item=>item.id===layerId)
         const point=layer?.points.find(item=>item.id===pointId)
-        if(!layer || !point || layer.buddyRole==='read')return
+        if(!layer || !point || layer.buddyRole==='read' || point.photos?.some(item=>item.id===photo.id) || (point.photos?.length || 0)>=5)return false
         const snapshot={...point,photos:[...(point.photos || []),photo]}
-        if(layer.buddyLayerId && !queueBuddyEdit(layer,{kind:'photo',pointId,action:'add',photoId:photo.id,photo},snapshot))return
+        if(layer.buddyLayerId && !queueBuddyEdit(layer,{kind:'photo',pointId,action:'add',photoId:photo.id,photo},snapshot))return false
+        if (!layer.buddyLayerId) {
+          try {
+            const state = get()
+            const next = { ...state, layers: state.layers.filter(item=>!item.buddyLayerId).map(item=>item.id===layerId?{...item,points:item.points.map(value=>value.id===pointId?snapshot:value)}:item) }
+            accountStorage.setItem('detectorapp-custom-point-layers', JSON.stringify({ state: next, version: 7 }))
+          } catch { return false }
+        }
         set(state => ({
           layers: state.layers.map(l =>
             l.id === layerId
@@ -350,6 +361,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               : l
           )
         }))
+        return true
       },
 
       removePhotoFromPoint: (layerId, pointId, photoId) => {
@@ -377,9 +389,18 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
       updatePhotoInPoint: (layerId, pointId, photoId, updates) => {
         const layer=get().layers.find(item=>item.id===layerId)
         const point=layer?.points.find(item=>item.id===pointId)
-        if(!layer || !point || layer.buddyRole==='read')return
+        if(!layer || !point || !point.photos?.some(photo=>photo.id===photoId) || layer.buddyRole==='read')return false
         const snapshot={...point,photos:(point.photos || []).map(item=>item.id===photoId?{...item,...updates}:item)}
-        if(layer.buddyLayerId && !queueBuddyEdit(layer,{kind:'photo',pointId,action:'update',photoId,fields:updates},snapshot))return
+        if(layer.buddyLayerId && !queueBuddyEdit(layer,{kind:'photo',pointId,action:'update',photoId,fields:updates},snapshot))return false
+        if (!layer.buddyLayerId) {
+          // Commit before changing memory: quota failures must never acknowledge
+          // an upload whose URL would disappear on the next reload.
+          try {
+            const state = get()
+            const next = { ...state, layers: state.layers.filter(item=>!item.buddyLayerId).map(item=>item.id===layerId?{...item,points:item.points.map(value=>value.id===pointId?snapshot:value)}:item) }
+            accountStorage.setItem('detectorapp-custom-point-layers', JSON.stringify({ state: next, version: 7 }))
+          } catch { return false }
+        }
         set(state => ({
           layers: state.layers.map(l =>
             l.id === layerId
@@ -399,6 +420,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               : l
           )
         }))
+        return true
       },
 
       exportLayerAsGeoJSON: (id) => {

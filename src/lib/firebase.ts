@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
+import { getStorage, ref as storageRef, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage'
 
 // Firebase config - replace with your actual config
 const firebaseConfig = {
@@ -85,4 +85,30 @@ export function base64ToBlob(base64: string): Blob {
   }
 
   return new Blob([uInt8Array], { type: contentType })
+}
+
+// Stable object paths make retries idempotent. Cancellation guards every await
+// so an account switch, removed photo or revoked role cannot attach stale URLs.
+export async function uploadPointPhoto(
+  uid: string, layerId: string, pointId: string, photoId: string,
+  photo: { fullImage: Blob; thumbnail: Blob }, current: () => boolean,
+): Promise<{ imageUrl: string; thumbnailUrl: string }> {
+  storage.maxUploadRetryTime = 15000
+  storage.maxOperationRetryTime = 15000
+  async function upload(blob: Blob, suffix: string) {
+    if (!current()) throw Object.assign(new Error('Upload onderbroken.'), { code: 'storage/canceled' })
+    const ref = storageRef(storage, `users/${uid}/layers/${layerId}/points/${pointId}/${photoId}${suffix}.jpg`)
+    const task = uploadBytesResumable(ref, blob, { contentType: 'image/jpeg' })
+    const timer = window.setInterval(() => { if (!current()) task.cancel() }, 200)
+    try {
+      await task
+      if (!current()) throw Object.assign(new Error(), { code: 'storage/canceled' })
+      const url = await getDownloadURL(ref)
+      if (!current()) throw Object.assign(new Error(), { code: 'storage/canceled' })
+      return url
+    } finally { window.clearInterval(timer) }
+  }
+  const imageUrl = await upload(photo.fullImage, '-full')
+  const thumbnailUrl = await upload(photo.thumbnail, '')
+  return { imageUrl, thumbnailUrl }
 }

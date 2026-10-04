@@ -13,8 +13,11 @@ export async function resizeImage(file: File, maxSize: number = MAX_THUMBNAIL_SI
     const img = new Image()
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
+    if (!ctx) { reject(new Error('Foto kan niet worden verwerkt.')); return }
+    const url = URL.createObjectURL(file)
 
     img.onload = () => {
+      URL.revokeObjectURL(url)
       // Calculate new dimensions
       let width = img.width
       let height = img.height
@@ -35,7 +38,7 @@ export async function resizeImage(file: File, maxSize: number = MAX_THUMBNAIL_SI
       canvas.height = height
 
       // Draw and export
-      ctx?.drawImage(img, 0, 0, width, height)
+      ctx.drawImage(img, 0, 0, width, height)
       canvas.toBlob(
         (blob) => {
           if (blob) {
@@ -49,8 +52,8 @@ export async function resizeImage(file: File, maxSize: number = MAX_THUMBNAIL_SI
       )
     }
 
-    img.onerror = () => reject(new Error('Failed to load image'))
-    img.src = URL.createObjectURL(file)
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Deze afbeelding kan niet worden geopend.')) }
+    img.src = url
   })
 }
 

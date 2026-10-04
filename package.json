@@ -1,7 +1,7 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.81",
+  "version": "2.33.82",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,7 +18,8 @@
     "typecheck": "tsc --noEmit",
     "test:private-sync": "node scripts/test-private-sync.mjs",
     "test:app-maintenance": "node scripts/test-app-maintenance.mjs",
-    "test:app-maintenance-browser": "node scripts/test-app-maintenance-browser.mjs"
+    "test:app-maintenance-browser": "node scripts/test-app-maintenance-browser.mjs",
+    "test:photos": "node scripts/test-photo-uploads.mjs"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.22",
@@ -36,6 +37,7 @@
   "dependencies": {
     "@arcgis/core": "^4.34.8",
     "clsx": "^2.1.1",
+    "dompurify": "^3.4.16",
     "exif-js": "^2.3.0",
     "firebase": "^12.7.0",
     "framer-motion": "^11.18.2",

@@ -140,14 +140,13 @@ export function AddPointModal() {
                 </div>
               </div>
 
-              {/* Foto's bij buddy-lagen volgen later via aparte gedeelde opslag. */}
-              {!pointLayer?.buddyLayerId && (
+              <>
                 <PhotoCapture
                   photos={photos}
-                  onAddPhoto={(photo) => setPhotos([...photos, photo])}
-                  onRemovePhoto={(photoId) => setPhotos(photos.filter(p => p.id !== photoId))}
+                  onAddPhoto={(photo) => setPhotos(previous => [...previous, photo])}
+                  onRemovePhoto={(photoId) => setPhotos(previous => previous.filter(p => p.id !== photoId))}
                 />
-              )}
+              </>
 
               {/* Notes */}
               <div>

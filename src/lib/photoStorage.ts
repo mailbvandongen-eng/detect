@@ -155,10 +155,11 @@ export async function savePhoto(id: string, file: File): Promise<StoredPhoto> {
     const store = tx.objectStore(STORE_NAME)
     const request = store.put(record)
 
-    request.onsuccess = () => resolve(record)
+    request.onsuccess = () => {}
     request.onerror = () => reject(request.error)
 
-    tx.oncomplete = () => db.close()
+    tx.oncomplete = () => { db.close(); resolve(record) }
+    tx.onabort = () => { db.close(); reject(tx.error || new Error("Foto kon niet lokaal worden opgeslagen.")) }
   })
 }
 
@@ -189,10 +190,11 @@ export async function deletePhoto(id: string): Promise<void> {
     const store = tx.objectStore(STORE_NAME)
     const request = store.delete(id)
 
-    request.onsuccess = () => resolve()
+    request.onsuccess = () => {}
     request.onerror = () => reject(request.error)
 
-    tx.oncomplete = () => db.close()
+    tx.oncomplete = () => { db.close(); resolve() }
+    tx.onabort = () => { db.close(); reject(tx.error || new Error("Foto kon niet worden verwijderd.")) }
   })
 }
 

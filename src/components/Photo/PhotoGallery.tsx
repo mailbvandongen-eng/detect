@@ -1,3 +1,4 @@
+import { safeContentUrl } from '../../utils/safePopupHtml'
 import { useState } from 'react'
 import { PhotoViewer } from './PhotoViewer'
 import type { PhotoData } from '../../store/customPointLayerStore'
@@ -40,7 +41,7 @@ export function PhotoGallery({ photos, onDeletePhoto, maxThumbnails = 4, classNa
     <>
       <div className={`flex flex-wrap gap-2 ${className}`}>
         {visiblePhotos.map((photo, index) => {
-          const thumbnailSrc = photo.thumbnailUrl || photo.thumbnailBase64
+          const thumbnailSrc = safeContentUrl(photo.thumbnailUrl || photo.thumbnailBase64, true)
 
           return (
             <button
@@ -76,6 +77,7 @@ export function PhotoGallery({ photos, onDeletePhoto, maxThumbnails = 4, classNa
       {viewingPhotoId && (
         <PhotoViewer
           photoId={viewingPhotoId}
+          photoData={photos.find(photo => photo.id === viewingPhotoId)}
           onClose={() => setViewingPhotoId(null)}
           onDelete={onDeletePhoto ? handleDelete : undefined}
           allPhotoIds={allPhotoIds}

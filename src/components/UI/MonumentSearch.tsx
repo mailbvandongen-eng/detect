@@ -1,3 +1,4 @@
+import { sanitizePopupHtml } from '../../utils/safePopupHtml'
 /**
  * Monument Search Component
  * Bottom sheet style - 35% default, click header for fullscreen
@@ -382,7 +383,7 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
                       {expandedId === result.id && (
                         <div
                           className="text-xs text-gray-700 bg-gray-50 rounded p-2 max-h-32 overflow-y-auto whitespace-pre-wrap"
-                          dangerouslySetInnerHTML={{ __html: highlightMatches(result.omschrijving) }}
+                          dangerouslySetInnerHTML={{ __html: sanitizePopupHtml(highlightMatches(result.omschrijving)) }}
                         />
                       )}
                     </div>

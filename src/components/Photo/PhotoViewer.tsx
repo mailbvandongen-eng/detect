@@ -1,3 +1,6 @@
+import { accountPhotoKey, accountSession, currentAccountScope } from '../../utils/accountStorage'
+import { safeContentUrl } from '../../utils/safePopupHtml'
+import type { PhotoData } from '../../store/customPointLayerStore'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Download, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -5,6 +8,7 @@ import { getPhoto, getPhotoUrl, deletePhoto, type StoredPhoto } from '../../lib/
 
 interface Props {
   photoId: string
+  photoData?: PhotoData
   onClose: () => void
   onDelete?: () => void
   // For multi-photo navigation
@@ -13,7 +17,7 @@ interface Props {
   onNavigate?: (photoId: string, index: number) => void
 }
 
-export function PhotoViewer({ photoId, onClose, onDelete, allPhotoIds, currentIndex = 0, onNavigate }: Props) {
+export function PhotoViewer({ photoId, photoData, onClose, onDelete, allPhotoIds, currentIndex = 0, onNavigate }: Props) {
   const [photo, setPhoto] = useState<StoredPhoto | null>(null)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -22,25 +26,35 @@ export function PhotoViewer({ photoId, onClose, onDelete, allPhotoIds, currentIn
   // Load photo from IndexedDB
   useEffect(() => {
     let url: string | null = null
+    let active = true
+    const valid = accountSession(currentAccountScope())
 
     async function loadPhoto() {
       setLoading(true)
       setError(null)
+      setPhoto(null)
+      setPhotoUrl(null)
 
       try {
-        const storedPhoto = await getPhoto(photoId)
+        const storedPhoto = await getPhoto(photoData ? accountPhotoKey(photoId) : photoId)
+        if (!active || !valid()) return
         if (storedPhoto) {
           setPhoto(storedPhoto)
           url = getPhotoUrl(storedPhoto)
           setPhotoUrl(url)
         } else {
-          setError('Foto niet gevonden')
+          const fallback = safeContentUrl(photoData?.imageUrl || photoData?.thumbnailUrl || photoData?.thumbnailBase64, true)
+          if (fallback) setPhotoUrl(fallback)
+          else setError('Foto niet gevonden')
         }
       } catch (err) {
-        console.error('Failed to load photo:', err)
-        setError('Fout bij laden van foto')
+        if (active && valid()) {
+          const fallback = safeContentUrl(photoData?.imageUrl || photoData?.thumbnailUrl || photoData?.thumbnailBase64, true)
+          if (fallback) setPhotoUrl(fallback)
+          else setError('Fout bij laden van foto')
+        }
       } finally {
-        setLoading(false)
+        if (active && valid()) setLoading(false)
       }
     }
 
@@ -48,17 +62,18 @@ export function PhotoViewer({ photoId, onClose, onDelete, allPhotoIds, currentIn
 
     // Cleanup object URL on unmount
     return () => {
+      active = false
       if (url) {
         URL.revokeObjectURL(url)
       }
     }
-  }, [photoId])
+  }, [photoId, photoData?.imageUrl, photoData?.thumbnailUrl])
 
   const handleDownload = () => {
-    if (photoUrl && photo) {
+    if (photoUrl) {
       const a = document.createElement('a')
       a.href = photoUrl
-      a.download = photo.originalName || `foto-${photoId}.jpg`
+      a.download = photo?.originalName || `foto-${photoId}.jpg`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -68,8 +83,12 @@ export function PhotoViewer({ photoId, onClose, onDelete, allPhotoIds, currentIn
   const handleDelete = async () => {
     if (!confirm('Weet je zeker dat je deze foto wilt verwijderen?')) return
 
+    const valid = accountSession(currentAccountScope())
     try {
-      await deletePhoto(photoId)
+      // The point owns removal; keep its full local photo until that change has
+      // been saved, so failed shared writes cannot destroy the only copy.
+      if (!photoData) await deletePhoto(photoId)
+      if (!valid()) return
       onDelete?.()
       onClose()
     } catch (err) {
@@ -185,7 +204,8 @@ export function PhotoViewer({ photoId, onClose, onDelete, allPhotoIds, currentIn
           {photoUrl && (
             <motion.img
               src={photoUrl}
-              alt="Vondst foto"
+              onError={() => { setPhotoUrl(null); setError('Foto kon niet worden geladen. Probeer opnieuw met verbinding.') }}
+              alt="Foto"
               className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
