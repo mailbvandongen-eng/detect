@@ -34,7 +34,7 @@ export async function applyBuddyWrite(write,current){
 }
 `
 const fixtureId=resolve('buddy-writes-fixture.jsx')
-const server=await createServer({configFile:false,optimizeDeps:{entries:[fixtureId],include:['react','react-dom/client','react/jsx-runtime','zustand','zustand/middleware','zustand/middleware/immer','immer','firebase/app','firebase/auth','firebase/firestore']},server:{host:'127.0.0.1',port:0},plugins:[{
+const server=await createServer({configFile:false,optimizeDeps:{noDiscovery:true,entries:[fixtureId],include:['react','react-dom/client','react/jsx-runtime','zustand','zustand/middleware','zustand/middleware/immer','immer','firebase/app','firebase/auth','firebase/firestore','firebase/storage','ol/proj','xlsx']},server:{host:'127.0.0.1',port:0},plugins:[{
  name:'shared-write-fixture',enforce:'pre',resolveId(id){if(id.includes('services/buddyLayers'))return '\0write-service';if(id==='/buddy-writes-fixture.jsx')return fixtureId},load(id){if(id==='\0write-service')return service;if(id===fixtureId)return fixture},configureServer(server){server.middlewares.use('/writes-test',async(_,res)=>{res.setHeader('Content-Type','text/html');res.end(await server.transformIndexHtml('/writes-test','<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div><script type="module" src="/buddy-writes-fixture.jsx"></script></body></html>'))})},
 },react()]})
 await server.listen();let browser
@@ -84,4 +84,8 @@ try{
  await other.waitForFunction(()=>window.test.queue.getState().items.length===0)
  assert.deepEqual(errors,[])
  console.log('PASS WebKit iPhone: two tabs retain both simultaneous offline operations with distinct cursors and acknowledge only completed writes')
+}catch(error){
+ const page=browser?.contexts()[0]?.pages()[0]
+ if(page)console.error('Mobile write diagnostic:',await page.evaluate(()=>({online:navigator.onLine,mode:window.test?.mode,queue:window.test?.queue.getState(),calls:window.test?.calls.length,text:document.body.innerText})).catch(()=>null))
+ throw error
 }finally{await browser?.close();await server.close()}

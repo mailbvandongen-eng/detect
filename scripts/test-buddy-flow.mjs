@@ -114,10 +114,14 @@ try {
   const partialId='point-owner-partial'
   await firestore.setDoc(firestore.doc(a.db,'buddyLayers',partialId),{id:partialId,name:'Partial',color:'#7c5ac7',sourceLayerId:'partial',ownerUid:owner.uid,ownerEmail:owner.email,memberEmails:[owner.email],editEmails:[],readEmails:[],ready:false})
   await assertFails(firestore.getDoc(firestore.doc(b.db,'buddyLayers',partialId)))
+  await a.saveBuddyPoint(partialId,{...point,name:'Already persisted; preserve me'})
   const resumed=await a.shareOwnPointLayer(owner,{...privateLayer,id:'partial'},editor.email,'edit')
   sharedPoints=await firestore.getDocs(firestore.collection(b.db,'buddyLayers',resumed.id,'points'))
   assert.equal(sharedPoints.size,2)
   pass('Interrupted promotion remains private and safely resumes with all points')
+  snap=await firestore.getDoc(firestore.doc(a.db,'buddyLayers',resumed.id,'points',point.id))
+  assert.equal(snap.data().name,'Already persisted; preserve me')
+  pass('Resumed initial promotion never overwrites a point already published by another request')
 
   const a2=client(owner)
   await Promise.all([a.addBuddyMember(owner,promoted.id,'extra-one@example.com','read'),a2.addBuddyMember(owner,promoted.id,'extra-two@example.com','edit')])

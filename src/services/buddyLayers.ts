@@ -184,7 +184,19 @@ export async function shareOwnPointLayer(
     // Sequential chunks keep large layers within Firestore's write limits.
     for (let offset = 0; offset < layer.points.length; offset += 100) {
       assertCurrent()
-      await Promise.all(layer.points.slice(offset, offset + 100).map(point => saveBuddyPoint(id, point)))
+      await Promise.all(layer.points.slice(offset, offset + 100).map(async point => {
+        const pointRef=doc(db,'buddyLayers',id,'points',point.id)
+        // Concurrent promotion/retry must never replace an already published
+        // point, including a buddy edit or a deletion receipt.
+        await runTransaction(db,async transaction=>{
+          const parent=await transaction.get(ref)
+          assertCurrent()
+          if(!parent.exists() || parent.data().deleted)throw new Error('Deze gedeelde laag is verwijderd.')
+          const existing=await transaction.get(pointRef)
+          assertCurrent()
+          if(!existing.exists())transaction.set(pointRef,{...JSON.parse(JSON.stringify(point)),updatedAt:serverTimestamp()})
+        })
+      }))
     }
     assertCurrent()
     await updateDoc(ref, { ready: true, updatedAt: serverTimestamp() })
