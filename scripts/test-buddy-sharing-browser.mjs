@@ -8,6 +8,7 @@ const require = createRequire(process.env.BUDDY_BROWSER_MODULE_ROOT
   ? process.env.BUDDY_BROWSER_MODULE_ROOT + '/package.json' : import.meta.url)
 const { webkit, devices } = require('playwright')
 const fixture = `
+import {independentPointLayers} from '/src/utils/independentLayers';
 import {activatePrivateAccount} from '/src/services/privateAccountData';
 import React from 'react'; import {createRoot} from 'react-dom/client';
 import {ThemesPanel} from '/src/components/LayerControl/ThemesPanel';
@@ -26,7 +27,7 @@ points.setState({layers:[{id:'buddy-test',name:'Frankrijk 2026 gedeeld',color:'#
 imports.setState({layers:[{id:'import-test',name:'Import test',features:{type:'FeatureCollection',features:[]},visible:true,opacity:1}]});
 settings.setState({fontScale:130,uiTheme:'purple',colorScheme:'dark'});
 useUIStore.setState({activeWindow:'layers'});
-window.test={points,imports,openLayers:()=>useUIStore.setState({activeWindow:'layers'}),calls:[],fail:false,signOut:()=>useAuthStore.setState({user:null}),switchAccount:async uid=>{useAuthStore.setState({user:null});await activatePrivateAccount(uid);useAuthStore.setState({user:uid?{uid,email:uid==='test-owner'?'owner@example.com':'other@example.com'}:null});useUIStore.setState({activeWindow:'layers'})},theme:(value,scheme)=>{document.documentElement.dataset.detectTheme=value;document.documentElement.dataset.detectColorScheme=scheme}};
+window.test={repair:independentPointLayers,points,imports,openLayers:()=>useUIStore.setState({activeWindow:'layers'}),calls:[],fail:false,signOut:()=>useAuthStore.setState({user:null}),switchAccount:async uid=>{useAuthStore.setState({user:null});await activatePrivateAccount(uid);useAuthStore.setState({user:uid?{uid,email:uid==='test-owner'?'owner@example.com':'other@example.com'}:null});useUIStore.setState({activeWindow:'layers'})},theme:(value,scheme)=>{document.documentElement.dataset.detectTheme=value;document.documentElement.dataset.detectColorScheme=scheme}};
 window.test.theme('purple','dark');
 createRoot(document.getElementById('root')).render(<><ThemesPanel/><CreateLayerModal/><OpacitySliders/></>);
 `
@@ -61,8 +62,32 @@ try {
  browser=await webkit.launch({headless:true})
  const context=await browser.newContext({...devices['iPhone 13'],viewport:{width:390,height:844}})
  const page=await context.newPage()
- page.on('pageerror',error=>console.error(error.stack))
+ const pageErrors=[]
+ page.on('pageerror',error=>{pageErrors.push(error.message);console.error(error.stack)})
  await page.goto(server.resolvedUrls.local[0]+'buddy-test')
+ await page.getByText('Eigen lagen',{exact:true}).waitFor()
+ await page.getByText('Imports',{exact:true}).waitFor()
+ await page.evaluate(()=>{
+   const base={color:'#f97316',visible:true,archived:false,categories:['Overig'],createdAt:'2026-10-04'};
+   window.test.points.setState(state=>({layers:window.test.repair([...state.layers,
+     {...base,id:'legacy-source',name:'#32c759 – eigen punten',points:[{id:'conflict',name:'Punt',notes:'Bron',photos:[{id:'photo',thumbnailBase64:'data:image/png;base64,a'}],coordinates:[1,2],category:'Overig',status:'todo',createdAt:'2026-10-04'}]},
+     {...base,id:'private-target',name:'Mijn reis',points:[{id:'conflict',name:'Punt',notes:'Doel',coordinates:[1,2],category:'Overig',status:'todo',createdAt:'2026-10-04'}]},
+   ])}));
+ })
+ await page.getByTitle('Bewaarde punten',{exact:true}).waitFor()
+ assert.equal(await page.getByText('#32c759 – eigen punten',{exact:true}).count(),0)
+ await page.getByTitle('Laaginstellingen',{exact:true}).nth(1).tap()
+ await page.getByLabel('Samenvoegen met een privélaag',{exact:true}).selectOption('private-target')
+ page.once('dialog',dialog=>dialog.accept())
+ await page.getByRole('button',{name:'Punten samenvoegen',exact:true}).tap()
+ await page.getByTitle('Bewaarde punten',{exact:true}).waitFor({state:'detached'})
+ const merged=await page.evaluate(()=>window.test.points.getState())
+ assert.equal(merged.layers.find(layer=>layer.id==='private-target').points.length,2)
+ assert.ok(merged.layers.find(layer=>layer.id==='private-target').points.some(point=>point.photos?.length===1))
+ assert.ok(merged.deletedLayerIds.includes('legacy-source'))
+ await page.evaluate(()=>window.test.points.getState().removeLayer('private-target'))
+ assert.deepEqual(pageErrors,[])
+ console.log('PASS WebKit iPhone: separate imports, repaired names and explicit private merge preserve conflicting points and photos')
  await page.getByTitle('Laaginstellingen',{exact:true}).first().tap()
  const input=page.getByRole('textbox',{name:'Google-e-mailadres',exact:true})
  await input.tap()

@@ -124,7 +124,7 @@ export function useCloudSync() {
         imported = independentImport(recovered)
         useCustomLayerStore.setState(state => ({ layers: [...state.layers, imported!] }))
       }
-      const overlay = independentPointLayer(materializeSharedOverlay(record, imported?.id || ''))
+      const overlay = independentPointLayer({ ...materializeSharedOverlay(record, imported?.id || ''), name: record.layerName })
       const missing = recoverLegacyPoints(useCustomPointLayerStore.getState().layers, overlay.points, record.shareId)
       useCustomPointLayerStore.setState(state => ({
         layers: missing.length ? [...state.layers, { ...overlay, id: `recovered-${record.shareId}`, points: missing }] : state.layers,

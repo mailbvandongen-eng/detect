@@ -60,6 +60,27 @@ assert.equal(migrated.shareId, undefined)
 assert.equal(migrated.points, old.points, 'Migration preserves every existing point')
 assert.equal(migrated.id, old.id)
 assert.deepEqual(independent.independentPointLayer(migrated), migrated, 'Migration is idempotent')
+const damaged = independent.independentPointLayers([
+  {...old, id:'first', name:'#32c759 – eigen punten'},
+  {...old, id:'second', name:'#f97316 – eigen punten'},
+  {...old, id:'third', name:'Frankrijk 2026 – eigen punten'},
+])
+assert.deepEqual(damaged.map(layer => layer.name), ['Bewaarde punten', 'Bewaarde punten 2', 'Frankrijk 2026'])
+assert.deepEqual(independent.independentPointLayers(damaged), damaged, 'Repair remains stable after reopening')
+assert.deepEqual(damaged.map(layer => layer.points), [old.points, old.points, old.points])
+const sharedLayer = {...old, buddyLayerId:'buddy', name:'#f97316 – eigen punten'}
+assert.equal(independent.independentPointLayer(sharedLayer), sharedLayer, 'Shared metadata is never locally renamed')
+const source = {...old, id:'source', shareId:undefined, categories:['Fossiel'], points:[{id:'same',notes:'source',photos:[{id:'photo'}],geometry:{type:'Point',coordinates:[1,2]}}]}
+const target = {...source,id:'target',categories:['Erfgoed'],points:[{id:'same',notes:'target'}]}
+const merged = independent.mergePrivatePointLayers([source,target], 'source','target', () => 'conflict')
+assert.equal(merged.length,1)
+assert.deepEqual(merged[0].points.map(point => point.notes), ['target','source'])
+assert.equal(merged[0].points[1].id,'conflict')
+assert.deepEqual(merged[0].points[1].photos,source.points[0].photos)
+assert.deepEqual(merged[0].categories,['Erfgoed','Fossiel'])
+const forbidden = [source,{...target,buddyLayerId:'buddy'}]
+assert.equal(independent.mergePrivatePointLayers(forbidden,'source','target',()=> 'bad'), forbidden, 'Merge cannot publish private points to a shared layer')
+assert.equal(independent.mergePrivatePointLayers([source,source],'source','source',()=> 'bad').length,2)
 assert.equal(independent.independentImport({...importedLayers[0], shareId: 'legacy'}).shareId, undefined)
 const oldPoint = {id:'p',name:'Lokaal',notes:'Mijn wijzigingen',coordinates:[1,2]}
 const remotePoint = {...oldPoint,notes:'Wijzigingen ontvanger'}

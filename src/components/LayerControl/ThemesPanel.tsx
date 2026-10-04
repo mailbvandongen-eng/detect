@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight, Settings2, Trash2 } from 'lucide-react'
 import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
@@ -36,6 +36,11 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
 }) {
   const [expanded, setExpanded] = useState(false)
   const [nameDraft, setNameDraft] = useState(layer.name)
+  useEffect(() => setNameDraft(layer.name), [layer.name])
+  const [mergeTarget, setMergeTarget] = useState('')
+  const mergePrivateLayers = useCustomPointLayerStore(state => state.mergePrivateLayers)
+  const allPointLayers = useCustomPointLayerStore(state => state.layers)
+  const mergeTargets = allPointLayers.filter(other => other.id !== layer.id && !other.buddyLayerId && !other.shareId && !other.archived)
   const [showColors, setShowColors] = useState(false)
 
   const editableMetadata = !layer.buddyLayerId || layer.buddyRole === 'owner'
@@ -81,7 +86,8 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
           style={{ fontSize: '0.9em' }}
           title={layer.name}
         >
-          {layer.name}
+          <span className="block truncate">{layer.name}</span>
+          <span className="block text-[10px]" style={{ color: 'var(--detect-window-muted)' }}>{layer.buddyLayerId ? (layer.buddyRole === 'read' ? 'Gedeeld · alleen bekijken' : 'Gedeeld') : 'Privé'}</span>
         </button>
         <span className="flex-shrink-0 text-[10px] text-gray-400">{layer.points.length}</span>
         <button
@@ -145,6 +151,21 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
 
           <BuddyLayerPanel layer={layer} />
 
+          {!layer.buddyLayerId && !layer.shareId && mergeTargets.length > 0 && (
+            <div className="space-y-1">
+              <label className="block text-[11px]" htmlFor={`merge-${layer.id}`}>Samenvoegen met een privélaag</label>
+              <select id={`merge-${layer.id}`} value={mergeTarget} onChange={event => setMergeTarget(event.target.value)} className="detect-form-field w-full">
+                <option value="">Kies een laag</option>
+                {mergeTargets.map(target => <option key={target.id} value={target.id}>{target.name}</option>)}
+              </select>
+              <button disabled={!mergeTarget} className="detect-window-secondary-button w-full disabled:opacity-40" onClick={() => {
+                const target = mergeTargets.find(item => item.id === mergeTarget)
+                if (!target || !window.confirm(`Alle ${layer.points.length} punten uit “${layer.name}” verplaatsen naar “${target.name}”? De lege bronlaag verdwijnt. Beide blijven privé.`)) return
+                mergePrivateLayers(layer.id, target.id)
+              }}>Punten samenvoegen</button>
+            </div>
+          )}
+
           {canDelete && (
             <button
               onClick={handleDelete}
@@ -186,8 +207,9 @@ export function ThemesPanel() {
             <div className="mb-2 pb-1 border-b border-gray-100">
               <div className="flex items-center gap-1 py-0.5 px-1 mb-1">
                 <Layers size={12} className="text-purple-600" />
-                <span className="text-purple-600 font-medium" style={{ fontSize: '0.9em' }}>Mijn lagen</span>
+                <span className="text-purple-600 font-medium" style={{ fontSize: '0.9em' }}>Eigen lagen</span>
               </div>
+              <p className="px-1 text-[11px] mb-1" style={{ color: 'var(--detect-window-muted)' }}>Nieuwe lagen zijn privé. Delen stel je in via de laaginstellingen.</p>
               {standalonePointLayers.map(layer => (
                 <PointLayerItem
                   key={layer.id}
@@ -204,19 +226,22 @@ export function ThemesPanel() {
                   <button onClick={refreshBuddies} className="mt-1 underline">Opnieuw proberen</button>
                 </div>
               )}
+              <div className="px-1 pt-3 pb-1 font-medium" style={{ color: 'var(--detect-accent)', fontSize: '0.9em' }}>Imports</div>
+              <p className="px-1 text-[11px] mb-1" style={{ color: 'var(--detect-window-muted)' }}>Geïmporteerde kaarten. Eigen lagen leg je hier overheen.</p>
+              {importedLayers.length === 0 && <p className="px-1 text-[11px]">Nog geen imports</p>}
               {importedLayers.map(layer => (
                 <CustomLayerItem key={layer.id} layer={layer} compact />
               ))}
               <div className="grid grid-cols-2 gap-2 px-1 pt-2">
                 <button
                   onClick={(event) => { event.stopPropagation(); openWindow('createLayer', 'layers') }}
-                  className="flex items-center justify-center gap-1 rounded-lg bg-purple-50 px-2 py-2 text-xs text-purple-700 hover:bg-purple-100"
+                  className="detect-window-primary-button flex items-center justify-center gap-1 px-2 py-2 text-xs"
                 >
                   <Plus size={14} /> Nieuwe laag
                 </button>
                 <button
                   onClick={(event) => { event.stopPropagation(); openWindow('importLayer', 'layers') }}
-                  className="flex items-center justify-center gap-1 rounded-lg bg-cyan-50 px-2 py-2 text-xs text-cyan-700 hover:bg-cyan-100"
+                  className="detect-window-secondary-button flex items-center justify-center gap-1 px-2 py-2 text-xs"
                 >
                   <Upload size={14} /> Importeren
                 </button>

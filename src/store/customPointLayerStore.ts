@@ -1,4 +1,4 @@
-import { independentPointLayer } from '../utils/independentLayers'
+import { independentPointLayers, mergePrivatePointLayers } from '../utils/independentLayers'
 import { useSettingsStore } from './settingsStore'
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
@@ -88,6 +88,7 @@ export interface CustomPointLayer {
   visible: boolean
   archived: boolean
   createdAt: string
+  originalImportName?: string
   // Handmatige punten die logisch bij een geïmporteerde laag horen.
   // De zware importgeometrie blijft lokaal; deze punten blijven cloud-synchroniseerbaar.
   linkedImportedLayerId?: string
@@ -116,6 +117,7 @@ interface CustomPointLayerStore {
   // Layer operations
   addLayer: (name: string, categories?: string[]) => string
   removeLayer: (id: string) => void
+  mergePrivateLayers: (sourceId: string, targetId: string) => void
   updateLayer: (id: string, updates: Partial<Omit<CustomPointLayer, 'id' | 'points' | 'createdAt'>>) => void
   toggleVisibility: (id: string) => void
   toggleArchived: (id: string) => void
@@ -193,6 +195,14 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
             ? state.deletedLayerIds
             : [...state.deletedLayerIds, id],
         }))
+      },
+
+      mergePrivateLayers: (sourceId, targetId) => {
+        set(state => {
+          const layers = mergePrivatePointLayers(state.layers, sourceId, targetId, () => crypto.randomUUID())
+          if (layers === state.layers) return state
+          return { layers, deletedLayerIds: [...new Set([...state.deletedLayerIds, sourceId])] }
+        })
       },
 
       updateLayer: (id, updates) => {
@@ -535,7 +545,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
             state.deletedLayerIds || [],
             state.layerCleanupVersion || 0
           )
-          state.layers = reconciled.layers.map(independentPointLayer)
+          state.layers = independentPointLayers(reconciled.layers)
           state.deletedLayerIds = reconciled.deletedLayerIds
           state.layerCleanupVersion = reconciled.cleanupVersion
         }
@@ -550,7 +560,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
 
         return {
           ...state,
-          layers: reconciled.layers.map(independentPointLayer),
+          layers: independentPointLayers(reconciled.layers),
           deletedLayerIds: reconciled.deletedLayerIds,
           layerCleanupVersion: reconciled.cleanupVersion,
           recoveredLegacyShareIds: state.recoveredLegacyShareIds || [],

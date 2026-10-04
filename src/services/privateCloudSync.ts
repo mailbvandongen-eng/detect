@@ -6,7 +6,7 @@ import { reconcilePointLayerDeletions } from '../utils/pointLayerCleanup'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../store/customPointLayerStore'
 import type { LocalVondst } from '../store/localVondstenStore'
 import type { RecordedRoute } from '../store/routeRecordingStore'
-import { independentPointLayer } from '../utils/independentLayers'
+import { independentPointLayers } from '../utils/independentLayers'
 
 type PrivateData = ReturnType<typeof privateData>
 export interface CloudPrivateData {
@@ -21,7 +21,7 @@ export interface CloudPrivateData {
 }
 function mergePrivate(cloud: CloudPrivateData, local: PrivateData, localRevision: PrivateRevision) {
   const remote = cloud.privateRevision || emptyPrivateRevision()
-  const layers = mergeCollection((cloud.layers || []).filter(layer => !layer.buddyLayerId).map(independentPointLayer), local.layers.map(independentPointLayer), remote.layers, localRevision.layers, true)
+  const layers = mergeCollection(independentPointLayers((cloud.layers || []).filter(layer => !layer.buddyLayerId)), independentPointLayers(local.layers), remote.layers, localRevision.layers, true)
   const vondsten = mergeCollection(cloud.vondsten || [], local.vondsten, remote.vondsten, localRevision.vondsten)
   const routes = mergeCollection(cloud.routes || [], local.routes, remote.routes, localRevision.routes)
   const layerState = useCustomPointLayerStore.getState()

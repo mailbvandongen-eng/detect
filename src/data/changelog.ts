@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.79',
+    date: '4 oktober 2026',
+    title: 'Logische en overzichtelijke kaartlagen',
+    changes: [
+      'Eigen lagen en imports hebben elk een aparte sectie. Eigen lagen tonen duidelijk of ze privé of gedeeld zijn.',
+      'Oude kleurcodes en het achtervoegsel eigen punten worden hersteld naar leesbare namen, zonder punten te verwijderen.',
+      'Privélagen kunnen via de instellingen worden samengevoegd. Verschillende versies van punten blijven behouden en de bronlaag komt niet terug uit een oude cloudkopie.',
+      'Nieuwe laag en Importeren gebruiken consequent de gekozen appkleur.',
+    ],
+  },
+  {
     version: '2.33.78',
     date: '4 oktober 2026',
     title: 'Privégegevens veilig synchroniseren',
