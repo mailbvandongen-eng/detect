@@ -1,3 +1,4 @@
+import { loadLocalImage } from './imageUtils'
 /**
  * Photo Storage Library using IndexedDB
  *
@@ -57,62 +58,20 @@ async function compressImage(
   maxSize: number,
   quality: number
 ): Promise<{ blob: Blob; width: number; height: number }> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    const url = URL.createObjectURL(file)
-
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-
-      // Calculate new dimensions
-      let { width, height } = img
-      if (width > maxSize || height > maxSize) {
-        if (width > height) {
-          height = Math.round((height * maxSize) / width)
-          width = maxSize
-        } else {
-          width = Math.round((width * maxSize) / height)
-          height = maxSize
-        }
-      }
-
-      // Create canvas and draw resized image
-      const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
-
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        reject(new Error('Could not get canvas context'))
-        return
-      }
-
-      // Use better image smoothing
-      ctx.imageSmoothingEnabled = true
-      ctx.imageSmoothingQuality = 'high'
-      ctx.drawImage(img, 0, 0, width, height)
-
-      // Convert to blob
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            resolve({ blob, width, height })
-          } else {
-            reject(new Error('Could not create blob'))
-          }
-        },
-        'image/jpeg',
-        quality
-      )
-    }
-
-    img.onerror = () => {
-      URL.revokeObjectURL(url)
-      reject(new Error('Could not load image'))
-    }
-
-    img.src = url
-  })
+  const image = await loadLocalImage(file)
+  if (!image.width || !image.height) throw new Error('Afbeelding heeft geen geldige afmetingen.')
+  const scale = Math.min(1, maxSize / Math.max(image.width, image.height))
+  const width = Math.max(1, Math.round(image.width * scale))
+  const height = Math.max(1, Math.round(image.height * scale))
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const context = canvas.getContext('2d')
+  if (!context) throw new Error('Foto kan niet worden verwerkt.')
+  context.imageSmoothingEnabled = true
+  context.imageSmoothingQuality = 'high'
+  context.drawImage(image, 0, 0, width, height)
+  return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve({ blob, width, height }) : reject(new Error('Foto kan niet worden verwerkt.')), 'image/jpeg', quality))
 }
 
 /**
@@ -131,7 +90,7 @@ export async function savePhoto(id: string, file: File): Promise<StoredPhoto> {
 
   // Create thumbnail
   const { blob: thumbnail } = await compressImage(
-    file,
+    fullImage,
     MAX_THUMB_SIZE,
     THUMB_QUALITY
   )

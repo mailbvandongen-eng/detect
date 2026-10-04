@@ -29,8 +29,7 @@ export function PhotoCapture({ photos, onAddPhoto, onRemovePhoto, disabled }: Ph
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.currentTarget
     const files = Array.from(input.files || [])
-    input.value = ''
-    if (disabled || busy.current || !files.length) return
+    if (disabled || busy.current || !files.length) { input.value = ''; return }
     const valid = accountSession(currentAccountScope())
     const current = () => mounted.current && valid()
     busy.current = true
@@ -52,11 +51,13 @@ export function PhotoCapture({ photos, onAddPhoto, onRemovePhoto, disabled }: Ph
           const added = onAddPhoto({ id, thumbnailBase64, createdAt: stored.createdAt, pendingUpload: true,
             uploadOwnerUid: useAuthStore.getState().user?.uid })
           if (added === false) setError('De foto is lokaal bewaard, maar kon niet aan het punt worden toegevoegd. Probeer opnieuw; controleer je bewerkrechten en vrije opslagruimte.')
-        } catch {
+        } catch (error) {
+          console.warn('Foto lokaal opslaan mislukt:', error instanceof Error ? `${error.name}: ${error.message}` : 'Opslagfout')
           if (current()) setError('Foto kon niet worden verwerkt of lokaal opgeslagen. Probeer een andere afbeelding; je bestaande foto’s blijven bewaard.')
         }
       }
     } finally {
+      input.value = ''
       busy.current = false
       if (current()) setProcessing(false)
     }

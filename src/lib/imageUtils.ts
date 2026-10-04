@@ -8,53 +8,35 @@ const JPEG_QUALITY = 0.7
 /**
  * Resize an image to fit within maxSize while maintaining aspect ratio
  */
-export async function resizeImage(file: File, maxSize: number = MAX_THUMBNAIL_SIZE): Promise<Blob> {
+// Reading local files into a data URL avoids a fetch of a blob URL. In WebKit,
+// those fetches can be blocked while the browser is offline.
+export function loadLocalImage(file: Blob): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
-    const img = new Image()
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    if (!ctx) { reject(new Error('Foto kan niet worden verwerkt.')); return }
-    const url = URL.createObjectURL(file)
-
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-      // Calculate new dimensions
-      let width = img.width
-      let height = img.height
-
-      if (width > height) {
-        if (width > maxSize) {
-          height = Math.round((height * maxSize) / width)
-          width = maxSize
-        }
-      } else {
-        if (height > maxSize) {
-          width = Math.round((width * maxSize) / height)
-          height = maxSize
-        }
-      }
-
-      canvas.width = width
-      canvas.height = height
-
-      // Draw and export
-      ctx.drawImage(img, 0, 0, width, height)
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            resolve(blob)
-          } else {
-            reject(new Error('Failed to create blob from canvas'))
-          }
-        },
-        'image/jpeg',
-        JPEG_QUALITY
-      )
+    const reader = new FileReader()
+    const image = new Image()
+    const failed = () => reject(new Error('Deze afbeelding kan niet worden geopend.'))
+    reader.onerror = failed
+    reader.onabort = failed
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') { failed(); return }
+      image.onload = () => resolve(image)
+      image.onerror = failed
+      image.src = reader.result
     }
-
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Deze afbeelding kan niet worden geopend.')) }
-    img.src = url
+    reader.readAsDataURL(file)
   })
+}
+
+export async function resizeImage(file: File, maxSize: number = MAX_THUMBNAIL_SIZE): Promise<Blob> {
+  const img = await loadLocalImage(file)
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  if (!ctx || !img.width || !img.height) throw new Error('Foto kan niet worden verwerkt.')
+  const scale = Math.min(1, maxSize / Math.max(img.width, img.height))
+  canvas.width = Math.max(1, Math.round(img.width * scale))
+  canvas.height = Math.max(1, Math.round(img.height * scale))
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+  return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Foto kan niet worden verwerkt.')), 'image/jpeg', JPEG_QUALITY))
 }
 
 /**
