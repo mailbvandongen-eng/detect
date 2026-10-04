@@ -18,6 +18,8 @@ export interface BuddyLayerRecord {
   id: string
   name: string
   color: string
+  sourceLayerId?: string
+  ready?: boolean
   ownerUid: string
   ownerEmail: string
   memberEmails: string[]
@@ -117,7 +119,7 @@ export async function updateBuddyLayerMetadata(
 
 export async function saveBuddyPoint(buddyLayerId: string, point: CustomPoint): Promise<void> {
   await setDoc(doc(db, 'buddyLayers', buddyLayerId, 'points', point.id), {
-    ...point,
+    ...JSON.parse(JSON.stringify(point)),
     updatedAt: serverTimestamp(),
   }, { merge: true })
 }
@@ -136,4 +138,43 @@ export async function deleteBuddyLayer(user: User, buddyLayerId: string): Promis
   const points = await getDocs(collection(db, 'buddyLayers', buddyLayerId, 'points'))
   await Promise.all(points.docs.map(point => deleteDoc(point.ref)))
   await deleteDoc(ref)
+}
+
+// Stable ID lets a failed upload be retried without creating extra layers.
+// Access is granted only after all existing points have been stored.
+export async function shareOwnPointLayer(
+  user: User,
+  layer: import('../store/customPointLayerStore').CustomPointLayer,
+  recipient: string,
+  permission: BuddyPermission,
+): Promise<BuddyLayerRecord> {
+  if (!user.email) throw new Error('Log in met een account met een e-mailadres.')
+  if (normalizeBuddyEmail(recipient) === normalizeBuddyEmail(user.email)) throw new Error('Je bent zelf al eigenaar van deze laag.')
+  const id = `point-${user.uid}-${layer.id}`
+  const ref = doc(db, 'buddyLayers', id)
+  let data: (BuddyLayerRecord & { ready?: boolean }) | undefined
+  try {
+    const snap = await getDoc(ref)
+    if (snap.exists()) data = snap.data() as BuddyLayerRecord & { ready?: boolean }
+  } catch (error) {
+    // Rules hide a missing document. The subsequent create is still authorized by rules.
+    if ((error as { code?: string }).code !== 'permission-denied') throw error
+  }
+  if (data && data.ownerUid !== user.uid) throw new Error('Alleen de eigenaar kan deze laag delen.')
+  if (!data) {
+    const email = normalizeBuddyEmail(user.email)
+    data = { id, name: layer.name, color: layer.color, ownerUid: user.uid,
+      ownerEmail: email, memberEmails: [email], editEmails: [], readEmails: [], sourceLayerId: layer.id, ready: false }
+    await setDoc(ref, { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() })
+  }
+  if (data.ready === false) {
+    // Sequential chunks keep large layers within Firestore's write limits.
+    for (let offset = 0; offset < layer.points.length; offset += 100) {
+      await Promise.all(layer.points.slice(offset, offset + 100).map(point => saveBuddyPoint(id, point)))
+    }
+    await updateDoc(ref, { ready: true, updatedAt: serverTimestamp() })
+  }
+  await addBuddyMember(user, id, recipient, permission)
+  const shared = await getDoc(ref)
+  return { ...shared.data() as BuddyLayerRecord, id }
 }

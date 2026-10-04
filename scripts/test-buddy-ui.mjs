@@ -23,7 +23,7 @@ const user = { uid: 'owner', email: 'owner@example.com' }
 const record = { id: 'new-buddy', name: 'Frankrijk gedeeld', color: '#06b6d4',
   ownerUid: user.uid, ownerEmail: user.email, memberEmails: [user.email], editEmails: [], readEmails: [] }
 let pointState = { layers: [{ id: 'private', name: 'Privé', color: '#ff0000', points: [], archived: false }] }
-const pointStore = Object.assign(() => ({ addLayer: () => { throw new Error('Must not create a private layer') } }), {
+const pointStore = Object.assign(() => ({ addLayer: name => { pointState.layers.push({ id: 'new-private', name, color: '#7c5ac7', points: [], archived: false }) } }), {
   getState: () => pointState,
   setState: update => { pointState = { ...pointState, ...(typeof update === 'function' ? update(pointState) : update) } },
 })
@@ -36,7 +36,7 @@ let authUser = user
 const authStore = selector => selector({ user: authUser })
 let returnedToLayers = false
 let stateIndex = 0
-const fields = [record.name, 'buddy', false, null]
+const fields = [record.name]
 const jsx = (type, props) => ({ type, props })
 const modal = load('src/components/CustomPoints/CreateLayerModal.tsx', {
   react: { useState: () => [fields[stateIndex++], () => {}] },
@@ -52,10 +52,12 @@ const modal = load('src/components/CustomPoints/CreateLayerModal.tsx', {
 const rendered = modal.CreateLayerModal()
 await rendered.props.footer.props.children[1].props.onClick()
 assert.equal(returnedToLayers, true)
-assert.equal(syncState.revision, 1)
-assert.equal(pointState.layers.find(layer => layer.buddyLayerId === record.id)?.name, record.name)
-assert.equal(catalog.getStandalonePointLayers(pointState.layers, []).length, 2)
-console.log('PASS actual creation handler shows acknowledged buddy layer before any listener callback')
+assert.equal(syncState.revision, 0, 'Creating a private layer does not require Firebase')
+assert.equal(pointState.layers.find(layer => layer.id === 'new-private')?.name, record.name)
+assert.equal(pointState.layers.some(layer => layer.buddyLayerId), false)
+console.log('PASS new layer is immediately visible and private without network access')
+pointState.layers = pointState.layers.filter(layer => layer.id !== 'new-private')
+pointState.layers = stateHelpers.upsertBuddyLayer(pointState.layers, record, user.uid, user.email)
 
 const effects = []
 let effectIndex = 0
@@ -122,6 +124,13 @@ pointState.layers = stateHelpers.preserveBuddyLayers(pointState.layers, privateO
 assert.equal(pointState.layers.length, 2)
 assert.equal(pointState.layers[1].points.length, 1)
 console.log('PASS private sync replacement preserves buddy layer and points')
+const original = { id: 'original', name: 'Eigen punten', color: '#7c5ac7', points: [{id: 'old-point'}], categories: [], visible: true, archived: false }
+const promoted = stateHelpers.upsertBuddyLayer([original], {...record, sourceLayerId: original.id}, user.uid, user.email)
+assert.equal(promoted.length, 1)
+assert.equal(promoted[0].id, original.id)
+assert.equal(promoted[0].points[0].id, 'old-point')
+assert.equal(stateHelpers.preserveBuddyLayers(promoted, [original]).length, 1)
+console.log('PASS sharing existing layer preserves ID and points; stale private cloud copy cannot duplicate it')
 events.get('visibilitychange')()
 renderHook()
 assert.equal(active.stopped, true)
@@ -144,4 +153,4 @@ renderHook()
 assert.equal(pointState.layers.length, 1)
 console.log('PASS sign-out removes buddy layers')
 effects.forEach(effect => effect.cleanup?.())
-console.log('9 buddy UI regression checks passed')
+console.log('10 buddy UI regression checks passed')

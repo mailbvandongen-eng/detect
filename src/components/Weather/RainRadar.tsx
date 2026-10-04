@@ -30,7 +30,7 @@ export function RainRadar({ isOpen, onClose }: RainRadarProps) {
   // Location search state
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
-  const [isSearching, setIsSearching] = useState(false)
+  const [, setIsSearching] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lon: number; name: string } | null>(null)
   const [showSearch, setShowSearch] = useState(false)
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -128,7 +128,7 @@ export function RainRadar({ isOpen, onClose }: RainRadarProps) {
 
   // Use selected location, GPS position, or default to center of Netherlands
   const lat = selectedLocation?.lat || gpsPosition?.lat || 52.1326
-  const lng = selectedLocation?.lon || gpsPosition?.lon || 5.2913
+  const lng = selectedLocation?.lon || gpsPosition?.lng || 5.2913
   const locationName = selectedLocation?.name || (gpsPosition ? 'Huidige locatie' : 'Nederland')
 
   // Calculate tile coordinates
@@ -138,7 +138,6 @@ export function RainRadar({ isOpen, onClose }: RainRadarProps) {
 
   const getTimeLabel = () => {
     if (radarTimestamps.length === 0 || !radarTimestamps[frameIndex]) return 'Laden...'
-    const frameTime = new Date(radarTimestamps[frameIndex])
     const now = Date.now()
     const diffMinutes = Math.round((radarTimestamps[frameIndex] - now) / 60000)
 

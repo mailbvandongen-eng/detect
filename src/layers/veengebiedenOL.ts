@@ -15,7 +15,7 @@ export async function createVeengebiedenLayerOL() {
 
   const layer = new VectorLayer({
     source: source,
-    title: 'Veengebieden/Toemaakdekken',
+    properties: { title: 'Veengebieden/Toemaakdekken' },
     visible: false,
     style: new Style({
       fill: new Fill({ color: 'rgba(139, 69, 19, 0.15)' }),

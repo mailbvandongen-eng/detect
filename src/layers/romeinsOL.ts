@@ -84,6 +84,7 @@ function geojsonFeatureIntersectsBounds(feature: any): boolean {
 export async function createRomeinseWegenLayerOL() {
   try {
     const geojson = await loadGeoJSON('./data/romeinse_wegen_itiner_e.geojson')
+    if (geojson.type !== 'FeatureCollection') throw new Error('Romeinse wegen: verwacht een GeoJSON FeatureCollection')
 
     // Filter GeoJSON features BEFORE converting to OpenLayers (coordinates are still WGS84)
     const filteredGeojson = {
@@ -98,7 +99,7 @@ export async function createRomeinseWegenLayerOL() {
     const layer = new VectorLayer({
       properties: { title: 'Romeinse wegen (regio)' },
       source: new VectorSource({ features }),
-      style: (feature, resolution) => createStyle(resolution),
+      style: (_feature, resolution) => createStyle(resolution),
       opacity: 0.8,
       zIndex: 20
     })
@@ -119,6 +120,7 @@ export async function createRomeinseWegenLayerOL() {
 export async function createRomeinseWegenWereldLayerOL() {
   try {
     const geojson = await loadGeoJSON('./data/romeinse_wegen_itiner_e.geojson')
+    if (geojson.type !== 'FeatureCollection') throw new Error('Romeinse wegen: verwacht een GeoJSON FeatureCollection')
 
     const format = new GeoJSON({ featureProjection: 'EPSG:3857' })
     const features = format.readFeatures(geojson)
@@ -126,7 +128,7 @@ export async function createRomeinseWegenWereldLayerOL() {
     const layer = new VectorLayer({
       properties: { title: 'Romeinse wegen (Wereld)' },
       source: new VectorSource({ features }),
-      style: (feature, resolution) => createStyle(resolution),
+      style: (_feature, resolution) => createStyle(resolution),
       opacity: 0.8,
       zIndex: 20
     })

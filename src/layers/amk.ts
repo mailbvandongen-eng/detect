@@ -3,11 +3,10 @@
  * RCE Archeologische Monumentenkaart with 4 value levels
  */
 
-import L from 'leaflet'
 import { loadTopoJSON, createGeoJSONLayer } from '../utils/layerLoader.js'
 
 // AMK color scheme (RCE official colors)
-const AMK_COLORS = {
+const AMK_COLORS: Record<string, string> = {
   'Terrein van archeologische waarde': '#c4b5fd',
   'Terrein van hoge archeologische waarde': '#8b5cf6',
   'Terrein van zeer hoge archeologische waarde': '#6d28d9',
@@ -20,7 +19,7 @@ export async function createAMKLayer() {
 
     return createGeoJSONLayer(geojson, {
       style: (feature) => {
-        const waarde = (feature.properties?.WAARDE || '').trim()
+        const waarde = (feature?.properties?.WAARDE || '').trim()
         const color = AMK_COLORS[waarde] || '#ddd'
 
         return {

@@ -11,6 +11,7 @@
  */
 
 import ImageryLayer from '@arcgis/core/layers/ImageryLayer'
+import RasterFunction from '@arcgis/core/layers/support/RasterFunction'
 
 // AHN4 ImageServer URLs
 const AHN4_DTM_50CM_URL = 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer'
@@ -26,9 +27,7 @@ export function createArcGISAHN4ColorElevation(): ImageryLayer {
     title: 'AHN4 Hoogtekaart Kleur',
     visible: false,
     opacity: 1.0,
-    renderingRule: {
-      rasterFunction: 'AHN - Color Ramp D'
-    }
+    rasterFunction: new RasterFunction({ functionName: 'AHN - Color Ramp D' })
   })
 }
 
@@ -42,9 +41,7 @@ export function createArcGISAHN4Hillshade(): ImageryLayer {
     title: 'AHN4 Hillshade NL',
     visible: false,
     opacity: 0.7,
-    renderingRule: {
-      rasterFunction: 'AHN - Hillshade'
-    }
+    rasterFunction: new RasterFunction({ functionName: 'AHN - Hillshade' })
   })
 }
 
@@ -58,9 +55,7 @@ export function createArcGISAHN4MultiHillshade(): ImageryLayer {
     title: 'AHN4 Multi-Hillshade NL',
     visible: false,
     opacity: 0.7,
-    renderingRule: {
-      rasterFunction: 'AHN - Hillshade (Multidirectionaal)'
-    }
+    rasterFunction: new RasterFunction({ functionName: 'AHN - Hillshade (Multidirectionaal)' })
   })
 }
 
@@ -74,9 +69,7 @@ export function createArcGISAHN4ShadedRelief(): ImageryLayer {
     title: 'AHN4 Hillshade Kleur',
     visible: false,
     opacity: 0.8,
-    renderingRule: {
-      rasterFunction: 'AHN - Shaded Relief'
-    }
+    rasterFunction: new RasterFunction({ functionName: 'AHN - Shaded Relief' })
   })
 }
 
@@ -90,9 +83,7 @@ export function createArcGISAHN4Slope(): ImageryLayer {
     title: 'AHN4 Helling NL',
     visible: false,
     opacity: 0.6,
-    renderingRule: {
-      rasterFunction: 'AHN - Slope'
-    }
+    rasterFunction: new RasterFunction({ functionName: 'AHN - Slope' })
   })
 }
 

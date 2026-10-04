@@ -1,3 +1,4 @@
+import { independentPointLayer, independentImport, recoverLegacyPoints } from '../utils/independentLayers'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
@@ -5,12 +6,10 @@ import { useAuthStore } from '../store/authStore'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../store/customPointLayerStore'
 import { useCustomLayerStore } from '../store/customLayerStore'
 import {
-  attachShareMetadata,
+  getOwnedShares,
   getIncomingShares,
   materializeSharedImportedLayer,
   materializeSharedOverlay,
-  syncOwnedShares,
-  syncRecipientOverlay,
 } from '../services/sharedImportedLayers'
 import { useLocalVondstenStore, type LocalVondst } from '../store/localVondstenStore'
 import { useRouteRecordingStore, type RecordedRoute } from '../store/routeRecordingStore'
@@ -128,7 +127,6 @@ export function useCloudSync() {
   const user = useAuthStore(state => state.user)
   const layers = useCustomPointLayerStore(state => state.layers)
   const deletedLayerIds = useCustomPointLayerStore(state => state.deletedLayerIds)
-  const importedLayers = useCustomLayerStore(state => state.layers)
   const layerCleanupVersion = useCustomPointLayerStore(state => state.layerCleanupVersion)
   const vondsten = useLocalVondstenStore(state => state.vondsten)
   const savedRoutes = useRouteRecordingStore(state => state.savedRoutes)
@@ -172,67 +170,41 @@ export function useCloudSync() {
 
   const refreshSharedOverlays = useCallback(async () => {
     if (!user?.email) return
-
-    const incoming = await getIncomingShares(user.email)
-    const incomingShareIds = new Set(incoming.map(record => record.shareId))
-    useCustomLayerStore.setState(state => ({
-      layers: state.layers.filter(layer => !layer.shareId || incomingShareIds.has(layer.shareId))
-    }))
-
-    const customStore = useCustomLayerStore.getState()
-    let localImported = customStore.layers
-
-    for (const record of incoming) {
-      let imported = localImported.find(layer =>
-        layer.shareId === record.shareId || layer.contentHash === record.layerHash
-      )
-
-      if (imported) {
-        const updated = attachShareMetadata(imported, record)
-        useCustomLayerStore.getState().updateLayer(imported.id, updated)
-        imported = updated
-      } else {
-        const sharedLayer = await materializeSharedImportedLayer(record)
-        if (!sharedLayer) continue
-        useCustomLayerStore.setState(state => ({
-          layers: [...state.layers, sharedLayer]
-        }))
-        imported = sharedLayer
+    // Compatibility read only: recover old shares as independent imports/points.
+    // Never overwrite local edits or write to the obsolete per-recipient shares.
+    const [incoming, owned] = await Promise.all([getIncomingShares(user.email), getOwnedShares(user.uid)])
+    const records = [...new Map([...incoming, ...owned].map(record => [record.shareId, record])).values()]
+    for (const record of records) {
+      const pointState = useCustomPointLayerStore.getState()
+      if (pointState.recoveredLegacyShareIds.includes(record.shareId) || pointState.deletedLayerIds.includes(`recovered-${record.shareId}`)) continue
+      let imported = useCustomLayerStore.getState().layers.find(layer => layer.contentHash === record.layerHash)
+      if (!imported && incoming.some(item => item.shareId === record.shareId)) {
+        const recovered = await materializeSharedImportedLayer(record)
+        if (!recovered) continue
+        imported = independentImport(recovered)
+        useCustomLayerStore.setState(state => ({ layers: [...state.layers, imported!] }))
       }
-
-      localImported = useCustomLayerStore.getState().layers
+      const overlay = independentPointLayer(materializeSharedOverlay(record, imported?.id || ''))
+      const missingPoints = recoverLegacyPoints(pointState.layers, overlay.points, record.shareId)
+      useCustomPointLayerStore.setState(state => ({
+        layers: missingPoints.length ? [...state.layers, { ...overlay, id: `recovered-${record.shareId}`, points: missingPoints }] : state.layers,
+        recoveredLegacyShareIds: [...state.recoveredLegacyShareIds, record.shareId],
+      }))
     }
-
-    const pointState = useCustomPointLayerStore.getState()
-    const buddyLayers = pointState.layers.filter(layer => !!layer.buddyLayerId)
-    const ownPointLayers = pointState.layers.filter(layer => !layer.shareId && !layer.buddyLayerId)
-    const sharedOverlays = incoming.flatMap(record => {
-      const imported = useCustomLayerStore.getState().layers.find(layer =>
-        layer.shareId === record.shareId || layer.contentHash === record.layerHash
-      )
-      if (!imported) return []
-      return [materializeSharedOverlay(record, imported.id)]
-    })
-
-    useCustomPointLayerStore.setState({
-      layers: [...ownPointLayers, ...buddyLayers, ...sharedOverlays]
-    })
+    useCustomLayerStore.setState(state => ({ layers: state.layers.map(independentImport) }))
+    const recovered = useCustomPointLayerStore.getState()
+    await setDoc(doc(db, 'users', user.uid), {
+      layers: recovered.layers.filter(layer => !layer.buddyLayerId).map(independentPointLayer),
+      recoveredLegacyShareIds: recovered.recoveredLegacyShareIds,
+      deletedLayerIds: recovered.deletedLayerIds,
+    }, { merge: true })
   }, [user])
 
   const syncLayersToCloud = useCallback(async (layersData: CustomPointLayer[]) => {
     if (!user) return false
 
     try {
-      const sharedLayers = layersData.filter(layer => !!layer.shareId)
-      const ownLayers = layersData.filter(layer => !layer.shareId && !layer.buddyLayerId)
-
-      for (const sharedLayer of sharedLayers) {
-        if (sharedLayer.sharePermission === 'edit') {
-          await syncRecipientOverlay(user, sharedLayer)
-        }
-      }
-
-      await syncOwnedShares(user)
+      const ownLayers = layersData.filter(layer => !layer.buddyLayerId).map(independentPointLayer)
 
       const pointLayerState = useCustomPointLayerStore.getState()
       await setDoc(doc(db, 'users', user.uid), {
@@ -328,7 +300,7 @@ export function useCloudSync() {
       const userDocRef = doc(db, 'users', user.uid)
       const docSnap = await getDoc(userDocRef)
       const allLocalLayers = useCustomPointLayerStore.getState().layers
-      const localLayers = allLocalLayers.filter(layer => !layer.shareId && !layer.buddyLayerId)
+      const localLayers = allLocalLayers.filter(layer => !layer.buddyLayerId).map(independentPointLayer)
       const localDeletedLayerIds = useCustomPointLayerStore.getState().deletedLayerIds
       const localLayerCleanupVersion = useCustomPointLayerStore.getState().layerCleanupVersion
       const localVondsten = useLocalVondstenStore.getState().vondsten
@@ -337,6 +309,10 @@ export function useCloudSync() {
 
       if (docSnap.exists()) {
         const data = docSnap.data()
+        useCustomPointLayerStore.setState(state => ({ recoveredLegacyShareIds: [...new Set([
+          ...state.recoveredLegacyShareIds,
+          ...(Array.isArray(data.recoveredLegacyShareIds) ? data.recoveredLegacyShareIds.filter((id: unknown): id is string => typeof id === 'string') : []),
+        ])] }))
 
         if (Array.isArray(data.layers)) {
           const cloudDeletedLayerIds = Array.isArray(data.deletedLayerIds)
@@ -345,7 +321,7 @@ export function useCloudSync() {
           const cloudCleanupVersion = typeof data.layerCleanupVersion === 'number'
             ? data.layerCleanupVersion
             : 0
-          const cloudOwnLayers = (data.layers as CustomPointLayer[]).filter(layer => !layer.shareId && !layer.buddyLayerId)
+          const cloudOwnLayers = (data.layers as CustomPointLayer[]).filter(layer => !layer.buddyLayerId).map(independentPointLayer)
           const rawMerged = mergeById(cloudOwnLayers, localLayers).merged
           const reconciled = reconcilePointLayerDeletions(
             rawMerged,
@@ -354,7 +330,7 @@ export function useCloudSync() {
           )
           const buddyLayers = useCustomPointLayerStore.getState().layers.filter(layer => !!layer.buddyLayerId)
           useCustomPointLayerStore.setState({
-            layers: [...reconciled.layers, ...buddyLayers],
+            layers: preserveBuddyLayers(buddyLayers, reconciled.layers),
             deletedLayerIds: reconciled.deletedLayerIds,
             layerCleanupVersion: reconciled.cleanupVersion,
           })
@@ -508,10 +484,6 @@ export function useCloudSync() {
     }
   }, [user, isHydrated, layers, deletedLayerIds, layerCleanupVersion, syncLayersToCloud])
 
-  useEffect(() => {
-    if (!user || !isHydrated || isInitialLoadRef.current) return
-    void refreshSharedOverlays()
-  }, [user, isHydrated, importedLayers, refreshSharedOverlays])
 
   useEffect(() => {
     if (!user || !isHydrated || isInitialLoadRef.current) return
@@ -590,12 +562,7 @@ export function useCloudSync() {
 
     try {
       const allCurrentLayers = useCustomPointLayerStore.getState().layers
-      for (const sharedLayer of allCurrentLayers.filter(layer => layer.shareId && layer.sharePermission === 'edit')) {
-        await syncRecipientOverlay(user, sharedLayer)
-      }
-      await syncOwnedShares(user)
-
-      const currentLayers = allCurrentLayers.filter(layer => !layer.shareId && !layer.buddyLayerId)
+      const currentLayers = allCurrentLayers.filter(layer => !layer.buddyLayerId).map(independentPointLayer)
       const currentDeletedLayerIds = useCustomPointLayerStore.getState().deletedLayerIds
       const currentVondsten = useLocalVondstenStore.getState().vondsten
       const currentRoutes = useRouteRecordingStore.getState().savedRoutes
@@ -604,9 +571,13 @@ export function useCloudSync() {
       const userDocRef = doc(db, 'users', user.uid)
       const docSnap = await getDoc(userDocRef)
       const cloudData = docSnap.exists() ? docSnap.data() : {}
+      useCustomPointLayerStore.setState(state => ({ recoveredLegacyShareIds: [...new Set([
+        ...state.recoveredLegacyShareIds,
+        ...(Array.isArray(cloudData.recoveredLegacyShareIds) ? cloudData.recoveredLegacyShareIds.filter((id: unknown): id is string => typeof id === 'string') : []),
+      ])] }))
 
       const cloudLayers = Array.isArray(cloudData.layers)
-        ? (cloudData.layers as CustomPointLayer[]).filter(layer => !layer.shareId && !layer.buddyLayerId)
+        ? (cloudData.layers as CustomPointLayer[]).filter(layer => !layer.buddyLayerId).map(independentPointLayer)
         : []
       const cloudDeletedLayerIds = Array.isArray(cloudData.deletedLayerIds)
         ? cloudData.deletedLayerIds.filter((id): id is string => typeof id === 'string')

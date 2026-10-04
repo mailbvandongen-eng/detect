@@ -1,4 +1,3 @@
-import type { Layer } from 'ol/layer'
 
 export interface LayerMetadata {
   name: string

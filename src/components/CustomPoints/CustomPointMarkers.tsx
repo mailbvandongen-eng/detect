@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useMapStore } from '../../store'
 import { useCustomPointLayerStore, type FeatureGeometry } from '../../store/customPointLayerStore'
-import { useCustomLayerStore } from '../../store/customLayerStore'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Feature } from 'ol'
@@ -49,7 +48,6 @@ function createOLGeometry(geometry: FeatureGeometry): Geometry {
 export function CustomPointMarkers() {
   const map = useMapStore(state => state.map)
   const layers = useCustomPointLayerStore(state => state.layers)
-  const importedLayers = useCustomLayerStore(state => state.layers)
   const layersRef = useRef<Map<string, VectorLayer<VectorSource>>>(new Map())
 
   useEffect(() => {
@@ -67,14 +65,9 @@ export function CustomPointMarkers() {
 
     // Add/update layers
     layers.forEach(customLayer => {
-      const linkedImport = customLayer.linkedImportedLayerId
-        ? importedLayers.find(layer => layer.id === customLayer.linkedImportedLayerId)
-        : undefined
-      const displayName = linkedImport?.name || customLayer.name
-      const displayColor = linkedImport?.style.points.color || customLayer.color
-      const displayVisible = linkedImport
-        ? linkedImport.visible && linkedImport.style.points.visible
-        : customLayer.visible
+      const displayName = customLayer.name
+      const displayColor = customLayer.color
+      const displayVisible = customLayer.visible
       const source = new VectorSource()
 
       // Add features for each point
@@ -171,7 +164,7 @@ export function CustomPointMarkers() {
       })
       layersRef.current.clear()
     }
-  }, [map, layers, importedLayers])
+  }, [map, layers])
 
   return null // Render-less component
 }

@@ -10,7 +10,7 @@
  */
 
 import WebGLTileLayer from 'ol/layer/WebGLTile'
-import XYZ from 'ol/source/XYZ'
+import ImageTile from 'ol/source/ImageTile'
 
 // Terrarium tiles (gratis, geen API key)
 const TERRARIUM_URL = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'
@@ -65,7 +65,7 @@ export function createWebGLHillshadeLayerOL() {
     extent: NL_EXTENT,
     visible: false,
     opacity: 0.8,
-    source: new XYZ({
+    source: new ImageTile({
       url: TERRARIUM_URL,
       crossOrigin: 'anonymous',
       maxZoom: 15,

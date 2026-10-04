@@ -1,3 +1,5 @@
+import { independentPointLayer } from '../utils/independentLayers'
+import { useSettingsStore } from './settingsStore'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import {
@@ -108,10 +110,10 @@ interface CustomPointLayerStore {
   colorIndex: number
   deletedLayerIds: string[]
   layerCleanupVersion: number
+  recoveredLegacyShareIds: string[]
 
   // Layer operations
   addLayer: (name: string, categories?: string[]) => string
-  ensureImportedLayerOverlay: (importedLayerId: string, importedLayerHash: string | undefined, name: string, color: string) => string
   removeLayer: (id: string) => void
   updateLayer: (id: string, updates: Partial<Omit<CustomPointLayer, 'id' | 'points' | 'createdAt'>>) => void
   toggleVisibility: (id: string) => void
@@ -148,12 +150,13 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
     (set, get) => ({
       layers: [],
       colorIndex: 0,
+      recoveredLegacyShareIds: [],
       deletedLayerIds: [],
       layerCleanupVersion: POINT_LAYER_CLEANUP_VERSION,
 
       addLayer: (name, categories = DEFAULT_CATEGORIES) => {
         const id = crypto.randomUUID()
-        const color = LAYER_COLORS[get().colorIndex % LAYER_COLORS.length]
+        const color = { blue: '#2563eb', forest: '#2d7a57', earth: '#a5693d', purple: '#7c5ac7' }[useSettingsStore.getState().uiTheme]
 
         set(state => ({
           layers: [
@@ -172,37 +175,6 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
           colorIndex: state.colorIndex + 1
         }))
 
-        return id
-      },
-
-      ensureImportedLayerOverlay: (importedLayerId, importedLayerHash, name, color) => {
-        const existing = get().layers.find(layer =>
-          layer.linkedImportedLayerId === importedLayerId ||
-          (!!importedLayerHash && layer.linkedImportedLayerHash === importedLayerHash)
-        )
-        if (existing) return existing.id
-
-        const preferredId = `import-overlay-${importedLayerId}`
-        const id = get().layers.some(layer => layer.id === preferredId) || get().deletedLayerIds.includes(preferredId)
-          ? crypto.randomUUID()
-          : preferredId
-        set(state => ({
-          layers: [
-            ...state.layers,
-            {
-              id,
-              name,
-              color,
-              categories: [],
-              points: [],
-              visible: true,
-              archived: false,
-              createdAt: new Date().toISOString(),
-              linkedImportedLayerId: importedLayerId,
-              linkedImportedLayerHash: importedLayerHash,
-            }
-          ]
-        }))
         return id
       },
 
@@ -549,7 +521,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
     }),
     {
       name: 'detectorapp-custom-point-layers',
-      version: 6,
+      version: 7,
       partialize: (state) => ({
         ...state,
         layers: state.layers.filter(layer => !layer.buddyLayerId),
@@ -561,7 +533,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
             state.deletedLayerIds || [],
             state.layerCleanupVersion || 0
           )
-          state.layers = reconciled.layers
+          state.layers = reconciled.layers.map(independentPointLayer)
           state.deletedLayerIds = reconciled.deletedLayerIds
           state.layerCleanupVersion = reconciled.cleanupVersion
         }
@@ -576,9 +548,10 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
 
         return {
           ...state,
-          layers: reconciled.layers,
+          layers: reconciled.layers.map(independentPointLayer),
           deletedLayerIds: reconciled.deletedLayerIds,
           layerCleanupVersion: reconciled.cleanupVersion,
+          recoveredLegacyShareIds: state.recoveredLegacyShareIds || [],
           colorIndex: typeof state.colorIndex === 'number' ? state.colorIndex : 0,
         }
       }

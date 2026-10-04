@@ -174,7 +174,7 @@ export async function createStrandopgangenLayerOL() {
     source: source,
     properties: { title: 'Strandopgangen', type: 'overlay' },
     visible: false,
-    style: (feature, resolution) => getStrandopgangStyle(resolution),
+    style: (_feature, resolution) => getStrandopgangStyle(resolution),
     zIndex: 27
   })
 

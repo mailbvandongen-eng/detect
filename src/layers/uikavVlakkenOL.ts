@@ -28,7 +28,7 @@ export async function createUIKAVVlakkenLayerOL() {
 
   const layer = new VectorLayer({
     source: source,
-    title: 'UIKAV Archeo Vlakken',
+    properties: { title: 'UIKAV Archeo Vlakken' },
     visible: false,
     style: (feature) => {
       const aardVindp = feature.get('Aard_vindp') || ''

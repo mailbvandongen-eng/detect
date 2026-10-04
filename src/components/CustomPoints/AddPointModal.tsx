@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { MapPin, Phone } from 'lucide-react'
 import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, type PhotoData } from '../../store/customPointLayerStore'
-import { useCustomLayerStore } from '../../store/customLayerStore'
 import { PhotoCapture } from './PhotoCapture'
 import { AppWindow } from '../UI/AppWindow'
 
@@ -14,12 +13,8 @@ export function AddPointModal() {
   const {
     addPoint,
     getLayer,
-    ensureImportedLayerOverlay,
     updateLayer: updatePointLayer,
   } = useCustomPointLayerStore()
-  const importedLayers = useCustomLayerStore(state => state.layers)
-  const updateImportedGeometryStyle = useCustomLayerStore(state => state.updateGeometryStyle)
-  const updateImportedLayer = useCustomLayerStore(state => state.updateLayer)
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -30,11 +25,8 @@ export function AddPointModal() {
   const pointLayer = addPointModalLayerTarget?.kind === 'point'
     ? getLayer(addPointModalLayerTarget.id)
     : null
-  const importedLayer = addPointModalLayerTarget?.kind === 'imported'
-    ? importedLayers.find(layer => layer.id === addPointModalLayerTarget.id)
-    : null
-  const layerName = pointLayer?.name || importedLayer?.name || ''
-  const layerColor = pointLayer?.color || importedLayer?.style.points.color || importedLayer?.color || '#3b82f6'
+  const layerName = pointLayer?.name || ''
+  const layerColor = pointLayer?.color || '#3b82f6'
   const readOnly = pointLayer?.buddyRole === 'read'
 
   const handleSubmit = () => {
@@ -42,16 +34,9 @@ export function AddPointModal() {
     const trimmedPhone = phone.trim()
     const trimmedUrl = url.trim()
 
-    const targetLayerId = addPointModalLayerTarget.kind === 'point'
-      ? addPointModalLayerTarget.id
-      : ensureImportedLayerOverlay(addPointModalLayerTarget.id, importedLayer?.contentHash, layerName, layerColor)
-
-    if (addPointModalLayerTarget.kind === 'imported') {
-      updateImportedGeometryStyle(addPointModalLayerTarget.id, 'points', { visible: true })
-      updateImportedLayer(addPointModalLayerTarget.id, { visible: true })
-    } else {
-      updatePointLayer(addPointModalLayerTarget.id, { visible: true })
-    }
+    if (addPointModalLayerTarget.kind !== 'point') return
+    const targetLayerId = addPointModalLayerTarget.id
+    updatePointLayer(targetLayerId, { visible: true })
 
     addPoint(targetLayerId, {
       name: name.trim(),

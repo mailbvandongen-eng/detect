@@ -24,7 +24,6 @@ import { Point } from 'ol/geom'
 import { Vector as VectorSource } from 'ol/source'
 import { Heatmap as HeatmapLayer } from 'ol/layer'
 import GeoJSON from 'ol/format/GeoJSON'
-import { fromLonLat } from 'ol/proj'
 import { loadTopoJSON, parseGeoJSON } from '../utils/layerLoaderOL'
 
 // Weight configuration for different feature types

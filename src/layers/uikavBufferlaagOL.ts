@@ -28,7 +28,7 @@ export async function createUIKAVBufferlaagLayerOL() {
 
   const layer = new VectorLayer({
     source: source,
-    title: 'UIKAV Bufferlaag',
+    properties: { title: 'UIKAV Bufferlaag' },
     visible: false,
     style: new Style({
       fill: new Fill({ color: 'rgba(251, 191, 36, 0.2)' }), // Geel/amber

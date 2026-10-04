@@ -1,3 +1,4 @@
+import type { FeatureLike } from 'ol/Feature'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import Feature from 'ol/Feature'
@@ -388,7 +389,7 @@ const MINERAL_HOTSPOTS = [
 ]
 
 // Style voor mineraal hotspots
-function createHotspotStyle(feature: Feature) {
+function createHotspotStyle(feature: FeatureLike) {
   const name = feature.get('name') || ''
   const country = feature.get('country') || ''
 

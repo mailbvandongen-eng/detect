@@ -47,15 +47,6 @@ export function StepCounter() {
     return `${Math.round(meters)} m`
   }
 
-  // Format duration
-  const formatDuration = (startTime: number | null) => {
-    if (!startTime) return '0:00'
-    const seconds = Math.floor((Date.now() - startTime) / 1000)
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
   // Fetch Google Fit steps
   const fetchGoogleFitSteps = useCallback(async () => {
     if (!accessToken) return

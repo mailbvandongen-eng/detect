@@ -1,13 +1,12 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef } from 'react'
 import { useMapStore } from '../../store/mapStore'
 import { useRouteRecordingStore } from '../../store/routeRecordingStore'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import Feature from 'ol/Feature'
-import { LineString, Polygon } from 'ol/geom'
-import { fromLonLat, toLonLat } from 'ol/proj'
+import { LineString } from 'ol/geom'
+import { fromLonLat } from 'ol/proj'
 import { Style, Stroke, Fill, Text } from 'ol/style'
-import { getDistance } from 'ol/sphere'
 
 // Generate grid lines based on center point and grid settings
 function generateGridFeatures(

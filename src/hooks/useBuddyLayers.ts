@@ -68,9 +68,13 @@ export function useBuddyLayers() {
 
       snapshot.docs.forEach(item => {
         const data = item.data() as BuddyLayerRecord
+        if (data.ready === false) return
         const buddyLayerId = item.id
         useCustomPointLayerStore.setState(state => ({
           layers: upsertBuddyLayer(state.layers, { ...data, id: buddyLayerId }, user.uid, email),
+          deletedLayerIds: data.ownerUid === user.uid && data.sourceLayerId
+            ? [...new Set([...(state.deletedLayerIds || []), data.sourceLayerId])]
+            : state.deletedLayerIds,
         }))
 
         if (pointUnsubs.has(buddyLayerId)) return

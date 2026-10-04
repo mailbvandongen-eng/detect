@@ -1,4 +1,4 @@
-import type { Layer } from 'ol/layer'
+import type Layer from 'ol/layer/Base'
 import type ImageryLayer from '@arcgis/core/layers/ImageryLayer'
 
 export type Region = 'nl' | 'be' | 'de' | 'fr'

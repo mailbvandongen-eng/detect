@@ -49,14 +49,26 @@ const importedLayers = [{
 }]
 
 const catalog = catalogModule.buildUserLayerCatalog(pointLayers, importedLayers)
-assert.deepEqual(catalog.map(item => item.name), [
-  'Losse punten',
-  'Bewaarde punten',
-  'Vondsten en locaties',
-])
-assert.deepEqual(catalog.map(item => item.target.kind), ['point', 'point', 'imported'])
-assert.equal(catalog.at(-1).objectCount, 4, 'Import en gekoppelde handpunten tellen samen')
-assert.equal(catalog.some(item => item.name === 'Import-overlay'), false, 'Overlay krijgt geen dubbele rij')
+assert.deepEqual(catalog.map(item => item.name), ['Losse punten', 'Import-overlay', 'Bewaarde punten'])
+assert.ok(catalog.every(item => item.target.kind === 'point'), 'Imports never appear as point destinations')
+assert.equal(catalog.find(item => item.target.id === 'overlay').objectCount, 2)
+const independent = loadTypeScriptModule('src/utils/independentLayers.ts')
+const old = {...pointLayers[1], shareId: 'legacy', sharePermission: 'edit'}
+const migrated = independent.independentPointLayer(old)
+assert.equal(migrated.linkedImportedLayerId, undefined)
+assert.equal(migrated.shareId, undefined)
+assert.equal(migrated.points, old.points, 'Migration preserves every existing point')
+assert.equal(migrated.id, old.id)
+assert.deepEqual(independent.independentPointLayer(migrated), migrated, 'Migration is idempotent')
+assert.equal(independent.independentImport({...importedLayers[0], shareId: 'legacy'}).shareId, undefined)
+const oldPoint = {id:'p',name:'Lokaal',notes:'Mijn wijzigingen',coordinates:[1,2]}
+const remotePoint = {...oldPoint,notes:'Wijzigingen ontvanger'}
+assert.deepEqual(independent.recoverLegacyPoints([{points:[oldPoint]}],[oldPoint],'share'),[])
+const recovered = independent.recoverLegacyPoints([{points:[oldPoint]}],[remotePoint],'share')
+assert.equal(recovered.length,1)
+assert.equal(recovered[0].notes,remotePoint.notes)
+assert.notEqual(recovered[0].id,oldPoint.id,'Conflicting legacy edits must both survive')
+assert.deepEqual(independent.recoverLegacyPoints([{points:[oldPoint,...recovered]}],[remotePoint],'share'),[])
 
 const popupHtml = popupModule.formatImportedLayerPopup({
   layerName: 'Vondsten en locaties',

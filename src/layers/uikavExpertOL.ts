@@ -28,7 +28,7 @@ export async function createUIKAVExpertLayerOL() {
 
   const layer = new VectorLayer({
     source: source,
-    title: 'UIKAV Expert',
+    properties: { title: 'UIKAV Expert' },
     visible: false,
     style: new Style({
       fill: new Fill({ color: 'rgba(6, 182, 212, 0.25)' }), // Cyan

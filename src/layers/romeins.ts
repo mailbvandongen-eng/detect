@@ -3,7 +3,6 @@
  * Global Roman road network dataset
  */
 
-import L from 'leaflet'
 import { loadGeoJSON, createGeoJSONLayer } from '../utils/layerLoader.js'
 
 export async function createRomeinseWegenLayer() {

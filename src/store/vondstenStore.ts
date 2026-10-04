@@ -25,7 +25,7 @@ interface VondstenState {
 }
 
 export const useVondstenStore = create<VondstenState>()(
-  immer((set, get) => ({
+  immer((set) => ({
     vondsten: [],
     loading: false,
     error: null,

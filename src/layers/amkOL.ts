@@ -1,3 +1,4 @@
+import type { FeatureLike } from 'ol/Feature'
 /**
  * AMK Monumenten Layer for OpenLayers
  * RCE Archeologische Monumentenkaart with full local data (13,010 monumenten)
@@ -69,7 +70,7 @@ async function loadAMKData(): Promise<Feature[]> {
   return cachedFeatures
 }
 
-function featureMatchesCurrentFilter(feature: Feature): boolean {
+function featureMatchesCurrentFilter(feature: FeatureLike): boolean {
   const filterState = useMonumentFilterStore.getState()
 
   if (!filterState.isActive || (filterState.keyword.trim().length < 2 && filterState.province === 'all')) {
@@ -138,10 +139,10 @@ export async function createAMKLayerOL() {
     useMonumentFilterStore.getState().updateCounts(features.length, features.length)
 
     const layer = new VectorLayer({
-      title: 'AMK Monumenten',
+      properties: { title: 'AMK Monumenten' },
       source: new VectorSource({ features }),
       style: (feature) => {
-        if (!featureMatchesCurrentFilter(feature)) return null
+        if (!featureMatchesCurrentFilter(feature)) return undefined
 
         const waarde = (feature.get('kwaliteitswaarde') || '').trim()
         const color = AMK_COLORS[waarde] || '#ddd'
@@ -182,10 +183,10 @@ async function createFilteredAMKLayer(
     }).map(feature => feature.clone())
 
     const layer = new VectorLayer({
-      title,
+      properties: { title },
       source: new VectorSource({ features: filteredFeatures }),
       style: (feature) => {
-        if (!featureMatchesCurrentFilter(feature)) return null
+        if (!featureMatchesCurrentFilter(feature)) return undefined
 
         const waarde = (feature.get('kwaliteitswaarde') || '').trim()
         // Use period color with opacity based on quality

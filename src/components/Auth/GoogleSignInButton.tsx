@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { LogIn, LogOut, Cloud, CloudOff, User } from 'lucide-react'
+import { LogOut, Cloud, CloudOff, User } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 
 export function GoogleSignInButton() {

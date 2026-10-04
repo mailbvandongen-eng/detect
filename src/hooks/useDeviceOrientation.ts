@@ -4,7 +4,7 @@ import { useGPSStore } from '../store'
 export function useDeviceOrientation() {
   const tracking = useGPSStore(state => state.tracking)
   const headingSource = useGPSStore(state => state.headingSource)
-  const updateHeading = useGPSStore(state => state.updateHeading)
+  const updateHeading = useGPSStore(state => state.setSmoothedHeading)
 
   useEffect(() => {
     // Only use compass when headingSource is explicitly 'compass'
@@ -25,7 +25,7 @@ export function useDeviceOrientation() {
         // Standard deviceorientation (Android Chrome)
         // Alpha is 0-360, where 0 is North
         // Convert to heading (360 - alpha because alpha increases clockwise)
-        updateHeading(360 - event.alpha, 'compass')
+        updateHeading(360 - event.alpha)
       }
     }
 
@@ -36,7 +36,7 @@ export function useDeviceOrientation() {
 
       if (event.alpha !== null) {
         // iOS Safari uses deviceorientationabsolute
-        updateHeading(360 - event.alpha, 'compass')
+        updateHeading(360 - event.alpha)
       }
     }
 
@@ -47,7 +47,7 @@ export function useDeviceOrientation() {
 
       // iOS Safari fallback (older devices)
       if (event.webkitCompassHeading !== undefined) {
-        updateHeading(event.webkitCompassHeading, 'compass')
+        updateHeading(event.webkitCompassHeading)
       }
     }
 

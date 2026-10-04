@@ -42,7 +42,7 @@ export async function createUIKAVUiterwaardenLayerOL() {
 
   const layer = new VectorLayer({
     source: source,
-    title: 'UIKAV Uiterwaarden',
+    properties: { title: 'UIKAV Uiterwaarden' },
     visible: false,
     style: (feature, resolution) => {
       const rivier = feature.get('rivier') || ''

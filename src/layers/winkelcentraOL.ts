@@ -186,7 +186,7 @@ export async function createWinkelcentraLayerOL() {
     source: source,
     properties: { title: 'Winkelcentra', type: 'overlay' },
     visible: false,
-    style: (feature, resolution) => getWinkelcentrumStyle(resolution),
+    style: (_feature, resolution) => getWinkelcentrumStyle(resolution),
     zIndex: 28
   })
 

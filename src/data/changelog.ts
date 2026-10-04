@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.77',
+    date: '4 oktober 2026',
+    title: 'Eigen puntenlagen eenvoudig delen',
+    changes: [
+      'Nieuwe puntenlagen beginnen privé. Via Delen geef je toegang om te bekijken of samen te bewerken; bestaande punten gaan mee.',
+      'Imports blijven zelfstandige imports. Eerder toegevoegde punten blijven behouden in een eigen puntenlaag, los van de import.',
+      'Transparantie werkt ook voor zichtbare imports. TypeScript-fouten zijn hersteld en publicatie controleert types en regressies.',
+    ],
+  },
+  {
     version: '2.33.76',
     date: '3 oktober 2026',
     title: 'Delen op mobiel en één gekozen accentkleur',

@@ -427,7 +427,7 @@ function LayerItem({
             className="overflow-hidden"
           >
             <div className="px-4 pb-3 pl-12 space-y-2">
-              {layer.buddyLayerId && <BuddyLayerPanel layer={layer} />}
+              <BuddyLayerPanel layer={layer} />
               {/* Categories */}
               {layer.categories.length > 0 && (
                 <div className="flex flex-wrap gap-1">

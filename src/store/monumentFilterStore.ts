@@ -25,7 +25,7 @@ interface MonumentFilterState {
   updateCounts: (total: number, filtered: number) => void
 }
 
-export const useMonumentFilterStore = create<MonumentFilterState>((set, get) => ({
+export const useMonumentFilterStore = create<MonumentFilterState>((set) => ({
   keyword: '',
   province: 'all',
   isActive: false,

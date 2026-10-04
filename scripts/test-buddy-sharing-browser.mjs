@@ -10,6 +10,9 @@ const { webkit, devices } = require('playwright')
 const fixture = `
 import React from 'react'; import {createRoot} from 'react-dom/client';
 import {ThemesPanel} from '/src/components/LayerControl/ThemesPanel';
+import {CreateLayerModal} from '/src/components/CustomPoints/CreateLayerModal';
+import {OpacitySliders} from '/src/components/UI/OpacitySliders';
+import {useCustomLayerStore as imports} from '/src/store/customLayerStore';
 import {useUIStore} from '/src/store';
 import {useAuthStore} from '/src/store/authStore';
 import {useCustomPointLayerStore as points} from '/src/store/customPointLayerStore';
@@ -17,12 +20,13 @@ import {useSettingsStore as settings} from '/src/store/settingsStore';
 import '/src/style.css'; import '/src/detect-theme.css';
 const owner={uid:'test-owner',email:'owner@example.com'};
 useAuthStore.setState({user:owner});
-points.setState({layers:[{id:'buddy-test',buddyLayerId:'test-layer',name:'Frankrijk 2026 gedeeld',color:'#06b6d4',visible:true,archived:false,points:[],categories:[],buddyRole:'owner',buddyOwnerEmail:owner.email,buddyMemberEmails:[owner.email],buddyEditEmails:[],buddyReadEmails:[]}]});
+points.setState({layers:[{id:'buddy-test',name:'Frankrijk 2026 gedeeld',color:'#06b6d4',visible:true,archived:false,points:[],categories:[],createdAt:'2026-10-04'}]});
+imports.setState({layers:[{id:'import-test',name:'Import test',features:{type:'FeatureCollection',features:[]},visible:true,opacity:1}]});
 settings.setState({fontScale:130,uiTheme:'purple',colorScheme:'dark'});
 useUIStore.setState({activeWindow:'layers'});
-window.test={calls:[],fail:false,signOut:()=>useAuthStore.setState({user:null}),theme:(value,scheme)=>{document.documentElement.dataset.detectTheme=value;document.documentElement.dataset.detectColorScheme=scheme}};
+window.test={points,imports,openLayers:()=>useUIStore.setState({activeWindow:'layers'}),calls:[],fail:false,signOut:()=>useAuthStore.setState({user:null}),theme:(value,scheme)=>{document.documentElement.dataset.detectTheme=value;document.documentElement.dataset.detectColorScheme=scheme}};
 window.test.theme('purple','dark');
-createRoot(document.getElementById('root')).render(<ThemesPanel/>);
+createRoot(document.getElementById('root')).render(<><ThemesPanel/><CreateLayerModal/><OpacitySliders/></>);
 `
 const service = `
 export const normalizeBuddyEmail=email=>email.trim().toLowerCase();
@@ -30,6 +34,10 @@ export async function addBuddyMember(user,id,email,permission){
  window.test.calls.push({email,permission,id});
  if(window.test.fail)throw new Error('Test: delen geweigerd');
  await new Promise(resolve=>setTimeout(resolve,60));
+}
+export async function shareOwnPointLayer(user,layer,email,permission){
+ await addBuddyMember(user,'test-layer',email,permission);
+ return {id:'test-layer',sourceLayerId:layer.id,name:layer.name,color:layer.color,ownerUid:user.uid,ownerEmail:user.email,memberEmails:[user.email,email],editEmails:permission==='edit'?[email]:[],readEmails:permission==='read'?[email]:[]};
 }
 export async function removeBuddyMember(){}
 export async function createBuddyLayer(){}
@@ -61,12 +69,12 @@ try {
  assert.equal(await input.evaluate(el=>el===document.activeElement),true)
  assert.ok((await input.boundingBox()).width>=230,'Email must remain full width on iPhone at 130% text size')
  console.log('PASS WebKit iPhone: tap, focus and type into full-width recipient field at 130%')
- await page.getByRole('button',{name:'Buddy toevoegen',exact:true}).tap()
+ await page.getByRole('button',{name:'Toegang geven',exact:true}).tap()
  await page.getByRole('status').filter({hasText:'buddy@example.com'}).waitFor()
  assert.equal(await input.inputValue(),'')
  assert.deepEqual(await page.evaluate(()=>window.test.calls[0]),{email:'buddy@example.com',permission:'edit',id:'test-layer'})
  await page.getByText('buddy@example.com',{exact:true}).waitFor()
- console.log('PASS successful share: normalized address, visible confirmation and member before listener update')
+ console.log('PASS private layer promotion and successful share: normalized address, visible confirmation and member before listener update')
  await input.fill('reader@example.com')
  await page.getByLabel('Rechten',{exact:true}).selectOption('read')
  await input.press('Enter')
@@ -78,20 +86,20 @@ try {
  assert.equal(await page.getByText('reader@example.com',{exact:true}).count(),0)
  console.log('PASS removing buddy updates member list after acknowledged write')
  await input.fill('geen-adres')
- await page.getByRole('button',{name:'Buddy toevoegen',exact:true}).tap()
+ await page.getByRole('button',{name:'Toegang geven',exact:true}).tap()
  await page.getByRole('alert').filter({hasText:'geldig'}).waitFor()
  assert.equal(await page.evaluate(()=>window.test.calls.length),2)
  await page.evaluate(()=>window.test.fail=true)
  await input.fill('failed@example.com')
- await page.getByRole('button',{name:'Buddy toevoegen',exact:true}).tap()
+ await page.getByRole('button',{name:'Toegang geven',exact:true}).tap()
  await page.getByRole('alert').filter({hasText:'geweigerd'}).waitFor()
  assert.equal(await input.inputValue(),'failed@example.com')
  console.log('PASS invalid email never sent; failed share keeps address and displays error')
  for(const theme of ['purple','forest','earth','blue'])for(const scheme of ['dark','light']){
    await page.evaluate(({theme,scheme})=>window.test.theme(theme,scheme),{theme,scheme})
    const expected={purple:['rgb(124, 90, 199)','rgb(104, 70, 178)'],forest:['rgb(22, 131, 95)','rgb(17, 106, 77)'],earth:['rgb(179, 106, 33)','rgb(146, 84, 22)'],blue:['rgb(59, 130, 246)','rgb(37, 99, 235)']}[theme]
-   await page.waitForFunction(expected=>expected.includes(getComputedStyle([...document.querySelectorAll('button')].find(el=>el.textContent==='Buddy toevoegen')).backgroundColor),expected)
-   const colors=await page.getByRole('button',{name:'Buddy toevoegen',exact:true}).evaluate(el=>({button:getComputedStyle(el).backgroundColor}))
+   await page.waitForFunction(expected=>expected.includes(getComputedStyle([...document.querySelectorAll('button')].find(el=>el.textContent==='Toegang geven')).backgroundColor),expected)
+   const colors=await page.getByRole('button',{name:'Toegang geven',exact:true}).evaluate(el=>({button:getComputedStyle(el).backgroundColor}))
    assert.ok(expected.includes(colors.button),`${theme}/${scheme}: ${colors.button}`)
    const fieldStyle=await page.getByLabel('Rechten',{exact:true}).evaluate(el=>({appearance:getComputedStyle(el).appearance,color:getComputedStyle(el).color,background:getComputedStyle(el).backgroundColor}))
    assert.equal(fieldStyle.appearance,'none')
@@ -111,6 +119,27 @@ try {
  }
  console.log('PASS recipient field usable at 320px and 430px widths')
  await page.setViewportSize({width:390,height:844})
+ await page.getByRole('button',{name:'Nieuwe laag',exact:true}).tap()
+ await page.getByLabel('Naam van de laag',{exact:true}).fill('Nieuwe eigen laag')
+ assert.equal(await page.getByRole('button',{name:'Buddy-laag',exact:true}).count(),0)
+ await page.getByRole('button',{name:'Aanmaken',exact:true}).tap()
+ await page.getByTitle('Nieuwe eigen laag',{exact:true}).waitFor()
+ const created=await page.evaluate(()=>window.test.points.getState().layers.find(layer=>layer.name==='Nieuwe eigen laag'))
+ assert.equal(created.buddyLayerId,undefined)
+ assert.equal(created.color,'#7c5ac7')
+ console.log('PASS actual creation flow: immediately visible private layer in chosen purple')
+ const importItem=page.getByTitle('Import test',{exact:true}).locator('..').locator('..')
+ await importItem.getByTitle('Laaginstellingen',{exact:true}).tap()
+ assert.equal(await importItem.getByRole('textbox',{name:'Google-e-mailadres',exact:true}).count(),0)
+ console.log('PASS import settings offer no sharing form')
+ await page.getByRole('button',{name:'Transparantie',exact:true}).tap()
+ const importSlider=page.getByRole('slider',{name:/Import test/})
+ await importSlider.press('ArrowLeft')
+ assert.equal(await page.evaluate(()=>window.test.imports.getState().layers[0].opacity),0.99)
+ console.log('PASS actual transparency control updates import store')
+ await page.getByRole('dialog',{name:'Transparantie',exact:true}).getByRole('button',{name:'Transparantie sluiten',exact:true}).tap()
+ await page.evaluate(()=>window.test.openLayers())
+ await page.getByTitle('Laaginstellingen',{exact:true}).first().tap()
  if(process.env.BUDDY_SCREENSHOT)await page.screenshot({path:process.env.BUDDY_SCREENSHOT})
  await page.evaluate(()=>{window.test.theme('purple','dark');window.test.signOut()})
  await page.getByRole('alert').filter({hasText:'Log in'}).waitFor()

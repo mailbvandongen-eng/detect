@@ -1,8 +1,10 @@
+import { upsertBuddyLayer } from '../../utils/buddyLayerState'
+import { useBuddySyncStore } from '../../store/buddySyncStore'
 import { useId, useState } from 'react'
 import { Share2, X } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
-import { addBuddyMember, removeBuddyMember, normalizeBuddyEmail, type BuddyPermission } from '../../services/buddyLayers'
+import { shareOwnPointLayer, addBuddyMember, removeBuddyMember, normalizeBuddyEmail, type BuddyPermission } from '../../services/buddyLayers'
 
 export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
   const user = useAuthStore(state => state.user)
@@ -13,9 +15,7 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
   const [success, setSuccess] = useState<string | null>(null)
   const fieldId = useId()
 
-  if (!layer.buddyLayerId) return null
-
-  const owner = layer.buddyRole === 'owner'
+  const owner = !layer.buddyLayerId || layer.buddyRole === 'owner'
   const members = (layer.buddyMemberEmails || []).filter(item => item !== layer.buddyOwnerEmail)
 
   const handleAdd = async () => {
@@ -33,10 +33,16 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
     }
     setBusy(true)
     try {
-      await addBuddyMember(user, layer.buddyLayerId!, recipient, permission)
+      if (!layer.buddyLayerId) {
+        const record = await shareOwnPointLayer(user, layer, recipient, permission)
+        useCustomPointLayerStore.setState(state => ({ layers: upsertBuddyLayer(state.layers, record, user.uid, normalizeBuddyEmail(user.email || '')), deletedLayerIds: [...new Set([...state.deletedLayerIds, layer.id])] }))
+        useBuddySyncStore.getState().refresh()
+      } else {
+        await addBuddyMember(user, layer.buddyLayerId, recipient, permission)
+      }
       // Show the acknowledged change even before the cloud listener responds.
       useCustomPointLayerStore.setState(state => ({ layers: state.layers.map(item => {
-        if (item.buddyLayerId !== layer.buddyLayerId) return item
+        if (item.id !== layer.id) return item
         const withoutRecipient = (emails: string[] = []) => emails.filter(value => normalizeBuddyEmail(value) !== recipient)
         return { ...item,
           buddyMemberEmails: [...withoutRecipient(item.buddyMemberEmails), recipient],
@@ -47,7 +53,7 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
       setEmail('')
       setSuccess(`Toegang gegeven aan ${recipient}.`)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Buddy toevoegen mislukt.')
+      setError(e instanceof Error ? e.message : 'Toegang geven mislukt.')
     } finally {
       setBusy(false)
     }
@@ -55,7 +61,7 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
 
   const handleRemove = async (memberEmail: string) => {
     if (busy) return
-    if (!user) { setError('Log in met Google om buddies te beheren.'); return }
+    if (!user) { setError('Log in met Google om delen te beheren.'); return }
     setBusy(true)
     setError(null)
     setSuccess(null)
@@ -79,7 +85,7 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
     <div className="detect-sharing-panel rounded-lg p-3 text-xs">
       <div className="detect-accent-text mb-1 flex items-center gap-1.5 font-medium">
         <Share2 size={13} />
-        Buddy-laag
+        Delen · {members.length ? 'Gedeeld' : 'Privé'}
       </div>
       <div className="mb-3 text-xs text-gray-500">
         {owner
@@ -125,9 +131,9 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
             disabled={!email.trim() || busy || !user}
             className="detect-window-primary-button w-full disabled:opacity-50"
           >
-            {busy ? 'Bezig…' : 'Buddy toevoegen'}
+            {busy ? 'Bezig…' : 'Toegang geven'}
           </button>
-          <p id={`${fieldId}-help`} className="text-xs text-gray-500">Je buddy vindt de laag onder Mijn lagen na inloggen met dit adres.</p>
+          <p id={`${fieldId}-help`} className="text-xs text-gray-500">De ontvanger vindt de laag onder Mijn lagen na inloggen met dit adres.</p>
         </form>
       )}
 
@@ -151,7 +157,7 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
       )}
 
       {owner && members.length === 0 && (
-        <div className="mt-2 text-[11px] text-gray-500">Nog niet gedeeld.</div>
+        <div className="mt-2 text-[11px] text-gray-500">Deze puntenlaag is privé.</div>
       )}
       {success && <div role="status" className="mt-2 text-xs">{success}</div>}
       {owner && !user && <div role="alert" className="mt-2 text-xs">Log in met Google om deze laag te delen.</div>}

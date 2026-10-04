@@ -1,3 +1,4 @@
+import type { FeatureLike } from 'ol/Feature'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import Feature from 'ol/Feature'
@@ -534,9 +535,8 @@ const GOLD_RIVERS = [
 ]
 
 // Style voor goud rivieren - gouden markers
-function createGoldStyle(feature: Feature) {
+function createGoldStyle(feature: FeatureLike) {
   const name = feature.get('name') || ''
-  const country = feature.get('country') || ''
   const legal = feature.get('legal') || ''
 
   // Rood voor verboden (BE), goud voor toegestaan

@@ -2,9 +2,9 @@ import type { BuddyLayerRecord } from '../services/buddyLayers'
 import type { CustomPointLayer } from '../store/customPointLayerStore'
 
 export function upsertBuddyLayer(layers: CustomPointLayer[], record: BuddyLayerRecord, uid: string, email: string): CustomPointLayer[] {
-  const existing = layers.find(layer => layer.buddyLayerId === record.id)
+  const existing = layers.find(layer => layer.buddyLayerId === record.id || (record.ownerUid === uid && layer.id === record.sourceLayerId))
   const next: CustomPointLayer = {
-    id: `buddy-${record.id}`,
+    id: existing?.id || (record.ownerUid === uid ? record.sourceLayerId : undefined) || `buddy-${record.id}`,
     name: record.name || 'Buddy-laag',
     color: record.color || '#06b6d4',
     categories: existing?.categories || [],
@@ -20,9 +20,9 @@ export function upsertBuddyLayer(layers: CustomPointLayer[], record: BuddyLayerR
     buddyEditEmails: record.editEmails || [],
     buddyReadEmails: record.readEmails || [],
   }
-  return [...layers.filter(layer => layer.buddyLayerId !== record.id), next]
+  return [...layers.filter(layer => layer.buddyLayerId !== record.id && layer.id !== next.id), next]
 }
 
 export function preserveBuddyLayers(current: CustomPointLayer[], privateLayers: CustomPointLayer[]): CustomPointLayer[] {
-  return [...privateLayers.filter(layer => !layer.buddyLayerId), ...current.filter(layer => !!layer.buddyLayerId)]
+  return [...privateLayers.filter(layer => !layer.buddyLayerId && !current.some(item => item.buddyLayerId && item.id === layer.id)), ...current.filter(layer => !!layer.buddyLayerId)]
 }

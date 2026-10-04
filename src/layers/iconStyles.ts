@@ -113,7 +113,7 @@ export function createIconStyle(options: IconStyleOptions) {
 
   const iconPath = LUCIDE_ICONS[icon] || LUCIDE_ICONS.circle
 
-  return function(feature: FeatureLike, resolution: number): Style {
+  return function(_feature: FeatureLike, resolution: number): Style {
     const scale = Math.max(minScale, Math.min(maxScale, getScaleForResolution(resolution)))
     const cacheKey = `${icon}-${color}-${bgColor || 'none'}-${scale.toFixed(2)}`
 

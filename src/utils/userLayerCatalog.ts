@@ -37,22 +37,17 @@ export function getLinkedPointLayer<T extends PointLayerLike>(
 
 export function getStandalonePointLayers<T extends PointLayerLike, U extends ImportedLayerLike>(
   pointLayers: T[],
-  importedLayers: U[],
+  _importedLayers: U[],
   options: { includeReadOnly?: boolean } = {}
 ): T[] {
-  const importedIds = new Set(importedLayers.map(layer => layer.id))
-  return pointLayers.filter(layer =>
-    !layer.archived &&
-    (options.includeReadOnly || layer.buddyRole !== 'read') &&
-    (!layer.linkedImportedLayerId || !importedIds.has(layer.linkedImportedLayerId))
-  )
+  return pointLayers.filter(layer => !layer.archived && (options.includeReadOnly || layer.buddyRole !== 'read'))
 }
 
 export function buildUserLayerCatalog<T extends PointLayerLike, U extends ImportedLayerLike>(
   pointLayers: T[],
-  importedLayers: U[]
+  _importedLayers: U[]
 ): UserLayerCatalogItem[] {
-  const standalone = getStandalonePointLayers(pointLayers, importedLayers).map(layer => ({
+  const standalone = getStandalonePointLayers(pointLayers, _importedLayers).map(layer => ({
     key: `point:${layer.id}`,
     target: { kind: 'point', id: layer.id } as const,
     name: layer.name,
@@ -60,16 +55,5 @@ export function buildUserLayerCatalog<T extends PointLayerLike, U extends Import
     objectCount: layer.points.length,
   }))
 
-  const imported = importedLayers.map(layer => {
-    const linkedLayer = getLinkedPointLayer(layer.id, pointLayers)
-    return {
-      key: `imported:${layer.id}`,
-      target: { kind: 'imported', id: layer.id } as const,
-      name: layer.name,
-      color: layer.style.points.color || layer.color,
-      objectCount: layer.features.features.length + (linkedLayer?.points.length || 0),
-    }
-  })
-
-  return [...standalone, ...imported]
+  return standalone
 }

@@ -141,7 +141,6 @@ function parseGPX(gpxText: string): [number, number][] {
 function createRouteStyle(feature: Feature, isHighlight = false): Style[] {
   const country = feature.get('country') || 'NL'
   const color = ROUTE_COLORS[country] || ROUTE_COLORS.NL
-  const name = feature.get('name') || ''
 
   const styles: Style[] = []
 
@@ -170,9 +169,9 @@ function createRouteStyle(feature: Feature, isHighlight = false): Style[] {
 
 // Create style for start point marker
 function createStartPointStyle(feature: Feature): Style {
+  const name = feature.get('name') || ''
   const country = feature.get('country') || 'NL'
   const color = ROUTE_COLORS[country] || ROUTE_COLORS.NL
-  const name = feature.get('name') || ''
 
   return new Style({
     image: new Circle({

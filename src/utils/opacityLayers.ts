@@ -9,7 +9,7 @@ interface OpacityLayer {
   id: string
   layerKey: string
   name: string
-  kind: 'standard'
+  kind: 'standard' | 'imported'
   opacity: number
 }
 
@@ -17,8 +17,9 @@ export function getActiveOpacityLayers(
   visible: Record<string, boolean>,
   opacity: Record<string, number>,
   registered: Record<string, { getOpacity: () => number }>,
+  imports: { id: string; name: string; visible: boolean; opacity: number }[] = [],
 ): OpacityLayer[] {
-  return Object.keys(visible)
+  const standard = Object.keys(visible)
     .filter(name => visible[name] && !NON_OPACITY_LAYERS.has(name))
     .filter(name => opacity[name] !== undefined || registered[name])
     .map(name => ({
@@ -28,4 +29,8 @@ export function getActiveOpacityLayers(
       kind: 'standard' as const,
       opacity: opacity[name] ?? registered[name].getOpacity(),
     }))
+  return [...standard, ...imports.filter(layer => layer.visible).map(layer => ({
+    id: `imported-${layer.id}`, layerKey: layer.id, name: layer.name,
+    kind: 'imported' as const, opacity: layer.opacity,
+  }))]
 }

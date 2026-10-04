@@ -143,7 +143,7 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
             </>
           )}
 
-          {layer.buddyLayerId && <BuddyLayerPanel layer={layer} />}
+          <BuddyLayerPanel layer={layer} />
 
           {canDelete && (
             <button

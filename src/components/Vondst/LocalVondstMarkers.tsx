@@ -60,7 +60,7 @@ export function LocalVondstMarkers() {
       const label = TYPE_LABELS[vondst.objectType] || '?'
 
       // Zoom-dependent style function
-      feature.setStyle((feature, resolution) => {
+      feature.setStyle((_feature, resolution) => {
         // Calculate radius based on resolution (zoom)
         // Higher resolution = zoomed out = smaller icons
         const baseRadius = 12

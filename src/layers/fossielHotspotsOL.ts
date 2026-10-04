@@ -1,3 +1,4 @@
+import type { FeatureLike } from 'ol/Feature'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import Feature from 'ol/Feature'
@@ -512,7 +513,7 @@ const COUNTRY_COLORS: Record<string, { fill: string; stroke: string }> = {
 }
 
 // Style voor fossiel hotspots
-function createHotspotStyle(feature: Feature) {
+function createHotspotStyle(feature: FeatureLike) {
   const name = feature.get('name') || ''
   const country = feature.get('country') || 'NL'
   const colors = COUNTRY_COLORS[country] || COUNTRY_COLORS.NL

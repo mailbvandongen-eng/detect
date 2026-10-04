@@ -229,14 +229,11 @@ export function Popup() {
     layers: customLayers,
     addPoint: addPointToLayer,
     addLayer: createNewLayer,
-    ensureImportedLayerOverlay,
     updateLayer: updatePointLayer,
     updatePoint: updateCustomPoint,
     removePoint: removeCustomPoint,
   } = useCustomPointLayerStore()
   const importedLayers = useCustomLayerStore(state => state.layers)
-  const updateImportedGeometryStyle = useCustomLayerStore(state => state.updateGeometryStyle)
-  const updateImportedLayer = useCustomLayerStore(state => state.updateLayer)
   const selectableUserLayers = buildUserLayerCatalog(customLayers, importedLayers)
   const [allContents, setAllContents] = useState<string[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -350,13 +347,7 @@ export function Popup() {
       return
     }
 
-    const importedLayer = importedLayers.find(layer => layer.id === target.id)
-    if (!importedLayer) return
-    const color = importedLayer.style.points.color || importedLayer.color
-    const overlayId = ensureImportedLayerOverlay(importedLayer.id, importedLayer.contentHash, importedLayer.name, color)
-    updateImportedGeometryStyle(importedLayer.id, 'points', { visible: true })
-    updateImportedLayer(importedLayer.id, { visible: true })
-    addPopupPointToLayer(overlayId, layerName)
+
   }
 
   const createLayerAndAddPopupPoint = () => {

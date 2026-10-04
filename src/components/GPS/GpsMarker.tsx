@@ -39,14 +39,13 @@ export function GpsMarker() {
   const tracking = useGPSStore(state => state.tracking)
   const smoothHeading = useGPSStore(state => state.smoothHeading)
   const navigationMode = useGPSStore(state => state.navigationMode)
-  const navigationMoving = useGPSStore(state => state.navigationMoving)
   const showAccuracyCircle = useSettingsStore(state => state.showAccuracyCircle)
   const firstFix = useGPSStore(state => state.firstFix)
   const resetFirstFix = useGPSStore(state => state.resetFirstFix)
   const centerOnUser = useGPSStore(state => state.config.centerOnUser)
 
-  const markerRef = useRef<Feature | null>(null)
-  const accuracyRef = useRef<Feature | null>(null)
+  const markerRef = useRef<Feature<Point> | null>(null)
+  const accuracyRef = useRef<Feature<Point> | null>(null)
   const layerRef = useRef<VectorLayer<VectorSource> | null>(null)
   const previousPositionRef = useRef(position)
 
