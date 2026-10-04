@@ -80,6 +80,8 @@ globalThis.document = {
   addEventListener: (name, fn) => events.set(name, fn),
   removeEventListener: name => events.delete(name),
 }
+const writes=load('src/utils/buddyWrites.ts')
+let pending=[]
 const hook = load('src/hooks/useBuddyLayers.ts', {
   react: { useEffect },
   'firebase/firestore': {
@@ -97,6 +99,8 @@ const hook = load('src/hooks/useBuddyLayers.ts', {
   '../services/buddyLayers': { normalizeBuddyEmail: email => email.trim().toLowerCase() },
   '../utils/buddyLayerState': stateHelpers,
   '../store/buddySyncStore': { useBuddySyncStore: syncStore },
+  '../store/buddyWriteStore': {useBuddyWriteStore:{getState:()=>({items:pending,deletedBuddyIds:[]})}},
+  '../utils/buddyWrites':writes,
 })
 function renderHook() { effectIndex = 0; hook.useBuddyLayers() }
 renderHook()
@@ -119,6 +123,17 @@ assert.equal(pointState.layers.find(layer => layer.buddyLayerId === record.id).b
 listeners[2].next({ docs: [{ id: 'point', data: () => ({ name: 'Saved point', coordinates: [0, 0] }) }] })
 assert.equal(pointState.layers.find(layer => layer.buddyLayerId === record.id).points[0].name, 'Saved point')
 console.log('PASS actual metadata and point listeners populate one layer without duplication')
+
+pending=[{uid:user.uid,buddyLayerId:record.id,mutation:{kind:'patch',pointId:'point',fields:{notes:'Offline wijziging'}},snapshot:{id:'point',name:'Saved point'}}]
+listeners[2].next({docs:[{id:'point',data:()=>({name:'Naam van buddy',notes:'Oud',writeCursors:{other:7}})},{id:'deleted',data:()=>({deleted:true})}]})
+const overlaid=pointState.layers.find(layer=>layer.buddyLayerId===record.id).points
+assert.equal(overlaid.length,1)
+assert.equal(overlaid[0].notes,'Offline wijziging')
+assert.equal(overlaid[0].name,'Naam van buddy')
+assert.equal(overlaid[0].writeCursors,undefined)
+pending=[]
+console.log('PASS remote refresh preserves pending fields and hides tombstones and internal cursors')
+
 const privateOnly = [pointState.layers[0]]
 pointState.layers = stateHelpers.preserveBuddyLayers(pointState.layers, privateOnly)
 assert.equal(pointState.layers.length, 2)
@@ -140,7 +155,7 @@ console.log('PASS returning to app restarts metadata and point subscriptions')
 active.next({ docs: [], metadata: { fromCache: false } })
 assert.equal(pointState.layers.length, 2)
 const latest = listeners.at(-1)
-latest.next({ docs: [], metadata: { fromCache: false } })
+latest.next({ docs: [{id:record.id,data:()=>({...record,deleted:true})}], metadata: { fromCache: false } })
 assert.equal(pointState.layers.length, 1)
 console.log('PASS confirmed server deletion removes layer; stale callback cannot')
 const readerLayers = stateHelpers.upsertBuddyLayer(privateOnly, record, 'reader', 'reader@example.com')
@@ -157,4 +172,4 @@ renderHook()
 assert.equal(pointState.layers.length, 1)
 console.log('PASS sign-out removes buddy layers')
 effects.forEach(effect => effect.cleanup?.())
-console.log('11 buddy UI regression checks passed')
+console.log('12 buddy UI regression checks passed')

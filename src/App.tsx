@@ -32,6 +32,7 @@ import { MeasureTool } from './components/UI/MeasureTool'
 import { DrawTool } from './components/UI/DrawTool'
 import { PrintTool } from './components/UI/PrintTool'
 import { useHeading } from './hooks/useHeading'
+import { useBuddyWrites } from './hooks/useBuddyWrites'
 import { useBuddyLayers } from './hooks/useBuddyLayers'
 import { useSettingsStore, useUIStore, useWeatherStore, useGPSStore, useAuthStore } from './store'
 import { useCustomLayerStore } from './store/customLayerStore'
@@ -45,6 +46,7 @@ function App() {
   // Initialize hooks
   useHeading()
   useBuddyLayers()
+  useBuddyWrites()
 
   const customLayers = useCustomLayerStore(state => state.layers)
   useEffect(() => {

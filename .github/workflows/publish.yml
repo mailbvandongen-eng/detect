@@ -38,6 +38,10 @@ jobs:
           printf '%s\n' '{"firestore":{"rules":"firestore.rules"},"emulators":{"firestore":{"port":8080},"ui":{"enabled":false}}}' > "$RUNNER_TEMP/private-sync/firebase.json"
           cp firestore.rules "$RUNNER_TEMP/private-sync/firestore.rules"
           "$RUNNER_TEMP/private-sync/node_modules/.bin/firebase" emulators:exec --only firestore --project demo-private-data --config "$RUNNER_TEMP/private-sync/firebase.json" "node scripts/test-private-sync-emulator.mjs"
+      - name: Controleer gelijktijdige gedeelde bewerkingen en rechten
+        env:
+          BUDDY_TEST_MODULE_ROOT: ${{ runner.temp }}/private-sync
+        run: '"$RUNNER_TEMP/private-sync/node_modules/.bin/firebase" emulators:exec --only firestore --project demo-detect-flow --config "$RUNNER_TEMP/private-sync/firebase.json" "node scripts/test-buddy-flow.mjs"'
       - name: Installeer WebKit voor mobiel testen
         run: '"$RUNNER_TEMP/private-sync/node_modules/.bin/playwright" install --with-deps webkit'
       - name: Controleer delen en accountwisseling op iPhone-formaat
@@ -46,6 +50,7 @@ jobs:
         run: |
           node scripts/test-buddy-sharing-browser.mjs
           node scripts/test-app-maintenance-browser.mjs
+          node scripts/test-buddy-writes-browser.mjs
   build:
     needs: verify-private-data
     runs-on: ubuntu-latest
@@ -72,6 +77,7 @@ jobs:
           npm run test:user-layers
           npm run test:controls
           npm run test:buddy-ui
+          npm run test:buddy-writes
 
       - name: Productieversie bouwen
         run: npm run build

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight, Settings2, Trash2 } from 'lucide-react'
 import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
+import { BuddyWriteStatus } from '../CustomPoints/BuddyWriteStatus'
 import { BuddyLayerPanel } from '../CustomPoints/BuddyLayerPanel'
 import { useCustomLayerStore } from '../../store/customLayerStore'
 import { LayerGroup } from './LayerGroup'
@@ -220,6 +221,7 @@ export function ThemesPanel() {
                   onChangeColor={(color) => updateLayer(layer.id, { color })}
                 />
               ))}
+              <BuddyWriteStatus />
               {buddyError && (
                 <div role="alert" className="rounded-lg bg-red-50 p-2 text-xs text-red-700">
                   <p>{buddyError}</p>

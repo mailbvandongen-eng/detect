@@ -1,3 +1,4 @@
+import { BuddyWriteStatus } from './BuddyWriteStatus'
 import { useState } from 'react'
 import { MapPin, Phone } from 'lucide-react'
 import { useUIStore } from '../../store'
@@ -38,7 +39,7 @@ export function AddPointModal() {
     const targetLayerId = addPointModalLayerTarget.id
     updatePointLayer(targetLayerId, { visible: true })
 
-    addPoint(targetLayerId, {
+    const saved=addPoint(targetLayerId, {
       name: name.trim(),
       category: 'Overig',
       notes: notes.trim(),
@@ -48,6 +49,7 @@ export function AddPointModal() {
       ...(photos.length > 0 ? { photos } : {})
     })
 
+    if(!saved)return
     // Reset form
     setName('')
     setPhone('')
@@ -102,6 +104,7 @@ export function AddPointModal() {
       }
     >
       <div className="p-4 space-y-3">
+        <BuddyWriteStatus />
               {/* Point name */}
               <div>
                 <label className="block font-medium text-gray-700 mb-1" style={{ fontSize: '0.9em' }}>

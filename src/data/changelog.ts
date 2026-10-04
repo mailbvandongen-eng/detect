@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version:'2.33.81',date:'4 oktober 2026',title:'Betrouwbaar gedeelde lagen bewerken',
+    changes:[
+      'Gedeelde punten slaan alleen gewijzigde velden op. Gelijktijdige wijzigingen aan verschillende velden blijven beide behouden.',
+      'Toegang geven en intrekken gebruiken transacties, zodat gelijktijdig beheer geen andere buddies overschrijft.',
+      'Offline bewerkingen blijven per account op dit apparaat bewaard en worden opnieuw opgeslagen zodra er verbinding is. De lagenlijst toont opslagstatus en fouten.',
+      'Bij verloren bewerkrechten kun je niet opgeslagen puntwijzigingen als privélaag bewaren. Opnieuw proberen wist geen lokale gegevens.',
+    ],
+  },
+  {
     version: '2.33.80', date: '4 oktober 2026', title: 'Rustig opstarten en veilig vernieuwen',
     changes: [
       'Opstartvensters wachten op het laden van account en instellingen. Het wijzigingsscherm verschijnt eenmaal per versie.',

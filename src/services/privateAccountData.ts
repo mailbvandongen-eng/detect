@@ -1,3 +1,4 @@
+import { useBuddyWriteStore } from '../store/buddyWriteStore'
 import { useCustomPointLayerStore } from '../store/customPointLayerStore'
 import { useCustomLayerStore } from '../store/customLayerStore'
 import { useLocalVondstenStore } from '../store/localVondstenStore'
@@ -8,7 +9,7 @@ import { useUIStore } from '../store/uiStore'
 import { accountStorage, beginAccountSwitch, finishAccountSwitch, lockAccountStorage, currentAccountScope } from '../utils/accountStorage'
 import { emptyPrivateRevision, latestRevision, trackChanges, type PrivateRevision, type SyncItem } from '../utils/privateSyncMerge'
 
-const stores = [useCustomPointLayerStore, useCustomLayerStore, useLocalVondstenStore, useRouteRecordingStore, useSettingsStore, usePresetStore]
+const stores = [useCustomPointLayerStore, useCustomLayerStore, useLocalVondstenStore, useRouteRecordingStore, useSettingsStore, usePresetStore, useBuddyWriteStore]
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value))
 let applying = false
 let initialized = false

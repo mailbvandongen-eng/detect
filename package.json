@@ -1,13 +1,15 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.80",
+  "version": "2.33.81",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "node scripts/build-pages.mjs",
     "build:dist": "vite build --outDir dist",
     "test:field": "node scripts/test-field-reliability.mjs",
+    "test:buddy-writes": "node scripts/test-buddy-writes.mjs",
+    "test:buddy-writes-browser": "node scripts/test-buddy-writes-browser.mjs",
     "test:buddy-ui": "node scripts/test-buddy-ui.mjs",
     "test:user-layers": "node scripts/test-user-layers.mjs",
     "preview": "vite preview",

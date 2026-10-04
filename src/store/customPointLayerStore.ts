@@ -8,7 +8,18 @@ import {
   reconcilePointLayerDeletions,
 } from '../utils/pointLayerCleanup'
 import { auth } from '../lib/firebase'
-import { deleteBuddyLayer, deleteBuddyPoint, saveBuddyPoint, updateBuddyLayerMetadata } from '../services/buddyLayers'
+import { enqueueBuddyWrite, useBuddyWriteStore } from './buddyWriteStore'
+import { accountSession } from '../utils/accountStorage'
+import type { BuddyMutation } from '../utils/buddyWrites'
+
+function queueBuddyEdit(layer: CustomPointLayer, mutation: BuddyMutation, snapshot?: CustomPoint): boolean {
+  const uid=auth.currentUser?.uid
+  if(!uid || !accountSession(uid)()) {
+    useBuddyWriteStore.setState({storageError:'Wacht tot je Google-account geladen is voordat je een gedeelde laag bewerkt.'})
+    return false
+  }
+  return enqueueBuddyWrite(uid,layer,mutation,snapshot)
+}
 
 // Color cycle for new layers
 const LAYER_COLORS = [
@@ -123,9 +134,9 @@ interface CustomPointLayerStore {
   toggleArchived: (id: string) => void
 
   // Point operations
-  addPoint: (layerId: string, point: Omit<CustomPoint, 'id' | 'createdAt' | 'status'> & { status?: PointStatus }) => void
+  addPoint: (layerId: string, point: Omit<CustomPoint, 'id' | 'createdAt' | 'status'> & { status?: PointStatus }) => boolean
   removePoint: (layerId: string, pointId: string) => void
-  updatePoint: (layerId: string, pointId: string, updates: Partial<Omit<CustomPoint, 'id' | 'createdAt'>>) => void
+  updatePoint: (layerId: string, pointId: string, updates: Partial<Omit<CustomPoint, 'id' | 'createdAt'>>) => boolean
   setPointStatus: (layerId: string, pointId: string, status: PointStatus) => void
 
   // Category operations
@@ -185,9 +196,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
         const layer = get().layers.find(l => l.id === id)
         if (layer?.buddyLayerId) {
           if (layer.buddyRole !== 'owner' || !auth.currentUser) return
-          void deleteBuddyLayer(auth.currentUser, layer.buddyLayerId).catch(error =>
-            console.error('Buddy-laag verwijderen mislukt:', error)
-          )
+          if (!queueBuddyEdit(layer, {kind:'deleteLayer'})) return
         }
         set(state => ({
           layers: state.layers.filter(l => l.id !== id),
@@ -211,21 +220,18 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
           const { name: _name, color: _color, ...localOnly } = updates
           updates = localOnly
         }
+        if(layer?.buddyLayerId && layer.buddyRole==='owner') {
+          const fields: {name?:string;color?:string}={}
+          if(typeof updates.name==='string' && updates.name!==layer.name)fields.name=updates.name.trim()
+          if(typeof updates.color==='string' && updates.color!==layer.color)fields.color=updates.color
+          if(Object.keys(fields).length && !queueBuddyEdit(layer,{kind:'metadata',fields}))return
+        }
         set(state => ({
           layers: state.layers.map(l =>
             l.id === id ? { ...l, ...updates } : l
           )
         }))
-        if (layer?.buddyLayerId && layer.buddyRole === 'owner' && auth.currentUser) {
-          const metadata: { name?: string; color?: string } = {}
-          if (typeof updates.name === 'string') metadata.name = updates.name
-          if (typeof updates.color === 'string') metadata.color = updates.color
-          if (metadata.name || metadata.color) {
-            void updateBuddyLayerMetadata(auth.currentUser, layer.buddyLayerId, metadata).catch(error =>
-              console.error('Buddy-laag bijwerken mislukt:', error)
-            )
-          }
-        }
+
       },
 
       toggleVisibility: (id) => {
@@ -246,7 +252,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
 
       addPoint: (layerId, point) => {
         const layer = get().layers.find(l => l.id === layerId)
-        if (layer?.buddyLayerId && layer.buddyRole === 'read') return
+        if (!layer || layer.buddyRole === 'read') return false
         const newPoint: CustomPoint = {
           ...point,
           status: point.status || 'todo',
@@ -254,6 +260,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
           createdAt: new Date().toISOString()
         }
 
+        if(layer?.buddyLayerId && !queueBuddyEdit(layer,{kind:'create',point:newPoint}))return false
         set(state => ({
           layers: state.layers.map(l =>
             l.id === layerId
@@ -261,16 +268,13 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               : l
           )
         }))
-        if (layer?.buddyLayerId) {
-          void saveBuddyPoint(layer.buddyLayerId, newPoint).catch(error =>
-            console.error('Buddy-punt opslaan mislukt:', error)
-          )
-        }
+        return true
       },
 
       removePoint: (layerId, pointId) => {
         const layer = get().layers.find(l => l.id === layerId)
         if (layer?.buddyLayerId && layer.buddyRole === 'read') return
+        if(layer?.buddyLayerId && !queueBuddyEdit(layer,{kind:'delete',pointId},layer.points.find(point=>point.id===pointId)))return
         set(state => ({
           layers: state.layers.map(l =>
             l.id === layerId
@@ -278,56 +282,32 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
               : l
           )
         }))
-        if (layer?.buddyLayerId) {
-          void deleteBuddyPoint(layer.buddyLayerId, pointId).catch(error =>
-            console.error('Buddy-punt verwijderen mislukt:', error)
-          )
-        }
+
       },
 
       updatePoint: (layerId, pointId, updates) => {
         const layer = get().layers.find(l => l.id === layerId)
-        if (layer?.buddyLayerId && layer.buddyRole === 'read') return
-        let updatedPoint: CustomPoint | undefined
+        if (!layer || layer.buddyRole === 'read') return false
+        const original=layer?.points.find(point=>point.id===pointId)
+        if(!original)return false
+        const fields=Object.fromEntries(Object.entries(updates).filter(([key,value])=>JSON.stringify(original[key as keyof CustomPoint])!==JSON.stringify(value)))
+        if(!Object.keys(fields).length)return true
+        if(layer?.buddyLayerId && !queueBuddyEdit(layer,{kind:'patch',pointId,fields}, {...original,...fields}))return false
         set(state => ({
           layers: state.layers.map(l => {
             if (l.id !== layerId) return l
             const points = l.points.map(p => {
               if (p.id !== pointId) return p
-              updatedPoint = { ...p, ...updates }
-              return updatedPoint
+              return { ...p, ...fields }
             })
             return { ...l, points }
           })
         }))
-        if (layer?.buddyLayerId && updatedPoint) {
-          void saveBuddyPoint(layer.buddyLayerId, updatedPoint).catch(error =>
-            console.error('Buddy-punt bijwerken mislukt:', error)
-          )
-        }
+        return true
       },
 
       setPointStatus: (layerId, pointId, status) => {
-        const layer = get().layers.find(l => l.id === layerId)
-        if (layer?.buddyLayerId && layer.buddyRole === 'read') return
-        const point = layer?.points.find(p => p.id === pointId)
-        set(state => ({
-          layers: state.layers.map(l =>
-            l.id === layerId
-              ? {
-                  ...l,
-                  points: l.points.map(p =>
-                    p.id === pointId ? { ...p, status } : p
-                  )
-                }
-              : l
-          )
-        }))
-        if (layer?.buddyLayerId && point) {
-          void saveBuddyPoint(layer.buddyLayerId, { ...point, status }).catch(error =>
-            console.error('Buddy-status bijwerken mislukt:', error)
-          )
-        }
+        get().updatePoint(layerId,pointId,{status})
       },
 
       addCategory: (layerId, category) => {
@@ -351,6 +331,11 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
       },
 
       addPhotoToPoint: (layerId, pointId, photo) => {
+        const layer=get().layers.find(item=>item.id===layerId)
+        const point=layer?.points.find(item=>item.id===pointId)
+        if(!layer || !point || layer.buddyRole==='read')return
+        const snapshot={...point,photos:[...(point.photos || []),photo]}
+        if(layer.buddyLayerId && !queueBuddyEdit(layer,{kind:'photo',pointId,action:'add',photoId:photo.id,photo},snapshot))return
         set(state => ({
           layers: state.layers.map(l =>
             l.id === layerId
@@ -368,6 +353,11 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
       },
 
       removePhotoFromPoint: (layerId, pointId, photoId) => {
+        const layer=get().layers.find(item=>item.id===layerId)
+        const point=layer?.points.find(item=>item.id===pointId)
+        if(!layer || !point || layer.buddyRole==='read')return
+        const snapshot={...point,photos:(point.photos || []).filter(item=>item.id!==photoId)}
+        if(layer.buddyLayerId && !queueBuddyEdit(layer,{kind:'photo',pointId,action:'remove',photoId},snapshot))return
         set(state => ({
           layers: state.layers.map(l =>
             l.id === layerId
@@ -385,6 +375,11 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
       },
 
       updatePhotoInPoint: (layerId, pointId, photoId, updates) => {
+        const layer=get().layers.find(item=>item.id===layerId)
+        const point=layer?.points.find(item=>item.id===pointId)
+        if(!layer || !point || layer.buddyRole==='read')return
+        const snapshot={...point,photos:(point.photos || []).map(item=>item.id===photoId?{...item,...updates}:item)}
+        if(layer.buddyLayerId && !queueBuddyEdit(layer,{kind:'photo',pointId,action:'update',photoId,fields:updates},snapshot))return
         set(state => ({
           layers: state.layers.map(l =>
             l.id === layerId

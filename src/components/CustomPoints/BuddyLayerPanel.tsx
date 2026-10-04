@@ -42,7 +42,7 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
         useCustomPointLayerStore.setState(state => ({ layers: upsertBuddyLayer(state.layers, record, user.uid, normalizeBuddyEmail(user.email || '')), deletedLayerIds: [...new Set([...state.deletedLayerIds, layer.id])] }))
         useBuddySyncStore.getState().refresh()
       } else {
-        await addBuddyMember(user, layer.buddyLayerId, recipient, permission)
+        await addBuddyMember(user, layer.buddyLayerId, recipient, permission, isCurrent)
       }
       if (!isCurrent()) return
       // Show the acknowledged change even before the cloud listener responds.
@@ -73,7 +73,7 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
     setError(null)
     setSuccess(null)
     try {
-      await removeBuddyMember(user, layer.buddyLayerId!, memberEmail)
+      await removeBuddyMember(user, layer.buddyLayerId!, memberEmail, isCurrent)
       if (!isCurrent()) return
       useCustomPointLayerStore.setState(state => ({ layers: state.layers.map(item => item.buddyLayerId !== layer.buddyLayerId ? item : {
         ...item,

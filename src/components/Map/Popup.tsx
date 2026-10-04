@@ -1,3 +1,4 @@
+import { BuddyWriteStatus } from '../CustomPoints/BuddyWriteStatus'
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import TileWMS from 'ol/source/TileWMS'
@@ -26,6 +27,7 @@ type PopupFeatureData = {
 }
 
 type EditableCustomPoint = {
+  original?: {name:string;phone:string;notes:string;url:string}
   name: string
   phone: string
   notes: string
@@ -323,7 +325,7 @@ export function Popup() {
   const addPopupPointToLayer = (layerId: string, layerName: string) => {
     if (!popupCoordinate) return
     const featureData = currentFeatureData
-    addPointToLayer(layerId, {
+    const saved=addPointToLayer(layerId, {
       name: extractedTitle || 'Punt',
       category: 'Overig',
       notes: '',
@@ -333,6 +335,7 @@ export function Popup() {
       sourceProperties: featureData?.properties,
       popupContent: featureData?.popupHtml,
     })
+    if(!saved)return
     setShowLayerPicker(false)
     setShowNewLayerInput(false)
     setNewLayerName('')
@@ -4169,6 +4172,7 @@ export function Popup() {
               <span className="text-gray-400 w-8 text-right" style={{ fontSize: '0.857em' }}>{textScale}%</span>
             </div>
 
+            {currentCustomPointLayer?.buddyLayerId && <BuddyWriteStatus />}
             {/* Handmatig toegevoegde punten worden rechtstreeks vanuit hun popup beheerd. */}
             {currentCustomPointRef && currentCustomPoint && !editingCustomPoint && currentCustomPointLayer?.buddyRole !== 'read' && (
               <div className="px-4 pb-4 flex gap-2 flex-shrink-0">
@@ -4176,6 +4180,7 @@ export function Popup() {
                   onClick={() => {
                     setConfirmCustomPointDelete(false)
                     setEditingCustomPoint({
+                      original:{name:currentCustomPoint.name,phone:currentCustomPoint.phone || '',notes:currentCustomPoint.notes || '',url:currentCustomPoint.url || ''},
                       name: currentCustomPoint.name,
                       phone: currentCustomPoint.phone || '',
                       notes: currentCustomPoint.notes || '',
@@ -4257,12 +4262,10 @@ export function Popup() {
                   <button
                     disabled={!editingCustomPoint.name.trim()}
                     onClick={() => {
-                      updateCustomPoint(currentCustomPointRef.layerId, currentCustomPointRef.pointId, {
-                        name: editingCustomPoint.name.trim(),
-                        phone: editingCustomPoint.phone.trim(),
-                        notes: editingCustomPoint.notes.trim(),
-                        url: editingCustomPoint.url.trim(),
-                      })
+                      const fields = Object.fromEntries((['name','phone','notes','url'] as const)
+                        .filter(key=>editingCustomPoint[key].trim()!==editingCustomPoint.original?.[key])
+                        .map(key=>[key,editingCustomPoint[key].trim()]))
+                      if(!updateCustomPoint(currentCustomPointRef.layerId, currentCustomPointRef.pointId, fields))return
                       setEditingCustomPoint(null)
                       setVisible(false)
                     }}

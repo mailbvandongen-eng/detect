@@ -2,7 +2,8 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 const require = createRequire(process.env.BUDDY_TEST_MODULE_ROOT + '/package.json')
-const ts = require('typescript')
+let ts
+try {ts=createRequire(import.meta.url)('typescript')}catch{ts=require('typescript')}
 const { initializeTestEnvironment, assertFails, assertSucceeds } = require('@firebase/rules-unit-testing')
 const firestore = require('firebase/firestore')
 const env = await initializeTestEnvironment({
@@ -20,10 +21,14 @@ function client(user) {
   }).outputText
   const module = {exports:{}}
   Function('require','module','exports',compiled)(
-    name => name === '../lib/firebase' ? {db} : require(name), module, module.exports
+    name => name === '../lib/firebase' ? {db} : name === '../utils/buddyWrites' ? writeHelpers : require(name), module, module.exports
   )
   return {db, ...module.exports}
 }
+function loadHelper(){
+ const m={exports:{}};const output=ts.transpileModule(readFileSync('src/utils/buddyWrites.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText;Function('module','exports',output)(m,m.exports);return m.exports
+}
+const writeHelpers=loadHelper()
 let count = 0
 function pass(label) { count++; console.log('PASS ' + label) }
 try {
@@ -113,5 +118,59 @@ try {
   sharedPoints=await firestore.getDocs(firestore.collection(b.db,'buddyLayers',resumed.id,'points'))
   assert.equal(sharedPoints.size,2)
   pass('Interrupted promotion remains private and safely resumes with all points')
+
+  const a2=client(owner)
+  await Promise.all([a.addBuddyMember(owner,promoted.id,'extra-one@example.com','read'),a2.addBuddyMember(owner,promoted.id,'extra-two@example.com','edit')])
+  snap=await firestore.getDoc(firestore.doc(a.db,'buddyLayers',promoted.id))
+  assert.ok(snap.data().memberEmails.includes('extra-one@example.com'))
+  assert.ok(snap.data().memberEmails.includes('extra-two@example.com'))
+  await Promise.all([a.removeBuddyMember(owner,promoted.id,'extra-one@example.com'),a2.addBuddyMember(owner,promoted.id,'extra-three@example.com','read')])
+  snap=await firestore.getDoc(firestore.doc(a.db,'buddyLayers',promoted.id))
+  assert.ok(!snap.data().memberEmails.includes('extra-one@example.com'))
+  assert.ok(snap.data().readEmails.includes('extra-three@example.com'))
+  pass('Concurrent member grants and revoke/grant preserve unrelated permissions')
+  const operation=(uid,deviceId,sequence,mutation)=>({id:deviceId+sequence,uid,deviceId,sequence,buddyLayerId:promoted.id,layer:privateLayer,mutation,status:'pending'})
+  const create=operation(owner.uid,'owner-device',1,{kind:'create',point:{...point,id:'concurrent'}})
+  await a.applyBuddyWrite(create,()=>true)
+  const notes=operation(owner.uid,'owner-device',2,{kind:'patch',pointId:'concurrent',fields:{notes:'Owner notes'}})
+  const status=operation(editor.uid,'editor-device',1,{kind:'patch',pointId:'concurrent',fields:{status:'done'}})
+  await Promise.all([a.applyBuddyWrite(notes,()=>true),b.applyBuddyWrite(status,()=>true)])
+  const reference=firestore.doc(a.db,'buddyLayers',promoted.id,'points','concurrent')
+  snap=await firestore.getDoc(reference)
+  assert.equal(snap.data().notes,'Owner notes');assert.equal(snap.data().status,'done')
+  pass('Two authenticated clients editing different point fields preserve both changes')
+  await b.applyBuddyWrite(operation(editor.uid,'editor-device',2,{kind:'patch',pointId:'concurrent',fields:{notes:'Later buddy notes'}}),()=>true)
+  await a.applyBuddyWrite(notes,()=>true)
+  snap=await firestore.getDoc(reference);assert.equal(snap.data().notes,'Later buddy notes')
+  pass('Retry after lost acknowledgement cannot overwrite a later buddy edit')
+  const photo=id=>({id,thumbnailBase64:'data:image/png;base64,test',createdAt:point.createdAt})
+  await Promise.all([a.applyBuddyWrite(operation(owner.uid,'owner-device',3,{kind:'photo',pointId:'concurrent',action:'add',photoId:'a',photo:photo('a')}),()=>true),b.applyBuddyWrite(operation(editor.uid,'editor-device',3,{kind:'photo',pointId:'concurrent',action:'add',photoId:'b',photo:photo('b')}),()=>true)])
+  snap=await firestore.getDoc(reference);assert.deepEqual(snap.data().photos.map(p=>p.id).sort(),['a','b'])
+  await a.applyBuddyWrite(operation(owner.uid,'owner-device',4,{kind:'photo',pointId:'concurrent',action:'update',photoId:'a',fields:{thumbnailUrl:'https://example.com/photo'},removedFields:['thumbnailBase64']}),()=>true)
+  snap=await firestore.getDoc(reference);assert.equal(snap.data().photos.find(p=>p.id==='a').thumbnailBase64,undefined)
+  pass('Concurrent photo additions preserve both photos; replacement clears only the selected thumbnail')
+  await a.applyBuddyWrite(operation(owner.uid,'owner-device',5,{kind:'patch',pointId:'concurrent',fields:{phone:'123'}}),()=>true)
+  await a.applyBuddyWrite(operation(owner.uid,'owner-device',6,{kind:'patch',pointId:'concurrent',fields:{},removedFields:['phone']}),()=>true)
+  snap=await firestore.getDoc(reference);assert.equal(snap.data().phone,undefined)
+  await a.applyBuddyWrite(operation(owner.uid,'owner-device',7,{kind:'delete',pointId:'concurrent'}),()=>true)
+  await a.applyBuddyWrite(create,()=>true)
+  await assert.rejects(b.applyBuddyWrite(operation(editor.uid,'editor-device',4,{kind:'patch',pointId:'concurrent',fields:{notes:'Stale'}}),()=>true),error=>error.code==='point-deleted')
+  snap=await firestore.getDoc(reference);assert.equal(snap.data().deleted,true)
+  pass('Field removals persist and deleted points cannot be resurrected by queued retries')
+  await a.removeBuddyMember(owner,promoted.id,editor.email)
+  await assertFails(b.applyBuddyWrite(operation(editor.uid,'editor-device',5,{kind:'patch',pointId:point.id,fields:{notes:'Offline before revoke'}}),()=>true))
+  await assert.rejects(a.applyBuddyWrite(operation(owner.uid,'owner-device',8,{kind:'patch',pointId:point.id,fields:{notes:'Wrong account'}}),()=>false),/Account is gewijzigd/)
+  pass('Revoked and stale-account writes cannot change shared points')
+
+  const deletion=operation(owner.uid,'owner-device',9,{kind:'deleteLayer'})
+  await a.applyBuddyWrite(deletion,()=>true)
+  await a.applyBuddyWrite(deletion,()=>true)
+  snap=await firestore.getDoc(firestore.doc(a.db,'buddyLayers',promoted.id))
+  assert.equal(snap.data().deleted,true)
+  assert.deepEqual(snap.data().memberEmails,[owner.email])
+  assert.equal((await firestore.getDocs(firestore.collection(a.db,'buddyLayers',promoted.id,'points'))).size,0)
+  await assert.rejects(a.applyBuddyWrite(operation(owner.uid,'owner-device',10,{kind:'create',point:{...point,id:'after-delete'}}),()=>true),error=>error.code==='layer-deleted')
+  await assertFails(firestore.getDoc(firestore.doc(c.db,'buddyLayers',promoted.id)))
+  pass('Layer deletion is replay-safe, revokes access atomically and rejects concurrent new points')
   console.log(count + ' integration checks passed. No production database used.')
 } finally { await env.cleanup() }

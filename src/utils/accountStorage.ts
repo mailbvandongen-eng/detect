@@ -5,7 +5,7 @@ const legacyOwnerMarker = 'detect-legacy-owner'
 export const accountStoreNames = [
   'detectorapp-custom-point-layers', 'detectorapp-custom-layers',
   'detectorapp-local-vondsten', 'detectorapp-route-recording',
-  'detectorapp-settings', 'detectorapp-presets', 'detect-private-sync',
+  'detectorapp-settings', 'detectorapp-presets', 'detect-private-sync', 'detectorapp-buddy-writes',
 ]
 const savedOwner = localStorage.getItem(marker)
 // Never show the last signed-in person's data before Firebase resolves identity.
@@ -53,3 +53,15 @@ export function finishAccountSwitch() { switching = false }
 export function currentAccountScope() { return scope }
 
 export function lockAccountStorage() { generation++; scope = 'locked'; switching = false }
+
+// Enumerate only this account's journal, never another person's storage keys.
+export function accountStorageNames(prefix: string): string[] {
+  if (scope === 'locked') return []
+  const scopedPrefix = key(scope, prefix)
+  const names: string[] = []
+  for (let index = 0; index < localStorage.length; index++) {
+    const storedKey = localStorage.key(index)
+    if (storedKey?.startsWith(scopedPrefix)) names.push(prefix + storedKey.slice(scopedPrefix.length))
+  }
+  return names
+}
