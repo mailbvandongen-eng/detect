@@ -58,9 +58,9 @@ export function initializePrivateTracking() {
   if (initialized) return
   initialized = true
   readRevision()
-  useCustomPointLayerStore.subscribe(track)
-  useLocalVondstenStore.subscribe(track)
-  useRouteRecordingStore.subscribe(track)
+  useCustomPointLayerStore.subscribe((next, previous) => { if (next.layers !== previous.layers) track() })
+  useLocalVondstenStore.subscribe((next, previous) => { if (next.vondsten !== previous.vondsten) track() })
+  useRouteRecordingStore.subscribe((next, previous) => { if (next.savedRoutes !== previous.savedRoutes) track() })
 }
 export async function activatePrivateAccount(uid: string | null) {
   initializePrivateTracking()

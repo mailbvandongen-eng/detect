@@ -197,4 +197,17 @@ assert.equal(guest.accountStorage.getItem('detectorapp-custom-point-layers'), nu
 guest.beginAccountSwitch('second-google-account'); guest.finishAccountSwitch()
 assert.equal(guest.accountStorage.getItem('detectorapp-custom-point-layers'), null)
 pass('First signed-out startup migrates once; later account never inherits guest or owner data')
+globalThis.localStorage = storage()
+const large = JSON.stringify({ state: { layers: [{ id: 'large-import', data: 'x'.repeat(100000) }] }, version: 1 })
+localStorage.setItem('detectorapp-custom-layers', large)
+const write = localStorage.setItem
+localStorage.setItem = (key, value) => { if (value.length > 10000) throw new Error('quota'); write(key, value) }
+cache.clear()
+const full = load('src/utils/accountStorage.ts')
+full.beginAccountSwitch('owner-with-large-import'); full.finishAccountSwitch()
+assert.equal(full.accountStorage.getItem('detectorapp-custom-layers'), large)
+assert.equal(localStorage.getItem('detect-account:owner-with-large-import:detectorapp-custom-layers'), null)
+full.beginAccountSwitch('other'); full.finishAccountSwitch()
+assert.equal(full.accountStorage.getItem('detectorapp-custom-layers'), null)
+pass('Large import migration needs no second copy and never exposes it to another account')
 console.log(`${count} private sync and account isolation checks passed`)
