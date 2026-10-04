@@ -41,7 +41,7 @@ export function PhotoGallery({ photos, onDeletePhoto, maxThumbnails = 4, classNa
     <>
       <div className={`flex flex-wrap gap-2 ${className}`}>
         {visiblePhotos.map((photo, index) => {
-          const thumbnailSrc = safeContentUrl(photo.thumbnailUrl || photo.thumbnailBase64, true)
+          const thumbnailSrc = safeContentUrl(photo.thumbnailBase64 || photo.thumbnailUrl, true)
 
           return (
             <button

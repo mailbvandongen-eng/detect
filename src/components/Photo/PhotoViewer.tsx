@@ -204,7 +204,11 @@ export function PhotoViewer({ photoId, photoData, onClose, onDelete, allPhotoIds
           {photoUrl && (
             <motion.img
               src={photoUrl}
-              onError={() => { setPhotoUrl(null); setError('Foto kon niet worden geladen. Probeer opnieuw met verbinding.') }}
+              onError={() => {
+                const thumbnail = safeContentUrl(photoData?.thumbnailBase64, true)
+                if (thumbnail && thumbnail !== photoUrl) { setPhotoUrl(thumbnail); setError('Alleen de miniatuur is beschikbaar. Het volledige bestand wacht op verbinding.') }
+                else { setPhotoUrl(null); setError('Foto kon niet worden geladen. Probeer opnieuw met verbinding.') }
+              }}
               alt="Foto"
               className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
               initial={{ scale: 0.9, opacity: 0 }}

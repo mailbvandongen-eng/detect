@@ -78,7 +78,7 @@ export function PhotoCapture({ photos, onAddPhoto, onRemovePhoto, disabled }: Ph
             className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
           >
             <img
-              src={safeContentUrl(photo.thumbnailUrl || photo.thumbnailBase64, true)}
+              src={safeContentUrl(photo.thumbnailBase64 || photo.thumbnailUrl, true)}
               alt="Foto"
               className="w-full h-full object-cover"
             />

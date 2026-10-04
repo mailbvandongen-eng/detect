@@ -62,7 +62,7 @@ jobs:
           const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
           const payload = b64url(JSON.stringify({
             iss: clientEmail,
-            scope: 'https://www.googleapis.com/auth/firebase',
+            scope: 'https://www.googleapis.com/auth/firebase https://www.googleapis.com/auth/cloud-platform',
             aud: 'https://oauth2.googleapis.com/token',
             iat: now,
             exp: now + 3600
@@ -103,7 +103,25 @@ jobs:
           if (project !== 'detect-personal') throw new Error('Onverwacht Firebase-project; opslagregels niet gewijzigd.')
           const bucket = 'detect-personal.firebasestorage.app'
           const projectInfo = await api(`https://firebase.googleapis.com/v1beta1/projects/${project}`)
-          const bucketResponse = await fetch(`https://firebasestorage.googleapis.com/v1beta/projects/${projectInfo.projectNumber}/buckets/${bucket}`, { headers })
+          let bucketResponse = await fetch(`https://firebasestorage.googleapis.com/v1beta/projects/${projectInfo.projectNumber}/buckets/${bucket}`, { headers })
+          if (bucketResponse.status === 403) {
+            const error = await bucketResponse.clone().json()
+            const disabled = error.error?.details?.some(detail => detail.reason === 'SERVICE_DISABLED')
+            if (disabled) {
+              // Enable only the free API. Never create billing accounts or
+              // change the project's payment plan from this workflow.
+              const operation = await api(`https://serviceusage.googleapis.com/v1/projects/${projectInfo.projectNumber}/services/firebasestorage.googleapis.com:enable`, { method: 'POST', body: '{}' })
+              if (operation.name) {
+                for (let attempt = 0; attempt < 20; attempt++) {
+                  const status = await api(`https://serviceusage.googleapis.com/v1/${operation.name}`)
+                  if (status.error) throw new Error(`Storage-API activeren mislukt: ${JSON.stringify(status.error)}`)
+                  if (status.done) break
+                  await new Promise(resolve => setTimeout(resolve, 2000))
+                }
+              }
+              bucketResponse = await fetch(`https://firebasestorage.googleapis.com/v1beta/projects/${projectInfo.projectNumber}/buckets/${bucket}`, { headers })
+            }
+          }
           if (bucketResponse.status === 404) {
             console.log('::warning::Firebase-foto-opslag ontbreekt. Activeer Storage in project detect-personal en voer deze workflow opnieuw uit. Lokale foto’s blijven bewaard; er is geen bucket of betaalplan aangemaakt.')
             process.exit(0)
