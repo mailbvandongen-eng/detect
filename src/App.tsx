@@ -33,7 +33,7 @@ import { DrawTool } from './components/UI/DrawTool'
 import { PrintTool } from './components/UI/PrintTool'
 import { useHeading } from './hooks/useHeading'
 import { useBuddyLayers } from './hooks/useBuddyLayers'
-import { useSettingsStore, useUIStore, useWeatherStore, useGPSStore } from './store'
+import { useSettingsStore, useUIStore, useWeatherStore, useGPSStore, useAuthStore } from './store'
 import { useCustomLayerStore } from './store/customLayerStore'
 import { seedFrance2026LayerIfPresent } from './utils/france2026Seed'
 import { AnimatePresence } from 'framer-motion'
@@ -42,6 +42,7 @@ import { version } from '../package.json'
 import { hasSeenChangeLog } from './data/changelog'
 
 function App() {
+  const accountUid = useAuthStore(state => state.user?.uid)
   // Initialize hooks
   useHeading()
   useBuddyLayers()
@@ -176,7 +177,7 @@ function App() {
       <SavedRoutesLayer />
       <CoverageHeatmapLayer />
       <GridOverlayLayer />
-      <Popup />
+      <Popup key={accountUid || 'signed-out'} />
       <LongPressMenu />
       <SearchBox />
       <GpsButton />

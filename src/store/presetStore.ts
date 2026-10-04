@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { accountStorage } from '../utils/accountStorage'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
@@ -545,6 +546,7 @@ export const usePresetStore = create<PresetState>()(
     }),
     {
       name: 'detectorapp-presets',
+      storage: createJSONStorage(() => accountStorage),
       version: 30,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {

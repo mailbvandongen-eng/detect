@@ -26,9 +26,10 @@ export function useBuddyLayers() {
 
   useEffect(() => {
     let active = true
+    const isCurrent = () => active && useAuthStore.getState().user?.uid === user?.uid
     useBuddySyncStore.setState({ error: null })
     const reportError = (error: unknown) => {
-      if (!active) return
+      if (!isCurrent()) return
       console.error('Buddy-lagen laden mislukt:', error)
       useBuddySyncStore.setState({ error: 'Buddy-lagen konden niet worden geladen. Probeer opnieuw.' })
     }
@@ -48,7 +49,7 @@ export function useBuddyLayers() {
     )
 
     const metaUnsub = onSnapshot(q, { includeMetadataChanges: true }, snapshot => {
-      if (!active) return
+      if (!isCurrent()) return
       useBuddySyncStore.setState({ error: null })
       const remoteIds = new Set(snapshot.docs.map(item => item.id))
 
@@ -82,7 +83,7 @@ export function useBuddyLayers() {
         const unsubscribePoints = onSnapshot(
           collection(db, 'buddyLayers', buddyLayerId, 'points'),
           pointSnapshot => {
-            if (!active) return
+            if (!isCurrent()) return
             const points = pointSnapshot.docs.map(pointDoc => {
               const raw = pointDoc.data() as CustomPoint
               return { ...raw, id: pointDoc.id } as CustomPoint

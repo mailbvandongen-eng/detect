@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { accountStorage } from '../utils/accountStorage'
 import * as XLSX from 'xlsx'
 
 // Condition type for finds
@@ -278,7 +279,8 @@ ${placemarks}
       }
     }),
     {
-      name: 'detectorapp-local-vondsten'
+      name: 'detectorapp-local-vondsten',
+      storage: createJSONStorage(() => accountStorage)
     }
   )
 )

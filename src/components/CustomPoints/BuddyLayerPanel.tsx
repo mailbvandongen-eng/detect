@@ -1,3 +1,4 @@
+import { accountSession } from '../../utils/accountStorage'
 import { upsertBuddyLayer } from '../../utils/buddyLayerState'
 import { useBuddySyncStore } from '../../store/buddySyncStore'
 import { useId, useState } from 'react'
@@ -31,15 +32,19 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
       setError('Vul een geldig e-mailadres in.')
       return
     }
+    const validSession = accountSession(user.uid)
+    const isCurrent = () => validSession() && useAuthStore.getState().user?.uid === user.uid
     setBusy(true)
     try {
       if (!layer.buddyLayerId) {
-        const record = await shareOwnPointLayer(user, layer, recipient, permission)
+        const record = await shareOwnPointLayer(user, layer, recipient, permission, isCurrent)
+        if (!isCurrent()) return
         useCustomPointLayerStore.setState(state => ({ layers: upsertBuddyLayer(state.layers, record, user.uid, normalizeBuddyEmail(user.email || '')), deletedLayerIds: [...new Set([...state.deletedLayerIds, layer.id])] }))
         useBuddySyncStore.getState().refresh()
       } else {
         await addBuddyMember(user, layer.buddyLayerId, recipient, permission)
       }
+      if (!isCurrent()) return
       // Show the acknowledged change even before the cloud listener responds.
       useCustomPointLayerStore.setState(state => ({ layers: state.layers.map(item => {
         if (item.id !== layer.id) return item
@@ -62,11 +67,14 @@ export function BuddyLayerPanel({ layer }: { layer: CustomPointLayer }) {
   const handleRemove = async (memberEmail: string) => {
     if (busy) return
     if (!user) { setError('Log in met Google om delen te beheren.'); return }
+    const validSession = accountSession(user.uid)
+    const isCurrent = () => validSession() && useAuthStore.getState().user?.uid === user.uid
     setBusy(true)
     setError(null)
     setSuccess(null)
     try {
       await removeBuddyMember(user, layer.buddyLayerId!, memberEmail)
+      if (!isCurrent()) return
       useCustomPointLayerStore.setState(state => ({ layers: state.layers.map(item => item.buddyLayerId !== layer.buddyLayerId ? item : {
         ...item,
         buddyMemberEmails: item.buddyMemberEmails?.filter(value => value !== memberEmail),

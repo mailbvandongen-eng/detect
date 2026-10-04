@@ -1,7 +1,8 @@
 import { independentPointLayer } from '../utils/independentLayers'
 import { useSettingsStore } from './settingsStore'
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { accountStorage } from '../utils/accountStorage'
 import {
   POINT_LAYER_CLEANUP_VERSION,
   reconcilePointLayerDeletions,
@@ -521,6 +522,7 @@ export const useCustomPointLayerStore = create<CustomPointLayerStore>()(
     }),
     {
       name: 'detectorapp-custom-point-layers',
+      storage: createJSONStorage(() => accountStorage),
       version: 7,
       partialize: (state) => ({
         ...state,

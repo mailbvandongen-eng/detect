@@ -7,6 +7,17 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.78',
+    date: '4 oktober 2026',
+    title: 'Privégegevens veilig synchroniseren',
+    changes: [
+      'Offline wijzigingen blijven behouden. Synchronisatie voegt wijzigingen per veld en per punt samen; gelijktijdige opslag gebruikt een transactie.',
+      'Verwijderde punten, vondsten en routes komen niet terug uit een oudere cloudkopie.',
+      'Privégegevens, imports en instellingen worden per account bewaard. Uitloggen opent een aparte lokale werkruimte; terug inloggen herstelt je eigen gegevens.',
+      'Oude opslagverzoeken en gedeelde-laagverbindingen kunnen na een accountwisseling geen gegevens meer in de nieuwe werkruimte zetten.',
+    ],
+  },
+  {
     version: '2.33.77',
     date: '4 oktober 2026',
     title: 'Eigen puntenlagen eenvoudig delen',

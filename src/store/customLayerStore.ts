@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { accountStorage } from '../utils/accountStorage'
 
 // GeoJSON types for storage
 export interface CustomFeature {
@@ -438,6 +439,7 @@ export const useCustomLayerStore = create<CustomLayerState>()(
     }),
     {
       name: 'detectorapp-custom-layers',
+      storage: createJSONStorage(() => accountStorage),
       version: 3,
       migrate: migrateCustomLayerState,
     }

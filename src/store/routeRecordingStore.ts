@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { accountStorage } from '../utils/accountStorage'
 
 export type RecordingState = 'idle' | 'recording' | 'paused'
 
@@ -542,6 +543,7 @@ export const useRouteRecordingStore = create<RouteRecordingStore>()(
     }),
     {
       name: 'detectorapp-route-recording',
+      storage: createJSONStorage(() => accountStorage),
       version: 2,
       partialize: (state) => ({
         // Only persist saved routes and settings, not current recording state

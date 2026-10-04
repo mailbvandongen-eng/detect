@@ -33,7 +33,7 @@ const syncStore = Object.assign(selector => selector(syncState), {
   setState: update => { syncState = { ...syncState, ...update } },
 })
 let authUser = user
-const authStore = selector => selector({ user: authUser })
+const authStore = Object.assign(selector => selector({ user: authUser }), { getState: () => ({ user: authUser }) })
 let returnedToLayers = false
 let stateIndex = 0
 const fields = [record.name]
@@ -148,9 +148,13 @@ assert.equal(catalog.getStandalonePointLayers(readerLayers, [], { includeReadOnl
 assert.equal(catalog.getStandalonePointLayers(readerLayers, []).length, 1)
 console.log('PASS read-only buddy layer is displayed but excluded from add-point choices')
 authUser = null
+const beforeLateCallback = JSON.stringify(pointState.layers)
+latest.next({ docs: [{ id: 'old-account', data: () => record }], metadata: { fromCache: false } })
+assert.equal(JSON.stringify(pointState.layers), beforeLateCallback)
+console.log('PASS old-account callback is blocked immediately before React cleanup')
 pointState.layers = readerLayers
 renderHook()
 assert.equal(pointState.layers.length, 1)
 console.log('PASS sign-out removes buddy layers')
 effects.forEach(effect => effect.cleanup?.())
-console.log('10 buddy UI regression checks passed')
+console.log('11 buddy UI regression checks passed')

@@ -147,7 +147,10 @@ export async function shareOwnPointLayer(
   layer: import('../store/customPointLayerStore').CustomPointLayer,
   recipient: string,
   permission: BuddyPermission,
+  isCurrent: () => boolean = () => true,
 ): Promise<BuddyLayerRecord> {
+  const assertCurrent = () => { if (!isCurrent()) throw new Error('Account is gewijzigd.') }
+  assertCurrent()
   if (!user.email) throw new Error('Log in met een account met een e-mailadres.')
   if (normalizeBuddyEmail(recipient) === normalizeBuddyEmail(user.email)) throw new Error('Je bent zelf al eigenaar van deze laag.')
   const id = `point-${user.uid}-${layer.id}`
@@ -160,6 +163,7 @@ export async function shareOwnPointLayer(
     // Rules hide a missing document. The subsequent create is still authorized by rules.
     if ((error as { code?: string }).code !== 'permission-denied') throw error
   }
+  assertCurrent()
   if (data && data.ownerUid !== user.uid) throw new Error('Alleen de eigenaar kan deze laag delen.')
   if (!data) {
     const email = normalizeBuddyEmail(user.email)
@@ -170,11 +174,15 @@ export async function shareOwnPointLayer(
   if (data.ready === false) {
     // Sequential chunks keep large layers within Firestore's write limits.
     for (let offset = 0; offset < layer.points.length; offset += 100) {
+      assertCurrent()
       await Promise.all(layer.points.slice(offset, offset + 100).map(point => saveBuddyPoint(id, point)))
     }
+    assertCurrent()
     await updateDoc(ref, { ready: true, updatedAt: serverTimestamp() })
   }
+  assertCurrent()
   await addBuddyMember(user, id, recipient, permission)
   const shared = await getDoc(ref)
+  assertCurrent()
   return { ...shared.data() as BuddyLayerRecord, id }
 }

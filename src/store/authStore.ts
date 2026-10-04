@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth'
 import { auth, googleProvider } from '../lib/firebase'
 import { useSettingsStore } from './settingsStore'
+import { activatePrivateAccount } from '../services/privateAccountData'
 
 interface AuthState {
   user: User | null
@@ -19,7 +20,6 @@ interface AuthState {
   error: string | null
   initialized: boolean
 
-  setUser: (user: User | null) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   setAccessToken: (token: string | null) => void
@@ -36,13 +36,6 @@ export const useAuthStore = create<AuthState>()(
     loading: false,  // Don't show spinner on initial load
     error: null,
     initialized: false,
-
-    setUser: (user) => {
-      set(state => {
-        state.user = user
-        state.loading = false
-      })
-    },
 
     setLoading: (loading) => {
       set(state => {
@@ -151,16 +144,24 @@ export const useAuthStore = create<AuthState>()(
           set(state => { state.error = error.message })
         })
 
+      let authGeneration = 0
+      let switchQueue = Promise.resolve()
       onAuthStateChanged(auth, (user) => {
-        set(state => {
-          state.user = user
-          state.loading = false
+        const generation = ++authGeneration
+        set(state => { state.user = null; state.accessToken = null; state.loading = true })
+        switchQueue = switchQueue.catch(() => {}).then(async () => {
+          await activatePrivateAccount(user?.uid || null)
+          if (generation !== authGeneration) return
+          set(state => { state.user = user; state.loading = false; state.error = null })
+          if (user) useSettingsStore.getState().setVondstenLocalOnly(false)
+        }).catch((error: unknown) => {
+          if (generation !== authGeneration) return
+          set(state => {
+            state.user = null
+            state.loading = false
+            state.error = error instanceof Error ? error.message : 'Lokale accountopslag kon niet worden geopend.'
+          })
         })
-
-        // Auto-switch to cloud storage when logged in with Google
-        if (user) {
-          useSettingsStore.getState().setVondstenLocalOnly(false)
-        }
       })
     }
   }))

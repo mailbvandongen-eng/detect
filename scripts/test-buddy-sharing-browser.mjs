@@ -8,6 +8,7 @@ const require = createRequire(process.env.BUDDY_BROWSER_MODULE_ROOT
   ? process.env.BUDDY_BROWSER_MODULE_ROOT + '/package.json' : import.meta.url)
 const { webkit, devices } = require('playwright')
 const fixture = `
+import {activatePrivateAccount} from '/src/services/privateAccountData';
 import React from 'react'; import {createRoot} from 'react-dom/client';
 import {ThemesPanel} from '/src/components/LayerControl/ThemesPanel';
 import {CreateLayerModal} from '/src/components/CustomPoints/CreateLayerModal';
@@ -19,12 +20,13 @@ import {useCustomPointLayerStore as points} from '/src/store/customPointLayerSto
 import {useSettingsStore as settings} from '/src/store/settingsStore';
 import '/src/style.css'; import '/src/detect-theme.css';
 const owner={uid:'test-owner',email:'owner@example.com'};
+await activatePrivateAccount(owner.uid);
 useAuthStore.setState({user:owner});
 points.setState({layers:[{id:'buddy-test',name:'Frankrijk 2026 gedeeld',color:'#06b6d4',visible:true,archived:false,points:[],categories:[],createdAt:'2026-10-04'}]});
 imports.setState({layers:[{id:'import-test',name:'Import test',features:{type:'FeatureCollection',features:[]},visible:true,opacity:1}]});
 settings.setState({fontScale:130,uiTheme:'purple',colorScheme:'dark'});
 useUIStore.setState({activeWindow:'layers'});
-window.test={points,imports,openLayers:()=>useUIStore.setState({activeWindow:'layers'}),calls:[],fail:false,signOut:()=>useAuthStore.setState({user:null}),theme:(value,scheme)=>{document.documentElement.dataset.detectTheme=value;document.documentElement.dataset.detectColorScheme=scheme}};
+window.test={points,imports,openLayers:()=>useUIStore.setState({activeWindow:'layers'}),calls:[],fail:false,signOut:()=>useAuthStore.setState({user:null}),switchAccount:async uid=>{useAuthStore.setState({user:null});await activatePrivateAccount(uid);useAuthStore.setState({user:uid?{uid,email:uid==='test-owner'?'owner@example.com':'other@example.com'}:null});useUIStore.setState({activeWindow:'layers'})},theme:(value,scheme)=>{document.documentElement.dataset.detectTheme=value;document.documentElement.dataset.detectColorScheme=scheme}};
 window.test.theme('purple','dark');
 createRoot(document.getElementById('root')).render(<><ThemesPanel/><CreateLayerModal/><OpacitySliders/></>);
 `
@@ -144,4 +146,15 @@ try {
  await page.evaluate(()=>{window.test.theme('purple','dark');window.test.signOut()})
  await page.getByRole('alert').filter({hasText:'Log in'}).waitFor()
  console.log('PASS lost sign-in is visible instead of silently ignoring submit')
+ await page.evaluate(()=>window.test.switchAccount('test-other'))
+ assert.equal(await page.evaluate(()=>window.test.points.getState().layers.length),0)
+ assert.equal(await page.evaluate(()=>window.test.imports.getState().layers.length),0)
+ await page.evaluate(()=>window.test.points.getState().addLayer('Andere gebruiker'))
+ await page.getByTitle('Andere gebruiker',{exact:true}).waitFor()
+ await page.evaluate(()=>window.test.switchAccount('test-owner'))
+ await page.getByTitle('Nieuwe eigen laag',{exact:true}).waitFor()
+ await page.getByTitle('Import test',{exact:true}).waitFor()
+ assert.equal(await page.getByTitle('Andere gebruiker',{exact:true}).count(),0)
+ assert.equal(await page.evaluate(()=>window.test.points.getState().layers.find(layer=>layer.name==='Nieuwe eigen laag').color),'#7c5ac7')
+ console.log('PASS iPhone account switch isolates points/imports and restores own private layer and purple color')
 } finally {await browser?.close();await server.close()}

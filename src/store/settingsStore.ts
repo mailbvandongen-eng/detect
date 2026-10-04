@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
+import { accountStorage } from '../utils/accountStorage'
 
 export type DefaultBackground = 'Esri (licht)' | 'Luchtfoto' | 'OpenStreetMap'
 export type DetectTheme = 'blue' | 'forest' | 'earth' | 'purple'
@@ -202,6 +203,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'detectorapp-settings',
+      storage: createJSONStorage(() => accountStorage),
       version: 6,
       migrate: (persistedState: any, version: number) => {
         const migratedState = { ...persistedState }
