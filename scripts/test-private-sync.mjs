@@ -172,6 +172,37 @@ await new Promise(resolve => setImmediate(resolve))
 assert.equal(authStore.getState().user.uid, 'b')
 assert.equal(points.getState().layers[0].id, 'b-layer')
 pass('Actual auth handler serializes rapid identity changes and exposes only final account')
+const refs = []; let refIndex = 0
+mocks.react = { useRef: value => refs[refIndex++] ||= { current: value }, useCallback: fn => fn, useState: value => [value, () => {}], useEffect: () => {} }
+const asHook = store => Object.assign(selector => selector ? selector(store.getState()) : store.getState(), { getState: store.getState, setState: store.setState })
+mocks['../store/authStore'] = { useAuthStore: asHook(authStore) }
+mocks['../store/customPointLayerStore'] = { useCustomPointLayerStore: asHook(points) }
+mocks['../store/customLayerStore'] = { useCustomLayerStore: asHook(imports) }
+mocks['../store/localVondstenStore'] = { useLocalVondstenStore: asHook(finds) }
+mocks['../store/routeRecordingStore'] = { useRouteRecordingStore: asHook(routes) }
+const settingsModule = load('src/store/settingsStore.ts'), presetsModule = load('src/store/presetStore.ts')
+mocks['../store/settingsStore'] = { ...settingsModule, useSettingsStore: asHook(settings) }
+mocks['../store/presetStore'] = { ...presetsModule, usePresetStore: asHook(presetsModule.usePresetStore) }
+mocks['../services/sharedImportedLayers'] = { getIncomingShares: async () => [], getOwnedShares: async () => [] }
+const pending = []
+mocks['../services/privateCloudSync'] = { synchronizePrivateData: (uid, valid, extras) => new Promise((resolve, reject) => {
+  pending.push(() => valid() ? resolve({ data: accounts.privateData(), revision: accounts.privateRevision(), deletedLayerIds: points.getState().deletedLayerIds, cloud: {}, additional: extras({}) }) : reject(new Error('Account is gewijzigd.')))
+}) }
+const syncHook = load('src/hooks/useCloudSync.ts')
+refIndex = 0
+const firstRequest = syncHook.useCloudSync().syncNow()
+await new Promise(resolve => setImmediate(resolve))
+assert.equal(pending.length, 1)
+authListener(null); await new Promise(resolve => setImmediate(resolve))
+authListener({ uid: 'b' }); await new Promise(resolve => setImmediate(resolve))
+refIndex = 0
+const nextRequest = syncHook.useCloudSync().syncNow()
+await new Promise(resolve => setImmediate(resolve))
+assert.equal(pending.length, 2, 'Re-login must start a fresh request instead of reusing obsolete same-UID request')
+pending[0](); pending[1]()
+assert.equal((await firstRequest).success, false)
+assert.equal((await nextRequest).success, true)
+pass('Actual hook starts fresh sync on same-account re-login with old request still pending')
 localStorage.setItem('detect-account:corrupt:detectorapp-custom-point-layers', '{bad-json')
 await assert.rejects(accounts.activatePrivateAccount('corrupt'))
 assert.equal(points.getState().layers.length, 0)

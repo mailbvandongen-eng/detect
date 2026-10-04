@@ -104,7 +104,7 @@ export function useCloudSync() {
   const settingsBaseline = useRef('')
   const presetsBaseline = useRef('')
   const initialized = useRef(false)
-  const inflight = useRef<{ uid: string; promise: Promise<CloudSyncResult>; token: object } | null>(null)
+  const inflight = useRef<{ uid: string; promise: Promise<CloudSyncResult>; token: object; isCurrent: () => boolean } | null>(null)
   const signature = () => JSON.stringify({ data: privateData(), metadata: privateRevision(), deletedLayerIds: useCustomPointLayerStore.getState().deletedLayerIds, settings: getCloudSettings(), presets: getPresetCloudState() })
 
   const refreshLegacyShares = useCallback(async (isCurrent: () => boolean) => {
@@ -136,7 +136,7 @@ export function useCloudSync() {
   const syncNow = useCallback((): Promise<CloudSyncResult> => {
     const failed = (error: string): CloudSyncResult => ({ success: false, uploaded: { layers: 0, vondsten: 0, routes: 0 }, downloaded: { layers: 0, vondsten: 0, routes: 0 }, error })
     if (!user) return Promise.resolve(failed('Niet ingelogd'))
-    if (inflight.current?.uid === user.uid) return inflight.current.promise
+    if (inflight.current?.uid === user.uid && inflight.current.isCurrent()) return inflight.current.promise
     const validSession = accountSession(user.uid)
     const isCurrent = () => validSession() && useAuthStore.getState().user?.uid === user.uid
     const token = {}
@@ -181,7 +181,7 @@ export function useCloudSync() {
         if (isCurrent()) refresh(value => value + 1)
       }
     })()
-    inflight.current = { uid: user.uid, promise, token }
+    inflight.current = { uid: user.uid, promise, token, isCurrent }
     return promise
   }, [user, refreshLegacyShares])
 
