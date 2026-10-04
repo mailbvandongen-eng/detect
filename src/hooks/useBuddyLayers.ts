@@ -85,7 +85,7 @@ export function useBuddyLayers() {
 
       snapshot.docs.forEach(item => {
         const data = item.data() as BuddyLayerRecord
-        if (data.ready === false || !remoteIds.has(item.id)) return
+        if (data.ready === false || (data.initializing && data.ready !== true) || !remoteIds.has(item.id)) return
         const buddyLayerId = item.id
         useCustomPointLayerStore.setState(state => ({
           layers: upsertBuddyLayer(state.layers, { ...data, id: buddyLayerId }, user.uid, email).map(layer=>layer.buddyLayerId===buddyLayerId?overlayBuddyMetadata(layer,useBuddyWriteStore.getState().items.filter(write=>write.uid===user.uid&&write.buddyLayerId===buddyLayerId)):layer),

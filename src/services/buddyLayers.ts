@@ -1,4 +1,5 @@
 import {
+  arrayUnion,
   collection,
   deleteDoc,
   deleteField,
@@ -24,6 +25,7 @@ export interface BuddyLayerRecord {
   sourceLayerId?: string
   ready?: boolean
   deleted?: boolean
+  initializing?: boolean
   ownerUid: string
   ownerEmail: string
   memberEmails: string[]
@@ -176,9 +178,27 @@ export async function shareOwnPointLayer(
   if (data && data.ownerUid !== user.uid) throw new Error('Alleen de eigenaar kan deze laag delen.')
   if (!data) {
     const email = normalizeBuddyEmail(user.email)
-    data = { id, name: layer.name, color: layer.color, ownerUid: user.uid,
-      ownerEmail: email, memberEmails: [email], editEmails: [], readEmails: [], sourceLayerId: layer.id, ready: false }
-    await setDoc(ref, { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() })
+    // The first read can race another device's promotion. This merge only
+    // establishes identity and adds the owner; it cannot reset members, rights,
+    // readiness, name or color already published by that device.
+    await setDoc(ref, {id,ownerUid:user.uid,ownerEmail:email,sourceLayerId:layer.id,
+      memberEmails:arrayUnion(email),initializing:true}, {merge:true})
+    data = await runTransaction(db,async transaction=>{
+      const snap=await transaction.get(ref)
+      assertCurrent()
+      const existing=snap.data() as BuddyLayerRecord & {createdAt?:unknown}
+      if(existing.deleted)throw new Error('Deze gedeelde laag is verwijderd.')
+      if(existing.ownerUid!==user.uid)throw new Error('Alleen de eigenaar kan deze laag delen.')
+      const defaults:Record<string,unknown>={}
+      if(!existing.name)defaults.name=layer.name
+      if(!existing.color)defaults.color=layer.color
+      if(!existing.editEmails)defaults.editEmails=[]
+      if(!existing.readEmails)defaults.readEmails=[]
+      if(existing.ready===undefined)defaults.ready=!!existing.name
+      if(!existing.createdAt)defaults.createdAt=serverTimestamp()
+      if(Object.keys(defaults).length)transaction.update(ref,{...defaults,updatedAt:serverTimestamp()})
+      return {...existing,...defaults,id} as BuddyLayerRecord
+    })
   }
   if (data.ready === false) {
     // Sequential chunks keep large layers within Firestore's write limits.

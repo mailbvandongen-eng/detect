@@ -14,14 +14,14 @@ const owner = {uid: 'owner', email: 'owner@example.com'}
 const editor = {uid: 'editor', email: 'editor@example.com'}
 const reader = {uid: 'reader', email: 'reader@example.com'}
 const outsider = {uid: 'outsider', email: 'outsider@example.com'}
-function client(user) {
+function client(user, beforeInitialize) {
   const db = env.authenticatedContext(user.uid, {email: user.email}).firestore()
   const compiled = ts.transpileModule(readFileSync('src/services/buddyLayers.ts','utf8'), {
     compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020}
   }).outputText
   const module = {exports:{}}
   Function('require','module','exports',compiled)(
-    name => name === '../lib/firebase' ? {db} : name === '../utils/buddyWrites' ? writeHelpers : require(name), module, module.exports
+    name => name === '../lib/firebase' ? {db} : name === '../utils/buddyWrites' ? writeHelpers : name === 'firebase/firestore' ? {...firestore,setDoc:async(ref,data,...rest)=>{if(data.initializing&&beforeInitialize)await beforeInitialize();return firestore.setDoc(ref,data,...rest)}} : require(name), module, module.exports
   )
   return {db, ...module.exports}
 }
@@ -176,5 +176,25 @@ try {
   await assert.rejects(a.applyBuddyWrite(operation(owner.uid,'owner-device',10,{kind:'create',point:{...point,id:'after-delete'}}),()=>true),error=>error.code==='layer-deleted')
   await assertFails(firestore.getDoc(firestore.doc(c.db,'buddyLayers',promoted.id)))
   pass('Layer deletion is replay-safe, revokes access atomically and rejects concurrent new points')
+
+  let releaseCreation,enteredCreation
+  const entered=new Promise(resolve=>enteredCreation=resolve)
+  const waiting=new Promise(resolve=>releaseCreation=resolve)
+  const delayed=client(owner,async()=>{enteredCreation();await waiting})
+  const raceLayer={...privateLayer,id:'creation-race'}
+  const delayedShare=delayed.shareOwnPointLayer(owner,raceLayer,reader.email,'read')
+  await entered
+  const firstShare=await a.shareOwnPointLayer(owner,raceLayer,editor.email,'edit')
+  await b.saveBuddyPoint(firstShare.id,{...point,notes:'Buddy edit after first promotion'})
+  await a.updateBuddyLayerMetadata(owner,firstShare.id,{name:'Concurrent new name',color:'#16835f'})
+  releaseCreation();await delayedShare
+  snap=await firestore.getDoc(firestore.doc(a.db,'buddyLayers',firstShare.id))
+  assert.ok(snap.data().memberEmails.includes(editor.email))
+  assert.ok(snap.data().memberEmails.includes(reader.email))
+  assert.equal(snap.data().name,'Concurrent new name');assert.equal(snap.data().color,'#16835f');assert.equal(snap.data().ready,true)
+  snap=await firestore.getDoc(firestore.doc(a.db,'buddyLayers',firstShare.id,'points',point.id))
+  assert.equal(snap.data().notes,'Buddy edit after first promotion')
+  pass('Delayed concurrent first-time sharing cannot reset granted access, metadata or buddy edits')
+
   console.log(count + ' integration checks passed. No production database used.')
 } finally { await env.cleanup() }
