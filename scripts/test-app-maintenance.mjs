@@ -52,6 +52,9 @@ changes.markChangeLogSeen('new');assert.equal(changes.hasSeenChangeLog('new'),tr
 assert.equal(load('src/data/changelog.ts').hasSeenChangeLog('new'),true)
 entries.set('detect-last-seen-version','older-tab')
 assert.equal(load('src/data/changelog.ts').hasSeenChangeLog('new'),true,'Old tab cannot reset a newer version acknowledgement')
+window.localStorage.setItem=(key,value)=>{if(key==='detect-last-seen-version')entries.set(key,value);else throw Error('quota')}
+changes.markChangeLogSeen('full-store')
+assert.equal(load('src/data/changelog.ts').hasSeenChangeLog('full-store'),true,'Full storage still updates the existing marker')
 window.localStorage.setItem=()=>{throw Error('quota')}
 changes.markChangeLogSeen('quota');assert.equal(changes.hasSeenChangeLog('quota'),true)
 pass('Seen version survives restart and does not repeat in-session when storage is blocked')

@@ -799,8 +799,12 @@ export function markChangeLogSeen(version: string): void {
 
   try {
     window.localStorage.setItem(`detect-changelog-seen:${version}`, 'yes')
+  } catch {
+    // A full store can still allow updating the existing acknowledgement key.
+  }
+  try {
     window.localStorage.setItem(LAST_SEEN_VERSION_KEY, version)
   } catch {
-    // De melding kan bij geblokkeerde opslag opnieuw verschijnen; de app blijft werken.
+    // Session memory prevents repeats when all browser writes are blocked.
   }
 }
