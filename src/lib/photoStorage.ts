@@ -23,6 +23,19 @@ export interface StoredPhoto {
   createdAt: string        // ISO timestamp
 }
 
+// Store bytes rather than Blob handles. This avoids WebKit's file-backed Blob
+// preparation failures while preserving the public Blob API and old records.
+type PhotoRecord = Omit<StoredPhoto, 'fullImage' | 'thumbnail'> & {
+  fullImage: Blob | ArrayBuffer
+  thumbnail: Blob | ArrayBuffer
+}
+function readRecord(record: PhotoRecord): StoredPhoto {
+  return { ...record,
+    fullImage: record.fullImage instanceof Blob ? record.fullImage : new Blob([record.fullImage], { type: record.mimeType }),
+    thumbnail: record.thumbnail instanceof Blob ? record.thumbnail : new Blob([record.thumbnail], { type: 'image/jpeg' }),
+  }
+}
+
 // Compression settings
 const MAX_FULL_SIZE = 1024    // Max dimension for full image
 const MAX_THUMB_SIZE = 200    // Max dimension for thumbnail
@@ -107,12 +120,15 @@ export async function savePhoto(id: string, file: File): Promise<StoredPhoto> {
     createdAt: new Date().toISOString()
   }
 
+  const persisted: PhotoRecord = { ...record,
+    fullImage: await fullImage.arrayBuffer(), thumbnail: await thumbnail.arrayBuffer(),
+  }
   // Save to IndexedDB
   const db = await openDB()
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite')
     const store = tx.objectStore(STORE_NAME)
-    const request = store.put(record)
+    const request = store.put(persisted)
 
     request.onsuccess = () => {}
     request.onerror = () => reject(request.error)
@@ -132,7 +148,7 @@ export async function getPhoto(id: string): Promise<StoredPhoto | null> {
     const store = tx.objectStore(STORE_NAME)
     const request = store.get(id)
 
-    request.onsuccess = () => resolve(request.result || null)
+    request.onsuccess = () => resolve(request.result ? readRecord(request.result) : null)
     request.onerror = () => reject(request.error)
 
     tx.oncomplete = () => db.close()
@@ -167,7 +183,7 @@ export async function getAllPhotos(): Promise<StoredPhoto[]> {
     const store = tx.objectStore(STORE_NAME)
     const request = store.getAll()
 
-    request.onsuccess = () => resolve(request.result || [])
+    request.onsuccess = () => resolve((request.result || []).map(readRecord))
     request.onerror = () => reject(request.error)
 
     tx.oncomplete = () => db.close()
