@@ -43,7 +43,9 @@ jobs:
       - name: Controleer delen en accountwisseling op iPhone-formaat
         env:
           BUDDY_BROWSER_MODULE_ROOT: ${{ runner.temp }}/private-sync
-        run: node scripts/test-buddy-sharing-browser.mjs
+        run: |
+          node scripts/test-buddy-sharing-browser.mjs
+          node scripts/test-app-maintenance-browser.mjs
   build:
     needs: verify-private-data
     runs-on: ubuntu-latest
@@ -64,6 +66,7 @@ jobs:
       - name: Controleer types en regressies
         run: |
           npm run typecheck
+          npm run test:app-maintenance
           npm run test:private-sync
           npm run test:field
           npm run test:user-layers

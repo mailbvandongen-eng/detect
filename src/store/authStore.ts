@@ -19,6 +19,7 @@ interface AuthState {
   loading: boolean
   error: string | null
   initialized: boolean
+  ready: boolean
 
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
@@ -36,6 +37,7 @@ export const useAuthStore = create<AuthState>()(
     loading: false,  // Don't show spinner on initial load
     error: null,
     initialized: false,
+    ready: false,
 
     setLoading: (loading) => {
       set(state => {
@@ -148,11 +150,11 @@ export const useAuthStore = create<AuthState>()(
       let switchQueue = Promise.resolve()
       onAuthStateChanged(auth, (user) => {
         const generation = ++authGeneration
-        set(state => { state.user = null; state.accessToken = null; state.loading = true })
+        set(state => { state.user = null; state.accessToken = null; state.loading = true; state.ready = false })
         switchQueue = switchQueue.catch(() => {}).then(async () => {
           await activatePrivateAccount(user?.uid || null)
           if (generation !== authGeneration) return
-          set(state => { state.user = user; state.loading = false; state.error = null })
+          set(state => { state.user = user; state.loading = false; state.error = null; state.ready = true })
           if (user) useSettingsStore.getState().setVondstenLocalOnly(false)
         }).catch((error: unknown) => {
           if (generation !== authGeneration) return

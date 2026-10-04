@@ -7,6 +7,14 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.80', date: '4 oktober 2026', title: 'Rustig opstarten en veilig vernieuwen',
+    changes: [
+      'Opstartvensters wachten op het laden van account en instellingen. Het wijzigingsscherm verschijnt eenmaal per versie.',
+      'Een nieuwe appversie wordt klaargezet zonder onverwacht herladen tijdens gebruik.',
+      'Instellingen bevat App vernieuwen en Appbestanden opnieuw laden. Herstel behoudt je gegevens en offlinekaarten en wordt geblokkeerd tijdens opname of bewerken.',
+    ],
+  },
+  {
     version: '2.33.79',
     date: '4 oktober 2026',
     title: 'Logische en overzichtelijke kaartlagen',
@@ -772,9 +780,10 @@ export const CHANGELOG: ChangeLogEntry[] = [
 ]
 
 const LAST_SEEN_VERSION_KEY = 'detect-last-seen-version'
+const seenThisSession = new Set<string>()
 
 export function hasSeenChangeLog(version: string): boolean {
-  if (typeof window === 'undefined') return true
+  if (seenThisSession.has(version) || typeof window === 'undefined') return true
 
   try {
     return window.localStorage.getItem(LAST_SEEN_VERSION_KEY) === version
@@ -784,6 +793,7 @@ export function hasSeenChangeLog(version: string): boolean {
 }
 
 export function markChangeLogSeen(version: string): void {
+  seenThisSession.add(version)
   if (typeof window === 'undefined') return
 
   try {

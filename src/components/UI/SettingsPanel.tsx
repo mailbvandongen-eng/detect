@@ -7,6 +7,9 @@ import { useLocalVondstenStore } from '../../store/localVondstenStore'
 import { VondstenDashboard } from '../Vondst/VondstenDashboard'
 import { ImportLayerModal } from '../CustomLayers'
 import type { ColorSchemePreference, DefaultBackground, DetectTheme } from '../../store/settingsStore'
+import { renewApp } from '../../services/appMaintenance'
+import { useAppUpdateStore } from '../../store/appUpdateStore'
+import { version } from '../../../package.json'
 import { AppWindow } from './AppWindow'
 
 type TabType = 'algemeen' | 'lagen' | 'vondsten'
@@ -27,6 +30,7 @@ export function SettingsPanel() {
   const backWindow = useUIStore(state => state.backWindow)
   const settings = useSettingsStore()
   const vondsten = useLocalVondstenStore(state => state.vondsten)
+  const update = useAppUpdateStore()
   const [activeTab, setActiveTab] = useState<TabType>('algemeen')
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
@@ -49,6 +53,16 @@ export function SettingsPanel() {
             <section className="space-y-2"><h3 className="font-medium text-gray-800 flex items-center gap-2"><Navigation size={16} /> GPS</h3><label className="flex items-center justify-between text-sm"><span>GPS automatisch starten</span><input type="checkbox" checked={settings.gpsAutoStart} onChange={e => settings.setGpsAutoStart(e.target.checked)} /></label><label className="flex items-center justify-between text-sm"><span>Nauwkeurigheidscirkel</span><input type="checkbox" checked={settings.showAccuracyCircle} onChange={e => settings.setShowAccuracyCircle(e.target.checked)} /></label></section>
             <section className="space-y-2"><h3 className="font-medium text-gray-800 flex items-center gap-2"><Smartphone size={16} /> Interface</h3><label className="flex items-center justify-between text-sm"><span>Haptische feedback</span><input type="checkbox" checked={settings.hapticFeedback} onChange={e => settings.setHapticFeedback(e.target.checked)} /></label><label className="flex items-center justify-between text-sm"><span>Lettergrootte</span><input type="range" min="80" max="130" step="10" value={settings.fontScale} onChange={e => settings.setFontScale(Number(e.target.value))} /></label></section>
           </>}
+          {activeTab === 'algemeen' && <section className="space-y-2">
+            <h3 className="font-medium text-gray-800">App vernieuwen · {version}</h3>
+            <p className="text-xs text-gray-500">{update.updateAvailable ? 'Een nieuwe versie staat klaar.' : 'Controleer op updates en laad de app opnieuw.'}</p>
+            <button className="detect-window-primary-button w-full" disabled={update.busy} onClick={() => void renewApp()}>{update.busy ? 'Even wachten…' : 'App vernieuwen'}</button>
+            <details><summary className="text-sm cursor-pointer">App herstellen</summary>
+              <p className="text-xs text-gray-500 my-2">Laad alleen de appbestanden opnieuw. Je lagen, punten, foto’s, instellingen, login en offlinekaarten blijven behouden. Internet is nodig.</p>
+              <button className="detect-window-secondary-button w-full" disabled={update.busy} onClick={() => void renewApp(true)}>Appbestanden opnieuw laden</button>
+            </details>
+            {update.error && <p role="alert" className="text-sm text-red-600">{update.error}</p>}
+          </section>}
           {activeTab === 'lagen' && <section className="space-y-3"><h3 className="font-medium text-gray-800 flex items-center gap-2"><Layers size={16} /> Lagen</h3><p className="text-sm text-gray-500">Zet je eigen lagen afzonderlijk aan of uit via Kaartlagen.</p><label className="flex items-center justify-between text-sm"><span>Vondsten op kaart tonen</span><input type="checkbox" checked={settings.showLocalVondsten} onChange={e => settings.setShowLocalVondsten(e.target.checked)} /></label><button className="detect-window-secondary-button w-full" onClick={() => openWindow('importLayer', 'settings')}><Upload size={16} /> Laag importeren</button></section>}
           {activeTab === 'vondsten' && <section className="space-y-3"><h3 className="font-medium text-gray-800 flex items-center gap-2"><MapPin size={16} /> Vondsten</h3><p className="text-sm text-gray-500">{vondsten.length} vondsten opgeslagen</p><label className="flex items-center justify-between text-sm"><span>Alleen lokaal opslaan</span><input type="checkbox" checked={settings.vondstenLocalOnly} onChange={e => settings.setVondstenLocalOnly(e.target.checked)} /></label><button className="detect-window-secondary-button w-full" onClick={() => openWindow('vondstDashboard', 'settings')}><BarChart3 size={16} /> Vondsten beheren</button></section>}
         </div>

@@ -1,7 +1,7 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.79",
+  "version": "2.33.80",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,9 @@
     "test:controls": "node scripts/test-map-controls.mjs",
     "test:buddy-sharing": "node scripts/test-buddy-sharing-browser.mjs",
     "typecheck": "tsc --noEmit",
-    "test:private-sync": "node scripts/test-private-sync.mjs"
+    "test:private-sync": "node scripts/test-private-sync.mjs",
+    "test:app-maintenance": "node scripts/test-app-maintenance.mjs",
+    "test:app-maintenance-browser": "node scripts/test-app-maintenance-browser.mjs"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.22",

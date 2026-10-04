@@ -25,6 +25,7 @@ export default defineConfig({
     noJekyllPlugin(),
     VitePWA({
       registerType: 'prompt',
+      injectRegister: false,
       includeAssets: ['favicon-23342.ico', 'favicon-23342.png', 'icon-192-23342.png', 'icon-512-23342.png'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],

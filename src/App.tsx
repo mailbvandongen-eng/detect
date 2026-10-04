@@ -37,9 +37,8 @@ import { useSettingsStore, useUIStore, useWeatherStore, useGPSStore, useAuthStor
 import { useCustomLayerStore } from './store/customLayerStore'
 import { seedFrance2026LayerIfPresent } from './utils/france2026Seed'
 import { AnimatePresence } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
-import { version } from '../package.json'
-import { hasSeenChangeLog } from './data/changelog'
+import { useEffect, useState } from 'react'
+import { useStartupWindows } from './hooks/useStartupWindows'
 
 function App() {
   const accountUid = useAuthStore(state => state.user?.uid)
@@ -122,48 +121,9 @@ function App() {
   const setShowBuienradar = useWeatherStore(state => state.setShowBuienradar)
 
   // Central window state: exactly one app window can be active.
-  const activeWindow = useUIStore(state => state.activeWindow)
-  const openWindow = useUIStore(state => state.openWindow)
   const closeWindow = useUIStore(state => state.closeWindow)
 
-  // Startup windows are queued: welcome first, then the changelog.
-  const hideWelcomeModal = useSettingsStore(state => state.hideWelcomeModal)
-  const welcomeModalOpen = activeWindow === 'welcome'
-  const manualOpen = activeWindow === 'manual'
-  const startupInitialized = useRef(false)
-  const [startupComplete, setStartupComplete] = useState(hideWelcomeModal)
-
-  // Change log state - shown once after each version, after the welcome screen.
-  const changeLogOpen = useUIStore(state => state.activeWindow === 'changeLog')
-  const openChangeLog = useUIStore(state => state.openChangeLog)
-  const closeChangeLog = useUIStore(state => state.closeChangeLog)
-
-  useEffect(() => {
-    if (startupInitialized.current) return
-    startupInitialized.current = true
-
-    if (hideWelcomeModal) {
-      setStartupComplete(true)
-    } else {
-      openWindow('welcome')
-    }
-  }, [hideWelcomeModal, openWindow])
-
-  useEffect(() => {
-    if (startupComplete && activeWindow === null && !hasSeenChangeLog(version)) {
-      openChangeLog()
-    }
-  }, [activeWindow, startupComplete, openChangeLog])
-
-  const handleWelcomeClose = () => {
-    closeWindow()
-    setStartupComplete(true)
-  }
-
-  const handleOpenManual = () => {
-    setStartupComplete(true)
-    openWindow('manual')
-  }
+  const { welcomeModalOpen, manualOpen, changeLogOpen, closeChangeLog, handleWelcomeClose, handleOpenManual } = useStartupWindows()
 
   return (
     <div data-detect-theme={uiTheme} data-detect-color-scheme={resolvedColorScheme} style={{ fontSize: `${baseFontSize}px` }}>
