@@ -52,6 +52,7 @@ jobs:
           node scripts/test-app-maintenance-browser.mjs
           node scripts/test-buddy-writes-browser.mjs
           node scripts/test-prio-three-browser.mjs
+          node scripts/test-radar-browser.mjs
   build:
     needs: verify-private-data
     runs-on: ubuntu-latest

@@ -225,8 +225,13 @@ export const useWeatherStore = create<WeatherState>()(
       partialize: state => ({
         weatherData: state.weatherData,
         savedLocations: state.savedLocations,
-        selectedLocationId: state.selectedLocationId,
-        showBuienradar: state.showBuienradar
+        selectedLocationId: state.selectedLocationId
+      }),
+      // Ignore the old saved open flag too; radar visibility is session UI.
+      merge: (persisted, current) => ({
+        ...current,
+        ...(persisted as Partial<WeatherState>),
+        showBuienradar: false
       })
     }
   )

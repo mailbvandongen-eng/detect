@@ -7,6 +7,13 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.84', date: '5 oktober 2026', title: 'Regenradar eenvoudig sluiten',
+    changes: [
+      'Regenradar heeft een ruime Sluiten-knop en een extra Radar uit-knop bij het weerwidget.',
+      'De radar start na herladen gesloten. Je weersgegevens en opgeslagen locaties blijven behouden.',
+    ],
+  },
+  {
     version: '2.33.83', date: '5 oktober 2026', title: 'App zonder foto-opslag',
     changes: [
       'De fotofunctie is verwijderd bij punten, vondsten en routes. Er zijn geen foto-uploads of uploadmeldingen meer.',

@@ -1,7 +1,7 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.83",
+  "version": "2.33.84",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "test:buddy-ui": "node scripts/test-buddy-ui.mjs",
     "test:user-layers": "node scripts/test-user-layers.mjs",
     "preview": "vite preview",
+    "test:radar-browser": "node scripts/test-radar-browser.mjs",
     "test:controls": "node scripts/test-map-controls.mjs",
     "test:buddy-sharing": "node scripts/test-buddy-sharing-browser.mjs",
     "typecheck": "tsc --noEmit",

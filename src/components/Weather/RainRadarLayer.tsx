@@ -19,6 +19,15 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
   const [error, setError] = useState(false)
   const [opacity, setOpacity] = useState(70)
 
+  useEffect(() => {
+    if (!isVisible) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isVisible, onClose])
+
   const fetchRadarData = useCallback(async () => {
     setIsLoading(true)
     setError(false)
@@ -94,10 +103,10 @@ export function RainRadarLayer({ isVisible, onClose }: RainRadarLayerProps) {
   if (!isVisible) return null
   return (
     <AnimatePresence>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-20 left-2 right-2 z-[1600] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200" style={{ maxWidth: '400px', margin: '0 auto' }}>
+      <motion.div aria-label="Regenradar" role="region" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed left-2 right-2 z-[1600] bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-gray-200" style={{ bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))', maxWidth: '400px', margin: '0 auto', maxHeight: 'calc(100dvh - 160px - env(safe-area-inset-bottom, 0px))', overflowY: 'auto' }}>
         <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
-          <div className="flex items-center gap-2"><CloudRain size={15} className="text-blue-500" /><b className="text-xs text-gray-700">Regenradar · afgelopen ±2 uur</b></div>
-          <button onClick={onClose} className="p-1 border-0 bg-transparent"><X size={15} /></button>
+          <div className="flex items-center gap-2 min-w-0"><CloudRain size={15} className="text-blue-500 flex-shrink-0" /><b className="text-xs text-gray-700">Regenradar · afgelopen ±2 uur</b></div>
+          <button type="button" aria-label="Regenradar sluiten" onClick={onClose} className="min-h-11 min-w-11 px-2 ml-2 flex-shrink-0 flex items-center justify-center gap-1 rounded-lg border-0 bg-gray-50 text-gray-700 touch-manipulation"><X size={20} /><span className="text-xs">Sluiten</span></button>
         </div>
         {error ? <div className="p-3 text-sm text-amber-700">Radar tijdelijk niet beschikbaar. De weersverwachting blijft wel werken.</div> : (
           <>

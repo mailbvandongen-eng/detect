@@ -126,6 +126,11 @@ export function WeatherWidget() {
 
   return (
     <>
+      {weather.showBuienradar && (
+        <button type="button" aria-label="Regenradar uitzetten" onClick={() => weather.setShowBuienradar(false)} className="fixed left-2 z-[1601] min-h-11 px-3 flex items-center gap-2 bg-white rounded-xl shadow-lg border border-gray-200 text-gray-700 touch-manipulation" style={{ top: 'calc(max(0.5rem, env(safe-area-inset-top, 0px)) + 76px)' }}>
+          <CloudRain size={18} /><span className="text-sm">Radar uit</span>
+        </button>
+      )}
       {isExpanded && <div className="fixed inset-0 z-[1099]" onClick={() => setIsExpanded(false)} />}
       <motion.div
         className="fixed left-2 z-[1100] bg-white shadow-lg border border-gray-200 select-none rounded-xl"
