@@ -7,6 +7,12 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.86', date: '6 oktober 2026', title: 'Dropdowns in lijstweergave hersteld',
+    changes: [
+      'De keuzelijsten tonen weer één pijltje rechts, ook in donkere modus op iPhone.',
+    ],
+  },
+  {
     version: '2.33.85', date: '5 oktober 2026', title: 'Lijstweergave voor plekken',
     changes: [
       'Open de lijst bij een preset, eigen laag of import, of via Menu → Lijstweergave. De vakantieplekken van Thédirac staan er ook in.',
