@@ -7,6 +7,14 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.83', date: '5 oktober 2026', title: 'App zonder foto-opslag',
+    changes: [
+      'De fotofunctie is verwijderd bij punten, vondsten en routes. Er zijn geen foto-uploads of uploadmeldingen meer.',
+      'De app gebruikt geen Firebase Storage meer. Lagen delen, punten opslaan en routenotities blijven beschikbaar.',
+      'Eerder opgeslagen fotogegevens blijven bewaard op dit apparaat. App vernieuwen wist deze gegevens niet.',
+    ],
+  },
+  {
     version: '2.33.82', date: '5 oktober 2026', title: 'Veilige pop-ups en betrouwbare foto’s',
     changes: [
       'Pop-upinhoud en zoekresultaten worden centraal beveiligd. Tabellen, tekst en veilige links blijven bruikbaar.',

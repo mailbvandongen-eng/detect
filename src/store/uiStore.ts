@@ -12,7 +12,6 @@ interface UIState {
   activeWindow: UIWindowId | null
   returnWindow: UIWindowId | null
   vondstFormLocation: { lat: number; lng: number } | null
-  vondstFormPhoto: File | null
   addPointModalLayerTarget: UserLayerTarget | null
   addPointModalLocation: { lat: number; lng: number } | null
   layerDashboardLayerId: string | null
@@ -35,7 +34,7 @@ interface UIState {
   toggleCategory: (category: string) => void
   setLayerControlOpen: (open: boolean) => void
   setLegendOpen: (open: boolean) => void
-  openVondstForm: (location?: { lat: number; lng: number }, photo?: File) => void
+  openVondstForm: (location?: { lat: number; lng: number }) => void
   closeVondstForm: () => void
   toggleVondstDashboard: () => void
   openCreateLayerModal: () => void
@@ -58,7 +57,7 @@ const closeWindowState = { activeWindow: null, returnWindow: null } as const
 
 export const useUIStore = create<UIState>()((set, get) => ({
   activeWindow: null, returnWindow: null,
-  vondstFormLocation: null, vondstFormPhoto: null,
+  vondstFormLocation: null,
   addPointModalLayerTarget: null, addPointModalLocation: null,
   layerDashboardLayerId: null, isDrawingMode: false,
   collapsedCategories: new Set<string>(),
@@ -80,8 +79,8 @@ export const useUIStore = create<UIState>()((set, get) => ({
   toggleCategory: (category) => set(state => { const collapsedCategories = new Set(state.collapsedCategories); collapsedCategories.has(category) ? collapsedCategories.delete(category) : collapsedCategories.add(category); return { collapsedCategories } }),
   setLayerControlOpen: (open) => open ? get().openWindow('layerControl') : get().activeWindow === 'layerControl' ? get().closeWindow() : undefined,
   setLegendOpen: (open) => open ? get().openWindow('legend') : get().activeWindow === 'legend' ? get().closeWindow() : undefined,
-  openVondstForm: (location, photo) => set({ activeWindow: 'vondstForm', returnWindow: null, vondstFormLocation: location || null, vondstFormPhoto: photo || null }),
-  closeVondstForm: () => set(state => ({ ...(state.activeWindow === 'vondstForm' ? closeWindowState : {}), vondstFormLocation: null, vondstFormPhoto: null })),
+  openVondstForm: (location) => set({ activeWindow: 'vondstForm', returnWindow: null, vondstFormLocation: location || null }),
+  closeVondstForm: () => set(state => ({ ...(state.activeWindow === 'vondstForm' ? closeWindowState : {}), vondstFormLocation: null })),
   toggleVondstDashboard: () => get().toggleWindow('vondstDashboard'),
   openCreateLayerModal: () => get().openWindow('createLayer'),
   closeCreateLayerModal: () => { if (get().activeWindow === 'createLayer') get().closeWindow() },

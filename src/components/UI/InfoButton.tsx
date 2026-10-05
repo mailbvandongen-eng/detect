@@ -299,7 +299,6 @@ function FunctiesTab() {
         <ul className="text-gray-600 space-y-1 text-xs">
           <li>Toevoegen via GPS locatie, long-press of handmatig</li>
           <li>Velden: type, materiaal, periode, diepte, conditie, gewicht</li>
-          <li>Foto's toevoegen (link of upload)</li>
           <li>Export: Excel, CSV, GeoJSON, GPX, KML</li>
           <li>Dashboard met statistieken</li>
           <li>Cloud sync met Google account</li>
@@ -406,7 +405,6 @@ function HandleidingTab() {
           <p><strong>Via GPS:</strong> Open menu → Vondst toevoegen. Je locatie wordt automatisch ingevuld.</p>
           <p><strong>Via long-press:</strong> Houd je vinger op de kaart → kies "Vondst registreren".</p>
           <p><strong>Handmatig:</strong> In het formulier → "Kies op kaart" voor exacte locatie.</p>
-          <p><strong>Foto's:</strong> Voeg foto-links toe of upload direct.</p>
         </div>
       </section>
 

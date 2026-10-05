@@ -1,6 +1,3 @@
-import { PhotoCapture } from '../CustomPoints/PhotoCapture'
-import { PhotoGallery } from '../Photo/PhotoGallery'
-import { PhotoUploadStatus } from '../Photo/PhotoUploadStatus'
 import { sanitizePopupHtml } from '../../utils/safePopupHtml'
 import { BuddyWriteStatus } from '../CustomPoints/BuddyWriteStatus'
 import { useEffect, useRef, useState } from 'react'
@@ -2310,7 +2307,6 @@ export function Popup() {
             ${v.condition && v.condition !== 'Onbekend' ? `<br/><span class="text-sm text-gray-600"><strong>Conditie:</strong> ${v.condition}</span>` : ''}
             ${v.weight ? `<br/><span class="text-sm text-gray-600"><strong>Gewicht:</strong> ${v.weight} gram</span>` : ''}
             ${v.notes ? `<br/><span class="text-sm text-gray-600"><strong>Notities:</strong> ${v.notes}</span>` : ''}
-            ${v.photoUrl ? `<br/><a href="${v.photoUrl}" target="_blank" rel="noopener" class="text-blue-600 hover:underline text-sm">📷 Bekijk foto</a>` : ''}
             <br/><span class="text-xs text-gray-400">${new Date(v.timestamp).toLocaleDateString('nl-NL')}</span>`
           collectedContents.push(vondstHtml)
           collectedFeatureData.push(null) // Vondsten don't need to be added to layers
@@ -4147,7 +4143,6 @@ export function Popup() {
               dangerouslySetInnerHTML={{ __html: contentWithoutTitle }}
             />
 
-            {currentCustomPoint && <div className="px-4 pb-2"><PhotoGallery photos={currentCustomPoint.photos || []} /><PhotoUploadStatus /></div>}
 
             {/* Font size slider */}
             <div className="px-4 py-2 border-t border-gray-100 flex items-center gap-2 flex-shrink-0">
@@ -4206,10 +4201,6 @@ export function Popup() {
             {editingCustomPoint && currentCustomPointRef && currentCustomPointLayer?.buddyRole !== 'read' && (
               <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3 flex-shrink-0 overflow-y-auto max-h-[50vh]">
                 <div className="text-sm font-medium text-blue-600">Punt bewerken</div>
-              <PhotoCapture photos={currentCustomPoint?.photos || []}
-                onAddPhoto={photo=>useCustomPointLayerStore.getState().addPhotoToPoint(currentCustomPointRef.layerId,currentCustomPointRef.pointId,photo)}
-                onRemovePhoto={id=>useCustomPointLayerStore.getState().removePhotoFromPoint(currentCustomPointRef.layerId,currentCustomPointRef.pointId,id)} />
-              <p className="text-xs">Foto’s worden direct bij het punt opgeslagen.</p>
                 <div>
                   <label className="text-xs text-gray-500">Naam *</label>
                   <input

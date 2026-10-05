@@ -1,4 +1,3 @@
-import { PhotoUploadStatus } from '../Photo/PhotoUploadStatus'
 import { useEffect, useState } from 'react'
 import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight, Settings2, Trash2 } from 'lucide-react'
 import { useUIStore } from '../../store'
@@ -223,7 +222,6 @@ export function ThemesPanel() {
                 />
               ))}
               <BuddyWriteStatus />
-              <PhotoUploadStatus />
               {buddyError && (
                 <div role="alert" className="rounded-lg bg-red-50 p-2 text-xs text-red-700">
                   <p>{buddyError}</p>

@@ -550,7 +550,7 @@ Opgenomen met Detect`
                       <button
                         onClick={() => setDetailsRoute(route)}
                         className="p-1.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded transition-colors border-0 outline-none"
-                        title="Details & foto's"
+                        title="Details & notities"
                       >
                         <Info size={16} />
                       </button>

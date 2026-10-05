@@ -42,13 +42,6 @@ jobs:
         env:
           BUDDY_TEST_MODULE_ROOT: ${{ runner.temp }}/private-sync
         run: '"$RUNNER_TEMP/private-sync/node_modules/.bin/firebase" emulators:exec --only firestore --project demo-detect-flow --config "$RUNNER_TEMP/private-sync/firebase.json" "node scripts/test-buddy-flow.mjs"'
-      - name: Controleer foto-opslag en rechten
-        env:
-          BUDDY_TEST_MODULE_ROOT: ${{ runner.temp }}/private-sync
-        run: |
-          printf '%s\n' '{"storage":{"rules":"storage.rules"},"emulators":{"storage":{"port":9199},"ui":{"enabled":false}}}' > "$RUNNER_TEMP/private-sync/photos.json"
-          cp storage.rules "$RUNNER_TEMP/private-sync/storage.rules"
-          "$RUNNER_TEMP/private-sync/node_modules/.bin/firebase" emulators:exec --only storage --project demo-detect-photos --config "$RUNNER_TEMP/private-sync/photos.json" "node scripts/test-photo-storage.mjs"
       - name: Installeer WebKit voor mobiel testen
         run: '"$RUNNER_TEMP/private-sync/node_modules/.bin/playwright" install --with-deps webkit'
       - name: Controleer delen en accountwisseling op iPhone-formaat
@@ -86,7 +79,6 @@ jobs:
           npm run test:controls
           npm run test:buddy-ui
           npm run test:buddy-writes
-          npm run test:photos
 
       - name: Productieversie bouwen
         run: npm run build

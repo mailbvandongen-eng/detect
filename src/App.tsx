@@ -1,4 +1,3 @@
-import { usePhotoUploads } from './hooks/usePhotoUploads'
 import './style.css'
 import { MapContainer } from './components/Map/MapContainer'
 import { GpsButton } from './components/GPS/GpsButton'
@@ -48,7 +47,6 @@ function App() {
   useHeading()
   useBuddyLayers()
   useBuddyWrites()
-  usePhotoUploads()
 
   const customLayers = useCustomLayerStore(state => state.layers)
   useEffect(() => {

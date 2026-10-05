@@ -255,7 +255,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 {/* Vondsten */}
                 <Section title="Vondsten Registreren" icon={<MapPin size={16} />}>
                   <p className="text-xs text-gray-600 mb-2">
-                    Registreer je vondsten met locatie, foto's en details:
+                    Registreer je vondsten met locatie en details:
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
                     <li><strong>Vondstknop:</strong> zet Menu → Vondst knop aan en gebruik de oranje knop onderaan</li>

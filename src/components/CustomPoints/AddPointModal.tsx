@@ -2,8 +2,7 @@ import { BuddyWriteStatus } from './BuddyWriteStatus'
 import { useState } from 'react'
 import { MapPin, Phone } from 'lucide-react'
 import { useUIStore } from '../../store'
-import { useCustomPointLayerStore, type PhotoData } from '../../store/customPointLayerStore'
-import { PhotoCapture } from './PhotoCapture'
+import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
 import { AppWindow } from '../UI/AppWindow'
 
 export function AddPointModal() {
@@ -21,7 +20,6 @@ export function AddPointModal() {
   const [phone, setPhone] = useState('')
   const [notes, setNotes] = useState('')
   const [url, setUrl] = useState('')
-  const [photos, setPhotos] = useState<PhotoData[]>([])
 
   const pointLayer = addPointModalLayerTarget?.kind === 'point'
     ? getLayer(addPointModalLayerTarget.id)
@@ -46,7 +44,6 @@ export function AddPointModal() {
       coordinates: [addPointModalLocation.lng, addPointModalLocation.lat],
       ...(trimmedPhone ? { phone: trimmedPhone } : {}),
       ...(trimmedUrl ? { url: trimmedUrl } : {}),
-      ...(photos.length > 0 ? { photos } : {})
     })
 
     if(!saved)return
@@ -55,7 +52,6 @@ export function AddPointModal() {
     setPhone('')
     setNotes('')
     setUrl('')
-    setPhotos([])
     closeAddPointModal()
   }
 
@@ -64,7 +60,6 @@ export function AddPointModal() {
     setPhone('')
     setNotes('')
     setUrl('')
-    setPhotos([])
     closeAddPointModal()
   }
 
@@ -139,14 +134,6 @@ export function AddPointModal() {
                   />
                 </div>
               </div>
-
-              <>
-                <PhotoCapture
-                  photos={photos}
-                  onAddPhoto={(photo) => setPhotos(previous => [...previous, photo])}
-                  onRemovePhoto={(photoId) => setPhotos(previous => previous.filter(p => p.id !== photoId))}
-                />
-              </>
 
               {/* Notes */}
               <div>

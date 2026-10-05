@@ -1,15 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Navigation, Crosshair, Camera, Trash2, ChevronDown, Edit3, MapPin } from 'lucide-react'
+import { Navigation, Crosshair, ChevronDown, Edit3, MapPin } from 'lucide-react'
 import { toLonLat } from 'ol/proj'
 import { useGPSStore } from '../../store/gpsStore'
 import { useMapStore } from '../../store/mapStore'
-import { useUIStore } from '../../store/uiStore'
 import { useCustomPointLayerStore, DEFAULT_VONDSTEN_LAYER_ID } from '../../store/customPointLayerStore'
 import { useRouteRecordingStore } from '../../store/routeRecordingStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { announceVondst } from '../../utils/voiceFeedback'
-import { savePhoto } from '../../lib/photoStorage'
 import { AppWindow } from '../UI/AppWindow'
 
 interface Props {
@@ -132,7 +130,6 @@ function SelectField({
 export function AddVondstForm({ onClose, initialLocation }: Props) {
   const gpsPosition = useGPSStore(state => state.position)
   const map = useMapStore(state => state.map)
-  const vondstFormPhoto = useUIStore(state => state.vondstFormPhoto)
   const customLayers = useCustomPointLayerStore(state => state.layers)
   const addPointToLayer = useCustomPointLayerStore(state => state.addPoint)
   const voiceFeedbackEnabled = useSettingsStore(state => state.voiceFeedbackEnabled)
@@ -159,21 +156,6 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
   const [weight, setWeight] = useState<number | undefined>(undefined)
   const [length, setLength] = useState<number | undefined>(undefined)
   const [saveTarget, setSaveTarget] = useState<SaveTarget>(() => customLayers[0]?.id || '')
-
-  // Photo state - initialize from store
-  const [photo, setPhoto] = useState<File | null>(vondstFormPhoto)
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
-
-  // Generate photo preview URL
-  useEffect(() => {
-    if (photo) {
-      const url = URL.createObjectURL(photo)
-      setPhotoPreview(url)
-      return () => URL.revokeObjectURL(url)
-    } else {
-      setPhotoPreview(null)
-    }
-  }, [photo])
 
   // Location state
   const [locationSource, setLocationSource] = useState<LocationSource>(
@@ -234,21 +216,6 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
     }
   }
 
-  // Handle camera capture
-  const handleTakePhoto = () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = 'image/*'
-    input.capture = 'environment'
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0]
-      if (file) setPhoto(file)
-    }
-    input.click()
-  }
-
-  const handleRemovePhoto = () => setPhoto(null)
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -283,33 +250,12 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
         }
       }
 
-      // Save photo to IndexedDB if we have one
-      let photoData: { id: string; thumbnailBase64?: string; createdAt: string } | undefined
-      if (photo) {
-        const photoId = crypto.randomUUID()
-        try {
-          const storedPhoto = await savePhoto(photoId, photo)
-          // Create base64 thumbnail for quick display in localStorage
-          const thumbnailBase64 = await blobToBase64(storedPhoto.thumbnail)
-          photoData = {
-            id: photoId,
-            thumbnailBase64,
-            createdAt: storedPhoto.createdAt
-          }
-        } catch (photoError) {
-          console.error('Failed to save photo:', photoError)
-          // Continue without photo
-        }
-      }
-
-      // Save to custom layer with optional route link and photo
+      // Save to custom layer with optional route link
       addPointToLayer(saveTarget, {
         coordinates: [location.lng, location.lat],
         name: objectType,
         category: saveTarget === DEFAULT_VONDSTEN_LAYER_ID ? objectType : 'Overig',
         notes: fullNotes || '',
-        // Include photo if saved
-        ...(photoData ? { photos: [photoData] } : {}),
         // Link to active route if recording
         ...(isRecordingRoute && routeStartTime ? {
           routeId: `recording-${routeStartTime}`, // Temporary ID, will be updated when route is saved
@@ -329,23 +275,13 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
         })
       }
 
-      alert(`Toegevoegd aan ${layerName}! ✅${photoData ? ' (met foto)' : ''}`)
+      alert(`Toegevoegd aan ${layerName}! ✅`)
       onClose()
     } catch (error: any) {
       alert('Fout bij opslaan: ' + error.message)
     } finally {
       setSaving(false)
     }
-  }
-
-  // Helper to convert blob to base64
-  const blobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onloadend = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
   }
 
   // Layer options for save target - all custom layers
@@ -410,37 +346,6 @@ export function AddVondstForm({ onClose, initialLocation }: Props) {
     >
         <form id="detect-vondst-form" onSubmit={handleSubmit}>
           <div className="p-5 space-y-4">
-
-            {/* Photo section */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Foto</label>
-              {photoPreview ? (
-                <div className="relative">
-                  <img
-                    src={photoPreview}
-                    alt="Vondst"
-                    className="w-full h-40 object-cover rounded-xl"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleRemovePhoto}
-                    className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors border-0 outline-none shadow-lg"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleTakePhoto}
-                  className="w-full h-32 bg-gray-50 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-gray-100 transition-colors text-gray-500 border-2 border-dashed border-gray-200"
-                  style={{ outline: 'none' }}
-                >
-                  <Camera size={32} />
-                  <span className="text-sm">Maak een foto</span>
-                </button>
-              )}
-            </div>
 
             {/* Location */}
             <div>
