@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { PlaceListScope } from '../utils/placeList'
 import type { UserLayerTarget } from '../utils/userLayerCatalog'
 
 export type UIWindowId =
@@ -6,9 +7,12 @@ export type UIWindowId =
   | 'info' | 'manual' | 'welcome' | 'presets' | 'changeLog' | 'monumentSearch'
   | 'monumentFilter' | 'vondstForm' | 'vondstDashboard' | 'createLayer' | 'addPoint'
   | 'layerManager' | 'layerDashboard' | 'routeDashboard' | 'importLayer' | 'print'
-  | 'opacity' | 'timeTravel' | 'measure' | 'draw'
+  | 'placeList' | 'opacity' | 'timeTravel' | 'measure' | 'draw'
 
 interface UIState {
+  placeListScope: PlaceListScope
+  placeListRequest: number
+  openPlaceList: (scope?: PlaceListScope) => void
   activeWindow: UIWindowId | null
   returnWindow: UIWindowId | null
   vondstFormLocation: { lat: number; lng: number } | null
@@ -56,6 +60,8 @@ interface UIState {
 const closeWindowState = { activeWindow: null, returnWindow: null } as const
 
 export const useUIStore = create<UIState>()((set, get) => ({
+  placeListScope: 'visible', placeListRequest: 0,
+  openPlaceList: (placeListScope = 'visible') => set(state => ({activeWindow: 'placeList', returnWindow: null, placeListScope, placeListRequest: state.placeListRequest + 1})),
   activeWindow: null, returnWindow: null,
   vondstFormLocation: null,
   addPointModalLayerTarget: null, addPointModalLocation: null,

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw, History } from 'lucide-react'
+import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw, History, List } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
@@ -281,6 +281,9 @@ export function HamburgerMenu() {
 
               {/* Menu Items */}
               <div className="py-1">
+                <button onClick={() => useUIStore.getState().openPlaceList(useUIStore.getState().placeListScope)} className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent text-gray-700 hover:bg-blue-50" style={menuItemStyle}>
+                  <List size={18} className="text-blue-500" /><span>Lijstweergave</span>
+                </button>
                 <button
                   onClick={handleInfoClick}
                   className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-blue-50"

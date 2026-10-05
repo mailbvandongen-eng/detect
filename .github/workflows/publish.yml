@@ -53,6 +53,7 @@ jobs:
           node scripts/test-buddy-writes-browser.mjs
           node scripts/test-prio-three-browser.mjs
           node scripts/test-radar-browser.mjs
+          node scripts/test-place-list-browser.mjs
   build:
     needs: verify-private-data
     runs-on: ubuntu-latest
@@ -78,6 +79,7 @@ jobs:
           npm run test:field
           npm run test:user-layers
           npm run test:controls
+          npm run test:place-list
           npm run test:buddy-ui
           npm run test:buddy-writes
 

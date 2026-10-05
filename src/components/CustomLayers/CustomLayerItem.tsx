@@ -1,5 +1,6 @@
+import { useUIStore } from '../../store/uiStore'
 import { useEffect, useState } from 'react'
-import { Check, Settings2, Trash2 } from 'lucide-react'
+import { Check, Settings2, Trash2, List } from 'lucide-react'
 import { useCustomLayerStore, type CustomLayer } from '../../store/customLayerStore'
 
 interface Props {
@@ -76,6 +77,7 @@ export function CustomLayerItem({ layer, compact = false }: Props) {
         </button>
 
         <span className="flex-shrink-0 text-[10px] text-gray-400">{featureCount}</span>
+        <button type="button" className="detect-window-icon-button shrink-0" style={{minWidth:44,minHeight:44}} aria-label={`Lijst van ${layer.name}`} onClick={() => useUIStore.getState().openPlaceList(`imported:${layer.id}`)}><List size={18}/></button>
         <button
           onClick={() => setExpanded(value => !value)}
           className="detect-window-icon-button shrink-0"

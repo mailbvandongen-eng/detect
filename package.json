@@ -1,7 +1,7 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.84",
+  "version": "2.33.85",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,8 @@
     "test:buddy-ui": "node scripts/test-buddy-ui.mjs",
     "test:user-layers": "node scripts/test-user-layers.mjs",
     "preview": "vite preview",
+    "test:place-list": "node scripts/test-place-list.mjs",
+    "test:place-list-browser": "node scripts/test-place-list-browser.mjs",
     "test:radar-browser": "node scripts/test-radar-browser.mjs",
     "test:controls": "node scripts/test-map-controls.mjs",
     "test:buddy-sharing": "node scripts/test-buddy-sharing-browser.mjs",

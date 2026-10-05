@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight, Settings2, Trash2 } from 'lucide-react'
+import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight, Settings2, Trash2, List } from 'lucide-react'
 import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
 import { BuddyWriteStatus } from '../CustomPoints/BuddyWriteStatus'
@@ -91,6 +91,7 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
           <span className="block text-[10px]" style={{ color: 'var(--detect-window-muted)' }}>{layer.buddyLayerId ? (layer.buddyRole === 'read' ? 'Gedeeld · alleen bekijken' : 'Gedeeld') : 'Privé'}</span>
         </button>
         <span className="flex-shrink-0 text-[10px] text-gray-400">{layer.points.length}</span>
+        <button type="button" className="detect-window-icon-button shrink-0" style={{minWidth:44,minHeight:44}} aria-label={`Lijst van ${layer.name}`} onClick={() => useUIStore.getState().openPlaceList(`point:${layer.id}`)}><List size={18}/></button>
         <button
           onClick={(event) => { event.stopPropagation(); setExpanded(value => !value) }}
           className="detect-window-icon-button shrink-0"

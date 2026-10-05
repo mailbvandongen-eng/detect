@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.85', date: '5 oktober 2026', title: 'Lijstweergave voor plekken',
+    changes: [
+      'Open de lijst bij een preset, eigen laag of import, of via Menu → Lijstweergave. De vakantieplekken van Thédirac staan er ook in.',
+      'Zoek op naam en notities, filter op laag of categorie en sorteer op naam, afstand vanaf GPS of nieuwste plek.',
+      'Bekijk de volledige informatie, toon een plek op de kaart en keer terug naar dezelfde lijst. Eigen en bewerkbare gedeelde punten zijn vanuit de lijst te bewerken.',
+      'De lijst gebruikt bestaande gegevens. Bronlagen en imports zijn alleen-lezen; kaartlagen, kleuren, transparantie en presetinstellingen blijven behouden.',
+    ],
+  },
+  {
     version: '2.33.84', date: '5 oktober 2026', title: 'Regenradar eenvoudig sluiten',
     changes: [
       'Regenradar heeft een ruime Sluiten-knop en een extra Radar uit-knop bij het weerwidget.',

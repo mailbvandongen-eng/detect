@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Bookmark, Trash2, Map } from 'lucide-react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Bookmark, Trash2, Map, List } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore, useMapStore } from '../../store'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
@@ -108,6 +108,7 @@ export function PresetButtons() {
     const selectedPreset = presets.find((preset) => preset.id === id)
     if (selectedPreset?.mapView) stopTracking()
     applyPreset(id)
+    useUIStore.setState({ placeListScope: `preset:${id}` })
     closeAllPanels()
   }
 
@@ -256,10 +257,10 @@ export function PresetButtons() {
             const isSaved = savedPresetId === preset.id
 
             return (
+              <div key={preset.id} className="flex items-center gap-1">
               <button
-                key={preset.id}
                 onClick={() => handleApplyPreset(preset.id)}
-                className={`w-full flex items-center gap-1.5 px-2.5 ${hoverColor} rounded-lg text-left transition-colors border-0 outline-none bg-transparent overflow-hidden ${isSaved ? 'bg-green-50' : ''}`}
+                className={`min-w-0 flex-1 flex items-center gap-1.5 px-2.5 ${hoverColor} rounded-lg text-left transition-colors border-0 outline-none bg-transparent overflow-hidden ${isSaved ? 'bg-green-50' : ''}`}
                 style={{
                   fontSize: `${baseFontSize}px`,
                   paddingTop: `${6 * spacingScale}px`,
@@ -292,6 +293,8 @@ export function PresetButtons() {
                   </span>
                 )}
               </button>
+              <button type="button" className="detect-window-icon-button shrink-0" style={{minWidth:44,minHeight:44}} aria-label={`Lijst van ${preset.name}`} title={`Lijst van ${preset.name}`} onClick={() => useUIStore.getState().openPlaceList(`preset:${preset.id}`)}><List size={18}/></button>
+              </div>
             )
           })}
         </div>

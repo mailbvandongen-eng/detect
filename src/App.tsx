@@ -1,4 +1,5 @@
 import './style.css'
+import { PlaceList } from './components/Places/PlaceList'
 import { MapContainer } from './components/Map/MapContainer'
 import { GpsButton } from './components/GPS/GpsButton'
 import { GpsMarker } from './components/GPS/GpsMarker'
@@ -157,6 +158,7 @@ function App() {
       <InfoButton />
       <CompassButton />
       <WeatherWidget />
+      <PlaceList key={accountUid || 'signed-out'} />
       <RainRadarLayer
         isVisible={showBuienradar}
         onClose={() => setShowBuienradar(false)}
