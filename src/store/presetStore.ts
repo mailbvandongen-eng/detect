@@ -32,7 +32,7 @@ export interface Preset {
   mapView?: {
     center: [number, number]
     zoom: number
-  }
+  } | null
   isBuiltIn: boolean
 }
 
@@ -321,7 +321,7 @@ function normalizePreset(preset: Preset): Preset {
     baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
     layerStates: normalizeLayerStates(preset.layerStates),
     layerOpacities: normalizeLayerOpacities(preset.layerOpacities ?? builtInPreset.layerOpacities),
-    mapView: preset.mapView ?? builtInPreset.mapView
+    mapView: preset.mapView === undefined ? builtInPreset.mapView : preset.mapView
   }
 }
 
@@ -548,19 +548,13 @@ export const usePresetStore = create<PresetState>()(
       },
 
       resetToDefaults: () => {
-        const { customDefaults } = get()
-        if (customDefaults) {
-          set({ presets: normalizePresetCollection(customDefaults), updatedAt: Date.now() })
-          console.log('🔄 Presets hersteld naar eigen standaard')
-        } else {
-          set({ presets: [...BUILT_IN_PRESETS], updatedAt: Date.now() })
-          console.log('🔄 Presets hersteld naar originele standaard')
-        }
+        const { customDefaults, presets } = get()
+        const defaults = normalizePresetCollection(customDefaults || BUILT_IN_PRESETS)
+        set({ presets: [...defaults.filter(p => p.isBuiltIn), ...presets.filter(p => !p.isBuiltIn)], updatedAt: Date.now() })
       },
 
       resetToBuiltIn: () => {
-        set({ presets: [...BUILT_IN_PRESETS], customDefaults: null, updatedAt: Date.now() })
-        console.log('🔄 Presets gereset naar originele instellingen')
+        set({ presets: [...BUILT_IN_PRESETS, ...get().presets.filter(p => !p.isBuiltIn)], customDefaults: null, updatedAt: Date.now() })
       }
     }),
     {

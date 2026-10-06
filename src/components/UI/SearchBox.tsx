@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Search, X, ExternalLink } from 'lucide-react'
-import { useMapStore, useSettingsStore } from '../../store'
+import { useMapStore, useSettingsStore, useUIStore } from '../../store'
 import { fromLonLat } from 'ol/proj'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -33,6 +33,9 @@ export function SearchBox() {
   const containerRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<number>()
   const requestRef = useRef<AbortController | null>(null)
+
+  const activeWindow = useUIStore(state => state.activeWindow)
+  useEffect(() => { if (activeWindow) collapse() }, [activeWindow])
 
   // Focus input when expanded
   useEffect(() => {
@@ -217,7 +220,7 @@ export function SearchBox() {
       <motion.button
         className="fixed right-14 z-[800] w-11 h-11 flex items-center justify-center bg-white/90 hover:bg-white rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         style={safeTopStyle}
-        onClick={() => setIsExpanded(true)}
+        onClick={() => { useUIStore.getState().closeAllPanels(); setIsExpanded(true) }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Zoeken in Europa"

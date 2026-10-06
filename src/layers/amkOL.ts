@@ -14,8 +14,8 @@ import type { FeatureLike } from 'ol/Feature'
  * Exception: if both Romeins AND Vroege ME are mentioned, feature appears in BOTH
  */
 
-import { Vector as VectorLayer } from 'ol/layer'
-import { Vector as VectorSource } from 'ol/source'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
 import { Style, Fill, Stroke } from 'ol/style'
 import { loadTopoJSON, parseGeoJSON } from '../utils/layerLoaderOL.js'
 import type { Feature } from 'ol'
@@ -39,35 +39,20 @@ const PERIOD_COLORS = {
   overig: '#8b5cf6'        // purple (default AMK)
 }
 
-// Check if txt_label indicates Romeinse tijd
-function isRomeins(txtLabel: string): boolean {
-  return /romeinse tijd/i.test(txtLabel)
-}
-
-// Check if txt_label indicates Steentijd (Paleo, Meso, Neo)
-function isSteentijd(txtLabel: string): boolean {
-  return /paleolithicum|mesolithicum|neolithicum/i.test(txtLabel)
-}
-
-// Check if txt_label indicates Vroege Middeleeuwen
-function isVroegeME(txtLabel: string): boolean {
-  return /middeleeuwen vroeg/i.test(txtLabel)
-}
-
-// Check if txt_label indicates Late Middeleeuwen (but not Vroege)
-function isLateME(txtLabel: string): boolean {
-  return /middeleeuwen laat/i.test(txtLabel) && !/middeleeuwen vroeg/i.test(txtLabel)
-}
+import { isRomeins, isSteentijd, isVroegeME, isLateME } from '../utils/amkPeriods'
 
 // Cached data to avoid reloading
 let cachedFeatures: Feature[] | null = null
 
-async function loadAMKData(): Promise<Feature[]> {
+let loading: Promise<Feature[]> | null = null
+export async function loadAMKData(): Promise<Feature[]> {
   if (cachedFeatures) return cachedFeatures
 
-  const geojson = await loadTopoJSON('./data/amk_monumenten_full.topojson')
-  cachedFeatures = parseGeoJSON(geojson)
-  return cachedFeatures
+  if (!loading) loading = loadTopoJSON('./data/amk_monumenten_full.topojson').then(geojson => {
+    cachedFeatures = parseGeoJSON(geojson)
+    return cachedFeatures!
+  }).finally(() => { loading = null })
+  return loading
 }
 
 function featureMatchesCurrentFilter(feature: FeatureLike): boolean {

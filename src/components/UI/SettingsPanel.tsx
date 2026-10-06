@@ -43,7 +43,7 @@ export function SettingsPanel() {
     <>
       <AppWindow isOpen={settingsPanelOpen} title="Instellingen" icon={<Settings size={18} />} placement="modal" onClose={toggleSettingsPanel}
         subHeader={<div className="flex">{tabs.map(tab => <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-medium transition-colors border-0 outline-none ${activeTab === tab.id ? 'text-[var(--detect-accent-text)] border-b-2 border-[var(--detect-accent)] bg-[var(--detect-accent-soft)]' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}>{tab.icon}{tab.label}</button>)}</div>}
-        footer={<div className="space-y-1"><a href={BUG_REPORT_URL} target="_blank" rel="noopener noreferrer" className="detect-window-secondary-button flex w-full items-center justify-center gap-2"><Bug size={16} /><span>Meld een bug</span></a><p className="text-center text-gray-400" style={{ fontSize: '0.75em' }}>Instellingen worden lokaal opgeslagen</p></div>}
+        footer={<div className="space-y-1"><a href={BUG_REPORT_URL} target="_blank" rel="noopener noreferrer" className="detect-window-secondary-button flex w-full items-center justify-center gap-2"><Bug size={16} /><span>Meld een bug</span></a><p className="text-center text-gray-400" style={{ fontSize: '0.75em' }}>Instellingen worden lokaal bewaard en bij inloggen gesynchroniseerd</p></div>}
       >
         <div className="p-3 space-y-5">
           {activeTab === 'algemeen' && <>

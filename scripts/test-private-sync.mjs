@@ -270,4 +270,18 @@ assert.equal(localStorage.getItem('detect-account:owner-with-large-import:detect
 full.beginAccountSwitch('other'); full.finishAccountSwitch()
 assert.equal(full.accountStorage.getItem('detectorapp-custom-layers'), null)
 pass('Large import migration needs no second copy and never exposes it to another account')
+const ownPreset = { id: 'restore-own', name: 'Eigen bewaard', icon: 'Map', isBuiltIn: false, layers: ['AHN4 Multi-Hillshade NL'], layerOpacities: {'AHN4 Multi-Hillshade NL': .31}, mapView: {center: [5,52],zoom:15} }
+const presetStore = load('src/store/presetStore.ts').usePresetStore
+presetStore.setState(s => ({presets:[...s.presets.filter(p => p.id !== ownPreset.id), ownPreset], customDefaults:null}))
+presetStore.getState().resetToDefaults()
+assert.deepEqual(presetStore.getState().presets.find(p => p.id === ownPreset.id), ownPreset)
+presetStore.getState().saveAsDefaults()
+presetStore.setState(s => ({presets:[...s.presets, {...ownPreset,id:'added-after-defaults'}]}))
+presetStore.getState().resetToDefaults()
+assert.deepEqual(presetStore.getState().presets.find(p => p.id === 'added-after-defaults'), {...ownPreset,id:'added-after-defaults'})
+presetStore.getState().resetToBuiltIn()
+assert.deepEqual(presetStore.getState().presets.find(p => p.id === ownPreset.id), ownPreset)
+const disabledView = {...presetStore.getState().presets.find(p => p.id === 'thedirac-2026'),mapView:null}
+assert.equal(load('src/store/presetStore.ts').normalizePresetCollection([disabledView]).find(p => p.id === disabledView.id).mapView,null)
+pass('Both restore paths preserve current own presets and disabled built-in map view survives normalization')
 console.log(`${count} private sync and account isolation checks passed`)

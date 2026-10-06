@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Printer, Download, FileImage, Loader2 } from 'lucide-react'
 import { useMapStore, useSettingsStore, useUIStore } from '../../store'
+import { composeMapCanvas } from '../../utils/mapExport'
 import { AppWindow } from './AppWindow'
 
 type PrintFormat = 'png' | 'jpeg' | 'pdf'
@@ -25,53 +26,10 @@ export function PrintTool() {
     setIsExporting(true)
 
     try {
-      // Get the map canvas
-      const mapTarget = map.getTargetElement()
-      if (!mapTarget) throw new Error('Map target not found')
-
-      const canvas = mapTarget.querySelector('canvas')
-      if (!canvas) throw new Error('Canvas not found')
-
-      // Create export canvas with title if needed
-      const exportCanvas = document.createElement('canvas')
-      const ctx = exportCanvas.getContext('2d')
-      if (!ctx) throw new Error('Could not get canvas context')
-
-      const titleHeight = includeTitle ? 50 : 0
-      exportCanvas.width = canvas.width
-      exportCanvas.height = canvas.height + titleHeight
-
-      // White background
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height)
-
-      // Add title if enabled
-      if (includeTitle) {
-        ctx.fillStyle = '#1f2937'
-        ctx.font = 'bold 24px system-ui, -apple-system, sans-serif'
-        ctx.textAlign = 'center'
-        ctx.fillText(title, exportCanvas.width / 2, 35)
-      }
-
-      // Draw map
-      ctx.drawImage(canvas, 0, titleHeight)
-
-      // Add timestamp
-      ctx.fillStyle = '#6b7280'
-      ctx.font = '12px system-ui, -apple-system, sans-serif'
-      ctx.textAlign = 'right'
-      const date = new Date().toLocaleDateString('nl-NL', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-      ctx.fillText(date, exportCanvas.width - 10, exportCanvas.height - 10)
-
-      // Add attribution
-      ctx.textAlign = 'left'
-      ctx.fillText('Detect', 10, exportCanvas.height - 10)
+      map.renderSync()
+      const size = map.getSize()
+      if (!size) throw new Error('Kaartgrootte ontbreekt')
+      const exportCanvas = composeMapCanvas(map.getViewport(), size, includeTitle ? title : undefined)
 
       // Export based on format
       const filename = `kaart-${new Date().toISOString().split('T')[0]}`
@@ -80,13 +38,14 @@ export function PrintTool() {
         // For PDF, we'll use a simple approach with jsPDF-like behavior
         // Create a printable page
         const printWindow = window.open('', '_blank')
+        if (!printWindow) throw new Error('Printvenster geblokkeerd')
         if (printWindow) {
           const imgData = exportCanvas.toDataURL('image/png')
           printWindow.document.write(`
             <!DOCTYPE html>
             <html>
               <head>
-                <title>${title}</title>
+                <title>Detect kaart</title>
                 <style>
                   @media print {
                     body { margin: 0; padding: 0; }

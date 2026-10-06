@@ -228,7 +228,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     <li><strong>Terrein Analyse</strong> - IKAW, bodem, geomorfologie en AHN</li>
                   </ul>
                   <p className="text-xs text-gray-500 mt-2 italic">
-                    Gebruik het opslaan-icoon naast een preset om de huidige lagen erin vast te leggen. Via Instellingen → Lagen kun je presets maken, hernoemen of verwijderen.
+                    Gebruik het opslaan-icoon naast een preset om de huidige lagen erin vast te leggen. Open Presets om een preset toe te voegen. Met het potlood kun je de naam en ‘Locatie & zoom onthouden’ aanpassen of een eigen preset verwijderen. Standaardpresets herstellen bewaart je eigen presets.
                   </p>
                 </Section>
 

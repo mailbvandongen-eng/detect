@@ -15,6 +15,8 @@ import { useGPSStore } from '../../store/gpsStore'
 import { useLayerStore } from '../../store/layerStore'
 import { useMapStore } from '../../store/mapStore'
 import { buildPersonalPlaceSources, collectPlaces, distanceToPlace, filterPlaces, getScopedSources, placeResearchMetadata, placeSourceUrl, placeExternalMapUrl, type PlaceListScope } from '../../utils/placeList'
+import { getAMKPlaceSources, loadAMKPlaceCatalog } from '../../utils/amkPlaceSources'
+import type { CustomFeature } from '../../store/customLayerStore'
 import { getThediracPlaceSources } from '../../utils/thediracPlaceSources'
 import { formatImportedLayerPopup } from '../../utils/importedLayerPopup'
 import { sanitizePopupHtml } from '../../utils/safePopupHtml'
@@ -52,11 +54,24 @@ function PlaceListSession() {
   const map = useMapStore(s => s.map)
   const personalSources = useMemo(() => buildPersonalPlaceSources(pointLayers, []), [pointLayers])
   const importSources = useMemo(() => buildPersonalPlaceSources([], importedLayers), [importedLayers])
-  const sources = useMemo(() => [...personalSources, ...importSources, ...getThediracPlaceSources(visible)], [personalSources, importSources, visible])
+  const [amkCatalog, setAMKCatalog] = useState<CustomFeature[]>([])
+  const [amkError, setAMKError] = useState(false)
+  const [amkRetry, setAMKRetry] = useState(0)
+  const amkSources = useMemo(() => getAMKPlaceSources(visible, amkCatalog), [visible, amkCatalog])
+  const needsAMK = isOpen && getScopedSources(amkSources, scope, presets).length > 0
+  useEffect(() => {
+    if (!needsAMK || amkCatalog.length) return
+    let cancelled = false
+    setAMKError(false)
+    loadAMKPlaceCatalog().then(data => { if (!cancelled) setAMKCatalog(data) }).catch(() => { if (!cancelled) setAMKError(true) })
+    return () => { cancelled = true }
+  }, [needsAMK, amkCatalog.length, amkRetry])
+  const sources = useMemo(() => [...personalSources, ...importSources, ...getThediracPlaceSources(visible), ...amkSources], [personalSources, importSources, visible, amkSources])
   const scopedSources = useMemo(() => getScopedSources(sources, scope, presets), [sources, scope, presets])
   const entries = useMemo(() => collectPlaces(scopedSources), [scopedSources])
   const [query, setQuery] = useState('')
   const [layer, setLayer] = useState('')
+  const listingEntries = useMemo(() => layer ? collectPlaces(scopedSources.filter(source => source.key === layer)) : entries, [layer, scopedSources, entries])
   const [category, setCategory] = useState('')
   const [period, setPeriod] = useState('')
   const [evidence, setEvidence] = useState('')
@@ -73,7 +88,7 @@ function PlaceListSession() {
   const [saveError, setSaveError] = useState('')
   const contentRef = useRef<HTMLDivElement>(null)
   const scrollPosition = useRef(0)
-  const selected = entries.find(e => e.id === selectedId)
+  const selected = listingEntries.find(e => e.id === selectedId)
   const selectedSourceUrl = selected ? placeSourceUrl(selected) : null
   const selectedMapUrl = selected ? placeExternalMapUrl(selected) : null
   const selectedIsSource = selected?.properties.bronvermelding === true
@@ -116,13 +131,13 @@ function PlaceListSession() {
     return () => {map.removeLayer(preview)}
   }, [map, mapPreview, selected?.id, selected?.coordinates?.[0], selected?.coordinates?.[1], selected?.name, selected?.color])
 
-  const filtered = useMemo(() => isOpen ? filterPlaces(entries, {query, layer, category, period, evidence, precision, sort, gps, extent: onlyMap ? extent : null}) : [], [isOpen, entries, query, layer, category, period, evidence, precision, sort, gps, onlyMap, extent])
-  const categories = useMemo(() => [...new Set(entries.filter(e => !layer || e.sourceKey === layer).map(e => e.category))].sort((a,b) => a.localeCompare(b,'nl')), [entries, layer])
+  const filtered = useMemo(() => isOpen ? filterPlaces(listingEntries, {query, layer, category, period, evidence, precision, sort, gps, extent: onlyMap ? extent : null}) : [], [isOpen, listingEntries, query, layer, category, period, evidence, precision, sort, gps, onlyMap, extent])
+  const categories = useMemo(() => [...new Set(listingEntries.filter(e => !layer || e.sourceKey === layer).map(e => e.category))].sort((a,b) => a.localeCompare(b,'nl')), [listingEntries, layer])
   const researchOptions = useMemo(() => {
-    const metadata = entries.map(placeResearchMetadata)
+    const metadata = listingEntries.map(placeResearchMetadata)
     const unique = (values: string[]) => [...new Set(values.filter(Boolean))].sort((a,b) => a.localeCompare(b,'nl'))
     return {periods:unique(metadata.flatMap(m => m.periods)), evidence:unique(metadata.map(m => m.evidence)), precision:unique(metadata.map(m => m.precision))}
-  }, [entries])
+  }, [listingEntries])
   const filtersActive = !!(layer || category || period || evidence || precision || onlyMap)
   const clearFilters = () => {setQuery(''); setLayer(''); setCategory(''); setPeriod(''); setEvidence(''); setPrecision(''); setOnlyMap(false)}
   const mayLeave = () => !dirty || window.confirm('Je wijzigingen zijn nog niet opgeslagen. Wijzigingen weggooien?')
@@ -173,7 +188,8 @@ function PlaceListSession() {
           <option value="visible">Zichtbare lagen</option><option value="all">Alle plekken</option>
           <optgroup label="Presets">{presets.map(p => <option key={p.id} value={`preset:${p.id}`}>{p.name}</option>)}</optgroup>
           <optgroup label="Mijn lagen en imports">{sources.filter(s => s.kind !== 'builtin').map(s => <option key={s.key} value={s.key}>{s.name}{s.kind === 'imported' ? ' · import' : ''}</option>)}</optgroup>
-          <optgroup label="Vakantieplekken">{sources.filter(s => s.kind === 'builtin').map(s => <option key={s.key} value={s.key}>{s.name}</option>)}</optgroup>
+          <optgroup label="Nederlandse monumenten">{amkSources.map(s => <option key={s.key} value={s.key}>{s.name}</option>)}</optgroup>
+          <optgroup label="Vakantieplekken">{sources.filter(s => s.kind === 'builtin' && !s.name.startsWith('AMK ')).map(s => <option key={s.key} value={s.key}>{s.name}</option>)}</optgroup>
         </select></label>
         <div className="place-list-search"><Search size={18}/><input type="search" aria-label="Zoek plekken" placeholder="Zoek naam, periode, bron of notitie…" value={query} onChange={e => setQuery(e.target.value)}/>{query && <button type="button" aria-label="Zoekopdracht wissen" onClick={() => setQuery('')}><X size={18}/></button>}</div>
         <div className="place-list-summary"><span role="status">{filtered.length} van {entries.length} items</span><button type="button" aria-expanded={filtersOpen} className="place-list-filter-toggle" onClick={() => setFiltersOpen(v => !v)}><SlidersHorizontal size={16}/> Filters{filtersActive ? ' · actief' : ''}</button></div>
@@ -193,6 +209,7 @@ function PlaceListSession() {
       footer={draft ? <div key="edit-actions" className="place-list-actions"><button type="button" className="detect-window-secondary-button" onClick={() => {if(mayLeave()) {setDraft(null); setSaveError('')}}}>Annuleren</button><button type="submit" form="place-list-edit" className="detect-window-primary-button" disabled={!draft.name.trim()}>Opslaan</button></div> : selected ? <div key="detail-actions" className="place-list-actions">{!selectedIsSource && <button type="button" className="detect-window-primary-button" onClick={showOnMap} disabled={!selected.coordinates || !map}><MapPin size={18}/> Toon op kaart</button>}{selectedMapUrl && <a className="detect-window-primary-button" href={selectedMapUrl} target="_blank" rel="noopener noreferrer"><MapPin size={18}/> Open externe kaart</a>}{selectedSourceUrl && <a className="detect-window-secondary-button" href={selectedSourceUrl} target="_blank" rel="noopener noreferrer">Open bron</a>}{selected.editable && <button type="button" className="detect-window-secondary-button" onClick={e => {e.preventDefault(); edit()}}><Pencil size={16}/> Bewerken</button>}</div> : <div className="place-list-footer"><span>{scopeName || (scope === 'all' ? 'Eigen lagen, imports en vakantieplekken' : 'Plekken uit je zichtbare lagen')}</span><button type="button" className="detect-window-secondary-button" onClick={close}><MapPin size={16}/> Kaart</button></div>}
     >
       <div ref={contentRef}>
+        {needsAMK && !amkCatalog.length && <p role={amkError ? 'alert' : 'status'} className="p-3">{amkError ? <>De monumentenlijst kon niet worden geladen. <button type="button" className="detect-window-secondary-button" onClick={() => setAMKRetry(n => n + 1)}>Opnieuw proberen</button></> : 'Nederlandse monumenten laden…'}</p>}
         {selected ? <div className="place-list-detail">
           <div className="place-list-layer-label"><i style={{background: selected.color}}/>{selected.layerName}</div>
           <h2>{selected.name}</h2><div className="place-list-meta">{selected.category}{selected.coordinates && <span> · {formatDistance(distanceToPlace(selected.coordinates, gps)) || 'Locatie beschikbaar'}</span>}</div>
@@ -216,7 +233,7 @@ function PlaceListSession() {
             <span className="place-list-dot" style={{background:entry.color}}/><span className="place-list-row-content"><strong>{entry.name}</strong><span className="place-list-meta">{entry.category} · {entry.layerName}</span>{meta.evidence && <span className="place-list-badges">{[...(meta.period === 'Alle perioden' ? ['Alle perioden'] : meta.periods),meta.evidence,meta.precision].filter(Boolean).map((label,i) => <span key={i}>{label}</span>)}</span>}{entry.description && <span className="place-list-description">{entry.description}</span>}{meta.source && meta.evidence && <span className="place-list-meta place-list-row-source">Bron: {meta.source}</span>}<span className="place-list-meta">{formatDistance(distanceToPlace(entry.coordinates,gps))}{entry.geometryType && entry.geometryType !== 'Point' && ` · ${entry.geometryType.includes('Polygon') ? 'Gebied' : 'Route / lijn'}`}</span></span><ChevronRight size={18} className="place-list-chevron"/>
           </button></li>})}</ul>
           {filtered.length > limit && <div className="place-list-more"><button type="button" className="detect-window-secondary-button" onClick={() => setLimit(v => v + PAGE_SIZE)}>Meer plekken ({Math.min(PAGE_SIZE, filtered.length-limit)})</button></div>}
-        </> : <div className="place-list-empty"><List size={32}/><h2>{entries.length ? 'Geen plekken gevonden' : 'Geen plekken in deze selectie'}</h2><p>{entries.length ? 'Pas je zoekopdracht of filters aan.' : 'Kies een andere preset of laag. Achtergrondkaarten leveren geen lijstregels op.'}</p>{entries.length > 0 && !filtersActive && <button type="button" className="detect-window-secondary-button" onClick={clearFilters}>Filters wissen</button>}</div>}
+        </> : needsAMK && !amkCatalog.length ? null : <div className="place-list-empty"><List size={32}/><h2>{entries.length ? 'Geen plekken gevonden' : 'Geen plekken in deze selectie'}</h2><p>{entries.length ? 'Pas je zoekopdracht of filters aan.' : 'Kies een andere preset of laag. Achtergrondkaarten leveren geen lijstregels op.'}</p>{entries.length > 0 && !filtersActive && <button type="button" className="detect-window-secondary-button" onClick={clearFilters}>Filters wissen</button>}</div>}
       </div>
     </AppWindow>
   </>

@@ -7,6 +7,16 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.93', date: '7 oktober 2026', title: 'Presets, lijsten en kaartexport verbeterd',
+    changes: [
+      'Standaardpresets herstellen bewaart je eigen presets. Reset verbergt ook eigen lagen en imports zonder hun gegevens te verwijderen.',
+      'Presetknoppen zijn groter. Met het potlood kun je de naam en het onthouden van locatie en zoom aanpassen, ook bij bestaande presets.',
+      'Nederlandse presets kunnen nu AMK-monumenten in de lijst tonen, inclusief periodefilters, zoeken en tonen op de kaart.',
+      'Kaartafbeeldingen en prints nemen alle tekenlagen en hun transparantie mee. Zoeken sluit bij het openen van een ander venster.',
+      'De handleiding beschrijft de juiste presetbediening.',
+    ],
+  },
+  {
     version: '2.33.92', date: '6 oktober 2026', title: 'Scherpere LiDAR voor Nederland',
     changes: ['De Nederlandse hillshade en multidirectionele LiDAR gebruiken nu AHN4 met een resolutie van 50 cm in plaats van 5 meter. Bestaande presets, opgeslagen transparantie en laagkeuzes blijven dezelfde lagen gebruiken.'],
   },
