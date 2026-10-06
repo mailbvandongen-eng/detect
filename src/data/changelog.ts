@@ -7,6 +7,10 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.91', date: '6 oktober 2026', title: 'Leesbare informatie bij oude bossen',
+    changes: ['De kaartinformatie bij oude bossen toont Nederlandse veldnamen en boscategorieën. Oppervlakten staan in hectares en vierkante meters.'],
+  },
+  {
     version: '2.33.90', date: '6 oktober 2026', title: 'Opgeslagen presetkeuzes behouden',
     changes: [
       'Synchronisatie en terugladen behouden nu wijzigingen aan standaardpresets, inclusief Thédirac. Save bewaart ook toegevoegde lagen, uitgeschakelde lagen, transparantie en kaartpositie.',

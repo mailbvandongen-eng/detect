@@ -15,6 +15,7 @@ import { useCustomLayerStore } from '../../store/customLayerStore'
 import { ROMEINSE_FORTEN_INFO, GENERIEK_FORT_INFO, FORT_TYPE_LABELS } from '../../data/romeinseFortenInfo'
 import { describeOcsArtificialisation, describeOcsCoverage, describeOcsUsage, formatOcsArea } from '../../utils/ocsGe'
 import { formatImportedLayerPopup } from '../../utils/importedLayerPopup'
+import { formatAncientForestPopup } from '../../utils/ancientForestPopup'
 import { buildUserLayerCatalog, type UserLayerTarget } from '../../utils/userLayerCatalog'
 import { isMapPopupGestureAllowed } from '../../utils/fieldReliability'
 import type { MapBrowserEvent } from 'ol'
@@ -2067,6 +2068,11 @@ export function Popup() {
 
           if (data.features && data.features.length > 0) {
             const props = data.features[0].properties
+
+            if (title === 'Oude bossen · Forêts anciennes') {
+              results.push(formatAncientForestPopup(props))
+              continue
+            }
 
             if (title === 'OCS GE landbedekking 2021-2023') {
               const coverageCode = String(props.code_cs ?? '').trim()
