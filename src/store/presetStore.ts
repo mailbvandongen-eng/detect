@@ -267,6 +267,7 @@ function migrateLegacyBaseLayer(baseLayer: string | undefined): string | undefin
 }
 
 function migrateFranceLayerName(layerName: string): string {
+  layerName = layerName.replace('Sites ClassÃ©s ', 'Sites Classés ').replace('ÃŽle-de-France', 'Île-de-France')
   if (layerName === 'Bekende plekken · Thédirac') return THEDIRAC_ARCHAEOLOGY_LAYER
   if (/^Archeologische plekken · (?:regio )?Thédirac \(\d+\)$/.test(layerName)) {
     return THEDIRAC_ARCHAEOLOGY_LAYER
@@ -274,10 +275,20 @@ function migrateFranceLayerName(layerName: string): string {
   return layerName
 }
 
+function normalizeLayerStates(states: Record<string, PresetLayerState> | undefined) {
+  if (!states) return undefined
+  // Als beide namen voorkomen, gaat de huidige naam boven de oude alias.
+  return Object.fromEntries(Object.entries(states)
+    .sort(([a], [b]) => Number(a === migrateFranceLayerName(a)) - Number(b === migrateFranceLayerName(b)))
+    .map(([name, state]) => [migrateFranceLayerName(name), state] as const)
+    .filter(([name]) => !REMOVED_LAYERS.has(name)))
+}
+
 function normalizeLayerOpacities(opacities: Record<string, number> | undefined): Record<string, number> | undefined {
   if (!opacities) return undefined
   return Object.fromEntries(
     Object.entries(opacities)
+      .sort(([a], [b]) => Number(a === migrateFranceLayerName(a)) - Number(b === migrateFranceLayerName(b)))
       .map(([layerName, opacity]) => [migrateFranceLayerName(layerName), opacity] as const)
       .filter(([layerName]) => !REMOVED_LAYERS.has(layerName))
   )
@@ -293,6 +304,7 @@ function normalizePreset(preset: Preset): Preset {
         .map(migrateFranceLayerName)
         .filter((layer) => !REMOVED_LAYERS.has(layer)),
       baseLayer: migrateLegacyBaseLayer(preset.baseLayer),
+      layerStates: normalizeLayerStates(preset.layerStates),
       layerOpacities: normalizeLayerOpacities(preset.layerOpacities)
     }
   }
@@ -307,6 +319,7 @@ function normalizePreset(preset: Preset): Preset {
     ...preset,
     layers: configuredLayers.filter((layer) => !REMOVED_LAYERS.has(layer)),
     baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
+    layerStates: normalizeLayerStates(preset.layerStates),
     layerOpacities: normalizeLayerOpacities(preset.layerOpacities ?? builtInPreset.layerOpacities),
     mapView: preset.mapView ?? builtInPreset.mapView
   }
@@ -318,7 +331,8 @@ export function normalizePresetCollection(presets: Preset[]): Preset[] {
     .filter(preset => !builtInIds.has(preset.id) && !LEGACY_STANDARD_PRESET_IDS.has(preset.id))
     .map(normalizePreset)
 
-  return [...BUILT_IN_PRESETS, ...custom]
+  const saved = new Map(presets.map(preset => [preset.id, preset]))
+  return [...BUILT_IN_PRESETS.map(preset => normalizePreset(saved.get(preset.id) ?? preset)), ...custom]
 }
 
 function isOverlayLayer(layerName: string): boolean {
@@ -379,6 +393,9 @@ function activateFranceResearchLayer(layerName: string) {
   if (!FRANCE_RESEARCH_LAYER_NAMES.has(layerName)) return false
 
   const layerStore = useLayerStore.getState()
+  // Deze lagen hebben een eigen factory. Leg de keuze vóór het laden vast,
+  // zodat een latere preset of handmatig uitzetten de lopende aanvraag wint.
+  layerStore.setLayerVisibility(layerName, true, false)
   const registeredLayer = layerStore.layers[layerName]
   if (registeredLayer) {
     layerStore.setLayerVisibility(layerName, true)
@@ -390,8 +407,8 @@ function activateFranceResearchLayer(layerName: string) {
 
   void import('../layers/franceResearchOL').then(({ FRANCE_RESEARCH_FACTORIES }) => {
     const latestStore = useLayerStore.getState()
+    if (!latestStore.visible[layerName]) return
     if (latestStore.layers[layerName]) {
-      latestStore.setLayerVisibility(layerName, true)
       return
     }
 
@@ -401,7 +418,6 @@ function activateFranceResearchLayer(layerName: string) {
     const layer = factory()
     map.addLayer(layer)
     latestStore.registerLayer(layerName, layer)
-    latestStore.setLayerVisibility(layerName, true)
   }).catch(error => console.error(`Frankrijk-laag kon niet worden geladen: ${layerName}`, error))
 
   return true
@@ -425,8 +441,8 @@ export const usePresetStore = create<PresetState>()(
           ? preset.baseLayer!
           : currentBaseLayer || 'Esri (licht)'
 
-        Object.keys(layerStore.visible)
-          .filter(isOverlayLayer)
+        const overlayNames = [...new Set([...Object.keys(layerStore.visible), ...preset.layers, ...Object.keys(preset.layerStates ?? {})])]
+        overlayNames.filter(isOverlayLayer)
           .forEach(layerName => {
             const snapshot = preset.layerStates?.[layerName]
             const shouldShow = snapshot ? snapshot.visible : preset.layers.includes(layerName)
@@ -550,7 +566,7 @@ export const usePresetStore = create<PresetState>()(
     {
       name: 'detectorapp-presets',
       storage: createJSONStorage(() => accountStorage),
-      version: 30,
+      version: 31,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {

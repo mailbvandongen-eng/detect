@@ -196,12 +196,28 @@ mocks['../store/routeRecordingStore'] = { useRouteRecordingStore: asHook(routes)
 const settingsModule = load('src/store/settingsStore.ts'), presetsModule = load('src/store/presetStore.ts')
 mocks['../store/settingsStore'] = { ...settingsModule, useSettingsStore: asHook(settings) }
 mocks['../store/presetStore'] = { ...presetsModule, usePresetStore: asHook(presetsModule.usePresetStore) }
+const savedVacation = {...presetsModule.usePresetStore.getState().presets.find(p=>p.id==='thedirac-2026'),
+  name:'Mijn Thédirac', baseLayer:'OpenStreetMap', layers:['Mineralen (12)','Fossielen (28)','Spectaculaire wandelroutes (15)','Sites Classés Occitanie'],
+  layerStates:{'Mineralen (12)':{visible:true,opacity:.41},'Fossielen (28)':{visible:true,opacity:.62},'Spectaculaire wandelroutes (15)':{visible:true,opacity:.8},'Sites Classés Occitanie':{visible:true,opacity:.35},'LiDAR HD terrein FR':{visible:false,opacity:.2}},
+  customLayerStates:{'point:kept':{visible:true,opacity:1}},mapView:{center:[1.34,44.62],zoom:13}};
+const normalizedVacation=presetsModule.normalizePresetCollection([savedVacation]).find(p=>p.id===savedVacation.id);
+assert.deepEqual(normalizedVacation,savedVacation);
+assert.deepEqual(presetsModule.normalizePresetCollection([normalizedVacation]).find(p=>p.id===savedVacation.id),savedVacation);
+const legacy=presetsModule.normalizePresetCollection([{...savedVacation,layers:['Sites ClassÃ©s Occitanie'],layerStates:{'Sites ClassÃ©s Occitanie':{visible:false,opacity:.2},'Sites Classés Occitanie':{visible:true,opacity:.35}}}]).find(p=>p.id===savedVacation.id);
+assert.deepEqual(legacy.layers,['Sites Classés Occitanie']);assert.deepEqual(legacy.layerStates['Sites Classés Occitanie'],{visible:true,opacity:.35});
+pass('Saved built-in presets retain all choices through normalization; current layer names override old aliases');
+
 mocks['../services/sharedImportedLayers'] = { getIncomingShares: async () => [], getOwnedShares: async () => [] }
 const pending = []
 mocks['../services/privateCloudSync'] = { synchronizePrivateData: (uid, valid, extras) => new Promise((resolve, reject) => {
   pending.push(() => valid() ? resolve({ data: accounts.privateData(), revision: accounts.privateRevision(), deletedLayerIds: points.getState().deletedLayerIds, cloud: {}, additional: extras({}) }) : reject(new Error('Account is gewijzigd.')))
 }) }
 const syncHook = load('src/hooks/useCloudSync.ts')
+presetsModule.usePresetStore.setState({presets:presetsModule.normalizePresetCollection([savedVacation]),updatedAt:Date.now()});
+refIndex=0;const presetSync=syncHook.useCloudSync().syncNow();await new Promise(resolve=>setImmediate(resolve));pending.shift()();assert.equal((await presetSync).success,true);
+assert.deepEqual(presetsModule.usePresetStore.getState().presets.find(p=>p.id===savedVacation.id),savedVacation);
+pass('Actual cloud sync hook preserves an edited built-in vacation preset');
+
 refIndex = 0
 const firstRequest = syncHook.useCloudSync().syncNow()
 await new Promise(resolve => setImmediate(resolve))

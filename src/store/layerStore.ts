@@ -15,7 +15,7 @@ interface LayerState {
   loadingState: Record<string, LoadingState>
   layers: Record<string, Layer>
   toggleLayer: (name: string) => void
-  setLayerVisibility: (name: string, visible: boolean) => void
+  setLayerVisibility: (name: string, visible: boolean, loadIfNeeded?: boolean) => void
   setLayerOpacity: (name: string, opacity: number) => void
   registerLayer: (name: string, layer: Layer) => void
   unregisterLayer: (name: string) => void
@@ -108,19 +108,19 @@ export const useLayerStore = create<LayerState>()(
       [THEDIRAC_RESEARCH_LAYER_NAME]: false,
       [THEDIRAC_CONTEXT_LAYER_NAME]: false,
       [THEDIRAC_SIGHTS_LAYER_NAME]: false,
-      'Sites ClassÃ©s Bretagne': false,
-      'Sites ClassÃ©s Normandie': false,
-      'Sites ClassÃ©s Hauts-de-France': false,
-      'Sites ClassÃ©s Grand Est': false,
-      'Sites ClassÃ©s ÃŽle-de-France': false,
-      'Sites ClassÃ©s Centre-Val de Loire': false,
-      'Sites ClassÃ©s Bourgogne-FC': false,
-      'Sites ClassÃ©s Pays de la Loire': false,
-      'Sites ClassÃ©s Nouvelle-Aquitaine': false,
-      'Sites ClassÃ©s Auvergne-RA': false,
-      'Sites ClassÃ©s Occitanie': false,
-      'Sites ClassÃ©s PACA': false,
-      'Sites ClassÃ©s Corse': false,
+      'Sites Classés Bretagne': false,
+      'Sites Classés Normandie': false,
+      'Sites Classés Hauts-de-France': false,
+      'Sites Classés Grand Est': false,
+      'Sites Classés Île-de-France': false,
+      'Sites Classés Centre-Val de Loire': false,
+      'Sites Classés Bourgogne-FC': false,
+      'Sites Classés Pays de la Loire': false,
+      'Sites Classés Nouvelle-Aquitaine': false,
+      'Sites Classés Auvergne-RA': false,
+      'Sites Classés Occitanie': false,
+      'Sites Classés PACA': false,
+      'Sites Classés Corse': false,
       'Monumenten IDF': false,
       'Parken': false,
       'Speeltuinen': false,
@@ -190,19 +190,19 @@ export const useLayerStore = create<LayerState>()(
       [THEDIRAC_RESEARCH_LAYER_NAME]: 1,
       [THEDIRAC_CONTEXT_LAYER_NAME]: 1,
       [THEDIRAC_SIGHTS_LAYER_NAME]: 1,
-      'Sites ClassÃ©s Bretagne': 0.5,
-      'Sites ClassÃ©s Normandie': 0.5,
-      'Sites ClassÃ©s Hauts-de-France': 0.5,
-      'Sites ClassÃ©s Grand Est': 0.5,
-      'Sites ClassÃ©s ÃŽle-de-France': 0.5,
-      'Sites ClassÃ©s Centre-Val de Loire': 0.5,
-      'Sites ClassÃ©s Bourgogne-FC': 0.5,
-      'Sites ClassÃ©s Pays de la Loire': 0.5,
-      'Sites ClassÃ©s Nouvelle-Aquitaine': 0.5,
-      'Sites ClassÃ©s Auvergne-RA': 0.5,
-      'Sites ClassÃ©s Occitanie': 0.5,
-      'Sites ClassÃ©s PACA': 0.5,
-      'Sites ClassÃ©s Corse': 0.5
+      'Sites Classés Bretagne': 0.5,
+      'Sites Classés Normandie': 0.5,
+      'Sites Classés Hauts-de-France': 0.5,
+      'Sites Classés Grand Est': 0.5,
+      'Sites Classés Île-de-France': 0.5,
+      'Sites Classés Centre-Val de Loire': 0.5,
+      'Sites Classés Bourgogne-FC': 0.5,
+      'Sites Classés Pays de la Loire': 0.5,
+      'Sites Classés Nouvelle-Aquitaine': 0.5,
+      'Sites Classés Auvergne-RA': 0.5,
+      'Sites Classés Occitanie': 0.5,
+      'Sites Classés PACA': 0.5,
+      'Sites Classés Corse': 0.5
     },
 
     loadingState: {},
@@ -223,7 +223,7 @@ export const useLayerStore = create<LayerState>()(
       }
     },
 
-    setLayerVisibility: (name: string, visible: boolean) => {
+    setLayerVisibility: (name: string, visible: boolean, loadIfNeeded = true) => {
       const state = get()
 
       set(current => {
@@ -234,7 +234,7 @@ export const useLayerStore = create<LayerState>()(
         }
       })
 
-      if (visible && !state.layers[name]) {
+      if (loadIfNeeded && visible && !state.layers[name]) {
         void get().loadLayer(name)
       }
     },

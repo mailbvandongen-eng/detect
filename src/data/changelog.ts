@@ -7,6 +7,13 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.90', date: '6 oktober 2026', title: 'Opgeslagen presetkeuzes behouden',
+    changes: [
+      'Synchronisatie en terugladen behouden nu wijzigingen aan standaardpresets, inclusief Thédirac. Save bewaart ook toegevoegde lagen, uitgeschakelde lagen, transparantie en kaartpositie.',
+      'Sites Classés gebruikt consequent dezelfde laagnamen. Opgeslagen lagen worden bij toepassen ook geladen als ze nog niet in de lagenlijst stonden.',
+    ],
+  },
+  {
     version: '2.33.89', date: '6 oktober 2026', title: 'Eigen lagen en imports inklapbaar',
     changes: [
       'Eigen lagen en Imports beginnen dichtgeklapt. Tik op de kop om iedere groep afzonderlijk te openen of sluiten.',
