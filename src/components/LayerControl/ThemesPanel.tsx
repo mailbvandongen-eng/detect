@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState, type ReactNode } from 'react'
 import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight, Settings2, Trash2, List } from 'lucide-react'
 import { useUIStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
@@ -183,6 +183,22 @@ function PointLayerItem({ layer, onToggle, onDelete, onRename, onChangeColor }: 
   )
 }
 
+function UserLayerSection({ title, count, children }: { title: string; count: number; children: ReactNode }) {
+  const [expanded, setExpanded] = useState(false)
+  const contentId = useId()
+  return <section>
+    <button type="button" aria-label={title} aria-expanded={expanded} aria-controls={contentId}
+      onClick={() => setExpanded(value => !value)}
+      className="flex w-full min-h-[44px] items-center gap-2 rounded px-1 py-1 text-left font-medium"
+      style={{ color: 'var(--detect-accent)', fontSize: '0.9em' }}>
+      {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+      {title === 'Imports' ? <Upload size={14} /> : <Layers size={14} />}
+      <span>{title}</span><span className="ml-auto text-xs" style={{ color: 'var(--detect-window-muted)' }}>{count}</span>
+    </button>
+    <div id={contentId} hidden={!expanded}>{children}</div>
+  </section>
+}
+
 export function ThemesPanel() {
   const themesPanelOpen = useUIStore(state => state.activeWindow === 'layers')
   const toggleThemesPanel = useUIStore(state => state.toggleThemesPanel)
@@ -205,12 +221,9 @@ export function ThemesPanel() {
       onClose={toggleThemesPanel}
     >
       <div className="p-2">
-            {/* Eén lijst voor zelfgemaakte en geïmporteerde lagen. */}
+            {/* Inklappen verandert alleen de lijst, nooit de kaartzichtbaarheid. */}
             <div className="mb-2 pb-1 border-b border-gray-100">
-              <div className="flex items-center gap-1 py-0.5 px-1 mb-1">
-                <Layers size={12} className="text-purple-600" />
-                <span className="text-purple-600 font-medium" style={{ fontSize: '0.9em' }}>Eigen lagen</span>
-              </div>
+              <UserLayerSection title="Eigen lagen" count={standalonePointLayers.length}>
               <p className="px-1 text-[11px] mb-1" style={{ color: 'var(--detect-window-muted)' }}>Nieuwe lagen zijn privé. Delen stel je in via de laaginstellingen.</p>
               {standalonePointLayers.map(layer => (
                 <PointLayerItem
@@ -222,6 +235,7 @@ export function ThemesPanel() {
                   onChangeColor={(color) => updateLayer(layer.id, { color })}
                 />
               ))}
+              </UserLayerSection>
               <BuddyWriteStatus />
               {buddyError && (
                 <div role="alert" className="rounded-lg bg-red-50 p-2 text-xs text-red-700">
@@ -229,12 +243,13 @@ export function ThemesPanel() {
                   <button onClick={refreshBuddies} className="mt-1 underline">Opnieuw proberen</button>
                 </div>
               )}
-              <div className="px-1 pt-3 pb-1 font-medium" style={{ color: 'var(--detect-accent)', fontSize: '0.9em' }}>Imports</div>
+              <UserLayerSection title="Imports" count={importedLayers.length}>
               <p className="px-1 text-[11px] mb-1" style={{ color: 'var(--detect-window-muted)' }}>Geïmporteerde kaarten. Eigen lagen leg je hier overheen.</p>
               {importedLayers.length === 0 && <p className="px-1 text-[11px]">Nog geen imports</p>}
               {importedLayers.map(layer => (
                 <CustomLayerItem key={layer.id} layer={layer} compact />
               ))}
+              </UserLayerSection>
               <div className="grid grid-cols-2 gap-2 px-1 pt-2">
                 <button
                   onClick={(event) => { event.stopPropagation(); openWindow('createLayer', 'layers') }}

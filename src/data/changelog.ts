@@ -7,6 +7,13 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.89', date: '6 oktober 2026', title: 'Eigen lagen en imports inklapbaar',
+    changes: [
+      'Eigen lagen en Imports beginnen dichtgeklapt. Tik op de kop om iedere groep afzonderlijk te openen of sluiten.',
+      'Inklappen verandert de kaartzichtbaarheid niet. Nieuwe laag, Importeren en meldingen over gedeelde opslag blijven bereikbaar.',
+    ],
+  },
+  {
     version: '2.33.88', date: '6 oktober 2026', title: 'Bronlinks en externe kaarten hersteld',
     changes: [
       'Atlas des patrimoines opent via het officiële HTTP-kaartadres. Bronpagina en externe kaart hebben ieder een eigen knop; ook BRGM en IGN bieden nu een directe kaartingang.',

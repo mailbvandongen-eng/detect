@@ -67,6 +67,17 @@ try {
  await page.goto(server.resolvedUrls.local[0]+'buddy-test')
  await page.getByText('Eigen lagen',{exact:true}).waitFor()
  await page.getByText('Imports',{exact:true}).waitFor()
+ const ownSection=page.getByRole('button',{name:'Eigen lagen',exact:true}),importSection=page.getByRole('button',{name:'Imports',exact:true});
+ await page.screenshot({path:'/tmp/detect-layers-collapsed.png',animations:'disabled'});
+ assert.equal(await ownSection.getAttribute('aria-expanded'),'false');assert.equal(await importSection.getAttribute('aria-expanded'),'false');
+ assert.equal(await page.getByTitle('Import test',{exact:true}).isVisible(),false);
+ const beforeCollapse=await page.evaluate(()=>JSON.stringify({points:window.test.points.getState().layers,imports:window.test.imports.getState().layers}));
+ await ownSection.tap();await importSection.tap();assert.equal(await page.getByTitle('Import test',{exact:true}).isVisible(),true);
+ await ownSection.tap();assert.equal(await importSection.getAttribute('aria-expanded'),'true');await importSection.tap();
+ assert.equal(await page.evaluate(()=>JSON.stringify({points:window.test.points.getState().layers,imports:window.test.imports.getState().layers})),beforeCollapse);
+ await page.getByRole('button',{name:'Nieuwe laag',exact:true}).waitFor();await page.getByRole('button',{name:'Importeren',exact:true}).waitFor();
+ await ownSection.tap();await importSection.tap();
+ console.log('PASS collapsed by default, independently open/close with unchanged layer data/visibility and creation controls available')
  await page.evaluate(()=>{
    const base={color:'#f97316',visible:true,archived:false,categories:['Overig'],createdAt:'2026-10-04'};
    window.test.points.setState(state=>({layers:window.test.repair([...state.layers,
@@ -92,6 +103,7 @@ try {
  const input=page.getByRole('textbox',{name:'Google-e-mailadres',exact:true})
  await input.tap()
  await input.pressSequentially('Buddy@Example.com')
+ await ownSection.tap();await ownSection.tap();await input.tap();
  assert.equal(await input.inputValue(),'Buddy@Example.com')
  assert.equal(await input.evaluate(el=>el===document.activeElement),true)
  assert.ok((await input.boundingBox()).width>=230,'Email must remain full width on iPhone at 130% text size')
@@ -150,11 +162,13 @@ try {
  await page.getByLabel('Naam van de laag',{exact:true}).fill('Nieuwe eigen laag')
  assert.equal(await page.getByRole('button',{name:'Buddy-laag',exact:true}).count(),0)
  await page.getByRole('button',{name:'Aanmaken',exact:true}).tap()
+ await ownSection.tap()
  await page.getByTitle('Nieuwe eigen laag',{exact:true}).waitFor()
  const created=await page.evaluate(()=>window.test.points.getState().layers.find(layer=>layer.name==='Nieuwe eigen laag'))
  assert.equal(created.buddyLayerId,undefined)
  assert.equal(created.color,'#7c5ac7')
  console.log('PASS actual creation flow: immediately visible private layer in chosen purple')
+ await importSection.tap()
  const importItem=page.getByTitle('Import test',{exact:true}).locator('..').locator('..')
  await importItem.getByTitle('Laaginstellingen',{exact:true}).tap()
  assert.equal(await importItem.getByRole('textbox',{name:'Google-e-mailadres',exact:true}).count(),0)
@@ -166,17 +180,20 @@ try {
  console.log('PASS actual transparency control updates import store')
  await page.getByRole('dialog',{name:'Transparantie',exact:true}).getByRole('button',{name:'Transparantie sluiten',exact:true}).tap()
  await page.evaluate(()=>window.test.openLayers())
+ await ownSection.tap();await importSection.tap()
  await page.getByTitle('Laaginstellingen',{exact:true}).first().tap()
  if(process.env.BUDDY_SCREENSHOT)await page.screenshot({path:process.env.BUDDY_SCREENSHOT})
  await page.evaluate(()=>{window.test.theme('purple','dark');window.test.signOut()})
  await page.getByRole('alert').filter({hasText:'Log in'}).waitFor()
  console.log('PASS lost sign-in is visible instead of silently ignoring submit')
  await page.evaluate(()=>window.test.switchAccount('test-other'))
+ assert.equal(await ownSection.getAttribute('aria-expanded'),'false');await ownSection.tap()
  assert.equal(await page.evaluate(()=>window.test.points.getState().layers.length),0)
  assert.equal(await page.evaluate(()=>window.test.imports.getState().layers.length),0)
  await page.evaluate(()=>window.test.points.getState().addLayer('Andere gebruiker'))
  await page.getByTitle('Andere gebruiker',{exact:true}).waitFor()
  await page.evaluate(()=>window.test.switchAccount('test-owner'))
+ assert.equal(await ownSection.getAttribute('aria-expanded'),'false');await ownSection.tap();await importSection.tap()
  await page.getByTitle('Nieuwe eigen laag',{exact:true}).waitFor()
  await page.getByTitle('Import test',{exact:true}).waitFor()
  assert.equal(await page.getByTitle('Andere gebruiker',{exact:true}).count(),0)
