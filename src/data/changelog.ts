@@ -7,6 +7,10 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.92', date: '6 oktober 2026', title: 'Scherpere LiDAR voor Nederland',
+    changes: ['De Nederlandse hillshade en multidirectionele LiDAR gebruiken nu AHN4 met een resolutie van 50 cm in plaats van 5 meter. Bestaande presets, opgeslagen transparantie en laagkeuzes blijven dezelfde lagen gebruiken.'],
+  },
+  {
     version: '2.33.91', date: '6 oktober 2026', title: 'Leesbare informatie bij oude bossen',
     changes: ['De kaartinformatie bij oude bossen toont Nederlandse veldnamen en boscategorieën. Oppervlakten staan in hectares en vierkante meters.'],
   },

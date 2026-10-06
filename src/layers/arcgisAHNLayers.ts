@@ -32,12 +32,12 @@ export function createArcGISAHN4ColorElevation(): ImageryLayer {
 }
 
 /**
- * AHN4 Hillshade NL - 5m resolutie
+ * AHN4 Hillshade NL - 50cm resolutie
  * Grijze hillshade voor 3D-effect
  */
 export function createArcGISAHN4Hillshade(): ImageryLayer {
   return new ImageryLayer({
-    url: AHN4_DTM_5M_URL,
+    url: AHN4_DTM_50CM_URL,
     title: 'AHN4 Hillshade NL',
     visible: false,
     opacity: 0.7,
@@ -46,12 +46,12 @@ export function createArcGISAHN4Hillshade(): ImageryLayer {
 }
 
 /**
- * AHN4 Multi-Hillshade NL - 5m resolutie
+ * AHN4 Multi-Hillshade NL - 50cm resolutie
  * Multidirectionele hillshade voor beter subtiel relief
  */
 export function createArcGISAHN4MultiHillshade(): ImageryLayer {
   return new ImageryLayer({
-    url: AHN4_DTM_5M_URL,
+    url: AHN4_DTM_50CM_URL,
     title: 'AHN4 Multi-Hillshade NL',
     visible: false,
     opacity: 0.7,

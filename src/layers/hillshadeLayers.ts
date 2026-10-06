@@ -90,14 +90,14 @@ export function createAHN4ShadedReliefLayerOL() {
 }
 
 // AHN4 Hillshade Netherlands - Esri Nederland ImageServer
-// Uses dynamic hillshade rendering from AHN4 DTM data
+// Uses dynamic hillshade rendering from AHN4 DTM at 50cm resolution
 export function createAHN4HillshadeLayerOL() {
   const layer = new TileLayer({
     properties: { title: 'AHN4 Hillshade NL', type: 'arcgis' },
     visible: false,
     opacity: 0.7,
     source: new TileArcGISRest({
-      url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_5m/ImageServer',
+      url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({
           rasterFunction: 'AHN - Hillshade'
@@ -118,7 +118,7 @@ export function createAHN4MultiHillshadeLayerOL() {
     visible: false,
     opacity: 0.7,
     source: new ImageArcGISRest({
-      url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_5m/ImageServer',
+      url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({
           rasterFunction: 'AHN - Hillshade (Multidirectionaal)'

@@ -112,5 +112,30 @@ try{
  await page.reload();await page.waitForFunction(()=>!!window.test);await page.evaluate(()=>{window.test.presets.getState().applyPreset('thedirac-2026');window.test.mapLayers.getState().setLayerVisibility('Mineralen (12)',false,false)});
  await page.waitForFunction(()=>!!window.test.mapLayers.getState().layers['Fossielen (28)']);assert.equal(await page.evaluate(()=>window.test.mapLayers.getState().visible['Mineralen (12)']),false);assert.equal(await page.evaluate(()=>window.test.mapLayers.getState().layers['Mineralen (12)']?.getVisible()??false),false);
  console.log('PASS real Save, cloud normalization, three refreshes and cold factory loading retain minerals, fossils, hikes, Sites Classés, opacity, base and view');
+ // Existing built-in and saved custom presets must resolve the new source, including cold reload.
+ const lidarName='AHN4 Multi-Hillshade NL',hillshadeName='AHN4 Hillshade NL';
+ const exports=[];
+ await page.route('https://ahn.arcgisonline.nl/**/exportImage?*',async route=>{
+  exports.push(route.request().url());
+  await route.fulfill({status:200,contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=','base64')});
+ });
+ await page.evaluate(()=>{window.test.ui.getState().closeWindow();window.test.map.getView().setCenter([627000,6800000]);window.test.map.getView().setZoom(17);window.test.presets.getState().applyPreset('veld-lidar')});
+ await page.waitForFunction(name=>window.test.mapLayers.getState().layers[name]?.getVisible(),lidarName);
+ const sourceState=()=>page.evaluate(name=>{const s=window.test.mapLayers.getState(),l=s.layers[name];return {url:l.getSource().getUrl(),rule:JSON.parse(l.getSource().getParams().renderingRule).rasterFunction,visible:l.getVisible(),opacity:l.getOpacity(),center:window.test.map.getView().getCenter(),zoom:window.test.map.getView().getZoom()}},lidarName);
+ let lidar=await sourceState();assert.ok(lidar.url.endsWith('/AHN4_DTM_50cm/ImageServer'));assert.equal(lidar.rule,'AHN - Hillshade (Multidirectionaal)');assert.equal(lidar.opacity,1);
+ await page.waitForFunction(name=>window.test.mapLayers.getState().layers[name].getSource().getImageInternal(window.test.map.getView().calculateExtent(),window.test.map.getView().getResolution(),window.devicePixelRatio,window.test.map.getView().getProjection())?.getState()===2,lidarName);
+ const center=lidar.center;
+ for(const zoom of [18,19]){const count=exports.length;await Promise.all([page.waitForResponse(r=>r.url().includes('ahn.arcgisonline.nl')&&r.url().includes('/exportImage?')&&r.status()===200),page.evaluate(z=>window.test.map.getView().setZoom(z),zoom)]);await page.waitForFunction(z=>window.test.map.getView().getZoom()===z,zoom);assert.deepEqual((await sourceState()).center,center);assert.ok(exports.length>count,'Zoom requests fresh detail rather than stretching an old image');}
+ await page.evaluate(name=>{window.test.mapLayers.getState().setLayerOpacity(name,.23);window.test.presets.getState().createPreset('Bestaande eigen LiDAR','Grid',true)},lidarName);
+ const own=await page.evaluate(()=>JSON.parse(JSON.stringify(window.test.presets.getState().presets.find(p=>p.name==='Bestaande eigen LiDAR'))));assert.ok(own.layers.includes(lidarName));assert.equal(own.layerOpacities[lidarName],.23);
+ await page.reload();await page.waitForFunction(()=>!!window.test);await page.evaluate(id=>window.test.presets.getState().applyPreset(id),own.id);await page.waitForFunction(name=>window.test.mapLayers.getState().layers[name]?.getVisible(),lidarName);
+ assert.deepEqual(await page.evaluate(id=>JSON.parse(JSON.stringify(window.test.presets.getState().presets.find(p=>p.id===id))),own.id),own);
+ await page.waitForFunction(()=>!window.test.map.getView().getAnimating());lidar=await sourceState();assert.ok(lidar.url.endsWith('/AHN4_DTM_50cm/ImageServer'));assert.equal(lidar.opacity,.23);assert.equal(lidar.zoom,19);assert.ok(lidar.center.every((v,i)=>Math.abs(v-center[i])<.001),'Saved map centre is retained within a millimetre');
+ await page.evaluate(()=>window.test.presets.getState().applyPreset('detectie-uitgebreid'));await page.waitForFunction(name=>window.test.mapLayers.getState().layers[name]?.getVisible(),lidarName);assert.equal((await sourceState()).opacity,.2);
+ await page.evaluate(name=>window.test.mapLayers.getState().setLayerVisibility(name,true),hillshadeName);await page.waitForFunction(name=>!!window.test.mapLayers.getState().layers[name],hillshadeName);
+ assert.ok((await page.evaluate(name=>window.test.mapLayers.getState().layers[name].getSource().getUrls()[0],hillshadeName)).endsWith('/AHN4_DTM_50cm/ImageServer'));
+ await page.evaluate(name=>{window.test.mapLayers.getState().setLayerOpacity(name,0);window.test.mapLayers.getState().setLayerVisibility(name,false)},lidarName);assert.equal((await sourceState()).visible,false);assert.equal((await sourceState()).opacity,0);
+ assert.ok(exports.length>=3);for(const url of exports){assert.ok(url.includes('/AHN4_DTM_50cm/'),'No old 5m LiDAR request');assert.ok(['AHN - Hillshade','AHN - Hillshade (Multidirectionaal)','AHN - Color Ramp D'].includes(JSON.parse(new URL(url).searchParams.get('renderingRule')).rasterFunction));}
+ console.log('PASS iPhone LiDAR: built-in and saved custom presets resolve 50cm; reload, opacity, off/zero, fresh zoom exports and map centre retained');
  assert.deepEqual(errors,[]);console.log('WebKit: Thedirac 187, presets and imports, paging/search/filter, map/return, protected source data, concurrent edits, buddy queue/permissions, layout at three sizes/130%, account isolation and persisted edits passed.')
 }catch(e){console.log('Failure screen:',await page?.locator('body').innerText().catch(()=>''));await page?.screenshot({path:'/tmp/detect-list-failure.png'}).catch(()=>{});throw e}finally{await browser?.close();await server.close()}
