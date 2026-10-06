@@ -14,7 +14,7 @@ import { useCustomPointLayerStore, type PointStatus } from '../../store/customPo
 import { useGPSStore } from '../../store/gpsStore'
 import { useLayerStore } from '../../store/layerStore'
 import { useMapStore } from '../../store/mapStore'
-import { buildPersonalPlaceSources, collectPlaces, distanceToPlace, filterPlaces, getScopedSources, placeResearchMetadata, placeSourceUrl, type PlaceListScope } from '../../utils/placeList'
+import { buildPersonalPlaceSources, collectPlaces, distanceToPlace, filterPlaces, getScopedSources, placeResearchMetadata, placeSourceUrl, placeExternalMapUrl, type PlaceListScope } from '../../utils/placeList'
 import { getThediracPlaceSources } from '../../utils/thediracPlaceSources'
 import { formatImportedLayerPopup } from '../../utils/importedLayerPopup'
 import { sanitizePopupHtml } from '../../utils/safePopupHtml'
@@ -75,6 +75,8 @@ function PlaceListSession() {
   const scrollPosition = useRef(0)
   const selected = entries.find(e => e.id === selectedId)
   const selectedSourceUrl = selected ? placeSourceUrl(selected) : null
+  const selectedMapUrl = selected ? placeExternalMapUrl(selected) : null
+  const selectedIsSource = selected?.properties.bronvermelding === true
   const selectedMetadata = selected ? placeResearchMetadata(selected) : null
   const currentPointLayer = selected?.pointId ? pointLayers.find(l => l.id === selected.layerId) : undefined
   const currentPoint = currentPointLayer?.points.find(p => p.id === selected?.pointId)
@@ -160,7 +162,7 @@ function PlaceListSession() {
   }
   const scopeName = scope.startsWith('preset:') ? presets.find(p => `preset:${p.id}` === scope)?.name : sources.find(s => s.key === scope)?.name
   const scopeExists = scope === 'all' || scope === 'visible' || !!scopeName
-  const listTitle = selected ? (draft ? 'Plek bewerken' : 'Plek bekijken') : 'Lijstweergave'
+  const listTitle = selected ? (draft ? 'Plek bewerken' : selectedIsSource ? 'Bron bekijken' : 'Plek bekijken') : 'Lijstweergave'
 
   return <>
     {mapPreview && !activeWindow && selected && <button type="button" className="place-list-return" onClick={() => {setMapPreview(false); useUIStore.getState().openWindow('placeList')}}><ArrowLeft size={18}/> Terug naar lijst</button>}
@@ -188,7 +190,7 @@ function PlaceListSession() {
           {filtersActive && <button type="button" className="detect-window-secondary-button" onClick={clearFilters}>Filters wissen</button>}
         </div>}
       </div>}
-      footer={draft ? <div key="edit-actions" className="place-list-actions"><button type="button" className="detect-window-secondary-button" onClick={() => {if(mayLeave()) {setDraft(null); setSaveError('')}}}>Annuleren</button><button type="submit" form="place-list-edit" className="detect-window-primary-button" disabled={!draft.name.trim()}>Opslaan</button></div> : selected ? <div key="detail-actions" className="place-list-actions"><button type="button" className="detect-window-primary-button" onClick={showOnMap} disabled={!selected.coordinates || !map}><MapPin size={18}/> Toon op kaart</button>{selectedSourceUrl && <a className="detect-window-secondary-button" href={selectedSourceUrl} target="_blank" rel="noopener noreferrer">Open bron</a>}{selected.editable && <button type="button" className="detect-window-secondary-button" onClick={e => {e.preventDefault(); edit()}}><Pencil size={16}/> Bewerken</button>}</div> : <div className="place-list-footer"><span>{scopeName || (scope === 'all' ? 'Eigen lagen, imports en vakantieplekken' : 'Plekken uit je zichtbare lagen')}</span><button type="button" className="detect-window-secondary-button" onClick={close}><MapPin size={16}/> Kaart</button></div>}
+      footer={draft ? <div key="edit-actions" className="place-list-actions"><button type="button" className="detect-window-secondary-button" onClick={() => {if(mayLeave()) {setDraft(null); setSaveError('')}}}>Annuleren</button><button type="submit" form="place-list-edit" className="detect-window-primary-button" disabled={!draft.name.trim()}>Opslaan</button></div> : selected ? <div key="detail-actions" className="place-list-actions">{!selectedIsSource && <button type="button" className="detect-window-primary-button" onClick={showOnMap} disabled={!selected.coordinates || !map}><MapPin size={18}/> Toon op kaart</button>}{selectedMapUrl && <a className="detect-window-primary-button" href={selectedMapUrl} target="_blank" rel="noopener noreferrer"><MapPin size={18}/> Open externe kaart</a>}{selectedSourceUrl && <a className="detect-window-secondary-button" href={selectedSourceUrl} target="_blank" rel="noopener noreferrer">Open bron</a>}{selected.editable && <button type="button" className="detect-window-secondary-button" onClick={e => {e.preventDefault(); edit()}}><Pencil size={16}/> Bewerken</button>}</div> : <div className="place-list-footer"><span>{scopeName || (scope === 'all' ? 'Eigen lagen, imports en vakantieplekken' : 'Plekken uit je zichtbare lagen')}</span><button type="button" className="detect-window-secondary-button" onClick={close}><MapPin size={16}/> Kaart</button></div>}
     >
       <div ref={contentRef}>
         {selected ? <div className="place-list-detail">
@@ -203,9 +205,9 @@ function PlaceListSession() {
             <label>Telefoon<input type="tel" aria-label="Telefoon van plek" value={draft.phone} onChange={e => setDraft({...draft,phone:e.target.value})}/></label>
             <label>Website<input aria-label="Website van plek" value={draft.url} onChange={e => setDraft({...draft,url:e.target.value})}/></label>
           </form> : <>
-            {currentPoint ? <><p className="place-list-notes">{currentPoint.notes || 'Geen notities toegevoegd.'}</p><p className="place-list-meta">{statusLabels[currentPoint.status] || 'Te bezoeken'}</p>{(currentPoint.phone || currentPoint.url || selected.popupHtml) && <div className="place-list-detail-html" dangerouslySetInnerHTML={{__html:sanitizePopupHtml((selected.popupHtml || '') + formatImportedLayerPopup({telefoon: currentPoint.phone, link: currentPoint.url, layerName:selected.layerName}))}}/>}</> : <div className="place-list-detail-html" dangerouslySetInnerHTML={{__html:sanitizePopupHtml(formatImportedLayerPopup({...selected.properties, layerName:selected.layerName, layerColor:selected.color, layerPopupConfig:importedLayers.find(l => l.id === selected.layerId)?.popupConfig || {titleField:'naam', hiddenFields:['detectSeed','detectSeedId','periodegroep','locatienauwkeurigheid'], showTechnicalFields:false}}))}}/>}
+            {currentPoint ? <><p className="place-list-notes">{currentPoint.notes || 'Geen notities toegevoegd.'}</p><p className="place-list-meta">{statusLabels[currentPoint.status] || 'Te bezoeken'}</p>{(currentPoint.phone || currentPoint.url || selected.popupHtml) && <div className="place-list-detail-html" dangerouslySetInnerHTML={{__html:sanitizePopupHtml((selected.popupHtml || '') + formatImportedLayerPopup({telefoon: currentPoint.phone, link: currentPoint.url, layerName:selected.layerName}))}}/>}</> : <div className="place-list-detail-html" dangerouslySetInnerHTML={{__html:sanitizePopupHtml(formatImportedLayerPopup({...selected.properties, link:selectedSourceUrl || selected.properties.link, layerName:selected.layerName, layerColor:selected.color, layerPopupConfig:importedLayers.find(l => l.id === selected.layerId)?.popupConfig || {titleField:'naam', hiddenFields:['detectSeed','detectSeedId','periodegroep','locatienauwkeurigheid','bronvermelding','kaartlink','gebruik'], showTechnicalFields:false}}))}}/>}
             {!selected.editable && <p className="place-list-meta">{currentPointLayer?.buddyRole === 'read' ? 'Gedeelde laag · alleen bekijken' : selected.sourceKey.startsWith('imported:') ? 'Import · alleen bekijken' : 'Brongegevens · alleen bekijken'}</p>}
-            {!selected.coordinates && <p className="place-list-meta">Deze plek heeft geen geldige kaartlocatie.</p>}
+            {selectedIsSource ? <p className="place-list-meta">{String(selected.properties.gebruik || 'Dit is een publicatie of inventaris, zonder eigen kaartpunt in Detect. Open bron om de informatie te bekijken.')}</p> : !selected.coordinates && <p className="place-list-meta">Deze plek heeft geen geldige kaartlocatie.</p>}
           </>}
           {saveError && <p role="alert" className="place-list-error">{saveError}</p>}
           {currentPointLayer?.buddyLayerId && <BuddyWriteStatus/>}

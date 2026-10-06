@@ -26,7 +26,7 @@ export function getThediracPlaceSources(visible: Record<string, boolean>): Place
       id: `${context.key}:guide:${guide.id}`, sourceKey: context.key, layerId: context.name, layerName: context.name, color: context.color,
       name: guide.naam, category: 'Bron & kaart', description: guide.omschrijving,
       coordinates: null, createdAt: '', geometryType: '', editable: false,
-      properties: {...guide, categorie: 'Bron & kaart', bewijsstatus: 'Bron & kaart'},
+      properties: {...guide, bronvermelding: true, categorie: 'Bron & kaart', bewijsstatus: 'Bron & kaart'},
     }))
   ]}]
 }

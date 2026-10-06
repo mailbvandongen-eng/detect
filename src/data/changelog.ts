@@ -7,6 +7,14 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.88', date: '6 oktober 2026', title: 'Bronlinks en externe kaarten hersteld',
+    changes: [
+      'Atlas des patrimoines opent via het officiële HTTP-kaartadres. Bronpagina en externe kaart hebben ieder een eigen knop; ook BRGM en IGN bieden nu een directe kaartingang.',
+      'Bronnen zonder eigen kaartpunt heten Bron bekijken. De uitgeschakelde kaartknop en de misleidende melding over een ongeldige locatie zijn daar verwijderd.',
+      'Thédirac-bronadressen gecontroleerd; de bronlink voor Forêt de Grésigne is bijgewerkt, ook in de lijst van eerdere imports. Eigen locaties en notities blijven behouden.',
+    ],
+  },
+  {
     version: '2.33.87', date: '6 oktober 2026', title: 'Thédirac: meer archeologie en uitgebreidere lijst',
     changes: [
       'Zes gepubliceerde prehistorische vermeldingen toegevoegd. De bestaande vakantieplekken blijven behouden; globale posities zijn herkenbaar als gemeentecentrum.',

@@ -1170,7 +1170,7 @@ export const THEDIRAC_SIGHTS: ThediracSight[] = [
     whyWorthItNl: 'Dit benadert jouw “oerbos”-wens eerlijk: oud en soortenrijk, maar zonder sprookjes over onaangeraakte wildernis.',
     whyWorthItFr: 'Une réponse honnête à la recherche de vieille forêt : ancienne et riche, sans mythe de nature vierge.',
     source: 'Office national des forêts — Forêt de Grésigne',
-    sourceUrl: 'https://www.onf.fr/vivre-la-foret/que-faire-en-foret/balade-activites-en-foret/%2B/c0e%3A%3Aforet-de-gresigne-ou-lexcursion-dans-la-plus-grande-chenaie-du-sud-de-la-france.html'
+    sourceUrl: 'https://www.onf.fr/onf/%2B/c0e%3A%3Aforet-de-gresigne-ou-lexcursion-dans-la-plus-grande-chenaie-du-sud-de-la-france.html'
   },
   {
     id: 'canyon-de-bozouls',

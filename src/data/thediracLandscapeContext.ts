@@ -35,7 +35,9 @@ export const THEDIRAC_LANDSCAPE_FEATURES: CustomFeature[] = [
 export const THEDIRAC_SOURCE_GUIDES = [
   {id:'atlas', naam:'Atlas des patrimoines — archeologische onderzoekszones', periode:'Alle perioden',
     omschrijving:'Openbare ZPPA-zones en erfgoedbescherming. Niet volledig en niet per periode ingedeeld. Een ontbrekende zone betekent niet dat er geen archeologie ligt. De dekking bij Thédirac is hier niet als volledige lokale kaart geïnventariseerd.',
-    bron:'Ministère de la Culture', link:'https://atlas.patrimoines.culture.fr/'},
+    bron:'Ministère de la Culture', link:'https://www.culture.gouv.fr/regions/drac-pays-de-la-loire/ressources-et-documents/atlas-des-patrimoines',
+    kaartlink:'http://atlas.patrimoines.culture.fr/atlas/trunk/',
+    gebruik:'Open externe kaart, zoek Thédirac en laad de archeologische zones. De Atlas wordt door de beheerder via HTTP aangeboden; de HTTPS-versie werkt niet betrouwbaar.'},
   {id:'national', naam:'Carte archéologique nationale — inventaris op aanvraag', periode:'Alle perioden',
     omschrijving:'De nationale inventaris is bij de SRA van DRAC Occitanie opvraagbaar. De beschikbare nauwkeurigheid hangt af van de bescherming van het erfgoed. Geen volledig openbare puntenexport.',
     bron:'Ministère de la Culture / DRAC Occitanie', link:'https://www.culture.gouv.fr/thematiques/archeologie/l-archeologie-en-france/la-carte-archeologique-nationale'},
@@ -47,8 +49,12 @@ export const THEDIRAC_SOURCE_GUIDES = [
     bron:'Éditions de la Maison des sciences de l’homme, 2011', link:'https://www.editions-msh.fr/livre/carte-archeologique-de-la-gaule-116/'},
   {id:'brgm', naam:'BRGM InfoTerre — geologie en rivierafzettingen', periode:'Alle perioden',
     omschrijving:'Openbare geologische kaarten en toelichtingen. Gebruik naast LiDAR om afzettingen en gesteenten te onderscheiden. De geologie is al als kaartlaag in de vakantiepreset aanwezig.',
-    bron:'BRGM — InfoTerre', link:'https://infoterre.brgm.fr/'},
+    bron:'BRGM — InfoTerre', link:'https://infoterre.brgm.fr/',
+    kaartlink:'http://infoterre.brgm.fr/viewer/MainTileForward.do',
+    gebruik:'Open externe kaart en zoek Thédirac. BRGM adviseert HTTP voor de legenda en toelichtingen. Geologie kun je ook rechtstreeks in de vakantiepreset bekijken.'},
   {id:'lidar', naam:'IGN LiDAR HD — terrein onder begroeiing', periode:'Alle perioden',
     omschrijving:'Open terreinhoogtegegevens voor reliëf, terrassen en landschapsvormen. Een vorm in het reliëf heeft daarmee nog geen archeologische datering. De LiDAR-terreinlaag is al in de vakantiepreset aanwezig.',
-    bron:'IGN — LiDAR HD', link:'https://www.ign.fr/institut/programme-lidar-hd-vers-une-nouvelle-cartographie-3d-du-territoire'}
+    bron:'IGN — LiDAR HD', link:'https://www.ign.fr/institut/programme-lidar-hd-vers-une-nouvelle-cartographie-3d-du-territoire',
+    kaartlink:'https://cartes.gouv.fr/',
+    gebruik:'Open externe kaart, zoek Thédirac en kies Relief du terrain HD (MNT LIDAR HD). LiDAR kun je ook rechtstreeks in de vakantiepreset bekijken.'}
 ]

@@ -48,8 +48,22 @@ try{
  await page.getByRole('status').filter({hasText:'187 van 187'}).waitFor();
  await open('builtin:Landschap & bronnen · Thédirac');await page.getByRole('status').filter({hasText:'9 van 9'}).waitFor();
  await page.getByRole('button',{name:'Filters',exact:true}).tap();await page.getByRole('combobox',{name:'Filter op bewijsstatus',exact:true}).selectOption('Bron & kaart');
- await page.getByRole('status').filter({hasText:'6 van 9'}).waitFor();await row('Atlas des patrimoines').tap();assert.equal(await page.getByRole('button',{name:'Toon op kaart',exact:true}).isDisabled(),true);
- assert.equal(await page.getByRole('link',{name:'Open bron',exact:true}).getAttribute('href'),'https://atlas.patrimoines.culture.fr/');
+ await page.getByRole('status').filter({hasText:'6 van 9'}).waitFor();await row('Atlas des patrimoines').tap();assert.equal(await page.getByRole('button',{name:'Toon op kaart',exact:true}).count(),0);
+ await page.getByRole('dialog',{name:'Bron bekijken',exact:true}).waitFor();
+ assert.equal(await page.getByRole('link',{name:'Open externe kaart',exact:true}).getAttribute('href'),'http://atlas.patrimoines.culture.fr/atlas/trunk/');
+ assert.equal(await page.getByText('Deze plek heeft geen geldige kaartlocatie.',{exact:true}).count(),0);
+ assert.match(await page.getByRole('link',{name:'Open bron',exact:true}).getAttribute('href'),/^https:\/\/www.culture.gouv.fr\//);
+ for(const [name,url] of [['BRGM InfoTerre','http://infoterre.brgm.fr/viewer/MainTileForward.do'],['IGN LiDAR HD','https://cartes.gouv.fr/']]){await open('builtin:Landschap & bronnen · Thédirac');await row(name).tap();assert.equal(await page.getByRole('link',{name:'Open externe kaart',exact:true}).getAttribute('href'),url);assert.equal(await page.getByRole('button',{name:'Toon op kaart',exact:true}).count(),0)}
+ await open('builtin:Landschap & bronnen · Thédirac');await row('Carte archéologique nationale').tap();assert.equal(await page.getByRole('link',{name:'Open externe kaart',exact:true}).count(),0);assert.equal(await page.getByRole('button',{name:'Toon op kaart',exact:true}).count(),0);await page.getByRole('link',{name:'Open bron',exact:true}).waitFor();
+ for(const name of ['Les Secades','Roc de Combe','Les Bosses','Les Combes','La Plane','Mas-Viel','Bouriane','Lot beneden Cahors','Frau bij Thédirac']){
+  await open('preset:thedirac-2026');await page.getByRole('searchbox',{name:'Zoek plekken',exact:true}).fill(name);await row(name).first().tap();
+  assert.equal(await page.getByRole('button',{name:'Toon op kaart',exact:true}).isEnabled(),true);await page.getByRole('button',{name:'Toon op kaart',exact:true}).tap();
+  await page.waitForFunction(()=>!window.test.map.getView().getAnimating());assert.equal(await page.evaluate(()=>window.test.map.getLayers().getArray().find(l=>l.get('name')==='place-list-preview').getSource().getFeatures().length),1);
+  await page.getByRole('button',{name:'Terug naar lijst',exact:true}).tap();await page.getByRole('button',{name:'Terug',exact:true}).tap();assert.equal(await page.getByRole('searchbox',{name:'Zoek plekken',exact:true}).inputValue(),name);
+ }
+ await open('builtin:Landschap & bronnen · Thédirac');await row('Atlas des patrimoines').tap();
+ for(const width of [320,390]){await page.setViewportSize({width,height:844});assert.equal(await page.getByRole('dialog',{name:'Bron bekijken',exact:true}).evaluate(el=>el.scrollWidth>el.clientWidth),false)}
+ await page.screenshot({path:'/tmp/detect-atlas-fixed.png',animations:'disabled'});
  await open('builtin:Landschap & bronnen · Thédirac');await row('Bouriane').tap();await page.getByText('Schematisch gebied',{exact:true}).waitFor();await page.getByRole('button',{name:'Toon op kaart',exact:true}).tap();
  await page.waitForFunction(()=>!window.test.map.getView().getAnimating());assert.ok(await page.evaluate(()=>window.test.map.getView().getZoom()<13));
  assert.equal(await page.evaluate(()=>window.test.map.getLayers().getArray().find(l=>l.get('name')==='place-list-preview').getSource().getFeatures()[0].getGeometry().getType()),'Polygon');

@@ -170,11 +170,19 @@ export function placeResearchMetadata(entry: PlaceEntry) {
   if (/^alle perioden$/i.test(period)) periods.push('Steentijd','Bronstijd','IJzertijd / Keltisch','Romeins','Middeleeuwen','Nieuwe tijd')
   const evidence = propertyText(p, ['bewijsstatus', 'evidenceStatus']) || (entry.seedId?.startsWith('archeologie:') ? (entry.seedId.endsWith('gindou-paleolithic-unlocated') ? 'Melding' : 'Gepubliceerd') : '')
   const quality = propertyText(p, ['locatienauwkeurigheid', 'locationQuality', 'Locatieprecisie'])
-  const precision = !entry.coordinates ? 'Geen kaartlocatie' : ({exact:'Exact bronpunt', 'source-centroid':'Toponiem / complex', approximate:'Globale positie', schematic:'Schematisch gebied'}[quality] || quality)
+  const precision = !entry.coordinates ? (p.bronvermelding === true ? (placeExternalMapUrl(entry) ? 'Externe kaart' : 'Bron zonder kaartpunt') : 'Geen kaartlocatie') : ({exact:'Exact bronpunt', 'source-centroid':'Toponiem / complex', approximate:'Globale positie', schematic:'Schematisch gebied'}[quality] || quality)
   return {period, periods, evidence, precision, source: propertyText(p, ['bron', 'source', 'Bron / source'])}
 }
 export function placeSourceUrl(entry: PlaceEntry): string | null {
   const link = propertyText(entry.properties, ['link', 'bronlink', 'sourceUrl', 'url'])
+  const currentLink = link === 'https://www.onf.fr/vivre-la-foret/que-faire-en-foret/balade-activites-en-foret/%2B/c0e%3A%3Aforet-de-gresigne-ou-lexcursion-dans-la-plus-grande-chenaie-du-sud-de-la-france.html'
+    ? 'https://www.onf.fr/onf/%2B/c0e%3A%3Aforet-de-gresigne-ou-lexcursion-dans-la-plus-grande-chenaie-du-sud-de-la-france.html' : link
+  return safePlaceUrl(currentLink)
+}
+export function placeExternalMapUrl(entry: PlaceEntry): string | null {
+  return safePlaceUrl(propertyText(entry.properties, ['kaartlink']))
+}
+function safePlaceUrl(link: string): string | null {
   try { const url = new URL(link); return ['https:', 'http:'].includes(url.protocol) ? url.href : null } catch { return null }
 }
 export function filterPlaces(entries: PlaceEntry[], options: {query: string; layer: string; category: string; period?: string; evidence?: string; precision?: string; sort: 'name' | 'distance' | 'latest'; gps: {lat: number; lng: number} | null; extent?: number[] | null}): PlaceEntry[] {
