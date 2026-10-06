@@ -12,8 +12,10 @@ import { Circle as CircleStyle, Fill, RegularShape, Stroke, Style } from 'ol/sty
 import {
   THEDIRAC_RESEARCH_LAYER_NAME,
   THEDIRAC_RESEARCH_SITES,
+  researchSiteProperties,
   type ThediracResearchSite
 } from '../data/thediracResearchSites'
+import { THEDIRAC_CONTEXT_LAYER_NAME, THEDIRAC_LANDSCAPE_FEATURES } from '../data/thediracLandscapeContext'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
 import { THEDIRAC_HIKES_LAYER_NAME } from '../data/thediracHikes'
 import {
@@ -125,6 +127,7 @@ export function createKnownThediracSitesLayerOL() {
       layerName: THEDIRAC_RESEARCH_LAYER_NAME,
       layerColor: color,
       name: site.nameNl,
+      'Bewijsstatus': researchSiteProperties(site).bewijsstatus,
       'Categorie / catégorie': researchSiteCategoryLabels[site.category],
       'Type locatie / type de site': site.siteTypeNl,
       'Periode / période': site.periodNl,
@@ -150,6 +153,16 @@ export function createKnownThediracSitesLayerOL() {
       features,
       attributions: 'Publieke archeologische en erfgoedbronnen — bron per punt vermeld'
     })
+  })
+}
+
+export function createThediracLandscapeContextLayerOL() {
+  const features = new GeoJSON().readFeatures({type:'FeatureCollection', features:THEDIRAC_LANDSCAPE_FEATURES}, {featureProjection:'EPSG:3857'})
+  for (const feature of features) feature.setProperties({layerType:'importedLayer', layerName:THEDIRAC_CONTEXT_LAYER_NAME, layerColor:'#0f766e', name:feature.get('naam'), 'Locatieprecisie':'Schematisch gebied', layerPopupConfig:{titleField:'naam', hiddenFields:['detectSeedId','locatienauwkeurigheid'],showTechnicalFields:false}})
+  return new VectorLayer({
+    properties:{title:THEDIRAC_CONTEXT_LAYER_NAME, type:'overlay'}, visible:false, opacity:1, zIndex:35,
+    source:new VectorSource({features, attributions:'Landschappelijke context: openbare publicaties; schematische oriëntatiekaders van Detect'}),
+    style:new Style({fill:new Fill({color:'rgba(15,118,110,0.035)'}), stroke:new Stroke({color:'#0f766e',width:2,lineDash:[8,6]})})
   })
 }
 
@@ -287,6 +300,7 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'OCS GE landbedekking 2021-2023': createFranceOcsCoverageLayerOL,
   'Oude bossen · Forêts anciennes': createFranceAncientForestsLayerOL,
   [THEDIRAC_RESEARCH_LAYER_NAME]: createKnownThediracSitesLayerOL,
+  [THEDIRAC_CONTEXT_LAYER_NAME]: createThediracLandscapeContextLayerOL,
   [THEDIRAC_MINERALS_LAYER_NAME]: createThediracMineralsLayerOL,
   [THEDIRAC_FOSSILS_LAYER_NAME]: createThediracFossilsLayerOL,
   [THEDIRAC_SIGHTS_LAYER_NAME]: createThediracSightsLayerOL,

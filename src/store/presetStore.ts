@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { accountStorage } from '../utils/accountStorage'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
+import { THEDIRAC_CONTEXT_LAYER_NAME } from '../data/thediracLandscapeContext'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
 import { THEDIRAC_HIKES_LAYER_NAME } from '../data/thediracHikes'
 import {
@@ -45,6 +46,7 @@ const FRANCE_FIELD_LAYERS = [
   'Bodem/geologie 1:50.000 FR',
   'Oude bossen · Forêts anciennes',
   THEDIRAC_ARCHAEOLOGY_LAYER,
+  THEDIRAC_CONTEXT_LAYER_NAME,
   THEDIRAC_MINERALS_LAYER_NAME,
   THEDIRAC_FOSSILS_LAYER_NAME,
   THEDIRAC_SIGHTS_LAYER_NAME,
@@ -62,6 +64,7 @@ const FRANCE_RESEARCH_LAYER_NAMES = new Set([
   'OCS GE landbedekking 2021-2023',
   'Oude bossen · Forêts anciennes',
   THEDIRAC_ARCHAEOLOGY_LAYER,
+  THEDIRAC_CONTEXT_LAYER_NAME,
   THEDIRAC_MINERALS_LAYER_NAME,
   THEDIRAC_FOSSILS_LAYER_NAME,
   THEDIRAC_SIGHTS_LAYER_NAME,

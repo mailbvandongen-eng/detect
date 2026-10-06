@@ -7,6 +7,15 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.87', date: '6 oktober 2026', title: 'Thédirac: meer archeologie en uitgebreidere lijst',
+    changes: [
+      'Zes gepubliceerde prehistorische vermeldingen toegevoegd. De bestaande vakantieplekken blijven behouden; globale posities zijn herkenbaar als gemeentecentrum.',
+      'Landschap & bronnen · Thédirac toont drie schematische oriëntatiekaders en biedt zes broningangen. Dit zijn landschappelijke aanwijzingen, geen officiële verwachtingenkaart of vondstkansen per perceel.',
+      'De lijst filtert nu ook op periode, bewijsstatus en locatieprecisie. Periode, bron en precisie staan bij archeologische items; Open bron brengt je naar de publicatie.',
+      'Toon op kaart past het kaartbeeld aan een gebied aan. Broningangen zonder kaartlocatie krijgen geen verzonnen marker.',
+    ],
+  },
+  {
     version: '2.33.86', date: '6 oktober 2026', title: 'Dropdowns in lijstweergave hersteld',
     changes: [
       'De keuzelijsten tonen weer één pijltje rechts, ook in donkere modus op iPhone.',

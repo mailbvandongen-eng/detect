@@ -1,3 +1,5 @@
+import { THEDIRAC_RESEARCH_EXPANSION } from './thediracResearchExpansion'
+
 export type ThediracResearchSite = {
   id: string
   category: 'prehistorie' | 'ijzertijd' | 'romeins' | 'middeleeuwen' | 'onbepaald'
@@ -758,7 +760,21 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
     locationQuality: 'exact',
     locationNoteNl: 'Officieel bezoekerspunt; opening vooraf controleren en uitsluitend het toegestane parcours volgen.',
     locationNoteFr: 'Point d’accueil officiel ; vérifier l’ouverture et rester exclusivement sur le parcours autorisé.'
-  }
+  },
+  ...THEDIRAC_RESEARCH_EXPANSION
 ]
+
+export function researchSiteProperties(site: ThediracResearchSite): Record<string, unknown> {
+  return {
+    naam: site.nameNl, categorie: 'Archeologie', type: site.siteTypeNl,
+    periode: site.periodNl, omschrijving: site.descriptionNl,
+    periodegroep: {prehistorie:'Steentijd', ijzertijd:'IJzertijd / Keltisch', romeins:'Romeins', middeleeuwen:'Middeleeuwen', onbepaald:''}[site.category],
+    bewijsstatus: site.id === 'gindou-paleolithic-unlocated' ? 'Melding' : 'Gepubliceerd',
+    bron: site.source, link: site.sourceUrl,
+    beschermd: site.protected ? 'Ja' : 'Niet vastgesteld',
+    locatienauwkeurigheid: site.locationQuality,
+    locatienotitie: site.locationNoteNl,
+  }
+}
 
 export const THEDIRAC_RESEARCH_LAYER_NAME = `Archeologische plekken · regio Thédirac (${THEDIRAC_RESEARCH_SITES.length})`

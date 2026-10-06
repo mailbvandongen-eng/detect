@@ -3,6 +3,7 @@ import { immer } from 'zustand/middleware/immer'
 import type { Layer } from 'ol/layer'
 import { layerRegistry } from '../layers/layerRegistry'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
+import { THEDIRAC_CONTEXT_LAYER_NAME } from '../data/thediracLandscapeContext'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
 import { useMapStore } from './mapStore'
 
@@ -105,6 +106,7 @@ export const useLayerStore = create<LayerState>()(
       'OCS GE landbedekking 2021-2023': false,
       'Oude bossen · Forêts anciennes': false,
       [THEDIRAC_RESEARCH_LAYER_NAME]: false,
+      [THEDIRAC_CONTEXT_LAYER_NAME]: false,
       [THEDIRAC_SIGHTS_LAYER_NAME]: false,
       'Sites ClassÃ©s Bretagne': false,
       'Sites ClassÃ©s Normandie': false,
@@ -186,6 +188,7 @@ export const useLayerStore = create<LayerState>()(
       'OCS GE landbedekking 2021-2023': 0.62,
       'Oude bossen · Forêts anciennes': 0.72,
       [THEDIRAC_RESEARCH_LAYER_NAME]: 1,
+      [THEDIRAC_CONTEXT_LAYER_NAME]: 1,
       [THEDIRAC_SIGHTS_LAYER_NAME]: 1,
       'Sites ClassÃ©s Bretagne': 0.5,
       'Sites ClassÃ©s Normandie': 0.5,

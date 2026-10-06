@@ -16,6 +16,7 @@ export interface PlaceEntry {
   createdAt: string
   properties: Record<string, unknown>
   geometryType: string
+  geometry?: CustomFeature['geometry']
   pointId?: string
   popupHtml?: string
   editable: boolean
@@ -68,6 +69,21 @@ export function placeCoordinates(geometry: CustomFeature['geometry'] | undefined
   if (geometry.type === 'Point') return first
   return [(west + east) / 2, (south + north) / 2]
 }
+function placeIntersectsExtent(entry: PlaceEntry, extent: number[]) {
+  const [west,south,east,north] = extent
+  if (entry.geometry && entry.geometryType !== 'Point') {
+    let w=Infinity,s=Infinity,e=-Infinity,n=-Infinity
+    const walk = (item: unknown) => {
+      if (!Array.isArray(item)) return
+      if (typeof item[0] === 'number' && typeof item[1] === 'number') {
+        if (Number.isFinite(item[0]) && Number.isFinite(item[1])) {w=Math.min(w,item[0]);e=Math.max(e,item[0]);s=Math.min(s,item[1]);n=Math.max(n,item[1])}
+      } else item.forEach(walk)
+    }
+    walk(entry.geometry.coordinates)
+    return w <= east && e >= west && s <= north && n >= south
+  }
+  return !!entry.coordinates && entry.coordinates[0] >= west && entry.coordinates[0] <= east && entry.coordinates[1] >= south && entry.coordinates[1] <= north
+}
 export function featurePlaceEntry(feature: CustomFeature, source: Omit<PlaceSource, 'entries'>, index: number, titleField?: string | null): PlaceEntry {
   const p = feature.properties || {}
   const seedId = propertyText(p, ['detectSeedId']) || undefined
@@ -77,7 +93,7 @@ export function featurePlaceEntry(feature: CustomFeature, source: Omit<PlaceSour
     category: propertyText(p, ['categorie', 'category', 'type', 'soort']) || (feature.geometry?.type.includes('Polygon') ? 'Vlak' : feature.geometry?.type.includes('Line') ? 'Lijn' : 'Overig'),
     description: propertyText(p, ['omschrijving', 'description', 'notes', 'notities', 'descr', 'toelichting', 'bewijs', 'highlights']),
     coordinates: placeCoordinates(feature.geometry), createdAt: propertyText(p, ['createdAt', 'created_at', 'datum']), properties: p,
-    geometryType: feature.geometry?.type || '', editable: false, seedId,
+    geometryType: feature.geometry?.type || '', geometry: feature.geometry, editable: false, seedId,
   }
 }
 export function buildPersonalPlaceSources(points: CustomPointLayer[], imports: CustomLayer[]): PlaceSource[] {
@@ -119,12 +135,19 @@ export function getScopedSources(sources: PlaceSource[], scope: PlaceListScope, 
 }
 export function collectPlaces(sources: PlaceSource[]): PlaceEntry[] {
   const seenSeeds = new Set<string>()
+  const builtinMetadata = new Map(sources.filter(s => s.kind === 'builtin').flatMap(s => s.entries).filter(e => e.seedId).map(e => [e.seedId, e.properties]))
   // Prefer the local imported record when the same seeded place also occurs in a built-in layer.
   return [...sources].sort((a,b) => Number(a.kind === 'builtin') - Number(b.kind === 'builtin')).flatMap(s => s.entries).filter(entry => {
     if (!entry.seedId) return true
     if (seenSeeds.has(entry.seedId)) return false
     seenSeeds.add(entry.seedId)
     return true
+  }).map(entry => {
+    const published = entry.seedId ? builtinMetadata.get(entry.seedId) : undefined
+    if (!published) return entry
+    // Older seeded imports keep user text and geometry; missing catalog metadata
+    // is supplied only in the read model. No import or account storage is edited.
+    return {...entry, properties:{...published, ...entry.properties}}
   })
 }
 export function distanceToPlace(coordinates: [number, number] | null, gps: {lat: number; lng: number} | null): number | null {
@@ -133,16 +156,41 @@ export function distanceToPlace(coordinates: [number, number] | null, gps: {lat:
   const h = Math.sin((lat - gps.lat) * rad / 2) ** 2 + Math.cos(lat * rad) * Math.cos(gps.lat * rad) * Math.sin((lon - gps.lng) * rad / 2) ** 2
   return 6371 * 2 * Math.asin(Math.sqrt(Math.min(1, h)))
 }
-export function filterPlaces(entries: PlaceEntry[], options: {query: string; layer: string; category: string; sort: 'name' | 'distance' | 'latest'; gps: {lat: number; lng: number} | null; extent?: number[] | null}): PlaceEntry[] {
+export function placeResearchMetadata(entry: PlaceEntry) {
+  const p = entry.properties
+  const period = propertyText(p, ['periode', 'period', 'Periode / période', 'datering'])
+  const classification = `${period} ${propertyText(p, ['periodegroep', 'periodGroup'])}`
+  const periods: string[] = []
+  if (/steentijd|prehistor|paleolith|paléolith|neolith|néolith|chalcolith|moustér|acheul|mesolith|mésolith/i.test(classification)) periods.push('Steentijd')
+  if (/brons|bronze/i.test(classification)) periods.push('Bronstijd')
+  if (/ijzertijd|kelt|gaul|âge du fer|iron age/i.test(classification)) periods.push('IJzertijd / Keltisch')
+  if (/romein|romain|roman|antiquit/i.test(classification)) periods.push('Romeins')
+  if (/middeleeuw|médiéval|moyen.âge|medieval/i.test(classification)) periods.push('Middeleeuwen')
+  if (/nieuwe tijd|modern/i.test(classification)) periods.push('Nieuwe tijd')
+  if (/^alle perioden$/i.test(period)) periods.push('Steentijd','Bronstijd','IJzertijd / Keltisch','Romeins','Middeleeuwen','Nieuwe tijd')
+  const evidence = propertyText(p, ['bewijsstatus', 'evidenceStatus']) || (entry.seedId?.startsWith('archeologie:') ? (entry.seedId.endsWith('gindou-paleolithic-unlocated') ? 'Melding' : 'Gepubliceerd') : '')
+  const quality = propertyText(p, ['locatienauwkeurigheid', 'locationQuality', 'Locatieprecisie'])
+  const precision = !entry.coordinates ? 'Geen kaartlocatie' : ({exact:'Exact bronpunt', 'source-centroid':'Toponiem / complex', approximate:'Globale positie', schematic:'Schematisch gebied'}[quality] || quality)
+  return {period, periods, evidence, precision, source: propertyText(p, ['bron', 'source', 'Bron / source'])}
+}
+export function placeSourceUrl(entry: PlaceEntry): string | null {
+  const link = propertyText(entry.properties, ['link', 'bronlink', 'sourceUrl', 'url'])
+  try { const url = new URL(link); return ['https:', 'http:'].includes(url.protocol) ? url.href : null } catch { return null }
+}
+export function filterPlaces(entries: PlaceEntry[], options: {query: string; layer: string; category: string; period?: string; evidence?: string; precision?: string; sort: 'name' | 'distance' | 'latest'; gps: {lat: number; lng: number} | null; extent?: number[] | null}): PlaceEntry[] {
   const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
   const words = normalize(options.query).split(/\s+/).filter(Boolean)
   return entries.filter(e => {
     if (options.layer && e.sourceKey !== options.layer) return false
     if (options.category && e.category !== options.category) return false
+    if (options.period || options.evidence || options.precision) {
+      const meta = placeResearchMetadata(e)
+      if (options.period && !meta.periods.includes(options.period)) return false
+      if (options.evidence && meta.evidence !== options.evidence) return false
+      if (options.precision && meta.precision !== options.precision) return false
+    }
     if (options.extent) {
-      if (!e.coordinates) return false
-      const [x,y] = e.coordinates, [west,south,east,north] = options.extent
-      if (y < south || y > north || x < west || x > east) return false
+      if (!placeIntersectsExtent(e, options.extent)) return false
     }
     const text = normalize(`${e.name} ${e.description} ${e.category} ${e.layerName} ${Object.values(e.properties).map(plainPlaceText).join(' ')}`)
     return words.every(word => text.includes(word))

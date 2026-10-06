@@ -44,7 +44,11 @@
 .place-list-edit { display: flex; flex-direction: column; gap: 14px; margin: 16px 0; }
 .place-list-edit > label { display: flex; flex-direction: column; gap: 5px; font-size: .9em; }
 .place-list-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.place-list-actions > button { flex: 1; min-height: 44px; }
+.place-list-actions > :is(button, a) { flex: 1; min-height: 44px; }
+.place-list-actions > a { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+.place-list-badges { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0; }
+.place-list-badges > span { padding: 3px 7px; border-radius: 6px; border: 1px solid var(--detect-window-border); background: var(--detect-window-subtle); color: var(--detect-window-text); font-size: .75em; line-height: 1.4; }
+.place-list-row-source { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .place-list-actions > button:disabled { opacity: .45; cursor: default; }
 .place-list-footer { display: flex; align-items: center; gap: 12px; }
 .place-list-footer > span { flex: 1; min-width: 0; font-size: .8em; color: var(--detect-window-muted); overflow-wrap: anywhere; }

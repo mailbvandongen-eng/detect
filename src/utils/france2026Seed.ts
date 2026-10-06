@@ -1,6 +1,6 @@
 import type { CustomFeature } from '../store/customLayerStore'
 import { useCustomLayerStore } from '../store/customLayerStore'
-import { THEDIRAC_RESEARCH_SITES } from '../data/thediracResearchSites'
+import { THEDIRAC_RESEARCH_SITES, researchSiteProperties } from '../data/thediracResearchSites'
 import { THEDIRAC_SIGHTS } from '../data/thediracSights'
 import { THEDIRAC_MINERAL_SITES, THEDIRAC_FOSSIL_SITES } from '../data/thediracGeologySites'
 import { THEDIRAC_HIKES } from '../data/thediracHikes'
@@ -39,18 +39,7 @@ export function buildFrance2026SeedFeatures(): CustomFeature[] {
     `archeologie:${site.id}`,
     site.lon,
     site.lat,
-    {
-      naam: site.nameNl,
-      categorie: 'Archeologie',
-      type: site.siteTypeNl,
-      periode: site.periodNl,
-      omschrijving: site.descriptionNl,
-      bron: site.source,
-      link: site.sourceUrl,
-      beschermd: site.protected ? 'Ja' : 'Nee',
-      locatienauwkeurigheid: site.locationQuality,
-      locatienotitie: site.locationNoteNl,
-    },
+    researchSiteProperties(site),
   ))
 
   const sights = THEDIRAC_SIGHTS.map(site => pointFeature(

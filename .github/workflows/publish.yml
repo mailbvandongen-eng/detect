@@ -80,6 +80,7 @@ jobs:
           npm run test:user-layers
           npm run test:controls
           npm run test:place-list
+          npm run test:thedirac-research
           npm run test:buddy-ui
           npm run test:buddy-writes
 

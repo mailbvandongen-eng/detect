@@ -3,6 +3,7 @@ import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
 import { useLayerStore, useMapStore } from '../../store'
 import { FRANCE_RESEARCH_FACTORIES } from '../../layers/franceResearchOL'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../../data/thediracResearchSites'
+import { THEDIRAC_CONTEXT_LAYER_NAME } from '../../data/thediracLandscapeContext'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../../data/thediracSights'
 import { THEDIRAC_HIKES_LAYER_NAME } from '../../data/thediracHikes'
 import {
@@ -34,6 +35,7 @@ const GEOLOGICAL_FINDS = [
 
 const ARCHAEOLOGY_HISTORY = [
   [THEDIRAC_RESEARCH_LAYER_NAME, 1],
+  [THEDIRAC_CONTEXT_LAYER_NAME, 1],
   ['Oude bossen · Forêts anciennes', 0.72]
 ] as const
 
