@@ -3,7 +3,7 @@ import { version } from '../../package.json'
 import { useAuthStore } from '../store/authStore'
 import { useUIStore } from '../store/uiStore'
 import { useSettingsStore } from '../store/settingsStore'
-import { hasSeenChangeLog, markChangeLogSeen } from '../data/changelog'
+import { shouldShowAutomaticChangeLog, markChangeLogSeen } from '../data/changelog'
 
 export function useStartupWindows() {
   const authReady = useAuthStore(state => state.ready)
@@ -36,7 +36,7 @@ export function useStartupWindows() {
   }, [authReady, hideWelcomeModal, openWindow])
 
   useEffect(() => {
-    if (authReady && startupComplete && activeWindow === null && !changeLogOffered.current && !hasSeenChangeLog(version)) {
+    if (authReady && startupComplete && activeWindow === null && !changeLogOffered.current && shouldShowAutomaticChangeLog(version)) {
       changeLogOffered.current = true
       markChangeLogSeen(version)
       openChangeLog()

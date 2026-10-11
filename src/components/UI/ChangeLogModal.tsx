@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Check, History } from 'lucide-react'
 import { version } from '../../../package.json'
-import { CHANGELOG, markChangeLogSeen } from '../../data/changelog'
+import { CHANGELOG, markChangeLogSeen, areAutomaticChangesHidden, setAutomaticChangesHidden } from '../../data/changelog'
 import { AppWindow } from './AppWindow'
 
 interface ChangeLogModalProps {
@@ -174,6 +175,8 @@ const recentReleases = [
 ]
 
 export function ChangeLogModal({ isOpen, onClose }: ChangeLogModalProps) {
+  const [hidden, setHidden] = useState(areAutomaticChangesHidden)
+  const [saveError, setSaveError] = useState(false)
   const handleClose = () => {
     markChangeLogSeen(version)
     onClose()
@@ -193,7 +196,17 @@ export function ChangeLogModal({ isOpen, onClose }: ChangeLogModalProps) {
       icon={<History size={18} />}
       placement="modal"
       onClose={handleClose}
-      footer={<button onClick={handleClose} className="detect-window-primary-button w-full">Gezien</button>}
+      footer={<div className="space-y-2">
+        <label className="flex items-center gap-2 min-h-[44px] cursor-pointer text-sm">
+          <input type="checkbox" checked={hidden} onChange={event => {
+            setHidden(event.target.checked)
+            setSaveError(!setAutomaticChangesHidden(event.target.checked))
+          }} />
+          Wijzigingen niet meer tonen
+        </label>
+        {saveError && <p role="alert" className="text-sm">De keuze geldt nu, maar kon niet op dit apparaat worden opgeslagen.</p>}
+        <button onClick={handleClose} className="detect-window-primary-button w-full">Gezien</button>
+      </div>}
     >
       <div className="p-4 space-y-4">
         <p className="text-gray-600 leading-relaxed">

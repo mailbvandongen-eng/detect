@@ -59,3 +59,15 @@ window.localStorage.setItem=()=>{throw Error('quota')}
 changes.markChangeLogSeen('quota');assert.equal(changes.hasSeenChangeLog('quota'),true)
 pass('Seen version survives restart and does not repeat in-session when storage is blocked')
 console.log(`${count} app maintenance checks passed`)
+
+window.localStorage.setItem=(key,value)=>entries.set(key,value)
+assert.equal(changes.shouldShowAutomaticChangeLog('future-1'),true)
+assert.equal(changes.setAutomaticChangesHidden(true),true)
+assert.equal(load('src/data/changelog.ts').shouldShowAutomaticChangeLog('future-2'),false)
+assert.equal(changes.hasSeenChangeLog('future-2'),false,'Opt-out does not acknowledge unread releases')
+assert.equal(changes.setAutomaticChangesHidden(false),true)
+assert.equal(load('src/data/changelog.ts').shouldShowAutomaticChangeLog('future-2'),true)
+window.localStorage.setItem=()=>{throw Error('blocked')}
+assert.equal(changes.setAutomaticChangesHidden(true),false)
+assert.equal(changes.shouldShowAutomaticChangeLog('future-3'),false)
+console.log('PASS automatic opt-out persists across releases/restarts, is reversible, and survives blocked storage in session')

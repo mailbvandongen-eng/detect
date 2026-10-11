@@ -6,6 +6,7 @@ export interface ChangeLogEntry {
 }
 
 export const CHANGELOG: ChangeLogEntry[] = [
+  {version: '2.33.95', date: '11 oktober 2026', title: 'Wijzigingen op jouw moment', changes: ['Met Wijzigingen niet meer tonen zet je het automatische wijzigingsscherm uit, ook voor toekomstige versies. Via Menu → Wijzigingen kun je alles teruglezen en automatisch tonen weer aanzetten.']},
   {
     version: '2.33.94', date: '11 oktober 2026', title: 'Rustige, uniforme kaartpunten',
     changes: ['Alle locatiepunten zijn rond met hetzelfde subtiele randje. Kleur onderscheidt de lagen en categorieën, ook in Thédirac.', 'Eigen lagen en imports hebben iets grotere punten. Alle punten verkleinen bij uitzoomen; kleuren, locaties, pop-ups en presets blijven behouden.'],
@@ -908,4 +909,23 @@ export function markChangeLogSeen(version: string): void {
   } catch {
     // Session memory prevents repeats when all browser writes are blocked.
   }
+}
+
+const HIDE_AUTOMATIC_CHANGES_KEY = 'detect-hide-automatic-changes'
+let hideAutomaticChangesFallback: boolean | null = null
+
+export function areAutomaticChangesHidden(): boolean {
+  if (hideAutomaticChangesFallback !== null) return hideAutomaticChangesFallback
+  try { return window.localStorage.getItem(HIDE_AUTOMATIC_CHANGES_KEY) === 'yes' }
+  catch { return false }
+}
+
+export function setAutomaticChangesHidden(hidden: boolean): boolean {
+  hideAutomaticChangesFallback = hidden
+  try { window.localStorage.setItem(HIDE_AUTOMATIC_CHANGES_KEY, hidden ? 'yes' : 'no'); hideAutomaticChangesFallback = null; return true }
+  catch { return false }
+}
+
+export function shouldShowAutomaticChangeLog(version: string): boolean {
+  return !areAutomaticChangesHidden() && !hasSeenChangeLog(version)
 }
