@@ -1,9 +1,10 @@
+import { getMapPointStyle } from '../utils/mapPointStyle'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Feature } from 'ol'
 import { Point } from 'ol/geom'
 import { fromLonLat } from 'ol/proj'
-import { Style, Icon } from 'ol/style'
+import { Style } from 'ol/style'
 
 // Cache for localStorage
 const CACHE_KEY = 'strandopgangen_cache'
@@ -127,36 +128,8 @@ async function fetchStrandopgangen(): Promise<StrandopgangFeature[]> {
   }
 }
 
-// Create beach access icon SVG - wave/beach themed
-function createStrandopgangIcon(): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32">
-    <circle cx="16" cy="16" r="13" fill="#0891b2" stroke="white" stroke-width="2"/>
-    <g transform="translate(6, 8)" fill="white">
-      <path d="M2 8c2-2 4-2 6 0s4 2 6 0s4-2 6 0" stroke="white" stroke-width="2" fill="none"/>
-      <path d="M2 12c2-2 4-2 6 0s4 2 6 0s4-2 6 0" stroke="white" stroke-width="2" fill="none"/>
-      <circle cx="10" cy="4" r="3" fill="white"/>
-    </g>
-  </svg>`
-  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
-}
-
-// Create style based on zoom
 function getStrandopgangStyle(resolution: number): Style {
-  let scale = 1.0
-  if (resolution > 150) scale = 0.5
-  else if (resolution > 75) scale = 0.6
-  else if (resolution > 40) scale = 0.7
-  else if (resolution > 20) scale = 0.85
-  else if (resolution > 10) scale = 1.0
-  else scale = 1.2
-
-  return new Style({
-    image: new Icon({
-      src: createStrandopgangIcon(),
-      scale: scale,
-      anchor: [0.5, 0.5]
-    })
-  })
+  return getMapPointStyle('#0891b2', resolution)
 }
 
 /**

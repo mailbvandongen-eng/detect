@@ -1,10 +1,11 @@
+import { createMapPointImage } from '../utils/mapPointStyle'
 import type { FeatureLike } from 'ol/Feature'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { fromLonLat } from 'ol/proj'
-import { Style, Circle, Fill, Stroke, Text } from 'ol/style'
+import { Style, Fill, Stroke, Text } from 'ol/style'
 
 // Mineralen hotspots - populaire zoeklocaties in NL/FR/BE/DE
 // Bronnen: Mindat.org, Mineralienatlas.de, Geoforum.fr, NGV.nl
@@ -389,7 +390,7 @@ const MINERAL_HOTSPOTS = [
 ]
 
 // Style voor mineraal hotspots
-function createHotspotStyle(feature: FeatureLike) {
+function createHotspotStyle(feature: FeatureLike, resolution: number) {
   const name = feature.get('name') || ''
   const country = feature.get('country') || ''
 
@@ -404,11 +405,7 @@ function createHotspotStyle(feature: FeatureLike) {
   const color = colors[country] || { fill: 'rgba(128, 0, 128, 0.8)', stroke: '#4B0082' }
 
   return new Style({
-    image: new Circle({
-      radius: 10,
-      fill: new Fill({ color: color.fill }),
-      stroke: new Stroke({ color: color.stroke, width: 2 })
-    }),
+    image: createMapPointImage(color.fill, resolution),
     text: new Text({
       text: name,
       font: 'bold 11px sans-serif',

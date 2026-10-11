@@ -1,10 +1,11 @@
+import { createMapPointImage } from '../utils/mapPointStyle'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import Feature from 'ol/Feature'
 import LineString from 'ol/geom/LineString'
 import Point from 'ol/geom/Point'
 import { fromLonLat } from 'ol/proj'
-import { Style, Stroke, Circle, Fill, Text } from 'ol/style'
+import { Style, Stroke, Fill, Text } from 'ol/style'
 
 // Route metadata - matched to GPX filenames
 interface RouteInfo {
@@ -168,17 +169,13 @@ function createRouteStyle(feature: Feature, isHighlight = false): Style[] {
 }
 
 // Create style for start point marker
-function createStartPointStyle(feature: Feature): Style {
+function createStartPointStyle(feature: Feature, resolution: number): Style {
   const name = feature.get('name') || ''
   const country = feature.get('country') || 'NL'
   const color = ROUTE_COLORS[country] || ROUTE_COLORS.NL
 
   return new Style({
-    image: new Circle({
-      radius: 8,
-      fill: new Fill({ color: color }),
-      stroke: new Stroke({ color: '#ffffff', width: 2 })
-    }),
+    image: createMapPointImage(color, resolution),
     text: new Text({
       text: name,
       offsetY: -16,
@@ -246,10 +243,10 @@ export async function createWandelroutesLayer(): Promise<VectorLayer<VectorSourc
 
   return new VectorLayer({
     source,
-    style: (feature) => {
+    style: (feature, resolution) => {
       const featureType = feature.get('featureType')
       if (featureType === 'startpoint') {
-        return createStartPointStyle(feature as Feature)
+        return createStartPointStyle(feature as Feature, resolution)
       }
       return createRouteStyle(feature as Feature)
     },

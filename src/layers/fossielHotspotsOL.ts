@@ -1,10 +1,11 @@
+import { createMapPointImage } from '../utils/mapPointStyle'
 import type { FeatureLike } from 'ol/Feature'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { fromLonLat } from 'ol/proj'
-import { Style, Circle, Fill, Stroke, Text } from 'ol/style'
+import { Style, Fill, Stroke, Text } from 'ol/style'
 
 // Fossiel hotspots - populaire zoeklocaties voor fossielen
 // Bronnen: Paleontica.org, Oervondstchecker.nl, mindat.org, paleontologie forums
@@ -513,17 +514,13 @@ const COUNTRY_COLORS: Record<string, { fill: string; stroke: string }> = {
 }
 
 // Style voor fossiel hotspots
-function createHotspotStyle(feature: FeatureLike) {
+function createHotspotStyle(feature: FeatureLike, resolution: number) {
   const name = feature.get('name') || ''
   const country = feature.get('country') || 'NL'
   const colors = COUNTRY_COLORS[country] || COUNTRY_COLORS.NL
 
   return new Style({
-    image: new Circle({
-      radius: 10,
-      fill: new Fill({ color: colors.fill }),
-      stroke: new Stroke({ color: colors.stroke, width: 2 })
-    }),
+    image: createMapPointImage(colors.fill, resolution),
     text: new Text({
       text: name,
       font: 'bold 11px sans-serif',

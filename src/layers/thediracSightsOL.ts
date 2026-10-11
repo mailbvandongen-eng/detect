@@ -1,9 +1,10 @@
+import { createMapPointImage, getMapPointRadius } from '../utils/mapPointStyle'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { fromLonLat } from 'ol/proj'
-import { Circle as CircleStyle, Fill, RegularShape, Stroke, Style, Text } from 'ol/style'
+import { Fill, Stroke, Style, Text } from 'ol/style'
 import {
   THEDIRAC_SIGHTS,
   THEDIRAC_SIGHTS_LAYER_NAME,
@@ -44,33 +45,9 @@ const markerLabels: Record<ThediracSight['markerType'], string> = {
 
 const styleCache = new Map<string, Style[]>()
 
-function createSymbol(category: ThediracSightCategory) {
-  const color = categoryColors[category]
-  const shared = {
-    fill: new Fill({ color }),
-    stroke: new Stroke({ color: '#ffffff', width: 3 })
-  }
-
-  switch (category) {
-    case 'grot-ondergronds':
-      return new RegularShape({ ...shared, points: 3, radius: 10, angle: Math.PI })
-    case 'prehistorie-archeologie':
-      return new RegularShape({ ...shared, points: 4, radius: 10, radius2: 4.5 })
-    case 'kasteel-ruine':
-      return new RegularShape({ ...shared, points: 4, radius: 9.5, angle: Math.PI / 4 })
-    case 'historisch-dorp':
-      return new RegularShape({ ...shared, points: 6, radius: 9.5 })
-    case 'natuur-bos':
-      return new RegularShape({ ...shared, points: 5, radius: 10, radius2: 4.8 })
-    case 'uitzicht-hoogte':
-      return new RegularShape({ ...shared, points: 3, radius: 10 })
-    case 'water-landschap':
-      return new CircleStyle({ ...shared, radius: 8.5 })
-  }
-}
-
-function getSightStyles(site: ThediracSight, showLabel: boolean) {
-  const cacheKey = `${site.category}:${showLabel ? site.id : 'marker'}`
+function getSightStyles(site: ThediracSight, resolution: number) {
+  const showLabel = resolution <= 20
+  const cacheKey = `${site.category}:${getMapPointRadius(resolution)}:${showLabel ? site.id : 'marker'}`
   const cached = styleCache.get(cacheKey)
   if (cached) return cached
 
@@ -87,7 +64,7 @@ function getSightStyles(site: ThediracSight, showLabel: boolean) {
       })
     : undefined
 
-  const styles = [new Style({ image: createSymbol(site.category), text: label })]
+  const styles = [new Style({ image: createMapPointImage(categoryColors[site.category], resolution), text: label })]
   styleCache.set(cacheKey, styles)
   return styles
 }
@@ -117,7 +94,7 @@ export function createThediracSightsLayerOL() {
     })
 
     feature.setId(site.id)
-    feature.setStyle((_feature, resolution) => getSightStyles(site, resolution <= 20))
+    feature.setStyle((_feature, resolution) => getSightStyles(site, resolution))
     feature.setProperties({
       layerType: 'importedLayer',
       layerName: THEDIRAC_SIGHTS_LAYER_NAME,

@@ -54,6 +54,7 @@ jobs:
           node scripts/test-prio-three-browser.mjs
           node scripts/test-radar-browser.mjs
           node scripts/test-place-list-browser.mjs
+          node scripts/test-map-points-browser.mjs
   build:
     needs: verify-private-data
     runs-on: ubuntu-latest

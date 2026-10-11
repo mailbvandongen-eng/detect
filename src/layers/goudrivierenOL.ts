@@ -1,10 +1,11 @@
+import { createMapPointImage } from '../utils/mapPointStyle'
 import type { FeatureLike } from 'ol/Feature'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { fromLonLat } from 'ol/proj'
-import { Style, Circle, Fill, Stroke, Text } from 'ol/style'
+import { Style, Fill, Stroke, Text } from 'ol/style'
 
 // Goudrivieren - locaties waar goudwassen mogelijk is
 // Bronnen: goldwaschkarte.de, goldlineorpaillage.fr, pan4gold.nl, orpaillage.fr
@@ -535,7 +536,7 @@ const GOLD_RIVERS = [
 ]
 
 // Style voor goud rivieren - gouden markers
-function createGoldStyle(feature: FeatureLike) {
+function createGoldStyle(feature: FeatureLike, resolution: number) {
   const name = feature.get('name') || ''
   const legal = feature.get('legal') || ''
 
@@ -546,14 +547,9 @@ function createGoldStyle(feature: FeatureLike) {
     ? 'rgba(200, 50, 50, 0.9)'  // Rood voor verboden
     : 'rgba(255, 215, 0, 0.9)' // Goud
 
-  const strokeColor = isProhibited ? '#8B0000' : '#B8860B'
 
   return new Style({
-    image: new Circle({
-      radius: 10,
-      fill: new Fill({ color: fillColor }),
-      stroke: new Stroke({ color: strokeColor, width: 2 })
-    }),
+    image: createMapPointImage(fillColor, resolution),
     text: new Text({
       text: name,
       font: 'bold 11px sans-serif',

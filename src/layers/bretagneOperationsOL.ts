@@ -1,7 +1,8 @@
+import { createMapPointImage } from '../utils/mapPointStyle'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import GeoJSON from 'ol/format/GeoJSON'
-import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style'
+import { Style } from 'ol/style'
 
 // Bretagne Archaeological Operations (Opérations Archéologiques)
 // Data from GéoBretagne WFS - DRAC Bretagne
@@ -30,12 +31,8 @@ export async function createBretagneOperationsLayerOL() {
       properties: { title: 'Operaties Bretagne' },
       visible: false,
       zIndex: 27,
-      style: new Style({
-        image: new CircleStyle({
-          radius: 4,
-          fill: new Fill({ color: '#f59e0b' }),  // Amber for operations
-          stroke: new Stroke({ color: 'white', width: 1 })
-        })
+      style: (_feature, resolution) => new Style({
+        image: createMapPointImage('#f59e0b', resolution)
       })
     })
 

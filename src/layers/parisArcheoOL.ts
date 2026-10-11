@@ -1,7 +1,8 @@
+import { createMapPointImage } from '../utils/mapPointStyle'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import GeoJSON from 'ol/format/GeoJSON'
-import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style'
+import { Style } from 'ol/style'
 
 // Paris Archaeological Reference (Référentiel Archéologique de Paris)
 // Data from Paris Open Data - INRAP/DRAC/CNRS R&CAP project
@@ -30,12 +31,8 @@ export async function createParisArcheoLayerOL() {
       properties: { title: 'Archeo Parijs' },
       visible: false,
       zIndex: 29,
-      style: new Style({
-        image: new CircleStyle({
-          radius: 5,
-          fill: new Fill({ color: '#dc2626' }),  // Red for Paris
-          stroke: new Stroke({ color: 'white', width: 1 })
-        })
+      style: (_feature, resolution) => new Style({
+        image: createMapPointImage('#dc2626', resolution)
       })
     })
 

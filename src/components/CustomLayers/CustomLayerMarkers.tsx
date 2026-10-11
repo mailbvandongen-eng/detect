@@ -5,7 +5,7 @@ import type { Geometry } from 'ol/geom'
 import VectorLayer from 'ol/layer/Vector'
 import { fromLonLat } from 'ol/proj'
 import VectorSource from 'ol/source/Vector'
-import { Circle, Fill, Stroke, Style } from 'ol/style'
+import { Fill, Stroke, Style } from 'ol/style'
 import { useMapStore } from '../../store'
 import {
   getGeometryGroup,
@@ -14,6 +14,7 @@ import {
   type CustomLayer,
   type PointLayerStyle,
 } from '../../store/customLayerStore'
+import { createMapPointImage } from '../../utils/mapPointStyle'
 import { getAutomaticImportedPointRadius } from '../../utils/importedLayerStyle'
 
 type OlFeature = Feature<Geometry>
@@ -56,11 +57,7 @@ function hexToRgba(hex: string, alpha: number): string {
 
 function createPointStyle(style: PointLayerStyle, resolution: number): Style {
   return new Style({
-    image: new Circle({
-      radius: getAutomaticImportedPointRadius(resolution),
-      fill: new Fill({ color: style.color }),
-      stroke: new Stroke({ color: style.outlineColor, width: style.outlineWidth }),
-    }),
+    image: createMapPointImage(style.color, resolution),
   })
 }
 

@@ -1,7 +1,8 @@
+import { createMapPointImage } from '../utils/mapPointStyle'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import GeoJSON from 'ol/format/GeoJSON'
-import { Style, Fill, Stroke, Circle as CircleStyle } from 'ol/style'
+import { Style, Fill, Stroke } from 'ol/style'
 
 // Belgian heritage layers from Onroerend Erfgoed (GeoJSON)
 // Downloaded from https://geo.onroerenderfgoed.be/downloads
@@ -27,14 +28,10 @@ export async function createBeschermdeMonumentenBELayerOL() {
       visible: false,
       zIndex: 25,
       opacity: 0.8,
-      style: new Style({
+      style: (_feature, resolution) => new Style({
         fill: new Fill({ color: 'rgba(139, 69, 19, 0.3)' }),
         stroke: new Stroke({ color: '#8B4513', width: 2 }),
-        image: new CircleStyle({
-          radius: 6,
-          fill: new Fill({ color: '#8B4513' }),
-          stroke: new Stroke({ color: 'white', width: 1 })
-        })
+        image: createMapPointImage('#8B4513', resolution)
       })
     })
   } catch (error) {
@@ -104,14 +101,10 @@ export async function createBeschArchSitesBELayerOL() {
       visible: false,
       zIndex: 26,
       opacity: 0.7,
-      style: new Style({
+      style: (_feature, resolution) => new Style({
         fill: new Fill({ color: 'rgba(178, 34, 34, 0.35)' }),
         stroke: new Stroke({ color: '#B22222', width: 2 }),
-        image: new CircleStyle({
-          radius: 7,
-          fill: new Fill({ color: '#B22222' }),
-          stroke: new Stroke({ color: 'white', width: 1.5 })
-        })
+        image: createMapPointImage('#B22222', resolution)
       })
     })
   } catch (error) {
@@ -180,14 +173,10 @@ export async function createCAIElementenBELayerOL() {
       properties: { title: 'CAI Elementen' },
       visible: false,
       zIndex: 24,
-      style: new Style({
+      style: (_feature, resolution) => new Style({
         fill: new Fill({ color: 'rgba(255, 107, 53, 0.3)' }),
         stroke: new Stroke({ color: '#ff6b35', width: 2 }),
-        image: new CircleStyle({
-          radius: 5,
-          fill: new Fill({ color: '#ff6b35' }),
-          stroke: new Stroke({ color: 'white', width: 1 })
-        })
+        image: createMapPointImage('#ff6b35', resolution)
       })
     })
   } catch (error) {

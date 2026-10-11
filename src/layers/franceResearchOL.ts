@@ -1,3 +1,4 @@
+import { getMapPointStyle } from '../utils/mapPointStyle'
 import TileLayer from 'ol/layer/Tile'
 import LayerGroup from 'ol/layer/Group'
 import VectorLayer from 'ol/layer/Vector'
@@ -8,7 +9,7 @@ import VectorSource from 'ol/source/Vector'
 import XYZ from 'ol/source/XYZ'
 import GeoJSON from 'ol/format/GeoJSON'
 import { fromLonLat } from 'ol/proj'
-import { Circle as CircleStyle, Fill, RegularShape, Stroke, Style } from 'ol/style'
+import { Fill, Stroke, Style } from 'ol/style'
 import {
   THEDIRAC_RESEARCH_LAYER_NAME,
   THEDIRAC_RESEARCH_SITES,
@@ -90,30 +91,6 @@ const researchSitePrecisionLabels: Record<ThediracResearchSite['locationQuality'
   approximate: 'Globale bronpositie; exacte vindplek onbekend'
 }
 
-const researchSiteStyleCache = new Map<string, Style>()
-
-function getResearchSiteStyle(site: ThediracResearchSite) {
-  const { category, locationQuality } = site
-  const isProtected = site.protected === true
-  const color = researchSiteColors[category] ?? researchSiteColors.onbepaald
-  const cacheKey = `${category}:${locationQuality}:${isProtected ? 'protected' : 'context'}`
-  const cached = researchSiteStyleCache.get(cacheKey)
-  if (cached) return cached
-
-  const fillAlpha = locationQuality === 'approximate' ? '99' : locationQuality === 'source-centroid' ? 'd9' : 'ff'
-  const stroke = new Stroke({
-    color: isProtected ? '#111827' : '#ffffff',
-    width: isProtected ? 3 : 1.7,
-    ...(locationQuality === 'approximate' ? { lineDash: [3, 2] } : {})
-  })
-  const image = locationQuality === 'exact'
-    ? new CircleStyle({ radius: 7.5, fill: new Fill({ color: `${color}${fillAlpha}` }), stroke })
-    : new RegularShape({ points: 4, radius: 8.5, angle: Math.PI / 4, fill: new Fill({ color: `${color}${fillAlpha}` }), stroke })
-  const style = new Style({ image })
-  researchSiteStyleCache.set(cacheKey, style)
-  return style
-}
-
 export function createKnownThediracSitesLayerOL() {
   const features = THEDIRAC_RESEARCH_SITES.map(site => {
     const color = researchSiteColors[site.category]
@@ -121,7 +98,7 @@ export function createKnownThediracSitesLayerOL() {
       geometry: new Point(fromLonLat([site.lon, site.lat]))
     })
     feature.setId(site.id)
-    feature.setStyle(getResearchSiteStyle(site))
+    feature.setStyle((_feature, resolution) => getMapPointStyle(color, resolution))
     feature.setProperties({
       layerType: 'importedLayer',
       layerName: THEDIRAC_RESEARCH_LAYER_NAME,

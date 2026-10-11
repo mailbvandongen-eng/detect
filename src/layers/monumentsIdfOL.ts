@@ -1,3 +1,4 @@
+import { createMapPointImage } from '../utils/mapPointStyle'
 /**
  * Monuments Historiques Île-de-France
  * 3,991 beschermde monumenten (classés en inscrits) in de regio Parijs
@@ -6,7 +7,7 @@
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import GeoJSON from 'ol/format/GeoJSON'
-import { Style, Circle, Fill, Stroke } from 'ol/style'
+import { Style } from 'ol/style'
 
 export async function createMonumentsIdfLayerOL(): Promise<VectorLayer<VectorSource>> {
     const response = await fetch('./data/monuments_idf.geojson')
@@ -28,12 +29,8 @@ export async function createMonumentsIdfLayerOL(): Promise<VectorLayer<VectorSou
       type: 'overlay'
     },
     visible: false,
-    style: new Style({
-      image: new Circle({
-        radius: 5,
-        fill: new Fill({ color: 'rgba(139, 69, 19, 0.7)' }), // Bruin
-        stroke: new Stroke({ color: '#5D3A1A', width: 1 })
-      })
+    style: (_feature, resolution) => new Style({
+      image: createMapPointImage('rgba(139, 69, 19, 0.7)', resolution)
     })
   })
 

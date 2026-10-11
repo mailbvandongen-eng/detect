@@ -7,6 +7,10 @@ export interface ChangeLogEntry {
 
 export const CHANGELOG: ChangeLogEntry[] = [
   {
+    version: '2.33.94', date: '11 oktober 2026', title: 'Rustige, uniforme kaartpunten',
+    changes: ['Alle locatiepunten zijn rond met hetzelfde subtiele randje. Kleur onderscheidt de lagen en categorieën, ook in Thédirac.', 'Eigen lagen en imports hebben iets grotere punten. Alle punten verkleinen bij uitzoomen; kleuren, locaties, pop-ups en presets blijven behouden.'],
+  },
+  {
     version: '2.33.93', date: '7 oktober 2026', title: 'Presets, lijsten en kaartexport verbeterd',
     changes: [
       'Standaardpresets herstellen bewaart je eigen presets. Reset verbergt ook eigen lagen en imports zonder hun gegevens te verwijderen.',

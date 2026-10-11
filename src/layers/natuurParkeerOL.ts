@@ -1,9 +1,10 @@
+import { getMapPointStyle } from '../utils/mapPointStyle'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Feature } from 'ol'
 import { Point } from 'ol/geom'
 import { fromLonLat } from 'ol/proj'
-import { Style, Icon } from 'ol/style'
+import { Style } from 'ol/style'
 
 // Cache for localStorage
 const CACHE_KEY = 'natuurparkeer_cache'
@@ -138,48 +139,8 @@ async function fetchNatuurParkeer(): Promise<ParkeerFeature[]> {
   }
 }
 
-// Create parking icon SVG - green/nature themed
-function createParkeerIcon(fee?: string): string {
-  // Green for free, orange for paid
-  const bgColor = fee === 'Betaald' ? '#f59e0b' : '#22c55e'
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32">
-    <circle cx="16" cy="16" r="13" fill="${bgColor}" stroke="white" stroke-width="2"/>
-    <text x="16" y="21" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">P</text>
-  </svg>`
-  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
-}
-
-// Style cache
-const styleCache = new Map<string, Style>()
-
-// Create style based on zoom and fee
 function getParkeerStyle(feature: any, resolution: number): Style {
-  const fee = feature.get('fee') || 'unknown'
-
-  let scale = 1.0
-  if (resolution > 150) scale = 0.5
-  else if (resolution > 75) scale = 0.6
-  else if (resolution > 40) scale = 0.7
-  else if (resolution > 20) scale = 0.85
-  else if (resolution > 10) scale = 1.0
-  else scale = 1.2
-
-  const cacheKey = `parkeer-${fee}-${scale.toFixed(2)}`
-  let style = styleCache.get(cacheKey)
-
-  if (!style) {
-    style = new Style({
-      image: new Icon({
-        src: createParkeerIcon(fee),
-        scale: scale,
-        anchor: [0.5, 0.5]
-      })
-    })
-    styleCache.set(cacheKey, style)
-  }
-
-  return style
+  return getMapPointStyle(feature.get('fee') === 'Betaald' ? '#f59e0b' : '#22c55e', resolution)
 }
 
 /**

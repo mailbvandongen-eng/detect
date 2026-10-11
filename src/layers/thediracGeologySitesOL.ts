@@ -1,9 +1,10 @@
+import { createMapPointImage, getMapPointRadius } from '../utils/mapPointStyle'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { fromLonLat } from 'ol/proj'
-import { Circle as CircleStyle, Fill, RegularShape, Stroke, Style, Text } from 'ol/style'
+import { Fill, Stroke, Style, Text } from 'ol/style'
 import {
   INPG_DATASET_URL,
   THEDIRAC_FOSSIL_SITES,
@@ -27,36 +28,13 @@ const styleCache = new Map<string, Style[]>()
 
 function markerStyles(kind: GeologyLayerKind, site: ThediracGeologySite, resolution: number) {
   const showLabel = resolution <= 20
-  const cacheKey = `${kind}:${showLabel ? site.id : 'marker'}`
+  const cacheKey = `${kind}:${getMapPointRadius(resolution)}:${showLabel ? site.id : 'marker'}`
   const cached = styleCache.get(cacheKey)
   if (cached) return cached
 
   const { color } = layerSettings[kind]
-  const image = kind === 'mineral'
-    ? new RegularShape({
-        points: 4,
-        radius: 10.5,
-        angle: Math.PI / 4,
-        fill: new Fill({ color }),
-        stroke: new Stroke({ color: '#ffffff', width: 3 })
-      })
-    : new CircleStyle({
-        radius: 9.5,
-        fill: new Fill({ color }),
-        stroke: new Stroke({ color: '#ffffff', width: 3 })
-      })
-
   const styles = [
-    new Style({ image }),
-    ...(kind === 'fossil'
-      ? [new Style({
-          image: new CircleStyle({
-            radius: 3.2,
-            fill: new Fill({ color: '#78350f' }),
-            stroke: new Stroke({ color: '#fef3c7', width: 1 })
-          })
-        })]
-      : []),
+    new Style({ image: createMapPointImage(color, resolution) }),
     ...(showLabel
       ? [new Style({
           text: new Text({

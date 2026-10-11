@@ -6,9 +6,9 @@ import VectorSource from 'ol/source/Vector'
 import { Feature } from 'ol'
 import { Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon } from 'ol/geom'
 import { fromLonLat } from 'ol/proj'
-import { Style, Circle, Fill, Stroke } from 'ol/style'
+import { Style, Fill, Stroke } from 'ol/style'
 import type { Geometry } from 'ol/geom'
-import { getAutomaticImportedPointRadius } from '../../utils/importedLayerStyle'
+import { createMapPointImage } from '../../utils/mapPointStyle'
 
 // Helper to convert FeatureGeometry (WGS84) to OpenLayers geometry (EPSG:3857)
 function createOLGeometry(geometry: FeatureGeometry): Geometry {
@@ -96,7 +96,7 @@ export function CustomPointMarkers() {
         if (hasFullGeometry) {
           // Style for polygons, lines, etc.
           const geometryType = point.geometry!.type
-          feature.setStyle(() => {
+          feature.setStyle((_, resolution) => {
             if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
               return new Style({
                 fill: new Fill({ color: displayColor + '40' }), // 25% opacity fill
@@ -109,24 +109,14 @@ export function CustomPointMarkers() {
             }
             // MultiPoint or other - use circle style
             return new Style({
-              image: new Circle({
-                radius: 5,
-                fill: new Fill({ color: displayColor }),
-                stroke: new Stroke({ color: '#ffffff', width: 1 })
-              })
+              image: createMapPointImage(displayColor, resolution)
             })
           })
         } else {
-          // The same restrained automatic size routine used by imported points.
+          // One zoom scale for personal, shared and imported place markers.
           feature.setStyle((_, resolution) => {
-            const radius = getAutomaticImportedPointRadius(resolution)
-
             return new Style({
-              image: new Circle({
-                radius,
-                fill: new Fill({ color: displayColor }),
-                stroke: new Stroke({ color: '#ffffff', width: 1 })
-              })
+              image: createMapPointImage(displayColor, resolution)
             })
           })
         }

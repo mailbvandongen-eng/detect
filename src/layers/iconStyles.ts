@@ -1,4 +1,5 @@
-import { Style, Icon } from 'ol/style'
+import { getMapPointStyle } from '../utils/mapPointStyle'
+import { Style } from 'ol/style'
 import type { FeatureLike } from 'ol/Feature'
 
 // Lucide icon SVG paths (24x24 viewBox)
@@ -58,39 +59,6 @@ export const LUCIDE_ICONS = {
   dot: 'M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0',
 }
 
-// Create SVG string with color and size
-function createSvgIcon(path: string, color: string, size: number, strokeWidth: number = 2): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg>`
-  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
-}
-
-// Create filled circle with icon overlay
-function createFilledIconSvg(iconPath: string, bgColor: string, iconColor: string, size: number): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 32 32">
-    <circle cx="16" cy="16" r="14" fill="${bgColor}" stroke="white" stroke-width="2"/>
-    <g transform="translate(4, 4) scale(1)">
-      <path d="${iconPath}" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </g>
-  </svg>`
-  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
-}
-
-// Get zoom-responsive scale factor
-function getScaleForResolution(resolution: number): number {
-  // Resolution roughly corresponds to meters per pixel
-  // At zoom 8: resolution ~600, at zoom 14: resolution ~10, at zoom 18: resolution ~0.6
-  if (resolution > 300) return 0.4      // Very zoomed out
-  if (resolution > 150) return 0.5      // Zoomed out
-  if (resolution > 75) return 0.6       // Medium-far
-  if (resolution > 40) return 0.7       // Medium
-  if (resolution > 20) return 0.85      // Medium-close
-  if (resolution > 10) return 1.0       // Close
-  return 1.2                            // Very close
-}
-
-// Style cache to avoid recreating styles
-const styleCache = new Map<string, Style>()
-
 export interface IconStyleOptions {
   icon: keyof typeof LUCIDE_ICONS
   color: string
@@ -100,71 +68,20 @@ export interface IconStyleOptions {
   maxScale?: number       // Maximum scale factor (default 1.2)
 }
 
-// Create a zoom-responsive icon style function
+// Keep the public options API; marker differences are expressed by color only.
 export function createIconStyle(options: IconStyleOptions) {
-  const {
-    icon,
-    color,
-    bgColor,
-    baseSize = 24,
-    minScale = 0.4,
-    maxScale = 1.2
-  } = options
-
-  const iconPath = LUCIDE_ICONS[icon] || LUCIDE_ICONS.circle
-
   return function(_feature: FeatureLike, resolution: number): Style {
-    const scale = Math.max(minScale, Math.min(maxScale, getScaleForResolution(resolution)))
-    const cacheKey = `${icon}-${color}-${bgColor || 'none'}-${scale.toFixed(2)}`
-
-    let style = styleCache.get(cacheKey)
-    if (!style) {
-      const svgSrc = bgColor
-        ? createFilledIconSvg(iconPath, bgColor, color, baseSize)
-        : createSvgIcon(iconPath, color, baseSize)
-
-      style = new Style({
-        image: new Icon({
-          src: svgSrc,
-          scale: scale,
-          anchor: [0.5, 0.5],
-        })
-      })
-      styleCache.set(cacheKey, style)
-    }
-
-    return style
+    return getMapPointStyle(options.bgColor ?? options.color, resolution)
   }
 }
 
-// Create a dynamic color style function (for layers with category-based colors)
 export function createDynamicIconStyle(
-  icon: keyof typeof LUCIDE_ICONS,
+  _icon: keyof typeof LUCIDE_ICONS,
   getColor: (feature: FeatureLike) => string,
-  baseSize: number = 26
+  _baseSize: number = 26
 ) {
-  const iconPath = LUCIDE_ICONS[icon] || LUCIDE_ICONS.circle
-
   return function(feature: FeatureLike, resolution: number): Style {
-    const bgColor = getColor(feature)
-    const scale = Math.max(0.4, Math.min(1.2, getScaleForResolution(resolution)))
-    const cacheKey = `${icon}-${bgColor}-${scale.toFixed(2)}`
-
-    let style = styleCache.get(cacheKey)
-    if (!style) {
-      const svgSrc = createFilledIconSvg(iconPath, bgColor, 'white', baseSize)
-
-      style = new Style({
-        image: new Icon({
-          src: svgSrc,
-          scale: scale,
-          anchor: [0.5, 0.5],
-        })
-      })
-      styleCache.set(cacheKey, style)
-    }
-
-    return style
+    return getMapPointStyle(getColor(feature), resolution)
   }
 }
 

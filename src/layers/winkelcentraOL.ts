@@ -1,9 +1,10 @@
+import { getMapPointStyle } from '../utils/mapPointStyle'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Feature } from 'ol'
 import { Point } from 'ol/geom'
 import { fromLonLat } from 'ol/proj'
-import { Style, Icon } from 'ol/style'
+import { Style } from 'ol/style'
 
 // Cache for localStorage
 const CACHE_KEY = 'winkelcentra_cache'
@@ -140,35 +141,8 @@ async function fetchWinkelcentra(): Promise<WinkelcentrumFeature[]> {
   }
 }
 
-// Create shopping center icon SVG
-function createWinkelcentrumIcon(): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32">
-    <circle cx="16" cy="16" r="13" fill="#8b5cf6" stroke="white" stroke-width="2"/>
-    <g transform="translate(8, 8)" fill="white">
-      <rect x="1" y="6" width="14" height="9" rx="1" fill="none" stroke="white" stroke-width="1.5"/>
-      <path d="M4 6V4a4 4 0 0 1 8 0v2" fill="none" stroke="white" stroke-width="1.5"/>
-    </g>
-  </svg>`
-  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
-}
-
-// Create style based on zoom
 function getWinkelcentrumStyle(resolution: number): Style {
-  let scale = 1.0
-  if (resolution > 150) scale = 0.5
-  else if (resolution > 75) scale = 0.6
-  else if (resolution > 40) scale = 0.7
-  else if (resolution > 20) scale = 0.85
-  else if (resolution > 10) scale = 1.0
-  else scale = 1.2
-
-  return new Style({
-    image: new Icon({
-      src: createWinkelcentrumIcon(),
-      scale: scale,
-      anchor: [0.5, 0.5]
-    })
-  })
+  return getMapPointStyle('#8b5cf6', resolution)
 }
 
 /**

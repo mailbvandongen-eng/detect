@@ -1,7 +1,8 @@
+import { createMapPointImage } from '../utils/mapPointStyle'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import GeoJSON from 'ol/format/GeoJSON'
-import { Style, Circle, Fill, Stroke } from 'ol/style'
+import { Style } from 'ol/style'
 
 // Wikimaginot - Maginot Line Fortifications
 // Data from DataGrandEst WFS - wikimaginot.eu
@@ -30,7 +31,7 @@ export async function createWikimaginotLayerOL() {
       properties: { title: 'Maginotlinie' },
       visible: false,
       zIndex: 28,
-      style: (feature) => {
+      style: (feature, resolution) => {
         const style = feature.get('style') || ''
 
         // Color by construction type
@@ -43,11 +44,7 @@ export async function createWikimaginotLayerOL() {
         else if (style.includes('observatoire')) color = '#7c3aed' // purple - observation post
 
         return new Style({
-          image: new Circle({
-            radius: 5,
-            fill: new Fill({ color }),
-            stroke: new Stroke({ color: '#1f2937', width: 1 })
-          })
+          image: createMapPointImage(color, resolution)
         })
       }
     })
