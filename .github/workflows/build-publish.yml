@@ -1,0 +1,40 @@
+name: Build and publish Detect
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: detect-pages-build
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Check types
+        run: npm run typecheck
+      - name: Run field reliability tests
+        run: npm run test:field
+      - name: Build GitHub Pages
+        run: npm run build
+      - name: Publish generated docs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          if ! git diff --cached --quiet; then
+            git commit -m "build: publish Detect $(node -p 'require(\"./package.json\").version') [skip ci]"
+            git push
+          fi
