@@ -1,0 +1,2 @@
+import{b as n,G as a,V as r,S as s,C as c}from"./index-2k26Bt6u.js";async function f(){const e=await(await fetch("./data/monuments_idf.geojson")).json();console.log(`📍 Monuments IDF: ${e.features?.length||0} monumenten`);const t=new n({features:new a().readFeatures(e,{dataProjection:"EPSG:4326",featureProjection:"EPSG:3857"})});return new r({source:t,properties:{title:"Monumenten IDF",type:"overlay"},visible:!1,style:(l,o)=>new s({image:c("rgba(139, 69, 19, 0.7)",o)})})}export{f as createMonumentsIdfLayerOL};
+//# sourceMappingURL=monumentsIdfOL-C3iHVKB_.js.map
