@@ -136,6 +136,15 @@ export function HamburgerMenu() {
 
   return (
     <>
+      {/* Always-visible release shortcut; do not cover or shift the map controls. */}
+      {!isOpen && <button
+        type="button"
+        onClick={handleChangeLogClick}
+        className="fixed right-16 z-[800] px-2 h-9 rounded-lg bg-white/90 shadow-sm text-xs text-gray-700 underline underline-offset-2 backdrop-blur-sm"
+        style={safeTopStyle}
+        title="Bekijk wijzigingen van Detect"
+        aria-label={`Detect versie ${version}; bekijk wijzigingen`}
+      >v{version}</button>}
       {/* Hamburger Button - Blue when open */}
       <motion.button
         className={`fixed right-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
@@ -171,9 +180,9 @@ export function HamburgerMenu() {
               <Settings size={18} className="text-gray-500" />
               <span>Instellingen</span>
             </button>
-            <div className="text-center text-gray-400" style={{ fontSize: '0.68em' }}>
-              Detect v{version}
-            </div>
+            <button type="button" onClick={handleChangeLogClick} className="w-full text-center text-blue-600 underline" style={{ fontSize: '0.78em' }} title="Bekijk wijzigingen">
+              Detect v{version} · Wijzigingen
+            </button>
           </div>
         )}
       >
