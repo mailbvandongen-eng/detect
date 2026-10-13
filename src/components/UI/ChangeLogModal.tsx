@@ -10,13 +10,13 @@ interface ChangeLogModalProps {
 }
 
 const currentRelease = {
-  version: '2.33.28',
-  date: '5 september 2026',
-  title: 'Referentielijnen onder de punten',
+  version,
+  date: '13 oktober 2026',
+  title: 'Geologie Frankrijk en versie direct zichtbaar',
   changes: [
-    'De lichte gele en witte lijnen op de hybride luchtfoto zijn wegen uit de OpenFreeMap/OpenStreetMap-referentielaag; het zijn geen onderzoeksroutes of verbindingen tussen vindplaatsen.',
-    'De referentielaag verhuist van z-index 110 naar 17, zodat kaartpunten en thematische lijnen er voortaan boven worden getekend.',
-    'Wegen en overige referentielijnen zijn 28 procent dunner gemaakt. De blauwe BD TOPAGE-waterlopen blijven ongewijzigd.'
+    'Het actuele versienummer staat direct naast de menuknop en opent met één tik het wijzigingsoverzicht.',
+    'BRGM-geologie vraagt nu de geologische eenheid op via twee toegangspunten en biedt de legenda direct in de kaartpopup.',
+    'Bij een tijdelijke storing wordt de kaartlaag niet uitgezet; bij een nieuwe klik wordt de informatie opnieuw opgehaald.'
   ]
 }
 
