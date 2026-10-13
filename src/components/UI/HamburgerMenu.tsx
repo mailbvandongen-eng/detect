@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Menu, X, Info, Settings, LogOut, User, MapPin, Route, Type, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw, History, List } from 'lucide-react'
+import { X, Info, Settings, LogOut, User, MapPin, Route, Type, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw, History, List } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
@@ -145,7 +145,7 @@ export function HamburgerMenu() {
         title="Bekijk wijzigingen van Detect"
         aria-label={`Detect versie ${version}; bekijk wijzigingen`}
       >v{version}</button>}
-      {/* Hamburger Button - Blue when open */}
+      {/* Settings menu button - preserve active colors */}
       <motion.button
         className={`fixed right-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
           isOpen
@@ -156,12 +156,13 @@ export function HamburgerMenu() {
         onClick={() => toggleWindow('menu')}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        title="Menu"
+        title="Instellingen en beheer"
+        aria-label="Instellingen en beheer"
       >
         {isOpen ? (
           <X size={22} className="text-white" />
         ) : (
-          <Menu size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
+          <Settings size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
         )}
       </motion.button>
 
