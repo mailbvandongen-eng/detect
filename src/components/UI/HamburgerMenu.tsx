@@ -136,11 +136,11 @@ export function HamburgerMenu() {
 
   return (
     <>
-      {/* Always-visible release shortcut; do not cover or shift the map controls. */}
+      {/* Quiet release link, not an additional map control. */}
       {!isOpen && <button
         type="button"
         onClick={handleChangeLogClick}
-        className="fixed right-16 z-[800] px-2 h-9 rounded-lg bg-white/90 shadow-sm text-xs text-gray-700 underline underline-offset-2 backdrop-blur-sm"
+        className="fixed right-16 z-[800] h-11 px-1 flex items-center justify-center bg-transparent border-0 shadow-none text-[11px] text-gray-600 hover:text-blue-700 underline underline-offset-2"
         style={safeTopStyle}
         title="Bekijk wijzigingen van Detect"
         aria-label={`Detect versie ${version}; bekijk wijzigingen`}
