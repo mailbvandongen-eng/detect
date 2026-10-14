@@ -239,6 +239,10 @@ export function Popup() {
   } = useCustomPointLayerStore()
   const importedLayers = useCustomLayerStore(state => state.layers)
   const selectableUserLayers = buildUserLayerCatalog(customLayers, importedLayers)
+  const [quickInfo, setQuickInfo] = useState<Array<{ layer: string; name: string; detail: string }> | null>(null)
+  const [hoverInfo, setHoverInfo] = useState<Array<{ layer: string; name: string; detail: string }> | null>(null)
+  const confirmedClickRef = useRef(false)
+  const resumeClickRef = useRef<(() => void) | null>(null)
   const [allContents, setAllContents] = useState<string[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [visible, setVisible] = useState(false)
@@ -2285,6 +2289,41 @@ export function Popup() {
       lastPointerDragAt = performance.now()
     }
 
+    // Alleen lokale punten krijgen een snelle preview. Vlakken en WMS blijven
+    // beschikbaar via de gewone kaartinformatie, zonder hover-ruis.
+    const previewAtPixel = (pixel: number[], hitTolerance: number) => {
+      const matches: Array<{ layer: string; name: string; detail: string }> = []
+      const seen = new Set<string>()
+      map.forEachFeatureAtPixel(pixel, feature => {
+        const p = feature.getProperties()
+        const kind = p.layerType
+        if (kind !== 'importedLayer' && kind !== 'customPoint' && !p.vondst) return
+        const type = feature.getGeometry()?.getType()
+        if (type !== 'Point' && type !== 'MultiPoint') return
+        const point = p.customPoint || p.vondst || {}
+        const layer = String(p.layerName || p.customLayerName || (p.vondst ? 'Vondsten' : 'Laag'))
+        const name = String(point.name || point.objectType || p.name || p.naam || p.title || p.titel || p.toponiem || p.site || p.locatie || 'Punt')
+        const detail = String(point.period || point.category || p.datering || p.periode || p.type || '')
+        const key = [kind, p.layerId || p.customLayerId || '', p.featureIndex ?? point.id ?? '', name].join(':')
+        if (seen.has(key)) return
+        seen.add(key)
+        matches.push({ layer, name, detail })
+      }, { hitTolerance })
+      return matches.slice(0, 30)
+    }
+
+    const handleHover = (evt: MapBrowserEvent<any>) => {
+      if (evt.dragging || useUIStore.getState().isDrawingMode || visible) {
+        setHoverInfo(null)
+        return
+      }
+      const original = evt.originalEvent as PointerEvent
+      if (original.pointerType !== 'mouse' && original.pointerType !== 'pen') return
+      const matches = previewAtPixel(evt.pixel, 3)
+      setHoverInfo(matches.length ? matches : null)
+      map.getTargetElement().style.cursor = matches.length ? 'pointer' : ''
+    }
+
     // Handle deliberate map taps. Small pan gestures and kinetic movement
     // must not open the blocking bottom sheet.
     const handleClick = async (evt: MapBrowserEvent<any>) => {
@@ -2298,6 +2337,23 @@ export function Popup() {
         viewInteracting: view.getInteracting(),
         viewAnimating: view.getAnimating(),
       })) return
+
+      if (!confirmedClickRef.current) {
+        const matches = previewAtPixel(evt.pixel, MOBILE_HIT_TOLERANCE_PX)
+        if (matches.length) {
+          setQuickInfo(matches)
+          setHoverInfo(null)
+          resumeClickRef.current = () => {
+            confirmedClickRef.current = true
+            setQuickInfo(null)
+            void handleClick(evt)
+          }
+          return
+        }
+      }
+      confirmedClickRef.current = false
+      setQuickInfo(null)
+      setHoverInfo(null)
 
       heightMapAbortRef.current?.abort()
       heightMapAbortRef.current = null
@@ -3951,10 +4007,13 @@ export function Popup() {
     }
 
     map.on('pointerdrag', handlePointerDrag)
+    map.on('pointermove', handleHover)
     map.on('singleclick', handleClick)
 
     return () => {
       map.un('pointerdrag', handlePointerDrag)
+      map.un('pointermove', handleHover)
+      map.getTargetElement().style.cursor = ''
       map.un('singleclick', handleClick)
     }
   }, [map])
@@ -3998,7 +4057,24 @@ export function Popup() {
   }
 
   return (
-    <AnimatePresence>
+    <>
+      {!visible && (quickInfo || hoverInfo) && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1490] w-[min(92vw,390px)] max-h-[45vh] overflow-auto rounded-xl bg-white text-gray-900 shadow-xl border border-gray-200 p-3" role="status">
+          <div className="flex justify-between items-center gap-2 mb-2">
+            <strong className="text-sm">{quickInfo ? 'Punten op deze plek' : 'Puntinformatie'}</strong>
+            {quickInfo && <button className="text-gray-600 p-1" onClick={() => setQuickInfo(null)} aria-label="Sluiten"><X size={18}/></button>}
+          </div>
+          {(quickInfo || hoverInfo || []).map((item, index) => (
+            <div key={index} className="py-1.5 border-t border-gray-100 text-sm">
+              <div className="text-xs text-gray-500">{item.layer}</div>
+              <div className="font-medium">{item.name}</div>
+              {item.detail && <div className="text-xs text-gray-600">{item.detail}</div>}
+            </div>
+          ))}
+          {quickInfo && <button className="w-full mt-2 rounded-lg bg-blue-600 text-white py-2 text-sm font-medium" onClick={() => resumeClickRef.current?.()}>Volledige kaartinformatie</button>}
+        </div>
+      )}
+      <AnimatePresence>
       {visible && (
         <>
           {/* Close on a new pointer gesture. Using click here makes the
@@ -4461,6 +4537,7 @@ export function Popup() {
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   )
 }
