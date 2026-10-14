@@ -5,7 +5,7 @@ import type { Geometry } from 'ol/geom'
 import VectorLayer from 'ol/layer/Vector'
 import { fromLonLat } from 'ol/proj'
 import VectorSource from 'ol/source/Vector'
-import { Fill, Stroke, Style } from 'ol/style'
+import { Circle, Fill, Stroke, Style } from 'ol/style'
 import { useMapStore } from '../../store'
 import {
   getGeometryGroup,
@@ -55,9 +55,13 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
-function createPointStyle(style: PointLayerStyle, resolution: number): Style {
+function createPointStyle(style: PointLayerStyle, resolution: number, isOppida = false): Style {
   return new Style({
-    image: createMapPointImage(style.color, resolution),
+    image: isOppida ? new Circle({
+      radius: getAutomaticImportedPointRadius(resolution) + 1,
+      fill: new Fill({ color: style.color }),
+      stroke: new Stroke({ color: '#fff', width: 2 }),
+    }) : createMapPointImage(style.color, resolution),
   })
 }
 
@@ -192,7 +196,7 @@ export function CustomLayerMarkers() {
           style: (_feature, resolution) => {
             const radius = getAutomaticImportedPointRadius(resolution)
             if (!pointStyleCache.has(radius)) {
-              pointStyleCache.set(radius, createPointStyle(layer.style.points, resolution))
+              pointStyleCache.set(radius, createPointStyle(layer.style.points, resolution, /oppida/i.test(layer.name)))
             }
             return pointStyleCache.get(radius)
           },
