@@ -2294,14 +2294,16 @@ export function Popup() {
     const previewAtPixel = (pixel: number[], hitTolerance: number) => {
       const matches: Array<{ layer: string; name: string; detail: string }> = []
       const seen = new Set<string>()
-      map.forEachFeatureAtPixel(pixel, feature => {
+      map.forEachFeatureAtPixel(pixel, (feature, sourceLayer) => {
         const p = feature.getProperties()
         const kind = p.layerType
-        if (kind !== 'importedLayer' && kind !== 'customPoint' && !p.vondst) return
+        const sourceName = String(sourceLayer?.get('title') || sourceLayer?.get('name') || '')
+        const isThedirac = /thedirac/i.test(sourceName) || /thedirac/i.test(String(p.layerName || ''))
+        if (kind !== 'importedLayer' && kind !== 'customPoint' && !p.vondst && !isThedirac) return
         const type = feature.getGeometry()?.getType()
         if (type !== 'Point' && type !== 'MultiPoint') return
         const point = p.customPoint || p.vondst || {}
-        const layer = String(p.layerName || p.customLayerName || (p.vondst ? 'Vondsten' : 'Laag'))
+        const layer = String(p.layerName || p.customLayerName || sourceName || (p.vondst ? 'Vondsten' : 'Laag'))
         const name = String(point.name || point.objectType || p.name || p.naam || p.title || p.titel || p.toponiem || p.site || p.locatie || 'Punt')
         const detail = String(point.period || point.category || p.datering || p.periode || p.type || '')
         const key = [kind, p.layerId || p.customLayerId || '', p.featureIndex ?? point.id ?? '', name].join(':')
