@@ -1,3 +1,4 @@
+import { THEDIRAC_FORTIFICATION_COLOR } from '../data/thediracFortifications'
 import { buildFrance2026SeedFeatures } from './france2026Seed'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
@@ -17,7 +18,7 @@ const features = buildFrance2026SeedFeatures()
 export function getThediracPlaceSources(visible: Record<string, boolean>): PlaceSource[] {
   const places = GROUPS.map(([prefix, name, color]) => {
     const source: Omit<PlaceSource, 'entries'> = {key: `builtin:${name}`, name, color, visible: !!visible[name], kind: 'builtin', snapshotKey: name}
-    return {...source, entries: features.filter(f => String(f.properties.detectSeedId).startsWith(`${prefix}:`)).map((f,i) => featurePlaceEntry(f, source, i))}
+    return {...source, entries: features.filter(f => String(f.properties.detectSeedId).startsWith(`${prefix}:`)).map((f,i) => ({...featurePlaceEntry(f, source, i), ...(f.properties.versterking === 'Ja' ? {color: THEDIRAC_FORTIFICATION_COLOR} : {})}))}
   })
   const context: Omit<PlaceSource, 'entries'> = {key: `builtin:${THEDIRAC_CONTEXT_LAYER_NAME}`, name: THEDIRAC_CONTEXT_LAYER_NAME, color: '#0f766e', visible: !!visible[THEDIRAC_CONTEXT_LAYER_NAME], kind: 'builtin', snapshotKey: THEDIRAC_CONTEXT_LAYER_NAME}
   return [...places, {...context, entries: [

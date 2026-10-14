@@ -1,3 +1,4 @@
+import { THEDIRAC_FORTIFIED_SIGHT_IDS, THEDIRAC_FORTIFICATION_COLOR, THEDIRAC_FORTIFICATION_CATEGORY } from '../data/thediracFortifications'
 import { createMapPointImage, getMapPointRadius } from '../utils/mapPointStyle'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
@@ -46,8 +47,9 @@ const markerLabels: Record<ThediracSight['markerType'], string> = {
 const styleCache = new Map<string, Style[]>()
 
 function getSightStyles(site: ThediracSight, resolution: number) {
+  const color = THEDIRAC_FORTIFIED_SIGHT_IDS.has(site.id) ? THEDIRAC_FORTIFICATION_COLOR : categoryColors[site.category]
   const showLabel = resolution <= 20
-  const cacheKey = `${site.category}:${getMapPointRadius(resolution)}:${showLabel ? site.id : 'marker'}`
+  const cacheKey = `${color}:${getMapPointRadius(resolution)}:${showLabel ? site.id : 'marker'}`
   const cached = styleCache.get(cacheKey)
   if (cached) return cached
 
@@ -64,7 +66,7 @@ function getSightStyles(site: ThediracSight, resolution: number) {
       })
     : undefined
 
-  const styles = [new Style({ image: createMapPointImage(categoryColors[site.category], resolution), text: label })]
+  const styles = [new Style({ image: createMapPointImage(color, resolution), text: label })]
   styleCache.set(cacheKey, styles)
   return styles
 }
@@ -88,7 +90,7 @@ function driveStatus(site: ThediracSight) {
 
 export function createThediracSightsLayerOL() {
   const features = THEDIRAC_SIGHTS.map(site => {
-    const color = categoryColors[site.category]
+    const color = THEDIRAC_FORTIFIED_SIGHT_IDS.has(site.id) ? THEDIRAC_FORTIFICATION_COLOR : categoryColors[site.category]
     const feature = new Feature({
       geometry: new Point(fromLonLat([site.lon, site.lat]))
     })
@@ -101,6 +103,7 @@ export function createThediracSightsLayerOL() {
       layerColor: color,
       name: site.name,
       'Categorie / catégorie': categoryLabels[site.category],
+      ...(THEDIRAC_FORTIFIED_SIGHT_IDS.has(site.id) ? {'Kaartlegenda': THEDIRAC_FORTIFICATION_CATEGORY} : {}),
       'Beschrijving': site.descriptionNl,
       'Description': site.descriptionFr,
       'Bezoek': site.visitNl,

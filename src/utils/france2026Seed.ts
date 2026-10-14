@@ -1,3 +1,4 @@
+import { THEDIRAC_FORTIFIED_SIGHT_IDS, THEDIRAC_FORTIFICATION_CATEGORY } from '../data/thediracFortifications'
 import type { CustomFeature } from '../store/customLayerStore'
 import { useCustomLayerStore } from '../store/customLayerStore'
 import { THEDIRAC_RESEARCH_SITES, researchSiteProperties } from '../data/thediracResearchSites'
@@ -48,7 +49,8 @@ export function buildFrance2026SeedFeatures(): CustomFeature[] {
     site.lat,
     {
       naam: site.name,
-      categorie: 'Bezienswaardigheid',
+      categorie: THEDIRAC_FORTIFIED_SIGHT_IDS.has(site.id) ? THEDIRAC_FORTIFICATION_CATEGORY : 'Bezienswaardigheid',
+      ...(THEDIRAC_FORTIFIED_SIGHT_IDS.has(site.id) ? {versterking: 'Ja', periode: 'Middeleeuwen', periodegroep: 'Middeleeuwen'} : {}),
       type: site.category,
       omschrijving: site.descriptionNl,
       bezoek: site.visitNl,

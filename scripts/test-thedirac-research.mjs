@@ -17,20 +17,23 @@ function load(path) {
 }
 const {THEDIRAC_RESEARCH_SITES}=load('src/data/thediracResearchSites.ts')
 const {THEDIRAC_RESEARCH_EXPANSION}=load('src/data/thediracResearchExpansion.ts')
+const {THEDIRAC_FORTIFICATIONS,THEDIRAC_FORTIFICATION_COLOR,THEDIRAC_FORTIFICATION_CATEGORY}=load('src/data/thediracFortifications.ts')
+const addedFortifications=THEDIRAC_FORTIFICATIONS.length
+assert.equal(addedFortifications,12)
 const {buildFrance2026SeedFeatures}=load('src/utils/france2026Seed.ts')
 const {THEDIRAC_CONTEXT_LAYER_NAME,THEDIRAC_LANDSCAPE_FEATURES,THEDIRAC_SOURCE_GUIDES}=load('src/data/thediracLandscapeContext.ts')
 const {getThediracPlaceSources}=load('src/utils/thediracPlaceSources.ts')
 const {collectPlaces,filterPlaces,placeResearchMetadata,placeSourceUrl,placeExternalMapUrl,getScopedSources}=load('src/utils/placeList.ts')
-assert.equal(THEDIRAC_RESEARCH_SITES.length,46)
+assert.equal(THEDIRAC_RESEARCH_SITES.length,46+addedFortifications)
 assert.equal(THEDIRAC_RESEARCH_EXPANSION.length,6)
-assert.equal(new Set(THEDIRAC_RESEARCH_SITES.map(s=>s.id)).size,46)
-const features=buildFrance2026SeedFeatures();assert.equal(features.length,178)
-assert.equal(features.filter(f=>!THEDIRAC_RESEARCH_EXPANSION.some(s=>f.properties.detectSeedId===`archeologie:${s.id}`)).length,172,'All previous vacation records remain in the catalog')
+assert.equal(new Set(THEDIRAC_RESEARCH_SITES.map(s=>s.id)).size,46+addedFortifications)
+const features=buildFrance2026SeedFeatures();assert.equal(features.length,178+addedFortifications)
+assert.equal(features.filter(f=>![...THEDIRAC_RESEARCH_EXPANSION,...THEDIRAC_FORTIFICATIONS].some(s=>f.properties.detectSeedId===`archeologie:${s.id}`)).length,172,'All previous vacation records remain in the catalog')
 for(const s of THEDIRAC_RESEARCH_EXPANSION){assert.ok(s.sourceUrl.startsWith('https://'));assert.ok(s.descriptionNl);assert.ok(s.locationNoteNl);assert.ok(Number.isFinite(s.lon)&&Number.isFinite(s.lat))}
 assert.equal(THEDIRAC_RESEARCH_EXPANSION.filter(s=>s.locationQuality==='approximate').length,5)
 const sources=getThediracPlaceSources({[THEDIRAC_CONTEXT_LAYER_NAME]:true}),entries=collectPlaces(sources)
 for(const e of entries.filter(e=>e.properties.bronvermelding!==true)){assert.ok(e.coordinates,`Map coordinates: ${e.name}`);assert.ok(e.coordinates.every(Number.isFinite));assert.ok(Math.abs(e.coordinates[0])<=180&&Math.abs(e.coordinates[1])<=90)}
-assert.equal(entries.length,187);assert.equal(entries.filter(e=>e.category==='Bron & kaart').length,6)
+assert.equal(entries.length,187+addedFortifications);assert.equal(entries.filter(e=>e.category==='Bron & kaart').length,6)
 assert.equal(getScopedSources(sources,'visible',[]).length,1)
 const context=sources.at(-1);assert.equal(context.entries.length,9)
 assert.equal(getScopedSources(sources,'preset:p',[{id:'p',layers:[THEDIRAC_CONTEXT_LAYER_NAME]}])[0].entries.length,9)
@@ -53,4 +56,13 @@ assert.equal(placeExternalMapUrl({...entries[0],properties:{kaartlink:'javascrip
 const atlas=entries.find(e=>e.id.endsWith('guide:atlas'));assert.equal(placeExternalMapUrl(atlas),'http://atlas.patrimoines.culture.fr/atlas/trunk/');assert.ok(placeSourceUrl(atlas).startsWith('https://www.culture.gouv.fr/'))
 assert.ok(placeSourceUrl({...entries[0],properties:{link:'https://www.onf.fr/vivre-la-foret/que-faire-en-foret/balade-activites-en-foret/%2B/c0e%3A%3Aforet-de-gresigne-ou-lexcursion-dans-la-plus-grande-chenaie-du-sud-de-la-france.html'}}).startsWith('https://www.onf.fr/onf/'))
 const before=JSON.stringify(sources);filterPlaces(entries,{...options,period:'Steentijd',evidence:'Gepubliceerd'});assert.equal(JSON.stringify(sources),before)
-console.log('Thédirac: 172 preserved + 6 new sites + 3 schematic contexts + 6 source guides; period/evidence/precision filters, area intersection and safe links passed.')
+for(const site of THEDIRAC_FORTIFICATIONS){
+ assert.equal(site.fortification,true);assert.ok(site.sourceUrl?.startsWith('https://'));assert.ok(site.positionSourceUrl?.startsWith('https://'));
+ assert.ok(site.locationNoteNl);assert.ok(!site.locationNoteNl.includes('gemeentecentrum'));
+ const entry=entries.find(e=>e.seedId===`archeologie:${site.id}`);assert.ok(entry);assert.equal(entry.color,THEDIRAC_FORTIFICATION_COLOR);assert.equal(entry.category,THEDIRAC_FORTIFICATION_CATEGORY);assert.deepEqual(entry.coordinates,[site.lon,site.lat]);
+ assert.equal(features.filter(f=>f.properties.detectSeedId===entry.seedId).length,1);
+}
+assert.equal(filterPlaces(entries,{...options,category:THEDIRAC_FORTIFICATION_CATEGORY}).length,18,'New sites and reused existing fortifications remain filterable together');
+assert.ok(filterPlaces(entries,{...options,query:'Blis vroege'}).some(e=>e.name.startsWith('Blis')));
+assert.ok(!entries.some(e=>e.name.includes('Castel Sarrazi')),'Disputed forge remains are not presented as a confirmed hillfort');
+console.log('Thédirac: 172 preserved + 6 existing expansion + 12 fortifications + 3 schematic contexts + 6 source guides; period/evidence/precision filters, area intersection and safe links passed.')

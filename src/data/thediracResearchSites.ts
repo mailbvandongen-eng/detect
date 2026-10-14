@@ -1,3 +1,4 @@
+import { THEDIRAC_FORTIFICATIONS, THEDIRAC_FORTIFICATION_CATEGORY } from './thediracFortifications'
 import { THEDIRAC_RESEARCH_EXPANSION } from './thediracResearchExpansion'
 
 export type ThediracResearchSite = {
@@ -16,6 +17,8 @@ export type ThediracResearchSite = {
   source: string
   sourceUrl?: string
   protected?: boolean
+  fortification?: boolean
+  positionSourceUrl?: string
   locationQuality: 'exact' | 'source-centroid' | 'approximate'
   locationNoteNl?: string
   locationNoteFr?: string
@@ -336,6 +339,7 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
   },
   {
     id: 'uzech-chateau',
+    fortification: true,
     category: 'middeleeuwen',
     siteTypeNl: 'Kasteelruïne / versterkte bewoning',
     siteTypeFr: 'Ruines castrales / habitat fortifié',
@@ -604,6 +608,7 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
   },
   {
     id: 'luzech-impernal',
+    fortification: true,
     category: 'ijzertijd',
     siteTypeNl: 'Oppidum / versterkte nederzetting',
     siteTypeFr: 'Oppidum / habitat fortifié',
@@ -624,6 +629,7 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
   },
   {
     id: 'murcens-cras-oppidum',
+    fortification: true,
     category: 'ijzertijd',
     siteTypeNl: 'Oppidum / georganiseerde versterkte bewoning',
     siteTypeFr: 'Oppidum / habitat fortifié organisé',
@@ -663,6 +669,7 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
   },
   {
     id: 'cazals-castrum',
+    fortification: true,
     category: 'middeleeuwen',
     siteTypeNl: 'Castrum / versterkte bewoningskern',
     siteTypeFr: 'Castrum / noyau d’habitat fortifié',
@@ -703,6 +710,7 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
   },
   {
     id: 'luzech-old-castle-enclosure',
+    fortification: true,
     category: 'middeleeuwen',
     siteTypeNl: 'Toren, omwalling en begraven kasteelresten',
     siteTypeFr: 'Tour, enceinte et vestiges castraux enfouis',
@@ -761,12 +769,15 @@ export const THEDIRAC_RESEARCH_SITES: ThediracResearchSite[] = [
     locationNoteNl: 'Officieel bezoekerspunt; opening vooraf controleren en uitsluitend het toegestane parcours volgen.',
     locationNoteFr: 'Point d’accueil officiel ; vérifier l’ouverture et rester exclusivement sur le parcours autorisé.'
   },
-  ...THEDIRAC_RESEARCH_EXPANSION
+  ...THEDIRAC_RESEARCH_EXPANSION,
+  ...THEDIRAC_FORTIFICATIONS
 ]
 
 export function researchSiteProperties(site: ThediracResearchSite): Record<string, unknown> {
   return {
-    naam: site.nameNl, categorie: 'Archeologie', type: site.siteTypeNl,
+    naam: site.nameNl, categorie: site.fortification ? THEDIRAC_FORTIFICATION_CATEGORY : 'Archeologie', type: site.siteTypeNl,
+    ...(site.fortification ? {versterking: 'Ja'} : {}),
+    ...(site.positionSourceUrl ? {positiebron: site.positionSourceUrl} : {}),
     periode: site.periodNl, omschrijving: site.descriptionNl,
     periodegroep: {prehistorie:'Steentijd', ijzertijd:'IJzertijd / Keltisch', romeins:'Romeins', middeleeuwen:'Middeleeuwen', onbepaald:''}[site.category],
     bewijsstatus: site.id === 'gindou-paleolithic-unlocated' ? 'Melding' : 'Gepubliceerd',

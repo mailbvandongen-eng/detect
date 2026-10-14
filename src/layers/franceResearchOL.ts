@@ -1,3 +1,4 @@
+import { THEDIRAC_FORTIFICATION_COLOR, THEDIRAC_FORTIFICATION_CATEGORY } from '../data/thediracFortifications'
 import { getMapPointStyle } from '../utils/mapPointStyle'
 import TileLayer from 'ol/layer/Tile'
 import LayerGroup from 'ol/layer/Group'
@@ -93,7 +94,7 @@ const researchSitePrecisionLabels: Record<ThediracResearchSite['locationQuality'
 
 export function createKnownThediracSitesLayerOL() {
   const features = THEDIRAC_RESEARCH_SITES.map(site => {
-    const color = researchSiteColors[site.category]
+    const color = site.fortification ? THEDIRAC_FORTIFICATION_COLOR : researchSiteColors[site.category]
     const feature = new Feature({
       geometry: new Point(fromLonLat([site.lon, site.lat]))
     })
@@ -105,6 +106,8 @@ export function createKnownThediracSitesLayerOL() {
       layerColor: color,
       name: site.nameNl,
       'Bewijsstatus': researchSiteProperties(site).bewijsstatus,
+      ...(site.fortification ? { 'Kaartlegenda': THEDIRAC_FORTIFICATION_CATEGORY } : {}),
+      ...(site.positionSourceUrl ? { 'Bron kaartpositie': site.positionSourceUrl } : {}),
       'Categorie / catégorie': researchSiteCategoryLabels[site.category],
       'Type locatie / type de site': site.siteTypeNl,
       'Periode / période': site.periodNl,

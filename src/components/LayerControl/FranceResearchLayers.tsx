@@ -1,3 +1,4 @@
+import { THEDIRAC_FORTIFICATION_COLOR } from '../../data/thediracFortifications'
 import { useState } from 'react'
 import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
 import { useLayerStore, useMapStore } from '../../store'
@@ -118,6 +119,12 @@ function ResearchFolder({ title, layers }: { title: string; layers: readonly (re
               </span>
             </button>
           ))}
+          {layers.some(([name]) => name === THEDIRAC_RESEARCH_LAYER_NAME) && (
+            <div className="flex items-center gap-1.5 px-2 py-1 text-xs text-gray-600">
+              <span className="inline-block h-2.5 w-2.5 rounded-full shrink-0" style={{backgroundColor: THEDIRAC_FORTIFICATION_COLOR, border: '0.75px solid white'}} />
+              Versterkingen / heuvelforten
+            </div>
+          )}
         </div>
       )}
     </div>

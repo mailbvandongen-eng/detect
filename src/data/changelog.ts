@@ -6,6 +6,7 @@ export interface ChangeLogEntry {
 }
 
 export const CHANGELOG: ChangeLogEntry[] = [
+  {version: '2.33.97', date: '15 oktober 2026', title: 'Versterkte hoogtes in Lot en Dordogne', changes: ['Twaalf locaties toegevoegd aan de archeologische plekken van Thédirac: heuvelforten, oppida, omwalde plateaus en verlaten middeleeuwse castra.', 'Versterkingen herken je aan een blauwe ronde stip, ook in de lijst. Bij ieder punt staan periode, bron en locatieprecisie; onzeker gedateerde wallen worden niet als bewezen Gallisch voorgesteld. De legenda staat bij Archeologie & historie.']},
   {version: '2.33.95', date: '11 oktober 2026', title: 'Wijzigingen op jouw moment', changes: ['Met Wijzigingen niet meer tonen zet je het automatische wijzigingsscherm uit, ook voor toekomstige versies. Via Menu → Wijzigingen kun je alles teruglezen en automatisch tonen weer aanzetten.']},
   {
     version: '2.33.94', date: '11 oktober 2026', title: 'Rustige, uniforme kaartpunten',

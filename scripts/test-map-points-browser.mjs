@@ -38,6 +38,9 @@ try{
    }
    for(const fn of Object.values(t.LAYER_STYLES)) {const image=fn()(null,resolution).getImage();if(!(image instanceof t.Circle)||image.getRadius()!==expected||image.getStroke().getWidth()!==.75)fail('Legacy layer style differs')}
   }
+  const fortified=t.layers.flatMap(l=>l.getSource().getFeatures()).filter(f=>f.get('Kaartlegenda')==='Versterking / heuvelfort');
+  if(fortified.length!==18)fail('Expected 18 distinct fortification markers');
+  for(const f of fortified){const style=[f.getStyleFunction()(f,20)].flat()[0];if(f.get('layerColor')!=='#0284c7'||style.getImage().getFill().getColor()!=='#0284c7')fail('Fortification color differs')}
   if(JSON.stringify({points:t.points.getState().layers,imports:t.imports.getState().layers})!==t.before)fail('Rendering mutated user data');
   return {count,layers:t.layers.map(l=>l.getSource().getFeatures().length)};
  });
@@ -48,5 +51,6 @@ try{
   await page.waitForTimeout(100);
   assert.ok(await page.evaluate(()=>{const t=window.test;return t.map.getFeaturesAtPixel(t.map.getPixelFromCoordinate(t.map.getView().getCenter()),{hitTolerance:4}).some(f=>f.get('pointId')==='own-point'||f.get('customPoint')?.id==='own-point')}),'Personal point remains clickable at every zoom');
  }
+ const fortHit=await page.evaluate(()=>{const t=window.test,f=t.layers[0].getSource().getFeatureById('pech-del-castel-le-roc');t.map.getView().setCenter(f.getGeometry().getCoordinates());t.map.getView().setResolution(2);t.map.renderSync();return t.map.getFeaturesAtPixel(t.map.getPixelFromCoordinate(f.getGeometry().getCoordinates()),{hitTolerance:4}).some(hit=>hit===f)});assert.ok(fortHit,'New hillfort remains tappable');
  console.log('iPhone map points passed:',JSON.stringify(result),'same circles and border at all zooms; stored colors/data, shared points, imports, MultiPoint, polygons, labels and hit detection preserved.');
 }finally{await browser?.close();await server.close()}
