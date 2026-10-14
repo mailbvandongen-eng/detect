@@ -241,6 +241,8 @@ export function Popup() {
   const selectableUserLayers = buildUserLayerCatalog(customLayers, importedLayers)
   const [quickInfo, setQuickInfo] = useState<Array<{ layer: string; name: string; detail: string }> | null>(null)
   const [hoverInfo, setHoverInfo] = useState<Array<{ layer: string; name: string; detail: string }> | null>(null)
+  const [previewPosition, setPreviewPosition] = useState<{ x: number; y: number } | null>(null)
+  const [showResultChooser, setShowResultChooser] = useState(true)
   const confirmedClickRef = useRef(false)
   const resumeClickRef = useRef<(() => void) | null>(null)
   const [allContents, setAllContents] = useState<string[]>([])
@@ -291,6 +293,14 @@ export function Popup() {
   // Current content based on index
   const content = allContents[currentIndex] || ''
   const hasMultiple = allContents.length > 1
+  const popupOptions = allContents.map((html, index) => {
+    const matches = [...html.matchAll(/<strong[^>]*>([\s\S]*?)<\/strong>/gi)]
+    const clean = (text: string) => text.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').trim()
+    const group = clean(matches[0]?.[1] || 'Kaartinformatie')
+    const name = clean(matches[1]?.[1] || group)
+    return { index, group, name: name === group ? 'Informatie' : name }
+  })
+  const popupGroups = Array.from(new Set(popupOptions.map(item => item.group)))
 
   // Extract title from content (first <strong> tag) and remove it from content
   const extractTitleAndContent = (html: string): { title: string; contentWithoutTitle: string } => {
@@ -458,8 +468,22 @@ export function Popup() {
       return
     }
 
-    setAllContents(contents)
-    setAllFeatureData(featureData)
+    // Identieke antwoorden zijn geen nieuwe keuzemogelijkheden.
+    const uniqueContents: string[] = []
+    const uniqueData: Array<PopupFeatureData | null> = []
+    const seen = new Set<string>()
+    contents.forEach((html, index) => {
+      const plain = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+      if (!plain || seen.has(plain)) return
+      seen.add(plain)
+      uniqueContents.push(html)
+      uniqueData.push(featureData[index] ?? null)
+    })
+    if (!uniqueContents.length) return
+    setAllContents(uniqueContents)
+    setAllFeatureData(uniqueData)
+    setShowResultChooser(uniqueContents.length > 1)
+    // Original data is kept aligned with the deduplicated list.
     if (resetIndex) {
       setCurrentIndex(0)
     }
@@ -2287,6 +2311,15 @@ export function Popup() {
     let lastPointerDragAt = Number.NEGATIVE_INFINITY
     const handlePointerDrag = () => {
       lastPointerDragAt = performance.now()
+      setQuickInfo(null)
+      setHoverInfo(null)
+    }
+    const setPointPosition = (pixel: number[]) => {
+      const rect = map.getTargetElement().getBoundingClientRect()
+      setPreviewPosition({
+        x: Math.max(12, Math.min(window.innerWidth - 12, rect.left + pixel[0])),
+        y: Math.max(12, Math.min(window.innerHeight - 12, rect.top + pixel[1])),
+      })
     }
 
     // Alleen lokale punten krijgen een snelle preview. Vlakken en WMS blijven
@@ -2322,6 +2355,7 @@ export function Popup() {
       const original = evt.originalEvent as PointerEvent
       if (original.pointerType !== 'mouse' && original.pointerType !== 'pen') return
       const matches = previewAtPixel(evt.pixel, 3)
+      if (matches.length && !quickInfo) setPointPosition(evt.pixel)
       setHoverInfo(matches.length ? matches : null)
       map.getTargetElement().style.cursor = matches.length ? 'pointer' : ''
     }
@@ -2344,6 +2378,7 @@ export function Popup() {
         const matches = previewAtPixel(evt.pixel, MOBILE_HIT_TOLERANCE_PX)
         if (matches.length) {
           setQuickInfo(matches)
+          setPointPosition(evt.pixel)
           setHoverInfo(null)
           resumeClickRef.current = () => {
             confirmedClickRef.current = true
@@ -2352,6 +2387,12 @@ export function Popup() {
           }
           return
         }
+      }
+      if (!confirmedClickRef.current) {
+        // Een tik elders sluit de preview; geen ongevraagde grote popup.
+        setQuickInfo(null)
+        setHoverInfo(null)
+        return
       }
       confirmedClickRef.current = false
       setQuickInfo(null)
@@ -4060,20 +4101,30 @@ export function Popup() {
 
   return (
     <>
-      {!visible && (quickInfo || hoverInfo) && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1490] w-[min(92vw,390px)] max-h-[45vh] overflow-auto rounded-xl bg-white text-gray-900 shadow-xl border border-gray-200 p-3" role="status">
+      {!visible && (quickInfo || hoverInfo) && previewPosition && (
+        <div className="fixed z-[1490] pointer-events-none" style={{
+          left: previewPosition.x,
+          top: previewPosition.y,
+          transform: `translate(${previewPosition.x > window.innerWidth / 2 ? '-100%' : '0px'}, ${previewPosition.y > window.innerHeight / 2 ? 'calc(-100% - 14px)' : '14px'})`,
+        }}>
+        <div className="pointer-events-auto w-[min(82vw,300px)] max-h-[35vh] overflow-auto rounded-xl bg-white text-gray-900 shadow-xl border border-gray-200 p-3" role="status">
           <div className="flex justify-between items-center gap-2 mb-2">
             <strong className="text-sm">{quickInfo ? 'Punten op deze plek' : 'Puntinformatie'}</strong>
             {quickInfo && <button className="text-gray-600 p-1" onClick={() => setQuickInfo(null)} aria-label="Sluiten"><X size={18}/></button>}
           </div>
-          {(quickInfo || hoverInfo || []).map((item, index) => (
+          {(quickInfo || hoverInfo || []).slice(0, 3).map((item, index) => (
             <div key={index} className="py-1.5 border-t border-gray-100 text-sm">
               <div className="text-xs text-gray-500">{item.layer}</div>
               <div className="font-medium">{item.name}</div>
               {item.detail && <div className="text-xs text-gray-600">{item.detail}</div>}
             </div>
           ))}
-          {quickInfo && <button className="w-full mt-2 rounded-lg bg-blue-600 text-white py-2 text-sm font-medium" onClick={() => resumeClickRef.current?.()}>Volledige kaartinformatie</button>}
+          {(quickInfo || hoverInfo || []).length > 3 && <div className="text-xs text-gray-500">+ {(quickInfo || hoverInfo || []).length - 3} andere punten</div>}
+          <button className="w-full mt-2 rounded-lg bg-blue-600 text-white py-2 text-sm font-medium" onClick={() => {
+            if (quickInfo) resumeClickRef.current?.()
+            else { setQuickInfo(hoverInfo); setHoverInfo(null) }
+          }}>Details bekijken</button>
+        </div>
         </div>
       )}
       <AnimatePresence>
@@ -4108,6 +4159,22 @@ export function Popup() {
             dragElastic={0.3}
             onDragEnd={handleDragEnd}
           >
+            {hasMultiple && showResultChooser && (
+              <div className="px-3 pt-3 pb-2 bg-white overflow-auto max-h-[24vh] border-b border-gray-200" onPointerDown={e => e.stopPropagation()}>
+                <div className="text-sm font-semibold text-gray-800 mb-2">Kies kaartinformatie ({allContents.length})</div>
+                {popupGroups.map(group => (
+                  <div key={group} className="mb-2">
+                    <div className="text-xs font-semibold text-gray-500">{group} ({popupOptions.filter(item => item.group === group).length})</div>
+                    {popupOptions.filter(item => item.group === group).map(item => (
+                      <button key={item.index} className="block w-full text-left px-2 py-1.5 text-sm text-blue-700 hover:bg-blue-50 rounded" onClick={() => {
+                        setCurrentIndex(item.index)
+                        setShowResultChooser(false)
+                      }}>{item.name}</button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
             {/* Blue gradient header - like MonumentSearch */}
             <div
               className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white cursor-grab active:cursor-grabbing rounded-t-xl select-none"
@@ -4144,6 +4211,7 @@ export function Popup() {
                 </span>
               </div>
 
+              {hasMultiple && <button className="text-xs text-white underline px-2" onClick={e => { e.stopPropagation(); setShowResultChooser(value => !value) }}>Overzicht</button>}
               {/* Right side: action icons + grip handle + close */}
               <div className="flex items-center gap-1 flex-shrink-0">
 
