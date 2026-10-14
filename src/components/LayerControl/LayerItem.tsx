@@ -1,4 +1,5 @@
-import { Check, Loader2, AlertCircle, Tag } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Loader2, AlertCircle, Tag, BookOpen, ExternalLink } from 'lucide-react'
 import { useLayerStore } from '../../store'
 import type { LoadingState } from '../../store/layerStore'
 
@@ -20,6 +21,9 @@ const BASE_LAYER_NAMES = [
 const AUTO_REFERENCE_BASE_LAYERS = ['Luchtfoto', 'Satelliet (wereld)', 'Hybride (wereld)']
 
 export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
+  const [showGeologyLegend, setShowGeologyLegend] = useState(false)
+  const isFrenchGeology = name === 'Bodem/geologie 1:50.000 FR' || name === 'Geologie + reliëf FR'
+  const brgmLegendUrl = 'https://mapsref.brgm.fr/wxs/referentiel/geologie?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&LAYER=GEOL50_HARM&FORMAT=image/png'
   const visible = useLayerStore(state => state.visible[name])
   const labelsVisible = useLayerStore(state => state.visible['Labels Overlay'])
   const hybridVisible = useLayerStore(state => state.visible['Hybride (wereld)'])
@@ -108,6 +112,28 @@ export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
           </button>
         )}
       </div>
+
+      {isFrenchGeology && (
+        <div className="pl-3 pr-2 pb-1">
+          <button type="button" onClick={() => setShowGeologyLegend(value => !value)}
+            aria-expanded={showGeologyLegend}
+            className="flex items-center gap-1 text-xs text-blue-700 underline min-h-[36px]">
+            <BookOpen size={14} /> {showGeologyLegend ? 'Legenda sluiten' : 'Legenda geologische kaart'}
+          </button>
+          {showGeologyLegend && (
+            <div className="rounded-lg border border-gray-200 bg-white p-2 text-xs text-gray-700 space-y-2">
+              <p>BRGM geologische kaart 1:50.000. De kleuren en lettercodes beschrijven geologische eenheden; hun exacte betekenis verschilt per kaartblad.</p>
+              <img src={brgmLegendUrl} alt="Legenda van BRGM geharmoniseerde geologische kaart"
+                className="w-full h-auto max-h-72 object-contain object-left" loading="lazy" />
+              <a href="https://infoterre.brgm.fr/" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-blue-700 underline">
+                Complete kaartbladlegenda in InfoTerre <ExternalLink size={12} />
+              </a>
+              <p>Klik op de kaart voor gegevens over de plek. Geologie alleen bewijst geen aanwezigheid van vuursteen of archeologische resten.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {showHybridCompanion && (
         <button
