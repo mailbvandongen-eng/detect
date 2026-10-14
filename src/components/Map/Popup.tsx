@@ -2063,7 +2063,7 @@ export function Popup() {
           }[char] || char))
           const serviceUrl = 'https://mapsref.brgm.fr/wxs/referentiel/geologie'
           const legendUrl = `${serviceUrl}?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&LAYER=GEOL50_HARM&FORMAT=image/png`
-          const legend = `<details class="mt-2"><summary class="cursor-pointer text-blue-700 underline text-sm">Legenda geologische kaart (BRGM)</summary><img src="${legendUrl}" alt="BRGM legenda 1:50.000" class="mt-2 max-w-full h-auto"/><div class="text-sm text-gray-600 mt-2">Ontbreekt de legenda-afbeelding? Open de complete kaartbladlegenda via InfoTerre hieronder.</div></details>`
+          const legend = `<details open class="mt-2"><summary class="cursor-pointer text-blue-700 underline text-sm">Legenda geologische kaart (BRGM)</summary><img src="${legendUrl}" alt="BRGM legenda 1:50.000" class="mt-2 max-w-full h-auto"/><div class="text-sm text-gray-600 mt-2">Ontbreekt de legenda-afbeelding? Open de complete kaartbladlegenda via InfoTerre hieronder.</div></details>`
           const link = `<div class="mt-2"><a href="${informationLink}" target="_blank" rel="noopener noreferrer" class="text-blue-700 text-sm underline">Open actuele kaart en kaartbladlegenda in BRGM InfoTerre</a></div>`
           let found = false
           // The BRGM harmonised service is WMS 1.1.1. The two endpoints are
