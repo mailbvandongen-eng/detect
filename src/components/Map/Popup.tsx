@@ -1,6 +1,6 @@
 import { sanitizePopupHtml } from '../../utils/safePopupHtml'
 import { BuddyWriteStatus } from '../CustomPoints/BuddyWriteStatus'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import TileWMS from 'ol/source/TileWMS'
 import TileLayer from 'ol/layer/Tile'
@@ -242,7 +242,7 @@ export function Popup() {
   const [quickInfo, setQuickInfo] = useState<Array<{ layer: string; name: string; detail: string }> | null>(null)
   const [hoverInfo, setHoverInfo] = useState<Array<{ layer: string; name: string; detail: string }> | null>(null)
   const [previewPosition, setPreviewPosition] = useState<{ x: number; y: number } | null>(null)
-  const [showResultChooser, setShowResultChooser] = useState(true)
+  const previewRef = useRef<HTMLDivElement>(null)
   const confirmedClickRef = useRef(false)
   const resumeClickRef = useRef<(() => void) | null>(null)
   const [allContents, setAllContents] = useState<string[]>([])
@@ -284,6 +284,43 @@ export function Popup() {
   const popupRequestIdRef = useRef(0)
   const heightMapAbortRef = useRef<AbortController | null>(null)
 
+  // Map listeners live for the lifetime of the map; read current UI state.
+  const previewStateRef = useRef({ visible, quickInfo })
+  previewStateRef.current = { visible, quickInfo }
+
+  useLayoutEffect(() => {
+    const card = previewRef.current
+    if (!card || !previewPosition) return
+    const place = () => {
+      const viewport = window.visualViewport
+      const left = (viewport?.offsetLeft ?? 0) + 12
+      const top = (viewport?.offsetTop ?? 0) + 12
+      const width = Math.max(1, (viewport?.width ?? window.innerWidth) - 24)
+      const height = Math.max(1, (viewport?.height ?? window.innerHeight) - 24)
+      card.style.width = `${Math.min(300, width)}px`
+      card.style.maxHeight = `${Math.min(height, (viewport?.height ?? window.innerHeight) * 0.35)}px`
+      const bounds = card.getBoundingClientRect()
+      const x = Math.max(left, Math.min(previewPosition.x, left + width - bounds.width))
+      const below = previewPosition.y + 14
+      const preferredY = below + bounds.height <= top + height ? below : previewPosition.y - bounds.height - 14
+      const y = Math.max(top, Math.min(preferredY, top + height - bounds.height))
+      card.style.left = `${x}px`
+      card.style.top = `${y}px`
+    }
+    place()
+    const observer = new ResizeObserver(place)
+    observer.observe(card)
+    window.addEventListener('resize', place)
+    window.visualViewport?.addEventListener('resize', place)
+    window.visualViewport?.addEventListener('scroll', place)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', place)
+      window.visualViewport?.removeEventListener('resize', place)
+      window.visualViewport?.removeEventListener('scroll', place)
+    }
+  }, [previewPosition, quickInfo, hoverInfo, visible])
+
   // Save text scale to localStorage
   const handleTextScaleChange = (value: number) => {
     setTextScale(value)
@@ -293,15 +330,6 @@ export function Popup() {
   // Current content based on index
   const content = allContents[currentIndex] || ''
   const hasMultiple = allContents.length > 1
-  const popupOptions = allContents.map((html, index) => {
-    const matches = [...html.matchAll(/<strong[^>]*>([\s\S]*?)<\/strong>/gi)]
-    const clean = (text: string) => text.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').trim()
-    const group = clean(matches[0]?.[1] || 'Kaartinformatie')
-    const name = clean(matches[1]?.[1] || group)
-    return { index, group, name: name === group ? 'Informatie' : name }
-  })
-  const popupGroups = Array.from(new Set(popupOptions.map(item => item.group)))
-
   // Extract title from content (first <strong> tag) and remove it from content
   const extractTitleAndContent = (html: string): { title: string; contentWithoutTitle: string } => {
     const match = html.match(/<strong[^>]*>(.*?)<\/strong>/)
@@ -482,7 +510,6 @@ export function Popup() {
     if (!uniqueContents.length) return
     setAllContents(uniqueContents)
     setAllFeatureData(uniqueData)
-    setShowResultChooser(uniqueContents.length > 1)
     // Original data is kept aligned with the deduplicated list.
     if (resetIndex) {
       setCurrentIndex(0)
@@ -2313,6 +2340,7 @@ export function Popup() {
       lastPointerDragAt = performance.now()
       setQuickInfo(null)
       setHoverInfo(null)
+      resumeClickRef.current = null
     }
     const setPointPosition = (pixel: number[]) => {
       const rect = map.getTargetElement().getBoundingClientRect()
@@ -2348,14 +2376,24 @@ export function Popup() {
     }
 
     const handleHover = (evt: MapBrowserEvent<any>) => {
-      if (evt.dragging || useUIStore.getState().isDrawingMode || visible) {
+      if (evt.dragging || useUIStore.getState().isDrawingMode || previewStateRef.current.visible) {
         setHoverInfo(null)
         return
       }
       const original = evt.originalEvent as PointerEvent
       if (original.pointerType !== 'mouse' && original.pointerType !== 'pen') return
       const matches = previewAtPixel(evt.pixel, 3)
-      if (matches.length && !quickInfo) setPointPosition(evt.pixel)
+      if (previewStateRef.current.quickInfo) return
+      if (matches.length) {
+        setPointPosition(evt.pixel)
+        resumeClickRef.current = () => {
+          confirmedClickRef.current = true
+          setHoverInfo(null)
+          void handleClick({ ...evt, pixel: map.getPixelFromCoordinate(evt.coordinate) } as MapBrowserEvent<any>)
+        }
+      } else {
+        resumeClickRef.current = null
+      }
       setHoverInfo(matches.length ? matches : null)
       map.getTargetElement().style.cursor = matches.length ? 'pointer' : ''
     }
@@ -2383,7 +2421,7 @@ export function Popup() {
           resumeClickRef.current = () => {
             confirmedClickRef.current = true
             setQuickInfo(null)
-            void handleClick(evt)
+            void handleClick({ ...evt, pixel: map.getPixelFromCoordinate(evt.coordinate) } as MapBrowserEvent<any>)
           }
           return
         }
@@ -4102,12 +4140,8 @@ export function Popup() {
   return (
     <>
       {!visible && (quickInfo || hoverInfo) && previewPosition && (
-        <div className="fixed z-[1490] pointer-events-none" style={{
-          left: previewPosition.x,
-          top: previewPosition.y,
-          transform: `translate(${previewPosition.x > window.innerWidth / 2 ? '-100%' : '0px'}, ${previewPosition.y > window.innerHeight / 2 ? 'calc(-100% - 14px)' : '14px'})`,
-        }}>
-        <div className="pointer-events-auto w-[min(82vw,300px)] max-h-[35vh] overflow-auto rounded-xl bg-white text-gray-900 shadow-xl border border-gray-200 p-3" role="status">
+        <div ref={previewRef} data-map-preview className="fixed z-[1490] overflow-auto rounded-xl bg-white text-gray-900 shadow-xl border border-gray-200 p-3"
+          style={{ boxSizing: 'border-box', overflowWrap: 'anywhere' }} role="status">
           <div className="flex justify-between items-center gap-2 mb-2">
             <strong className="text-sm">{quickInfo ? 'Punten op deze plek' : 'Puntinformatie'}</strong>
             {quickInfo && <button className="text-gray-600 p-1" onClick={() => setQuickInfo(null)} aria-label="Sluiten"><X size={18}/></button>}
@@ -4120,11 +4154,7 @@ export function Popup() {
             </div>
           ))}
           {(quickInfo || hoverInfo || []).length > 3 && <div className="text-xs text-gray-500">+ {(quickInfo || hoverInfo || []).length - 3} andere punten</div>}
-          <button className="w-full mt-2 rounded-lg bg-blue-600 text-white py-2 text-sm font-medium" onClick={() => {
-            if (quickInfo) resumeClickRef.current?.()
-            else { setQuickInfo(hoverInfo); setHoverInfo(null) }
-          }}>Details bekijken</button>
-        </div>
+          <button className="w-full mt-2 rounded-lg bg-blue-600 text-white py-2 text-sm font-medium" onClick={() => resumeClickRef.current?.()}>Details bekijken</button>
         </div>
       )}
       <AnimatePresence>
@@ -4143,6 +4173,7 @@ export function Popup() {
 
           {/* Bottom Sheet */}
           <motion.div
+            data-map-details
             className="fixed bottom-0 left-0 right-0 z-[1501] bg-white rounded-t-2xl shadow-2xl overflow-hidden flex flex-col"
             style={{
               fontSize: `${14 * textScale / 100}px`,
@@ -4159,22 +4190,6 @@ export function Popup() {
             dragElastic={0.3}
             onDragEnd={handleDragEnd}
           >
-            {hasMultiple && showResultChooser && (
-              <div className="px-3 pt-3 pb-2 bg-white overflow-auto max-h-[24vh] border-b border-gray-200" onPointerDown={e => e.stopPropagation()}>
-                <div className="text-sm font-semibold text-gray-800 mb-2">Kies kaartinformatie ({allContents.length})</div>
-                {popupGroups.map(group => (
-                  <div key={group} className="mb-2">
-                    <div className="text-xs font-semibold text-gray-500">{group} ({popupOptions.filter(item => item.group === group).length})</div>
-                    {popupOptions.filter(item => item.group === group).map(item => (
-                      <button key={item.index} className="block w-full text-left px-2 py-1.5 text-sm text-blue-700 hover:bg-blue-50 rounded" onClick={() => {
-                        setCurrentIndex(item.index)
-                        setShowResultChooser(false)
-                      }}>{item.name}</button>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
             {/* Blue gradient header - like MonumentSearch */}
             <div
               className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white cursor-grab active:cursor-grabbing rounded-t-xl select-none"
@@ -4211,7 +4226,6 @@ export function Popup() {
                 </span>
               </div>
 
-              {hasMultiple && <button className="text-xs text-white underline px-2" onClick={e => { e.stopPropagation(); setShowResultChooser(value => !value) }}>Overzicht</button>}
               {/* Right side: action icons + grip handle + close */}
               <div className="flex items-center gap-1 flex-shrink-0">
 

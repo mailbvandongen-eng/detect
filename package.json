@@ -1,7 +1,7 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.97",
+  "version": "2.33.98",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -23,7 +23,8 @@
     "test:app-maintenance": "node scripts/test-app-maintenance.mjs",
     "test:app-maintenance-browser": "node scripts/test-app-maintenance-browser.mjs",
     "test:map-points-browser": "node scripts/test-map-points-browser.mjs",
-    "test:thedirac-research": "node scripts/test-thedirac-research.mjs"
+    "test:thedirac-research": "node scripts/test-thedirac-research.mjs",
+    "test:map-popup-browser": "node scripts/test-map-popup-browser.mjs"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.22",
