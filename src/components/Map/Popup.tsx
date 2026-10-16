@@ -2375,6 +2375,17 @@ export function Popup() {
       return matches.slice(0, 30)
     }
 
+    const setDetailsTarget = (evt: Pick<MapBrowserEvent<any>, 'coordinate'>) => {
+      // Native OpenLayers events expose coordinate/pixel through prototype
+      // getters: spreading the event drops them. Capture the location now,
+      // then recompute its pixel if the viewport changes before Details.
+      const coordinate = [...evt.coordinate]
+      resumeClickRef.current = () => {
+        confirmedClickRef.current = true
+        void handleClick({ coordinate, pixel: map.getPixelFromCoordinate(coordinate) })
+      }
+    }
+
     const handleHover = (evt: MapBrowserEvent<any>) => {
       if (evt.dragging || useUIStore.getState().isDrawingMode || previewStateRef.current.visible) {
         setHoverInfo(null)
@@ -2386,11 +2397,7 @@ export function Popup() {
       if (previewStateRef.current.quickInfo) return
       if (matches.length) {
         setPointPosition(evt.pixel)
-        resumeClickRef.current = () => {
-          confirmedClickRef.current = true
-          setHoverInfo(null)
-          void handleClick({ ...evt, pixel: map.getPixelFromCoordinate(evt.coordinate) } as MapBrowserEvent<any>)
-        }
+        setDetailsTarget(evt)
       } else {
         resumeClickRef.current = null
       }
@@ -2400,9 +2407,12 @@ export function Popup() {
 
     // Handle deliberate map taps. Small pan gestures and kinetic movement
     // must not open the blocking bottom sheet.
-    const handleClick = async (evt: MapBrowserEvent<any>) => {
+    const handleClick = async (evt: Pick<MapBrowserEvent<any>, 'coordinate' | 'pixel'>) => {
       // Don't show popups when in drawing/measuring mode
       if (useUIStore.getState().isDrawingMode) return
+      // A native singleclick arrives after a delay. Details may already have
+      // opened from the mouse hover card; never create a hidden preview then.
+      if (previewStateRef.current.visible && !confirmedClickRef.current) return
 
       const view = map.getView()
       if (!isMapPopupGestureAllowed({
@@ -2418,18 +2428,16 @@ export function Popup() {
           setQuickInfo(matches)
           setPointPosition(evt.pixel)
           setHoverInfo(null)
-          resumeClickRef.current = () => {
-            confirmedClickRef.current = true
-            setQuickInfo(null)
-            void handleClick({ ...evt, pixel: map.getPixelFromCoordinate(evt.coordinate) } as MapBrowserEvent<any>)
-          }
+          setDetailsTarget(evt)
           return
         }
       }
-      if (!confirmedClickRef.current) {
-        // Een tik elders sluit de preview; geen ongevraagde grote popup.
+      if (!confirmedClickRef.current && previewStateRef.current.quickInfo) {
+        // Een tik elders sluit een vastgezet kaartje. Zonder kaartje blijft
+        // de gewone klikroute voor vlakken, andere punten en WMS bereikbaar.
         setQuickInfo(null)
         setHoverInfo(null)
+        resumeClickRef.current = null
         return
       }
       confirmedClickRef.current = false
@@ -4100,6 +4108,10 @@ export function Popup() {
   }, [map])
 
   const handleClose = () => {
+    setQuickInfo(null)
+    setHoverInfo(null)
+    resumeClickRef.current = null
+    confirmedClickRef.current = false
     popupRequestIdRef.current += 1
     heightMapAbortRef.current?.abort()
     heightMapAbortRef.current = null
