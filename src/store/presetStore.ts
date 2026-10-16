@@ -33,13 +33,17 @@ export interface Preset {
     center: [number, number]
     zoom: number
   } | null
+  cassiniAdded?: boolean
   isBuiltIn: boolean
 }
 
 const THEDIRAC_CENTER: [number, number] = [1.34, 44.625]
 const THEDIRAC_ARCHAEOLOGY_LAYER = THEDIRAC_RESEARCH_LAYER_NAME
 
+const CASSINI_LAYER = 'Carte de Cassini · 18e eeuw'
+
 const FRANCE_FIELD_LAYERS = [
+  CASSINI_LAYER,
   'LiDAR HD terrein FR',
   'Waterlopen BD TOPAGE 2026',
   'OCS GE landbedekking 2021-2023',
@@ -54,6 +58,7 @@ const FRANCE_FIELD_LAYERS = [
 ] as const
 
 const FRANCE_RESEARCH_LAYER_NAMES = new Set([
+  CASSINI_LAYER,
   'LiDAR HD terrein FR',
   'Bodem/geologie 1:50.000 FR',
   'Geologie + reliëf FR',
@@ -181,6 +186,7 @@ const BUILT_IN_PRESETS: Preset[] = [
   },
   {
     id: 'thedirac-2026',
+    cassiniAdded: true,
     name: 'Thédirac 2026',
     icon: 'Compass',
     layers: [...FRANCE_FIELD_LAYERS],
@@ -190,6 +196,7 @@ const BUILT_IN_PRESETS: Preset[] = [
       zoom: 10.7
     },
     layerOpacities: {
+      [CASSINI_LAYER]: 0.8,
       'LiDAR HD terrein FR': 0.48,
       'Waterlopen BD TOPAGE 2026': 0.92,
       'OCS GE landbedekking 2021-2023': 0.24,
@@ -314,13 +321,23 @@ function normalizePreset(preset: Preset): Preset {
   // niet stilletjes uit de ingebouwde definitie worden teruggezet.
   const configuredLayers = (preset.layers ?? builtInPreset.layers).map(migrateFranceLayerName)
 
+  const addCassini = preset.id === 'thedirac-2026' && !preset.cassiniAdded
+  const layerStates = normalizeLayerStates(preset.layerStates)
+  const layerOpacities = normalizeLayerOpacities(preset.layerOpacities ?? builtInPreset.layerOpacities)
+  if (addCassini && !configuredLayers.includes(CASSINI_LAYER)) {
+    configuredLayers.push(CASSINI_LAYER)
+    if (layerStates) layerStates[CASSINI_LAYER] = { visible: true, opacity: 0.8 }
+    if (layerOpacities) layerOpacities[CASSINI_LAYER] = 0.8
+  }
+
   return {
     ...builtInPreset,
     ...preset,
+    ...(preset.id === 'thedirac-2026' ? { cassiniAdded: true } : {}),
     layers: configuredLayers.filter((layer) => !REMOVED_LAYERS.has(layer)),
     baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
-    layerStates: normalizeLayerStates(preset.layerStates),
-    layerOpacities: normalizeLayerOpacities(preset.layerOpacities ?? builtInPreset.layerOpacities),
+    layerStates,
+    layerOpacities,
     mapView: preset.mapView === undefined ? builtInPreset.mapView : preset.mapView
   }
 }
@@ -560,7 +577,7 @@ export const usePresetStore = create<PresetState>()(
     {
       name: 'detectorapp-presets',
       storage: createJSONStorage(() => accountStorage),
-      version: 31,
+      version: 32,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {

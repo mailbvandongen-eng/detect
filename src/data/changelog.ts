@@ -6,6 +6,7 @@ export interface ChangeLogEntry {
 }
 
 export const CHANGELOG: ChangeLogEntry[] = [
+  {version: '2.33.101', date: '16 oktober 2026', title: 'Carte de Cassini toegevoegd', changes: ['De historische Cassini-kaart van IGN/BNF staat bij Frankrijk → Archeologie & historie, met instelbare transparantie.', 'De laag is toegevoegd aan Thédirac 2026, ook aan bestaande opgeslagen presets. Je overige laagkeuzes blijven behouden.']},
   {version: '2.33.100', date: '16 oktober 2026', title: 'Zoekknop weer vrij', changes: ['De zwevende versielink is verwijderd: die lag over het vergrootglas en opende daardoor de wijzigingen in plaats van zoeken.', 'Wijzigingen blijven bereikbaar via de versielink onderaan het menu.']},
   {version: '2.33.99', date: '16 oktober 2026', title: 'Gewone kaartinformatie weer bereikbaar', changes: ['Klikken op vlakken, gewone kaartpunten en kaartdiensten opent weer het vertrouwde informatievenster.', 'Details bekijken werkt weer met echte muisklikken en telefoontikken. Eigen punten behouden hun kleine informatiekaartje. Een tik elders sluit eerst het kaartje; schuiven opent geen pop-up.']},
   {version: '2.33.98', date: '15 oktober 2026', title: 'Kaartinformatie binnen beeld', changes: ['Het kleine informatiekaartje blijft volledig binnen het zichtbare scherm, ook aan de rand en bij draaien of inzoomen op je telefoon.', 'Details bekijken opent direct het vertrouwde detailvenster. Het extra keuzepaneel is verwijderd; bladeren tussen resultaten blijft beschikbaar.']},

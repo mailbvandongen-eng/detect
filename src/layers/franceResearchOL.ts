@@ -257,6 +257,25 @@ export function createFranceOcsCoverageLayerOL() {
   return queryableWmsLayer('OCS GE landbedekking 2021-2023', IGN_WMS, 'OCSGE.COUVERTURE.2021-2023', 0.62, '© IGN — OCS GE')
 }
 
+// IGN WMTS capabilities: BNF Cassini, PM_6_14, PNG, zoom 6–14.
+// Reuse the final tile level when zooming in further.
+export function createFranceCassiniLayerOL() {
+  return new TileLayer({
+    properties: { title: 'Carte de Cassini · 18e eeuw', type: 'overlay' },
+    visible: false,
+    opacity: 0.8,
+    zIndex: 10,
+    source: new XYZ({
+      url: `${IGN_WMTS}?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=BNF-IGNF_GEOGRAPHICALGRIDSYSTEMS.CASSINI&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM_6_14&TILEMATRIX={z}&TILECOL={x}&TILEROW={y}`,
+      minZoom: 6,
+      maxZoom: 14,
+      wrapX: false,
+      crossOrigin: 'anonymous',
+      attributions: '© BnF / IGN — Carte de Cassini (18e eeuw)'
+    })
+  })
+}
+
 export function createFranceAncientForestsLayerOL() {
   return ignWmsLayer('Oude bossen · Forêts anciennes', 'IGNF_FORETS-ANCIENNES', 0.72, '© IGN — BD Forêts anciennes')
 }
@@ -270,6 +289,7 @@ function firstText(...values: unknown[]) {
 }
 
 export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
+  'Carte de Cassini · 18e eeuw': createFranceCassiniLayerOL,
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
   'Bodem/geologie 1:50.000 FR': createFranceGeology50LayerOL,
   'Geologie + reliëf FR': createFranceGeologyReliefLayerOL,

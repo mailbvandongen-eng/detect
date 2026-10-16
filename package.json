@@ -1,12 +1,13 @@
 {
   "name": "detect",
   "private": true,
-  "version": "2.33.100",
+  "version": "2.33.101",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "node scripts/build-pages.mjs",
     "build:dist": "vite build --outDir dist",
+    "test:cassini-browser": "node scripts/test-cassini-browser.mjs",
     "test:field": "node scripts/test-field-reliability.mjs",
     "test:buddy-writes": "node scripts/test-buddy-writes.mjs",
     "test:buddy-writes-browser": "node scripts/test-buddy-writes-browser.mjs",

@@ -35,6 +35,7 @@ const GEOLOGICAL_FINDS = [
 ] as const
 
 const ARCHAEOLOGY_HISTORY = [
+  ['Carte de Cassini · 18e eeuw', 0.8],
   [THEDIRAC_RESEARCH_LAYER_NAME, 1],
   [THEDIRAC_CONTEXT_LAYER_NAME, 1],
   ['Oude bossen · Forêts anciennes', 0.72]
