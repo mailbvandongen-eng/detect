@@ -1,3 +1,4 @@
+import { NAPOLEON_LOT_LAYER } from '../../data/lotCadastreArchives'
 import { THEDIRAC_FORTIFICATION_COLOR } from '../../data/thediracFortifications'
 import { useState } from 'react'
 import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
@@ -34,8 +35,15 @@ const GEOLOGICAL_FINDS = [
   [THEDIRAC_FOSSILS_LAYER_NAME, 1]
 ] as const
 
-const ARCHAEOLOGY_HISTORY = [
+const HISTORICAL_MAPS = [
+  ['Luchtfoto · 1950–1965', 1],
+  ['IGN-kaart · 1950', 1],
+  ['État-major · 1820–1866', 1],
   ['Carte de Cassini · 18e eeuw', 0.8],
+  [NAPOLEON_LOT_LAYER, 1]
+] as const
+
+const ARCHAEOLOGY_HISTORY = [
   [THEDIRAC_RESEARCH_LAYER_NAME, 1],
   [THEDIRAC_CONTEXT_LAYER_NAME, 1],
   ['Oude bossen · Forêts anciennes', 0.72]
@@ -54,6 +62,7 @@ export const FRANCE_RESEARCH_LAYERS = [
   ...WATER_LANDSCAPE,
   ...SOIL_GEOLOGY,
   ...GEOLOGICAL_FINDS,
+  ...HISTORICAL_MAPS,
   ...ARCHAEOLOGY_HISTORY,
   ...SIGHTS,
   ...HIKES
@@ -76,7 +85,7 @@ function ensureLayer(
   setLayerOpacity(name, opacity)
 }
 
-function ResearchFolder({ title, layers }: { title: string; layers: readonly (readonly [string, number])[] }) {
+function ResearchFolder({ title, layers, help }: { title: string; layers: readonly (readonly [string, number])[]; help?: string }) {
   const [expanded, setExpanded] = useState(true)
   const map = useMapStore(state => state.map)
   const visible = useLayerStore(state => state.visible)
@@ -104,6 +113,7 @@ function ResearchFolder({ title, layers }: { title: string; layers: readonly (re
       </button>
       {expanded && (
         <div className="ml-5">
+          {help && <p className="px-2 py-1 text-xs text-gray-500">{help}</p>}
           {layers.map(([name, opacity]) => (
             <button
               key={name}
@@ -111,7 +121,7 @@ function ResearchFolder({ title, layers }: { title: string; layers: readonly (re
               className={`w-full flex items-center justify-between py-1 pl-2 pr-1 border-0 outline-none transition-colors text-left ${visible[name] ? 'bg-blue-50' : 'bg-transparent hover:bg-blue-50'}`}
               style={{ fontSize: 'inherit' }}
             >
-              <span className="text-gray-600">{name}</span>
+              <span className="text-gray-600">{name}{name === NAPOLEON_LOT_LAYER && <small className="block text-gray-500">Gemeentepunten → klik voor archiefbladen</small>}</span>
               <span
                 className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: visible[name] ? '#3b82f6' : 'white', border: '2px solid #60a5fa', color: 'white' }}
@@ -139,6 +149,7 @@ export function FranceResearchLayers() {
       <ResearchFolder title="Water & landschap" layers={WATER_LANDSCAPE} />
       <ResearchFolder title="Bodem & geologie" layers={SOIL_GEOLOGY} />
       <ResearchFolder title="Mineralen & fossielen" layers={GEOLOGICAL_FINDS} />
+      <ResearchFolder title="Historische kaarten" layers={HISTORICAL_MAPS} help="Zet één historische kaart aan voor een helder beeld. Bij meerdere kaarten ligt de luchtfoto bovenaan. Napoleon opent archiefbladen via gemeentepunten." />
       <ResearchFolder title="Archeologie & historie" layers={ARCHAEOLOGY_HISTORY} />
       <ResearchFolder title="Bezienswaardigheden" layers={SIGHTS} />
       <ResearchFolder title="Wandelroutes" layers={HIKES} />

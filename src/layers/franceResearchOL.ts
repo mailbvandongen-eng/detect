@@ -1,3 +1,4 @@
+import { LOT_ARCHIVE_COMMUNES, NAPOLEON_LOT_LAYER, NAPOLEON_LOT_ARCHIVES_URL, NAPOLEON_LOT_COLOR } from '../data/lotCadastreArchives'
 import { THEDIRAC_FORTIFICATION_COLOR, THEDIRAC_FORTIFICATION_CATEGORY } from '../data/thediracFortifications'
 import { getMapPointStyle } from '../utils/mapPointStyle'
 import TileLayer from 'ol/layer/Tile'
@@ -276,6 +277,55 @@ export function createFranceCassiniLayerOL() {
   })
 }
 
+// Paramètres vérifiés dans le GetCapabilities IGN (17 octobre 2026).
+function createHistoricalIgnLayer(title: string, technicalName: string, matrix: string, format: string, minZoom: number, maxZoom: number, zIndex: number) {
+  return new TileLayer({
+    properties: { title, type: 'overlay' }, visible: false, opacity: 1, zIndex,
+    source: new XYZ({
+      url: `${IGN_WMTS}?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${technicalName}&STYLE=normal&FORMAT=${format}&TILEMATRIXSET=${matrix}&TILEMATRIX={z}&TILECOL={x}&TILEROW={y}`,
+      minZoom, maxZoom, wrapX: false, crossOrigin: 'anonymous',
+      attributions: `© IGN — ${title}`
+    })
+  })
+}
+
+export function createFranceEtatMajorLayerOL() {
+  return createHistoricalIgnLayer('État-major · 1820–1866', 'GEOGRAPHICALGRIDSYSTEMS.ETATMAJOR40', 'PM_6_15', 'image/jpeg', 6, 15, 11)
+}
+
+export function createFranceMap1950LayerOL() {
+  return createHistoricalIgnLayer('IGN-kaart · 1950', 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN50.1950', 'PM_3_15', 'image/jpeg', 3, 15, 12)
+}
+
+export function createFranceAerial1950LayerOL() {
+  return createHistoricalIgnLayer('Luchtfoto · 1950–1965', 'ORTHOIMAGERY.ORTHOPHOTOS.1950-1965', 'PM_0_18', 'image/png', 0, 18, 13)
+}
+
+export function createLotNapoleonArchivesLayerOL() {
+  const features = LOT_ARCHIVE_COMMUNES.map(([code, commune, lon, lat]) => {
+    const feature = new Feature({ geometry: new Point(fromLonLat([lon, lat])) })
+    feature.setId(`cadastre-archive:${code}`)
+    feature.setStyle((_feature, resolution) => getMapPointStyle(NAPOLEON_LOT_COLOR, resolution))
+    feature.setProperties({
+      layerType: 'importedLayer', layerName: NAPOLEON_LOT_LAYER, layerColor: NAPOLEON_LOT_COLOR,
+      name: `Kadasterarchief — ${commune}`,
+      Gemeente: commune, 'Code INSEE': code,
+      Omschrijving: 'Toegang tot de historische kadasterbladen van het Lot. Dit punt is het gemeentemiddelpunt; het is geen historisch gebouw of vindplaats.',
+      'Kaartstatus': 'Archiefingang; geen doorlopende historische kaartlaag',
+      'Zo bekijk je de bladen': `Open de bronlink, kies Cadastre en zoek op ${commune}. Kies het Napoleontische kadaster en daarna een sectieblad. Historische gemeentegrenzen kunnen afwijken.`,
+      'Locatieprecisie': 'Gemeentemiddelpunt (huidige gemeente); kaartbladen niet op deze locatie uitgelijnd',
+      'Bron / source': 'Archives départementales du Lot; gemeentemiddelpunten: API Découpage administratif',
+      Bronlink: NAPOLEON_LOT_ARCHIVES_URL
+    }, true)
+    return feature
+  })
+  return new VectorLayer({
+    properties: { title: NAPOLEON_LOT_LAYER, type: 'overlay' },
+    visible: false, opacity: 1, zIndex: 39,
+    source: new VectorSource({ features, attributions: 'Archives départementales du Lot · Gemeentemiddelpunten: geo.api.gouv.fr' })
+  })
+}
+
 export function createFranceAncientForestsLayerOL() {
   return ignWmsLayer('Oude bossen · Forêts anciennes', 'IGNF_FORETS-ANCIENNES', 0.72, '© IGN — BD Forêts anciennes')
 }
@@ -289,6 +339,10 @@ function firstText(...values: unknown[]) {
 }
 
 export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
+  'Luchtfoto · 1950–1965': createFranceAerial1950LayerOL,
+  'IGN-kaart · 1950': createFranceMap1950LayerOL,
+  'État-major · 1820–1866': createFranceEtatMajorLayerOL,
+  [NAPOLEON_LOT_LAYER]: createLotNapoleonArchivesLayerOL,
   'Carte de Cassini · 18e eeuw': createFranceCassiniLayerOL,
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
   'Bodem/geologie 1:50.000 FR': createFranceGeology50LayerOL,

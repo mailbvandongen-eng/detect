@@ -28,7 +28,7 @@ try {
    const t=window.test,p=t.presets.getState().presets.find(p=>p.id==='thedirac-2026');
    if(p.name!=='Mijn Thedirac'||p.mapView!==null||p.layerStates['Oude bossen · Forêts anciennes'].visible!==false||p.layerOpacities['Oude bossen · Forêts anciennes']!==.27||!p.customLayerStates['point:own'].visible)throw Error('Existing preset choices changed')
    t.presets.getState().applyPreset(p.id);return {added:p.cassiniAdded,visible:p.layerStates[name].visible,count:p.layers.filter(n=>n===name).length,version:JSON.parse(localStorage.getItem('detectorapp-presets')).version}
-  },name),{added:true,visible:true,count:1,version:32})
+  },name),{added:true,visible:true,count:1,version:33})
   await page.waitForFunction(name=>window.test.layers.getState().layers[name]?.getVisible(),name)
   assert.equal(await page.evaluate(name=>{
    const t=window.test,l=t.layers.getState().layers[name],s=l.getSource();

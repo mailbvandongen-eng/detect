@@ -1,3 +1,4 @@
+import { NAPOLEON_LOT_LAYER } from '../data/lotCadastreArchives'
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { accountStorage } from '../utils/accountStorage'
@@ -33,6 +34,7 @@ export interface Preset {
     center: [number, number]
     zoom: number
   } | null
+  historicalMapsAdded?: boolean
   cassiniAdded?: boolean
   isBuiltIn: boolean
 }
@@ -42,7 +44,10 @@ const THEDIRAC_ARCHAEOLOGY_LAYER = THEDIRAC_RESEARCH_LAYER_NAME
 
 const CASSINI_LAYER = 'Carte de Cassini · 18e eeuw'
 
+const NEW_HISTORICAL_LAYERS = ['Luchtfoto · 1950–1965', 'IGN-kaart · 1950', 'État-major · 1820–1866', NAPOLEON_LOT_LAYER] as const
+
 const FRANCE_FIELD_LAYERS = [
+  ...NEW_HISTORICAL_LAYERS,
   CASSINI_LAYER,
   'LiDAR HD terrein FR',
   'Waterlopen BD TOPAGE 2026',
@@ -58,6 +63,7 @@ const FRANCE_FIELD_LAYERS = [
 ] as const
 
 const FRANCE_RESEARCH_LAYER_NAMES = new Set([
+  ...NEW_HISTORICAL_LAYERS,
   CASSINI_LAYER,
   'LiDAR HD terrein FR',
   'Bodem/geologie 1:50.000 FR',
@@ -187,6 +193,7 @@ const BUILT_IN_PRESETS: Preset[] = [
   {
     id: 'thedirac-2026',
     cassiniAdded: true,
+    historicalMapsAdded: true,
     name: 'Thédirac 2026',
     icon: 'Compass',
     layers: [...FRANCE_FIELD_LAYERS],
@@ -196,6 +203,7 @@ const BUILT_IN_PRESETS: Preset[] = [
       zoom: 10.7
     },
     layerOpacities: {
+      ...Object.fromEntries(NEW_HISTORICAL_LAYERS.map(name => [name, 1])),
       [CASSINI_LAYER]: 0.8,
       'LiDAR HD terrein FR': 0.48,
       'Waterlopen BD TOPAGE 2026': 0.92,
@@ -330,10 +338,19 @@ function normalizePreset(preset: Preset): Preset {
     if (layerOpacities) layerOpacities[CASSINI_LAYER] = 0.8
   }
 
+  if (preset.id === 'thedirac-2026' && !preset.historicalMapsAdded) {
+    for (const name of NEW_HISTORICAL_LAYERS) {
+      if (configuredLayers.includes(name)) continue
+      configuredLayers.push(name)
+      if (layerStates) layerStates[name] = { visible: true, opacity: 1 }
+      if (layerOpacities) layerOpacities[name] = 1
+    }
+  }
+
   return {
     ...builtInPreset,
     ...preset,
-    ...(preset.id === 'thedirac-2026' ? { cassiniAdded: true } : {}),
+    ...(preset.id === 'thedirac-2026' ? { cassiniAdded: true, historicalMapsAdded: true } : {}),
     layers: configuredLayers.filter((layer) => !REMOVED_LAYERS.has(layer)),
     baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
     layerStates,
@@ -577,7 +594,7 @@ export const usePresetStore = create<PresetState>()(
     {
       name: 'detectorapp-presets',
       storage: createJSONStorage(() => accountStorage),
-      version: 32,
+      version: 33,
       migrate: (persistedState: unknown, version: number) => {
         if (!persistedState || typeof persistedState !== 'object') {
           return {

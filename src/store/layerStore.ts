@@ -1,3 +1,4 @@
+import { NAPOLEON_LOT_LAYER } from '../data/lotCadastreArchives'
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import type { Layer } from 'ol/layer'
@@ -96,6 +97,10 @@ export const useLayerStore = create<LayerState>()(
       'Sites Patrimoine PACA': false,
       'Sites Patrimoine Normandie': false,
       'Maginotlinie': false,
+      'Luchtfoto · 1950–1965': false,
+      'IGN-kaart · 1950': false,
+      'État-major · 1820–1866': false,
+      [NAPOLEON_LOT_LAYER]: false,
       'Carte de Cassini · 18e eeuw': false,
       'LiDAR HD terrein FR': false,
       'Bodem/geologie 1:50.000 FR': false,
@@ -179,6 +184,10 @@ export const useLayerStore = create<LayerState>()(
       'Erfgoedlijnen': 0.7,
       'Oude Kernen': 0.6,
       'Relictenkaart Vlakken': 0.5,
+      'Luchtfoto · 1950–1965': 1,
+      'IGN-kaart · 1950': 1,
+      'État-major · 1820–1866': 1,
+      [NAPOLEON_LOT_LAYER]: 1,
       'Carte de Cassini · 18e eeuw': 0.8,
       'LiDAR HD terrein FR': 0.78,
       'Bodem/geologie 1:50.000 FR': 0.68,
