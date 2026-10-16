@@ -136,15 +136,6 @@ export function HamburgerMenu() {
 
   return (
     <>
-      {/* Quiet release link, not an additional map control. */}
-      {!isOpen && <button
-        type="button"
-        onClick={handleChangeLogClick}
-        className="fixed right-16 z-[800] h-11 px-1 flex items-center justify-center bg-transparent border-0 shadow-none text-[11px] text-gray-600 hover:text-blue-700 underline underline-offset-2"
-        style={safeTopStyle}
-        title="Bekijk wijzigingen van Detect"
-        aria-label={`Detect versie ${version}; bekijk wijzigingen`}
-      >v{version}</button>}
       {/* Settings menu button - preserve active colors */}
       <motion.button
         className={`fixed right-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
