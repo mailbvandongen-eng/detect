@@ -20,8 +20,8 @@ type GeologyLayerKind = 'mineral' | 'fossil'
 const THEDIRAC_ORIGIN = { lat: 44.6005861, lon: 1.3164838 }
 
 const layerSettings: Record<GeologyLayerKind, { color: string; title: string; zIndex: number }> = {
-  mineral: { color: '#7c3aed', title: THEDIRAC_MINERALS_LAYER_NAME, zIndex: 41 },
-  fossil: { color: '#d97706', title: THEDIRAC_FOSSILS_LAYER_NAME, zIndex: 42 }
+  mineral: { color: '#7c3aed', title: THEDIRAC_MINERALS_LAYER_NAME, zIndex: 54 },
+  fossil: { color: '#d97706', title: THEDIRAC_FOSSILS_LAYER_NAME, zIndex: 55 }
 }
 
 const styleCache = new Map<string, Style[]>()

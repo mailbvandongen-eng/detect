@@ -27,10 +27,12 @@ try {
   assert.equal(await page.evaluate(names=>{
    const t=window.test,p=t.presets.getState().presets.find(p=>p.id==='thedirac-2026');
    if(p.name!=='Mijn Thedirac'||p.mapView!==null||p.layerStates['Oude bossen · Forêts anciennes'].visible||p.layerStates['Carte de Cassini · 18e eeuw'].opacity!==.42||!p.customLayerStates['point:own'].visible)throw Error('Existing choices changed');
-   for(const name of names)if(!p.layerStates[name].visible||p.layers.filter(n=>n===name).length!==1)throw Error('Missing migration layer '+name);
+   for(const name of names)if(p.layerStates[name].visible!==(name==='Carte de Cassini · 18e eeuw')||p.layers.filter(n=>n===name).length!==1)throw Error('Historical layer migration mismatch '+name);
    t.presets.getState().applyPreset(p.id);return JSON.parse(localStorage.getItem('detectorapp-presets')).version
   },names),33)
-  await page.waitForFunction(names=>names.every(n=>window.test.layers.getState().layers[n]?.getVisible()),names)
+  await page.waitForFunction(names=>names.every(n=>window.test.layers.getState().layers[n]),names)
+  assert.equal(await page.evaluate(()=>window.test.layers.getState().layers['Carte de Cassini · 18e eeuw'].getVisible()),true)
+  assert.equal(await page.evaluate(()=>window.test.layers.getState().layers['Luchtfoto · 1950–1965'].getVisible()),false)
   const config=await page.evaluate(names=>names.slice(0,3).map(n=>{const l=window.test.layers.getState().layers[n],s=l.getSource();return {max:s.getTileGrid().getMaxZoom(),min:s.getTileGrid().getMinZoom(),url:s.getUrls()[0],z:l.getZIndex()}}),names)
   for(const [i,matrix,max,min] of [[0,'PM_0_18',18,0],[1,'PM_3_15',15,3],[2,'PM_6_15',15,6]]){assert.ok(config[i].url.includes('TILEMATRIXSET='+matrix));assert.equal(config[i].max,max);assert.equal(config[i].min,min)}
   assert.ok(config[0].z>config[1].z&&config[1].z>config[2].z)

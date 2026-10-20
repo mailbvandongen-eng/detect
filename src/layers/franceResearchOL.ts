@@ -39,11 +39,12 @@ const BRGM_RISKS_WMS = 'https://geoservices.brgm.fr/risques'
 const TOPAGE_2026_WMS = 'https://services.sandre.eaufrance.fr/geo/topage2026?'
 const TOPAGE_THEDIRAC_DATA = './data/topage_thedirac_2026.geojson'
 
-function queryableWmsLayer(title: string, url: string, layerName: string, opacity: number, attribution: string) {
+function queryableWmsLayer(title: string, url: string, layerName: string, opacity: number, attribution: string, zIndex = 0) {
   return new TileLayer({
     properties: { title, type: 'overlay', queryableWms: true, queryLayer: layerName, sourceLabel: attribution },
     visible: false,
     opacity,
+    zIndex,
     source: new TileWMS({
       url,
       params: { LAYERS: layerName, QUERY_LAYERS: layerName, INFO_FORMAT: 'application/json', TILED: true, FORMAT: 'image/png', TRANSPARENT: true },
@@ -53,14 +54,14 @@ function queryableWmsLayer(title: string, url: string, layerName: string, opacit
   })
 }
 
-function geologyLayer(title: string, layerName: string, opacity: number) {
-  return queryableWmsLayer(title, BRGM_GEOLOGY_WMS, layerName, opacity, '© BRGM — InfoTerre')
+function geologyLayer(title: string, layerName: string, opacity: number, zIndex: number) {
+  return queryableWmsLayer(title, BRGM_GEOLOGY_WMS, layerName, opacity, '© BRGM — InfoTerre', zIndex)
 }
 
-function ignWmsLayer(title: string, layerName: string, opacity: number, attribution = '© IGN') {
+function ignWmsLayer(title: string, layerName: string, opacity: number, attribution = '© IGN', zIndex = 0) {
   return new TileLayer({
     properties: { title, type: 'overlay' },
-    visible: false,
+    visible: false, zIndex,
     opacity,
     source: new TileWMS({
       url: IGN_WMS,
@@ -129,7 +130,7 @@ export function createKnownThediracSitesLayerOL() {
     properties: { title: THEDIRAC_RESEARCH_LAYER_NAME, type: 'overlay' },
     visible: false,
     opacity: 1,
-    zIndex: 38,
+    zIndex: 50,
     source: new VectorSource({
       features,
       attributions: 'Publieke archeologische en erfgoedbronnen — bron per punt vermeld'
@@ -152,6 +153,7 @@ export function createFranceLidarTerrainLayerOL() {
     properties: { title: 'LiDAR HD terrein FR', type: 'overlay' },
     visible: false,
     opacity: 0.78,
+    zIndex: 20,
     source: new XYZ({
       url: `${IGN_WMTS}?layer=IGNF_LIDAR-HD_MNT_ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW&style=normal&tilematrixset=PM&tilematrix={z}&tilecol={x}&tilerow={y}&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/png`,
       maxZoom: 22,
@@ -162,23 +164,23 @@ export function createFranceLidarTerrainLayerOL() {
 }
 
 export function createFranceGeology50LayerOL() {
-  return geologyLayer('Bodem/geologie 1:50.000 FR', 'SCAN_D_GEOL50', 0.68)
+  return geologyLayer('Bodem/geologie 1:50.000 FR', 'SCAN_D_GEOL50', 0.68, 22)
 }
 
 export function createFranceGeologyReliefLayerOL() {
-  return geologyLayer('Geologie + reliëf FR', 'SCAN_H_RELIEF_GEOL50', 0.66)
+  return geologyLayer('Geologie + reliëf FR', 'SCAN_H_RELIEF_GEOL50', 0.66, 23)
 }
 
 export function createFranceBssLayerOL() {
-  return queryableWmsLayer('BRGM boringen · BSS', BRGM_GEOLOGY_WMS, 'BSS', 1, '© BRGM — Banque du Sous-Sol')
+  return queryableWmsLayer('BRGM boringen · BSS', BRGM_GEOLOGY_WMS, 'BSS', 1, '© BRGM — Banque du Sous-Sol', 24)
 }
 
 export function createFranceIdprLayerOL() {
-  return queryableWmsLayer('BRGM IDPR · infiltratie/afstroming', BRGM_GEOLOGY_WMS, 'IDPR', 0.55, '© BRGM — IDPR')
+  return queryableWmsLayer('BRGM IDPR · infiltratie/afstroming', BRGM_GEOLOGY_WMS, 'IDPR', 0.55, '© BRGM — IDPR', 25)
 }
 
 export function createFranceCavitiesLayerOL() {
-  return queryableWmsLayer('BRGM cavités · ondergrondse holtes', BRGM_RISKS_WMS, 'CAVITE_LOCALISEE', 1, '© BRGM — Géorisques / cavités')
+  return queryableWmsLayer('BRGM cavités · ondergrondse holtes', BRGM_RISKS_WMS, 'CAVITE_LOCALISEE', 1, '© BRGM — Géorisques / cavités', 26)
 }
 
 export function createFranceTopageWatercoursesLayerOL() {
@@ -255,7 +257,7 @@ export function createFranceTopageWatercoursesLayerOL() {
 }
 
 export function createFranceOcsCoverageLayerOL() {
-  return queryableWmsLayer('OCS GE landbedekking 2021-2023', IGN_WMS, 'OCSGE.COUVERTURE.2021-2023', 0.62, '© IGN — OCS GE')
+  return queryableWmsLayer('OCS GE landbedekking 2021-2023', IGN_WMS, 'OCSGE.COUVERTURE.2021-2023', 0.62, '© IGN — OCS GE', 21)
 }
 
 // IGN WMTS capabilities: BNF Cassini, PM_6_14, PNG, zoom 6–14.
@@ -321,13 +323,13 @@ export function createLotNapoleonArchivesLayerOL() {
   })
   return new VectorLayer({
     properties: { title: NAPOLEON_LOT_LAYER, type: 'overlay' },
-    visible: false, opacity: 1, zIndex: 39,
+    visible: false, opacity: 1, zIndex: 51,
     source: new VectorSource({ features, attributions: 'Archives départementales du Lot · Gemeentemiddelpunten: geo.api.gouv.fr' })
   })
 }
 
 export function createFranceAncientForestsLayerOL() {
-  return ignWmsLayer('Oude bossen · Forêts anciennes', 'IGNF_FORETS-ANCIENNES', 0.72, '© IGN — BD Forêts anciennes')
+  return ignWmsLayer('Oude bossen · Forêts anciennes', 'IGNF_FORETS-ANCIENNES', 0.72, '© IGN — BD Forêts anciennes', 27)
 }
 
 function firstText(...values: unknown[]) {

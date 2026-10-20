@@ -112,7 +112,7 @@ export function createThediracHikesLayerOL() {
     properties: { title: THEDIRAC_HIKES_LAYER_NAME, type: 'overlay' },
     visible: false,
     opacity: 1,
-    zIndex: 40,
+    zIndex: 53,
     declutter: true,
     renderBuffer: 120,
     source,

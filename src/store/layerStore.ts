@@ -17,6 +17,7 @@ interface LayerState {
   layers: Record<string, Layer>
   toggleLayer: (name: string) => void
   setLayerVisibility: (name: string, visible: boolean, loadIfNeeded?: boolean) => void
+  setLayerStatus: (name: string, status: LoadingState) => void
   setLayerOpacity: (name: string, opacity: number) => void
   registerLayer: (name: string, layer: Layer) => void
   unregisterLayer: (name: string) => void
@@ -248,6 +249,12 @@ export const useLayerStore = create<LayerState>()(
       if (loadIfNeeded && visible && !state.layers[name]) {
         void get().loadLayer(name)
       }
+    },
+
+    setLayerStatus: (name: string, status: LoadingState) => {
+      set(state => {
+        state.loadingState[name] = status
+      })
     },
 
     setLayerOpacity: (name: string, opacity: number) => {

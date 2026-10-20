@@ -4,6 +4,7 @@ import { ChevronRight, Folder, FolderOpen } from 'lucide-react'
 import { useLayerStore, useMapStore } from '../../store'
 import { FranceResearchLayers, FRANCE_RESEARCH_LAYERS } from './FranceResearchLayers'
 import { FRANCE_RESEARCH_FACTORIES } from '../../layers/franceResearchOL'
+import { FRANCE_HISTORICAL_MAP_NAMES } from '../../config/franceResearchLayers'
 
 interface Props {
   title: string
@@ -33,6 +34,7 @@ export function LayerGroup({ title, children, defaultExpanded = true, layerNames
     const newState = !allActive
     if (newState && title === 'Frankrijk') {
       FRANCE_RESEARCH_LAYERS.forEach(([name, opacity]) => {
+        if (FRANCE_HISTORICAL_MAP_NAMES.includes(name as typeof FRANCE_HISTORICAL_MAP_NAMES[number]) && name !== 'Luchtfoto · 1950–1965') return
         if (!registered[name] && map) {
           const factory = FRANCE_RESEARCH_FACTORIES[name]
           if (factory) {
@@ -44,7 +46,10 @@ export function LayerGroup({ title, children, defaultExpanded = true, layerNames
         }
       })
     }
-    groupLayers.forEach(name => setLayerVisibility(name, newState))
+    groupLayers.forEach(name => {
+      const isHiddenHistoricalMap = FRANCE_HISTORICAL_MAP_NAMES.includes(name as typeof FRANCE_HISTORICAL_MAP_NAMES[number]) && name !== 'Luchtfoto · 1950–1965'
+      setLayerVisibility(name, newState && !isHiddenHistoricalMap, false)
+    })
   }
 
   return (

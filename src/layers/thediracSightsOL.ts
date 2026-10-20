@@ -128,7 +128,7 @@ export function createThediracSightsLayerOL() {
     properties: { title: THEDIRAC_SIGHTS_LAYER_NAME, type: 'overlay' },
     visible: false,
     opacity: 1,
-    zIndex: 39,
+    zIndex: 52,
     declutter: true,
     source: new VectorSource({
       features,
