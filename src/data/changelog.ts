@@ -6,6 +6,7 @@ export interface ChangeLogEntry {
 }
 
 export const CHANGELOG: ChangeLogEntry[] = [
+  {version: '2.33.103', date: '22 oktober 2026', title: 'Google-login hersteld op iPhone', changes: ['Google-inloggen werkt weer in iPhone- en iPad-browsers met Safari.']},
   {version: '2.33.102', date: '17 oktober 2026', title: 'Meer historische kaarten voor Frankrijk', changes: ['Luchtfoto’s 1950–1965, IGN-kaart 1950 en État-major 1820–1866 staan bij Frankrijk → Historische kaarten, samen met Cassini.', 'Napoleontisch kadaster Lot geeft klikbare gemeentepunten naar de officiële archiefbladen; het is geen doorlopende kaartoverlay.', 'Alle vier zijn toegevoegd aan Thédirac, ook aan bestaande opgeslagen presets. Opgeslagen wijzigingen daarna blijven behouden.']},
   {version: '2.33.101', date: '16 oktober 2026', title: 'Carte de Cassini toegevoegd', changes: ['De historische Cassini-kaart van IGN/BNF staat bij Frankrijk → Archeologie & historie, met instelbare transparantie.', 'De laag is toegevoegd aan Thédirac 2026, ook aan bestaande opgeslagen presets. Je overige laagkeuzes blijven behouden.']},
   {version: '2.33.100', date: '16 oktober 2026', title: 'Zoekknop weer vrij', changes: ['De zwevende versielink is verwijderd: die lag over het vergrootglas en opende daardoor de wijzigingen in plaats van zoeken.', 'Wijzigingen blijven bereikbaar via de versielink onderaan het menu.']},

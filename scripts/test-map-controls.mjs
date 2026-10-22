@@ -1,15 +1,29 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import { dirname, relative, resolve } from 'node:path'
 import ts from 'typescript'
 
 const require = createRequire(import.meta.url)
+const moduleCache = new Map()
 function loadModule(path) {
-  const output = ts.transpileModule(readFileSync(path, 'utf8'), {
+  const filename = resolve(process.cwd(), path)
+  if (moduleCache.has(filename)) return moduleCache.get(filename).exports
+  const module = { exports: {} }
+  moduleCache.set(filename, module)
+  const output = ts.transpileModule(readFileSync(filename, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
   }).outputText
-  const module = { exports: {} }
-  Function('module', 'exports', 'require', output)(module, module.exports, require)
+  const nodeRequire = createRequire(filename)
+  const sourceRequire = specifier => {
+    if (!specifier.startsWith('.')) return nodeRequire(specifier)
+    const base = resolve(dirname(filename), specifier)
+    for (const candidate of [`${base}.ts`, `${base}.tsx`, resolve(base, 'index.ts'), resolve(base, 'index.tsx')]) {
+      if (existsSync(candidate)) return loadModule(relative(process.cwd(), candidate))
+    }
+    return nodeRequire(specifier)
+  }
+  Function('module', 'exports', 'require', output)(module, module.exports, sourceRequire)
   return module.exports
 }
 

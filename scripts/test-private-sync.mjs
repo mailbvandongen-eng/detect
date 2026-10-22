@@ -198,7 +198,7 @@ mocks['../store/settingsStore'] = { ...settingsModule, useSettingsStore: asHook(
 mocks['../store/presetStore'] = { ...presetsModule, usePresetStore: asHook(presetsModule.usePresetStore) }
 const savedVacation = {...presetsModule.usePresetStore.getState().presets.find(p=>p.id==='thedirac-2026'),
   name:'Mijn Thédirac', baseLayer:'OpenStreetMap', layers:['Mineralen (12)','Fossielen (28)','Spectaculaire wandelroutes (15)','Sites Classés Occitanie'],
-  layerStates:{'Mineralen (12)':{visible:true,opacity:.41},'Fossielen (28)':{visible:true,opacity:.62},'Spectaculaire wandelroutes (15)':{visible:true,opacity:.8},'Sites Classés Occitanie':{visible:true,opacity:.35},'LiDAR HD terrein FR':{visible:false,opacity:.2}},
+  layerStates:{'Mineralen (12)':{visible:true,opacity:.41},'Fossielen (28)':{visible:true,opacity:.62},'Spectaculaire wandelroutes (15)':{visible:true,opacity:.8},'Sites Classés Occitanie':{visible:true,opacity:.35},'LiDAR HD terrein FR':{visible:false,opacity:.2},'Carte de Cassini · 18e eeuw':{visible:false,opacity:.8},'Luchtfoto · 1950–1965':{visible:true,opacity:1},'IGN-kaart · 1950':{visible:false,opacity:1},'État-major · 1820–1866':{visible:false,opacity:1}},
   customLayerStates:{'point:kept':{visible:true,opacity:1}},mapView:{center:[1.34,44.62],zoom:13}};
 const normalizedVacation=presetsModule.normalizePresetCollection([savedVacation]).find(p=>p.id===savedVacation.id);
 assert.deepEqual(normalizedVacation,savedVacation);
