@@ -96,6 +96,14 @@ if (result.status !== 0) {
   process.exit(result.status ?? 1)
 }
 
+const publishedIndex = readFileSync(resolve('docs/index.html'), 'utf8')
+const publishedBundleMatch = publishedIndex.match(/src=["'](?:\/detect\/|\.\/|\/)?(assets\/index-[^"']+\.js)["']/)
+if (!publishedBundleMatch) throw new Error('Build bevat geen herkenbare app-bundle.')
+const publishedBundle = readFileSync(resolve('docs', publishedBundleMatch[1]), 'utf8')
+if (/REPLACE_WITH_YOUR_API_KEY|your-project|your-project-id/.test(publishedBundle)) {
+  throw new Error('Firebase-configuratie ontbreekt; ongeldige login-build wordt niet gepubliceerd.')
+}
+
 if (backupDir) {
   copyMissingFiles(backupDir, docsAssetsDir)
   rmSync(backupDir, { recursive: true, force: true })
