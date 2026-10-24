@@ -1,4 +1,6 @@
 import { appendFileSync, readFileSync } from 'node:fs'
+import { lookup } from 'node:dns/promises'
+import { connect as tlsConnect } from 'node:tls'
 
 const baseUrl = 'https://detectapp.nl'
 const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'))
@@ -18,9 +20,34 @@ function result({ ok, repair = false, message }) {
   process.exit(ok ? 0 : 1)
 }
 
+const host = new URL(baseUrl).hostname
+try {
+  await lookup(host, { all: true })
+} catch (error) {
+  result({ ok: false, message: `DNS-resolutie voor ${host} faalt (${error.code || error.message}); geen rebuild gestart.` })
+}
+
+let certificateDaysRemaining
+try {
+  certificateDaysRemaining = await new Promise((resolve, reject) => {
+    const socket = tlsConnect({ host, port: 443, servername: host }, () => {
+      const certificate = socket.getPeerCertificate()
+      const remaining = Math.floor((Date.parse(certificate.valid_to) - Date.now()) / 86_400_000)
+      socket.end()
+      resolve(remaining)
+    })
+    socket.once('error', reject)
+  })
+} catch (error) {
+  result({ ok: false, message: `TLS-certificaatcontrole faalt (${error.code || error.message}); geen rebuild gestart.` })
+}
+if (certificateDaysRemaining <= 30) {
+  result({ ok: false, message: `TLS-certificaat verloopt over ${certificateDaysRemaining} dagen; controleer de domeinprovider.` })
+}
+
 async function fetchLive(path) {
   try {
-    return await fetch(`${baseUrl}${path}`, { headers: { 'cache-control': 'no-cache' } })
+    return await fetch(`${baseUrl}${path}`, { headers: { 'cache-control': 'no-cache' }, signal: AbortSignal.timeout(15_000) })
   } catch (error) {
     result({ ok: false, message: `Detect is niet bereikbaar; geen automatische rebuild gestart. ${error.message}` })
   }
@@ -54,4 +81,21 @@ for (const property of configProperties) {
 }
 if (mismatches.length) result({ ok: false, repair: true, message: `Live Firebase-config wijkt af (${mismatches.join(', ')}); rebuild nodig.` })
 
-result({ ok: true, message: `Detect ${packageJson.version}: live appbestanden en Firebase-configuratie komen overeen.` })
+let authResponse
+try {
+  authResponse = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=${encodeURIComponent(sourceConfig.apiKey)}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ providerId: 'google.com', continueUri: baseUrl }),
+    signal: AbortSignal.timeout(15_000)
+  })
+} catch (error) {
+  result({ ok: false, message: `Firebase Google-aanmeldcontrole is niet bereikbaar (${error.cause?.code || error.message}); geen rebuild gestart.` })
+}
+const authResult = await authResponse.json().catch(() => ({}))
+if (!authResponse.ok || authResult.providerId !== 'google.com' || !authResult.authUri) {
+  const detail = authResult.error?.message || `HTTP ${authResponse.status}`
+  result({ ok: false, message: `Firebase maakt geen Google-aanmeldlink aan (${detail}); controleer provider- en domeininstellingen.` })
+}
+
+result({ ok: true, message: `Detect ${packageJson.version}: DNS, TLS-certificaat (${certificateDaysRemaining} dagen), live appbestanden en Firebase Google-aanmeldconfiguratie zijn in orde.` })

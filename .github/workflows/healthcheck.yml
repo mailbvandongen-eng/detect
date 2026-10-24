@@ -1,6 +1,11 @@
 name: Controleer Detect
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check-live-health.mjs'
+      - '.github/workflows/healthcheck.yml'
   schedule:
     - cron: '17 7 * * *'
   workflow_dispatch:
