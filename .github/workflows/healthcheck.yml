@@ -1,0 +1,38 @@
+name: Controleer Detect
+
+on:
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: detect-live-healthcheck
+  cancel-in-progress: false
+
+jobs:
+  healthcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Haal broncode op
+        uses: actions/checkout@v4
+
+      - name: Controleer live app en Firebase-configuratie
+        id: check
+        run: node scripts/check-live-health.mjs
+
+      - name: Start gecontroleerde rebuild bij publicatiefout
+        if: always() && steps.check.outputs.repair == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'build-publish.yml',
+              ref: 'main'
+            })
+            core.notice('Detect wordt opnieuw gebouwd. De build publiceert alleen als de Firebase-configuratie geldig is.')
