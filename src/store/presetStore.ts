@@ -320,6 +320,19 @@ function normalizePreset(preset: Preset): Preset {
     }
   }
 
+  // Houd de LiDAR-laag vast in Detectie, ook als een oudere opgeslagen preset
+  // deze expliciet had uitgezet. De bestaande transparantie blijft behouden.
+  if (preset.id === 'detectie-uitgebreid') {
+    const lidarLayer = 'AHN4 Multi-Hillshade NL'
+    if (!configuredLayers.includes(lidarLayer)) configuredLayers.push(lidarLayer)
+    const lidarOpacity = layerStates?.[lidarLayer]?.opacity ?? layerOpacities?.[lidarLayer] ?? 0.2
+    layerStates = {
+      ...layerStates,
+      [lidarLayer]: { visible: true, opacity: lidarOpacity }
+    }
+    if (layerOpacities) layerOpacities[lidarLayer] = lidarOpacity
+  }
+
   return {
     ...builtInPreset,
     ...preset,
