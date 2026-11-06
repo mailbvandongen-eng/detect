@@ -1,6 +1,6 @@
 # Detect - Sessienotities
 
-## Huidige versie: 2.33.1
+## Huidige versie: 2.33.107
 
 ---
 
@@ -20,6 +20,16 @@
 - Broncode gaat naar GitHub `main`.
 - `.github/workflows/publish.yml` bouwt en publiceert `docs/` automatisch.
 - De build bewaart de bestaande publieke Firebase-webconfig, zodat Bob niet van een lokale pc afhankelijk is.
+
+### UI-herindeling (v2.33.105–2.33.107, 6 nov 2026)
+- Vast knoppenschema: `src/config/controlLayout.ts` + `useControlSlot`; geen gaten, knoppen schuiven door. Zoomknoppen verwijderd.
+- Opstarten: hoogstens het welkomstvenster; nieuwe wijzigingen = stipje op menuknop.
+- Menu in groepen; Kaartlagen met zoekveld, inklapbaar Actief, basiskaart als rondjes, eigen lagen onderaan.
+- Presets: tik = kiezen, rest achter ⋯. Reset heeft Ongedaan maken (`applyPresetSnapshot`).
+- Monumenten zoeken via knop in de zoekbalk. Laagbeginstand uit register (`buildDefaultVisibility`).
+- `Popup.tsx` deels opgesplitst naar `src/components/Map/popup/`; `handleClick` is nog groot.
+- Open: Bob overweegt de Vondst-knop helemaal te verwijderen (long-press → toevoegen → laag werkt prima).
+- Bekende testfouten die al vóór deze ronde bestonden: `test-cassini-browser` (Cassini niet zichtbaar na migratie) en `test-france-history-browser` (Historical layer migration mismatch Luchtfoto 1950–1965).
 
 ### Venstersysteem (v2.33.1)
 - `src/store/uiStore.ts` beheert één actief hoofdvenster; een tweede venster vervangt altijd het eerste.
