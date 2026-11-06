@@ -117,14 +117,14 @@ className="w-full px-3 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:r
 style={{ fontSize: '1em' }}
 ```
 
-## NIEUWE LAGEN TOEVOEGEN - ALTIJD RESET UPDATEN!
+## NIEUWE LAGEN TOEVOEGEN
 
-**Bij ELKE nieuwe laag die je toevoegt, MOET je deze ook toevoegen aan de reset functie!**
-
-| # | Bestand | Array | Wat toevoegen |
-|---|---------|-------|---------------|
-| 1 | `src/store/layerStore.ts` | `visible` | Nieuwe laag met `false` |
-| 2 | `src/components/UI/PresetButtons.tsx` | `ALL_OVERLAYS` | Laagnaam als string |
+Voeg de laag toe aan `src/layers/layerRegistry.ts` (of voor Frankrijk aan
+`src/config/franceResearchLayers.ts`) en zet hem in de boom van
+`src/components/LayerControl/ThemesPanel.tsx`. De beginstand (`buildDefaultVisibility`
+in `layerStore.ts`), de resetknop, het zoekveld en het blok Actief in Kaartlagen volgen
+daar automatisch uit. Geef alleen een standaardtransparantie op in `layerStore.ts`
+`opacity` als de laag niet volledig dekkend moet starten.
 
 ## KNOPPENSCHEMA - ELKE KAARTKNOP KRIJGT ZIJN PLEK UIT HET SCHEMA
 

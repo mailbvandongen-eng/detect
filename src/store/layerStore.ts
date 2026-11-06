@@ -7,6 +7,7 @@ import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { THEDIRAC_CONTEXT_LAYER_NAME } from '../data/thediracLandscapeContext'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
 import { useMapStore } from './mapStore'
+import { FRANCE_RESEARCH_LAYER_DEFINITIONS } from '../config/franceResearchLayers'
 
 export type LoadingState = 'idle' | 'loading' | 'loaded' | 'error'
 
@@ -24,128 +25,28 @@ interface LayerState {
   loadLayer: (name: string) => Promise<void>
 }
 
+/**
+ * Beginstand van alle lagen. Wordt opgebouwd uit het laagregister en de
+ * Frankrijk-definities, zodat een nieuwe laag hier niet met de hand bij hoeft.
+ */
+export function buildDefaultVisibility(): Record<string, boolean> {
+  const visible: Record<string, boolean> = {
+    'Esri (licht)': true,
+    'OpenStreetMap': false,
+    'Luchtfoto': false,
+    'Satelliet (wereld)': false,
+    'Labels Overlay': true,
+  }
+  for (const name of Object.keys(layerRegistry)) visible[name] = false
+  for (const { name } of FRANCE_RESEARCH_LAYER_DEFINITIONS) visible[name] = false
+  for (const name of [NAPOLEON_LOT_LAYER, THEDIRAC_RESEARCH_LAYER_NAME, THEDIRAC_CONTEXT_LAYER_NAME, THEDIRAC_SIGHTS_LAYER_NAME]) visible[name] = false
+  visible['Mijn Vondsten'] = true
+  return visible
+}
+
 export const useLayerStore = create<LayerState>()(
   immer((set, get) => ({
-    visible: {
-      'Esri (licht)': true,
-      'OpenStreetMap': false,
-      'Luchtfoto': false,
-      'Satelliet (wereld)': false,
-      'Labels Overlay': true,
-      'TMK 1850': false,
-      'Bonnebladen 1900': false,
-      'Hunebedden': false,
-      'FAMKE Steentijd': false,
-      'FAMKE IJzertijd': false,
-      'Grafheuvels': false,
-      'Terpen': false,
-      'AMK Monumenten': false,
-      'AMK Romeins': false,
-      'AMK Steentijd': false,
-      'AMK Vroege ME': false,
-      'AMK Late ME': false,
-      'AMK Overig': false,
-      'Archeo Onderzoeken': false,
-      'Romeinse wegen (regio)': false,
-      'Romeinse wegen (Wereld)': false,
-      'Kastelen': false,
-      'IKAW': false,
-      'Essen': false,
-      'Rijksmonumenten': false,
-      'Werelderfgoed': false,
-      'WWII Bunkers': false,
-      'Slagvelden': false,
-      'Militaire Vliegvelden': false,
-      'Verdedigingslinies': false,
-      'Inundatiegebieden': false,
-      'Militaire Objecten': false,
-      'Paleokaart 800 n.Chr.': false,
-      'Paleokaart 100 n.Chr.': false,
-      'Paleokaart 500 v.Chr.': false,
-      'Paleokaart 1500 v.Chr.': false,
-      'Paleokaart 2750 v.Chr.': false,
-      'Paleokaart 5500 v.Chr.': false,
-      'Paleokaart 9000 v.Chr.': false,
-      'Religieus Erfgoed': false,
-      'UIKAV Punten': false,
-      'UIKAV Vlakken': false,
-      'UIKAV Buffer': false,
-      'UIKAV Expert': false,
-      'UIKAV Indeling': false,
-      'AHN4 Hoogtekaart Kleur': false,
-      'AHN4 Hillshade NL': false,
-      'AHN4 Multi-Hillshade NL': false,
-      'AHN4 Hillshade Kleur': false,
-      'AHN 0.5m': false,
-      'Veengebieden': false,
-      'Geomorfologie': false,
-      'Bodemkaart': false,
-      'Fossielen Nederland': false,
-      'Fossielen BelgiÃ«': false,
-      'Fossielen Duitsland': false,
-      'Fossielen Frankrijk': false,
-      'Monumenten BE': false,
-      'Archeo Zones BE': false,
-      'Arch Sites BE': false,
-      'Erfgoed Landschap BE': false,
-      'CAI Elementen': false,
-      'Hist. Gebouwen FR': false,
-      'INRAP Sites FR': false,
-      'Archeo Sites Bretagne': false,
-      'Operaties Bretagne': false,
-      'Archeo Parijs': false,
-      'Sites Patrimoine Occitanie': false,
-      'Sites Patrimoine PACA': false,
-      'Sites Patrimoine Normandie': false,
-      'Maginotlinie': false,
-      'Luchtfoto · 1950–1965': false,
-      'IGN-kaart · 1950': false,
-      'État-major · 1820–1866': false,
-      [NAPOLEON_LOT_LAYER]: false,
-      'Carte de Cassini · 18e eeuw': false,
-      'LiDAR HD terrein FR': false,
-      'Bodem/geologie 1:50.000 FR': false,
-      'Geologie + reliëf FR': false,
-      'BRGM boringen · BSS': false,
-      'BRGM IDPR · infiltratie/afstroming': false,
-      'BRGM cavités · ondergrondse holtes': false,
-      'Waterlopen BD TOPAGE 2026': false,
-      'OCS GE landbedekking 2021-2023': false,
-      'Oude bossen · Forêts anciennes': false,
-      [THEDIRAC_RESEARCH_LAYER_NAME]: false,
-      [THEDIRAC_CONTEXT_LAYER_NAME]: false,
-      [THEDIRAC_SIGHTS_LAYER_NAME]: false,
-      'Sites Classés Bretagne': false,
-      'Sites Classés Normandie': false,
-      'Sites Classés Hauts-de-France': false,
-      'Sites Classés Grand Est': false,
-      'Sites Classés Île-de-France': false,
-      'Sites Classés Centre-Val de Loire': false,
-      'Sites Classés Bourgogne-FC': false,
-      'Sites Classés Pays de la Loire': false,
-      'Sites Classés Nouvelle-Aquitaine': false,
-      'Sites Classés Auvergne-RA': false,
-      'Sites Classés Occitanie': false,
-      'Sites Classés PACA': false,
-      'Sites Classés Corse': false,
-      'Monumenten IDF': false,
-      'Parken': false,
-      'Speeltuinen': false,
-      'Strandjes': false,
-      'Gewaspercelen': false,
-      'Kadastrale Grenzen': false,
-      'Scheepswrakken': false,
-      'Woonheuvels ZH': false,
-      'Romeinse Forten': false,
-      'Windmolens': false,
-      'Erfgoedlijnen': false,
-      'Oude Kernen': false,
-      'Relictenkaart Punten': false,
-      'Relictenkaart Lijnen': false,
-      'Relictenkaart Vlakken': false,
-      'Verdronken Dorpen': false,
-      'Mijn Vondsten': true
-    },
+    visible: buildDefaultVisibility(),
 
     opacity: {
       'AHN4 Hoogtekaart Kleur': 0.85,

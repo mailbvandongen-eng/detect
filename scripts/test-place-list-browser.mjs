@@ -105,7 +105,7 @@ try{
  const selectedOpacity=[.41,.62,.8,.35];
  await page.evaluate(({names,opacity})=>{const s=window.test.mapLayers.getState();for(const name of Object.keys(s.visible))s.setLayerVisibility(name,false,false);names.forEach((name,i)=>{s.setLayerVisibility(name,true,false);s.setLayerOpacity(name,opacity[i])});s.setLayerVisibility('OpenStreetMap',true,false);window.test.map.getView().setZoom(13);window.test.map.getView().setCenter([149000,5560000]);},{names:selectedLayers,opacity:selectedOpacity});
  await page.getByRole('button',{name:'Presets',exact:true}).tap();
- await page.locator('[data-preset-id="thedirac-2026"]').getByTitle('Huidige lagen opslaan naar deze preset',{exact:true}).tap();
+ await page.locator('[data-preset-id="thedirac-2026"]').getByRole('button',{name:'Meer voor Thédirac 2026',exact:true}).tap();await page.locator('[data-preset-id="thedirac-2026"]').getByTitle('Huidige lagen opslaan naar deze preset',{exact:true}).tap();
  const saved=await page.evaluate(()=>JSON.parse(JSON.stringify(window.test.presets.getState().presets.find(p=>p.id==='thedirac-2026'))));
  assert.deepEqual([...saved.layers].sort(),[...selectedLayers].sort());assert.equal(saved.baseLayer,'OpenStreetMap');assert.equal(saved.mapView.zoom,13);
  await page.evaluate(()=>window.test.presets.setState(s=>({presets:window.test.normalizePresetCollection(JSON.parse(JSON.stringify(s.presets)))})));

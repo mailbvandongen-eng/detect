@@ -13,6 +13,7 @@ import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Style, Fill, Stroke } from 'ol/style'
 import { buffer, extend, createEmpty } from 'ol/extent'
+import { useUIStore } from '../../store/uiStore'
 import { AppWindow } from './AppWindow'
 
 interface MonumentSearchProps {
@@ -86,6 +87,16 @@ export function MonumentSearch({ isOpen, onClose }: MonumentSearchProps) {
 
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<number>()
+
+  // Zoekterm overnemen uit de algemene zoekbalk
+  useEffect(() => {
+    if (!isOpen) return
+    const initialQuery = useUIStore.getState().monumentSearchQuery
+    if (initialQuery) {
+      setQuery(initialQuery)
+      useUIStore.setState({ monumentSearchQuery: '' })
+    }
+  }, [isOpen])
 
   // Focus input when opened
   useEffect(() => {

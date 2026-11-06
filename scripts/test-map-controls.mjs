@@ -77,4 +77,14 @@ assert.equal(layout.getControlPosition('gps', shown).right, '8px')
 assert.equal(layout.getControlPosition('gps', shown).bottom, '8px', 'GPS staat in de hoek nu de zoomknoppen weg zijn')
 const compassShown = new Set(['menu', 'layers', 'compass'])
 assert.equal(layout.getControlPosition('layers', compassShown).top, layout.getControlPosition('layers', new Set(['menu'])).top, 'Kompas verschuift de lagenknop niet')
+
+const { buildDefaultVisibility } = loadModule('src/store/layerStore.ts')
+const { layerRegistry } = loadModule('src/layers/layerRegistry.ts')
+const { FRANCE_RESEARCH_LAYER_DEFINITIONS } = loadModule('src/config/franceResearchLayers.ts')
+const defaults = buildDefaultVisibility()
+for (const name of [...Object.keys(layerRegistry), ...FRANCE_RESEARCH_LAYER_DEFINITIONS.map(layer => layer.name)]) {
+  assert.equal(defaults[name], false, `Nieuwe laag ${name} start automatisch uit`)
+}
+assert.equal(defaults['Esri (licht)'], true)
+assert.equal(Object.keys(defaults).some(name => name.includes('Ã')), false, 'Geen kapotte laagnamen')
 console.log('Kaartbediening: complete lagenlijst, import-ID’s, nul-opacity, één-venster-regel en knoppenschema zonder gaten goed.')

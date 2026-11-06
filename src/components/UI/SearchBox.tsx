@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Search, X, ExternalLink } from 'lucide-react'
+import { Search, X, ExternalLink, Landmark } from 'lucide-react'
 import { useMapStore, useSettingsStore, useUIStore } from '../../store'
 import { fromLonLat } from 'ol/proj'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -140,6 +140,12 @@ export function SearchBox() {
     }
   }, [query])
 
+  const openMonuments = () => {
+    const term = query.trim()
+    collapse()
+    useUIStore.getState().openMonumentSearch(term)
+  }
+
   const collapse = () => {
     setIsExpanded(false)
     setQuery('')
@@ -259,6 +265,14 @@ export function SearchBox() {
           className="search-input"
         />
         <button
+          onClick={openMonuments}
+          className="search-clear"
+          title="Zoek in monumenten"
+          aria-label="Zoek in monumenten"
+        >
+          <Landmark size={18} className="text-purple-500" />
+        </button>
+        <button
           onClick={collapse}
           className="search-clear"
           title="Sluiten"
@@ -310,7 +324,10 @@ export function SearchBox() {
       )}
 
       {isOpen && !searching && !searchError && query.trim().length >= 2 && results.length === 0 && (
-        <div className="search-loading">Geen locaties gevonden</div>
+        <div className="search-loading">
+          Geen locaties gevonden.{' '}
+          <button type="button" onClick={openMonuments} className="underline text-purple-600 bg-transparent border-0 p-0">Zoek in monumenten</button>
+        </div>
       )}
     </div>
   )

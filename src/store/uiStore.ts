@@ -51,6 +51,8 @@ interface UIState {
   closeLayerDashboard: () => void
   toggleRouteDashboard: () => void
   toggleMonumentSearch: () => void
+  monumentSearchQuery: string
+  openMonumentSearch: (query?: string) => void
   closeMonumentSearch: () => void
   toggleMonumentFilter: () => void
   closeMonumentFilter: () => void
@@ -98,6 +100,8 @@ export const useUIStore = create<UIState>()((set, get) => ({
   closeLayerDashboard: () => set(state => ({ ...(state.activeWindow === 'layerDashboard' ? closeWindowState : {}), layerDashboardLayerId: null })),
   toggleRouteDashboard: () => get().toggleWindow('routeDashboard'),
   toggleMonumentSearch: () => get().toggleWindow('monumentSearch'),
+  monumentSearchQuery: '',
+  openMonumentSearch: (query = '') => { set({ monumentSearchQuery: query }); get().openWindow('monumentSearch') },
   closeMonumentSearch: () => { if (get().activeWindow === 'monumentSearch') get().closeWindow() },
   toggleMonumentFilter: () => get().toggleWindow('monumentFilter'),
   closeMonumentFilter: () => { if (get().activeWindow === 'monumentFilter') get().closeWindow() },

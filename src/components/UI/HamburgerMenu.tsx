@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { X, Info, Settings, LogOut, User, MapPin, Route, Type, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw, History, List, Menu } from 'lucide-react'
+import { X, Info, Settings, LogOut, User, MapPin, Route, Type, Cloud, Ruler, Pencil, Printer, RefreshCw, History, List, Menu } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
@@ -81,10 +81,6 @@ export function HamburgerMenu() {
 
   const handleSettingsClick = () => {
     openWindow('settings')
-  }
-
-  const handleMonumentSearchClick = () => {
-    openWindow('monumentSearch')
   }
 
   const handleChangeLogClick = () => {
@@ -313,15 +309,6 @@ export function HamburgerMenu() {
                   {hasUnseenChanges && (
                     <span className="ml-auto px-1.5 py-0.5 rounded-full bg-blue-500 text-white" style={{ fontSize: '0.7em' }}>Nieuw</span>
                   )}
-                </button>
-
-                <button
-                  onClick={handleMonumentSearchClick}
-                  className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent transition-colors text-gray-700 hover:bg-purple-50"
-                  style={menuItemStyle}
-                >
-                  <Landmark size={18} className="text-purple-500" />
-                  <span>Zoek in monumenten</span>
                 </button>
               </MenuSection>
 

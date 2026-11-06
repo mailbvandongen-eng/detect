@@ -50,7 +50,7 @@ export function WelcomeModal({ isOpen, onClose, onOpenManual }: WelcomeModalProp
     >
               <div className="p-4 space-y-4">
                 <ToolGroup title="Rechtsboven">
-                  <ToolItem icon={<Search size={16} />} title="Zoeken" description="adres of plaatsnaam in heel Europa" />
+                  <ToolItem icon={<Search size={16} />} title="Zoeken" description="adres, plaats of monument" />
                   <ToolItem icon={<Settings size={16} />} title="Menu" description="account, lijsten, handleiding en instellingen" />
                   <ToolItem icon={<Layers size={16} />} title="Kaartlagen" description="basiskaart en thema's kiezen" />
                 </ToolGroup>

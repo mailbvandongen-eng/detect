@@ -12,14 +12,12 @@ interface ChangeLogModalProps {
 const currentRelease = {
   version,
   date: '6 november 2026',
-  title: 'Overzichtelijker menu, lagen en presets',
+  title: 'Monumenten zoeken vanuit de zoekbalk',
   changes: [
-    'De menuknop heeft nu een menu-icoon. Het menu is ingedeeld in Account, Openen, Knoppen op de kaart en Vensters; het versienummer staat onderaan.',
-    'Kaartlagen heeft bovenaan een zoekveld en een inklapbaar blok Actief met alle lagen die aan staan. Eigen lagen en imports staan nu onderaan.',
-    'Bij de basiskaart kies je met rondjes, want er staat er altijd één aan. TMK 1850 en Bonnebladen staan apart als historische kaarten.',
-    'Het tellertje bij een themagroep zet met één tik alle lagen van die groep uit. Groepen kunnen niet meer per ongeluk in één keer helemaal aan; de Frankrijk-hoofdschakelaar blijft.',
-    'Presets kies je met één tik op de naam. Opslaan, naam en locatie aanpassen en de lijst zitten achter de knop ⋯.',
-    'Na Reset kun je een paar seconden lang Ongedaan maken kiezen; je lagen en kaartpositie komen dan terug.'
+    'In de zoekbalk zit nu een monumentknop: je zoekterm gaat direct mee naar Zoek in monumenten. Vind je geen adres, dan staat de link er ook. Het menu-item is daarom vervallen.',
+    'De knoppen voor transparantie en jaarkeuze hebben dezelfde vorm als de andere kaartknoppen.',
+    'Nieuwe kaartlagen starten automatisch uit en doen direct mee met reset, zoeken en Actief. Zes lagen die daar nog ontbraken doen nu ook mee.',
+    'Achter de schermen is de kaartinformatie opgesplitst in kleinere onderdelen; er verandert niets aan wat je ziet.'
   ]
 }
 

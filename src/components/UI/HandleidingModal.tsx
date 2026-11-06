@@ -52,7 +52,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     ]} />
 
                     <LocationGroup title="Rechtsboven" items={[
-                      { icon: <Search size={14} />, name: "Zoeken", desc: "Zoek adressen en plaatsen in heel Europa" },
+                      { icon: <Search size={14} />, name: "Zoeken", desc: "Adressen en plaatsen in Europa; het monumenticoon zoekt in monumenten" },
                       { icon: <Menu size={14} />, name: "Menu", desc: "Account, lijsten, handleiding en instellingen" },
                       { icon: <Map size={14} />, name: "Kaartlagen", desc: "Lagen aan/uit zetten" },
                       { icon: <Compass size={14} />, name: "Kompas", desc: "Verschijnt onder Kaartlagen bij een gedraaide kaart" },
@@ -86,7 +86,6 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                   <div className="bg-gray-50 rounded-xl p-3 space-y-2">
                     <MenuItem icon={<Cloud size={14} />} name="Google-account" desc="Inloggen en handmatig synchroniseren" />
                     <MenuItem icon={<Star size={14} />} name="Info & handleiding" desc="App-informatie en deze handleiding" />
-                    <MenuItem icon={<Search size={14} />} name="Zoek in monumenten" desc="Zoek specifieke monumenten" />
                     <MenuItem icon={<Settings size={14} />} name="Instellingen" desc="Kaart, lagen, presets en vondsten beheren" />
                   </div>
 
