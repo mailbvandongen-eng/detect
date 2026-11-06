@@ -38,29 +38,56 @@ function ensureLayer(
   }
 }
 
+/** Zet een Frankrijk-onderzoekslaag aan of uit; maakt de laag zo nodig eerst aan. */
+export function toggleFranceResearchLayer(name: string) {
+  const definition = FRANCE_RESEARCH_LAYER_DEFINITIONS.find(layer => layer.name === name)
+  if (!definition) return
+  const store = useLayerStore.getState()
+  const next = !store.visible[name]
+  if (next) {
+    if (FRANCE_HISTORICAL_MAP_NAMES.includes(name as typeof FRANCE_HISTORICAL_MAP_NAMES[number])) {
+      FRANCE_HISTORICAL_MAP_NAMES
+        .filter(otherName => otherName !== name)
+        .forEach(otherName => store.setLayerVisibility(otherName, false))
+    }
+    ensureLayer(name, definition.opacity, useMapStore.getState().map, store.layers, store.registerLayer, store.setLayerOpacity, store.setLayerStatus)
+  }
+  store.setLayerVisibility(name, next, false)
+}
+
+export function FranceResearchRow({ layer, note }: { layer: FranceResearchLayerDefinition; note?: string }) {
+  const { name } = layer
+  const visible = useLayerStore(state => Boolean(state.visible[name]))
+  const status = useLayerStore(state => state.loadingState[name])
+  const ready = useLayerStore(state => Boolean(state.layers[name])) && status !== 'error'
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); toggleFranceResearchLayer(name) }}
+      className={`w-full flex items-center justify-between py-1 pl-2 pr-1 border-0 outline-none transition-colors text-left ${visible ? 'bg-blue-50' : 'bg-transparent hover:bg-blue-50'}`}
+      style={{ fontSize: 'inherit' }}
+    >
+      <span className={`text-gray-600 ${status === 'error' ? 'text-red-600' : ''}`}>
+        {name}
+        {name.includes('Napoleontisch kadaster') && <small className="block text-gray-500">Gemeentepunten → klik voor archiefbladen</small>}
+        {note && <small className="block text-gray-400">{note}</small>}
+      </span>
+      <span
+        className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0"
+        style={{ backgroundColor: visible ? '#3b82f6' : 'white', border: '2px solid #60a5fa', color: 'white' }}
+      >
+        {status === 'loading' ? <Loader2 size={11} className="animate-spin" />
+          : status === 'error' ? <AlertCircle size={11} />
+            : visible ? <Check size={11} /> : null}
+      </span>
+      {!visible && status === 'loaded' && <span className="sr-only">geladen</span>}
+      {visible && status === 'error' && <span className="sr-only">laden mislukt</span>}
+      {visible && status !== 'error' && status !== 'loading' && !ready && <Circle size={10} className="text-gray-400" aria-label="niet geladen" />}
+    </button>
+  )
+}
+
 function ResearchFolder({ title, layers, help }: { title: string; layers: readonly FranceResearchLayerDefinition[]; help?: string }) {
   const [expanded, setExpanded] = useState(true)
-  const map = useMapStore(state => state.map)
-  const visible = useLayerStore(state => state.visible)
-  const registered = useLayerStore(state => state.layers)
-  const registerLayer = useLayerStore(state => state.registerLayer)
-  const loadingState = useLayerStore(state => state.loadingState)
-  const setLayerVisibility = useLayerStore(state => state.setLayerVisibility)
-  const setLayerOpacity = useLayerStore(state => state.setLayerOpacity)
-  const setLayerStatus = useLayerStore(state => state.setLayerStatus)
-
-  const toggle = (name: string, opacity: number) => {
-    const next = !visible[name]
-    if (next) {
-      if (FRANCE_HISTORICAL_MAP_NAMES.includes(name as typeof FRANCE_HISTORICAL_MAP_NAMES[number])) {
-        FRANCE_HISTORICAL_MAP_NAMES
-          .filter(otherName => otherName !== name)
-          .forEach(otherName => setLayerVisibility(otherName, false))
-      }
-      ensureLayer(name, opacity, map, registered, registerLayer, setLayerOpacity, setLayerStatus)
-    }
-    setLayerVisibility(name, next, false)
-  }
 
   return (
     <div className="mb-0.5">
@@ -76,32 +103,7 @@ function ResearchFolder({ title, layers, help }: { title: string; layers: readon
       {expanded && (
         <div className="ml-5">
           {help && <p className="px-2 py-1 text-xs text-gray-500">{help}</p>}
-          {layers.map(layer => {
-            const { name, opacity } = layer
-            const status = loadingState[name]
-            const ready = Boolean(registered[name]) && status !== 'error'
-            return (
-            <button
-              key={name}
-              onClick={(e) => { e.stopPropagation(); toggle(name, opacity) }}
-              className={`w-full flex items-center justify-between py-1 pl-2 pr-1 border-0 outline-none transition-colors text-left ${visible[name] ? 'bg-blue-50' : 'bg-transparent hover:bg-blue-50'}`}
-              style={{ fontSize: 'inherit' }}
-            >
-              <span className={`text-gray-600 ${status === 'error' ? 'text-red-600' : ''}`}>{name}{name.includes('Napoleontisch kadaster') && <small className="block text-gray-500">Gemeentepunten → klik voor archiefbladen</small>}</span>
-              <span
-                className="w-4 h-4 rounded-sm flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: visible[name] ? '#3b82f6' : 'white', border: '2px solid #60a5fa', color: 'white' }}
-              >
-                {status === 'loading' ? <Loader2 size={11} className="animate-spin" />
-                  : status === 'error' ? <AlertCircle size={11} />
-                    : visible[name] ? <Check size={11} /> : null}
-              </span>
-              {!visible[name] && status === 'loaded' && <span className="sr-only">geladen</span>}
-              {visible[name] && status === 'error' && <span className="sr-only">laden mislukt</span>}
-              {visible[name] && status !== 'error' && status !== 'loading' && !ready && <Circle size={10} className="text-gray-400" aria-label="niet geladen" />}
-            </button>
-          )
-          })}
+          {layers.map(layer => <FranceResearchRow key={layer.name} layer={layer} />)}
           {layers.some(layer => layer.name === THEDIRAC_RESEARCH_LAYER_NAME) && (
             <div className="flex items-center gap-1.5 px-2 py-1 text-xs text-gray-600">
               <span className="inline-block h-2.5 w-2.5 rounded-full shrink-0" style={{backgroundColor: THEDIRAC_FORTIFICATION_COLOR, border: '0.75px solid white'}} />
@@ -114,6 +116,17 @@ function ResearchFolder({ title, layers, help }: { title: string; layers: readon
   )
 }
 
+export const FRANCE_GROUP_TITLES: Record<FranceResearchGroup, string> = {
+  terrain: 'Terrein & reliëf',
+  water: 'Water & landschap',
+  geology: 'Bodem & geologie',
+  finds: 'Mineralen & fossielen',
+  history: 'Historische kaarten',
+  archaeology: 'Archeologie & historie',
+  sights: 'Bezienswaardigheden',
+  hikes: 'Wandelroutes',
+}
+
 export function FranceResearchLayers() {
   const groups: Record<FranceResearchGroup, FranceResearchLayerDefinition[]> = {
     terrain: [], water: [], geology: [], finds: [], history: [], archaeology: [], sights: [], hikes: []
@@ -121,14 +134,14 @@ export function FranceResearchLayers() {
   FRANCE_RESEARCH_LAYER_DEFINITIONS.forEach(layer => groups[layer.group].push(layer))
   return (
     <div className="mb-1 border-b border-gray-100 pb-1">
-      <ResearchFolder title="Terrein & reliëf" layers={groups.terrain} />
-      <ResearchFolder title="Water & landschap" layers={groups.water} />
-      <ResearchFolder title="Bodem & geologie" layers={groups.geology} />
-      <ResearchFolder title="Mineralen & fossielen" layers={groups.finds} />
-      <ResearchFolder title="Historische kaarten" layers={groups.history} help="Kies één historische kaart voor een helder beeld. De andere kaarten blijven beschikbaar maar worden niet tegelijk over elkaar gelegd. Napoleon toont gemeentepunten naar de officiële archiefbladen." />
-      <ResearchFolder title="Archeologie & historie" layers={groups.archaeology} />
-      <ResearchFolder title="Bezienswaardigheden" layers={groups.sights} />
-      <ResearchFolder title="Wandelroutes" layers={groups.hikes} />
+      <ResearchFolder title={FRANCE_GROUP_TITLES.terrain} layers={groups.terrain} />
+      <ResearchFolder title={FRANCE_GROUP_TITLES.water} layers={groups.water} />
+      <ResearchFolder title={FRANCE_GROUP_TITLES.geology} layers={groups.geology} />
+      <ResearchFolder title={FRANCE_GROUP_TITLES.finds} layers={groups.finds} />
+      <ResearchFolder title={FRANCE_GROUP_TITLES.history} layers={groups.history} help="Kies één historische kaart voor een helder beeld. De andere kaarten blijven beschikbaar maar worden niet tegelijk over elkaar gelegd. Napoleon toont gemeentepunten naar de officiële archiefbladen." />
+      <ResearchFolder title={FRANCE_GROUP_TITLES.archaeology} layers={groups.archaeology} />
+      <ResearchFolder title={FRANCE_GROUP_TITLES.sights} layers={groups.sights} />
+      <ResearchFolder title={FRANCE_GROUP_TITLES.hikes} layers={groups.hikes} />
     </div>
   )
 }

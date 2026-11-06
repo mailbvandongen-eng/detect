@@ -12,13 +12,14 @@ interface ChangeLogModalProps {
 const currentRelease = {
   version,
   date: '6 november 2026',
-  title: 'Vaste plek voor elke knop',
+  title: 'Overzichtelijker menu, lagen en presets',
   changes: [
-    'Alle kaartknoppen volgen één vast schema. Staat een knop uit of is hij niet nodig, dan schuiven de andere knoppen netjes door; er blijven geen gaten meer over.',
-    'De knoppen voor in- en uitzoomen zijn verwijderd. Zoomen gaat met twee vingers of dubbeltikken. GPS staat nu rechtsonder in de hoek.',
-    'Kaartbronnen zit niet meer over de uitzoomknop heen, maar staat als klein i-knopje naast de resetknop.',
-    'Bij het opstarten opent hoogstens één venster. Nieuwe wijzigingen zie je aan een blauw stipje op de menuknop en het label Nieuw bij Wijzigingen.',
-    'De uitleg Hoe werkt Detect? toont weer precies de knoppen die op het scherm staan, per schermhoek.'
+    'De menuknop heeft nu een menu-icoon. Het menu is ingedeeld in Account, Openen, Knoppen op de kaart en Vensters; het versienummer staat onderaan.',
+    'Kaartlagen heeft bovenaan een zoekveld en een inklapbaar blok Actief met alle lagen die aan staan. Eigen lagen en imports staan nu onderaan.',
+    'Bij de basiskaart kies je met rondjes, want er staat er altijd één aan. TMK 1850 en Bonnebladen staan apart als historische kaarten.',
+    'Het tellertje bij een themagroep zet met één tik alle lagen van die groep uit. Groepen kunnen niet meer per ongeluk in één keer helemaal aan; de Frankrijk-hoofdschakelaar blijft.',
+    'Presets kies je met één tik op de naam. Opslaan, naam en locatie aanpassen en de lijst zitten achter de knop ⋯.',
+    'Na Reset kun je een paar seconden lang Ongedaan maken kiezen; je lagen en kaartpositie komen dan terug.'
   ]
 }
 

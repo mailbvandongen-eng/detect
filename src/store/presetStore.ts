@@ -359,6 +359,68 @@ function isOverlayLayer(layerName: string): boolean {
   return !BASE_LAYER_NAMES.includes(layerName)
 }
 
+export function applyPresetSnapshot(rawPreset: Preset) {
+  const preset = normalizePreset(rawPreset)
+  const layerStore = useLayerStore.getState()
+  const currentBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
+  const nextBaseLayer = BASE_LAYER_NAMES.includes(preset.baseLayer || '')
+    ? preset.baseLayer!
+    : currentBaseLayer || 'Esri (licht)'
+
+  const overlayNames = [...new Set([...Object.keys(layerStore.visible), ...preset.layers, ...Object.keys(preset.layerStates ?? {})])]
+  overlayNames.filter(isOverlayLayer)
+    .forEach(layerName => {
+      const snapshot = preset.layerStates?.[layerName]
+      const shouldShow = snapshot ? snapshot.visible : preset.layers.includes(layerName)
+      const opacity = snapshot?.opacity ?? preset.layerOpacities?.[layerName]
+
+      if (typeof opacity === 'number') {
+        layerStore.setLayerOpacity(layerName, opacity)
+      }
+      if (shouldShow && activateFranceResearchLayer(layerName)) {
+        return
+      }
+      layerStore.setLayerVisibility(layerName, shouldShow)
+    })
+
+  const customLayerStore = useCustomLayerStore.getState()
+  customLayerStore.layers.forEach(layer => {
+    const snapshot = preset.customLayerStates?.[customLayerSnapshotKey(layer)]
+    if (!snapshot) return
+    customLayerStore.updateLayer(layer.id, {
+      visible: snapshot.visible,
+      opacity: snapshot.opacity
+    })
+  })
+
+  const pointLayerStore = useCustomPointLayerStore.getState()
+  pointLayerStore.layers.forEach(layer => {
+    const snapshot = preset.customLayerStates?.[pointLayerSnapshotKey(layer)]
+    if (!snapshot) return
+    pointLayerStore.updateLayer(layer.id, { visible: snapshot.visible })
+  })
+
+  BASE_LAYER_NAMES.forEach((layerName) => {
+    layerStore.setLayerVisibility(layerName, layerName === nextBaseLayer)
+  })
+  layerStore.setLayerVisibility(
+    'Labels Overlay',
+    nextBaseLayer === 'Esri (licht)' || preset.layers.includes('Labels Overlay')
+  )
+
+  if (preset.mapView) {
+    const map = useMapStore.getState().map
+    map?.getView().animate({
+      center: fromLonLat(preset.mapView.center),
+      zoom: preset.mapView.zoom,
+      rotation: 0,
+      duration: 500
+    })
+  }
+
+  console.log(`🎨 Preset toegepast: ${preset.name} (${nextBaseLayer})`)
+}
+
 export function captureCurrentPresetSnapshot() {
   const layerStore = useLayerStore.getState()
   const customLayerStore = useCustomLayerStore.getState()
@@ -467,66 +529,7 @@ export const usePresetStore = create<PresetState>()(
       applyPreset: (id: string) => {
         const rawPreset = get().presets.find(p => p.id === id)
         if (!rawPreset) return
-
-        const preset = normalizePreset(rawPreset)
-        const layerStore = useLayerStore.getState()
-        const currentBaseLayer = BASE_LAYER_NAMES.find((layerName) => layerStore.visible[layerName])
-        const nextBaseLayer = BASE_LAYER_NAMES.includes(preset.baseLayer || '')
-          ? preset.baseLayer!
-          : currentBaseLayer || 'Esri (licht)'
-
-        const overlayNames = [...new Set([...Object.keys(layerStore.visible), ...preset.layers, ...Object.keys(preset.layerStates ?? {})])]
-        overlayNames.filter(isOverlayLayer)
-          .forEach(layerName => {
-            const snapshot = preset.layerStates?.[layerName]
-            const shouldShow = snapshot ? snapshot.visible : preset.layers.includes(layerName)
-            const opacity = snapshot?.opacity ?? preset.layerOpacities?.[layerName]
-
-            if (typeof opacity === 'number') {
-              layerStore.setLayerOpacity(layerName, opacity)
-            }
-            if (shouldShow && activateFranceResearchLayer(layerName)) {
-              return
-            }
-            layerStore.setLayerVisibility(layerName, shouldShow)
-          })
-
-        const customLayerStore = useCustomLayerStore.getState()
-        customLayerStore.layers.forEach(layer => {
-          const snapshot = preset.customLayerStates?.[customLayerSnapshotKey(layer)]
-          if (!snapshot) return
-          customLayerStore.updateLayer(layer.id, {
-            visible: snapshot.visible,
-            opacity: snapshot.opacity
-          })
-        })
-
-        const pointLayerStore = useCustomPointLayerStore.getState()
-        pointLayerStore.layers.forEach(layer => {
-          const snapshot = preset.customLayerStates?.[pointLayerSnapshotKey(layer)]
-          if (!snapshot) return
-          pointLayerStore.updateLayer(layer.id, { visible: snapshot.visible })
-        })
-
-        BASE_LAYER_NAMES.forEach((layerName) => {
-          layerStore.setLayerVisibility(layerName, layerName === nextBaseLayer)
-        })
-        layerStore.setLayerVisibility(
-          'Labels Overlay',
-          nextBaseLayer === 'Esri (licht)' || preset.layers.includes('Labels Overlay')
-        )
-
-        if (preset.mapView) {
-          const map = useMapStore.getState().map
-          map?.getView().animate({
-            center: fromLonLat(preset.mapView.center),
-            zoom: preset.mapView.zoom,
-            rotation: 0,
-            duration: 500
-          })
-        }
-
-        console.log(`🎨 Preset toegepast: ${preset.name} (${nextBaseLayer})`)
+        applyPresetSnapshot(rawPreset)
       },
 
       createPreset: (name: string, icon: string, rememberMapView = false) => {

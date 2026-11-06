@@ -1,12 +1,14 @@
-import { useEffect, useId, useState, type ReactNode } from 'react'
-import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight, Settings2, Trash2, List } from 'lucide-react'
-import { useUIStore } from '../../store'
+import { Children, isValidElement, useEffect, useId, useState, type ReactNode } from 'react'
+import { Layers, Check, Upload, Plus, ExternalLink, Globe, ChevronDown, ChevronRight, Settings2, Trash2, List, Search, X } from 'lucide-react'
+import { useLayerStore, useUIStore } from '../../store'
 import { useCustomPointLayerStore, type CustomPointLayer } from '../../store/customPointLayerStore'
 import { BuddyWriteStatus } from '../CustomPoints/BuddyWriteStatus'
 import { BuddyLayerPanel } from '../CustomPoints/BuddyLayerPanel'
 import { useCustomLayerStore } from '../../store/customLayerStore'
 import { LayerGroup } from './LayerGroup'
 import { LayerItem } from './LayerItem'
+import { FranceResearchRow, FRANCE_GROUP_TITLES } from './FranceResearchLayers'
+import { FRANCE_RESEARCH_LAYER_DEFINITIONS } from '../../config/franceResearchLayers'
 import { CustomLayerItem } from '../CustomLayers/CustomLayerItem'
 import { isThemeVisible, isSpecialSectionVisible } from '../../config/buildMode'
 import { AppWindow } from '../UI/AppWindow'
@@ -208,84 +210,19 @@ export function ThemesPanel() {
   const standalonePointLayers = getStandalonePointLayers(customLayers, importedLayers, { includeReadOnly: true })
   const buddyError = useBuddySyncStore(state => state.error)
   const refreshBuddies = useBuddySyncStore(state => state.refresh)
+  const visible = useLayerStore(state => state.visible)
+  const [query, setQuery] = useState('')
+  const [activeOpen, setActiveOpen] = useState(false)
 
   // State for special projects section
   const [specialProjectsOpen, setSpecialProjectsOpen] = useState(false)
 
-  return (
-    <AppWindow
-      isOpen={themesPanelOpen}
-      title="Kaartlagen"
-      icon={<Layers size={18} />}
-      placement="right"
-      onClose={toggleThemesPanel}
-    >
-      <div className="p-2">
-            {/* Inklappen verandert alleen de lijst, nooit de kaartzichtbaarheid. */}
-            <div className="mb-2 pb-1 border-b border-gray-100">
-              <UserLayerSection title="Eigen lagen" count={standalonePointLayers.length}>
-              <p className="px-1 text-[11px] mb-1" style={{ color: 'var(--detect-window-muted)' }}>Nieuwe lagen zijn privé. Delen stel je in via de laaginstellingen.</p>
-              {standalonePointLayers.map(layer => (
-                <PointLayerItem
-                  key={layer.id}
-                  layer={layer}
-                  onToggle={() => toggleVisibility(layer.id)}
-                  onDelete={() => removeLayer(layer.id)}
-                  onRename={(name) => updateLayer(layer.id, { name })}
-                  onChangeColor={(color) => updateLayer(layer.id, { color })}
-                />
-              ))}
-              </UserLayerSection>
-              <BuddyWriteStatus />
-              {buddyError && (
-                <div role="alert" className="rounded-lg bg-red-50 p-2 text-xs text-red-700">
-                  <p>{buddyError}</p>
-                  <button onClick={refreshBuddies} className="mt-1 underline">Opnieuw proberen</button>
-                </div>
-              )}
-              <UserLayerSection title="Imports" count={importedLayers.length}>
-              <p className="px-1 text-[11px] mb-1" style={{ color: 'var(--detect-window-muted)' }}>Geïmporteerde kaarten. Eigen lagen leg je hier overheen.</p>
-              {importedLayers.length === 0 && <p className="px-1 text-[11px]">Nog geen imports</p>}
-              {importedLayers.map(layer => (
-                <CustomLayerItem key={layer.id} layer={layer} compact />
-              ))}
-              </UserLayerSection>
-              <div className="grid grid-cols-2 gap-2 px-1 pt-2">
-                <button
-                  onClick={(event) => { event.stopPropagation(); openWindow('createLayer', 'layers') }}
-                  className="detect-window-primary-button flex items-center justify-center gap-1 px-2 py-2 text-xs"
-                >
-                  <Plus size={14} /> Nieuwe laag
-                </button>
-                <button
-                  onClick={(event) => { event.stopPropagation(); openWindow('importLayer', 'layers') }}
-                  className="detect-window-secondary-button flex items-center justify-center gap-1 px-2 py-2 text-xs"
-                >
-                  <Upload size={14} /> Importeren
-                </button>
-              </div>
-            </div>
+  useEffect(() => {
+    if (!themesPanelOpen) setQuery('')
+  }, [themesPanelOpen])
 
-            {/* Basislaag - vaste sectie zonder pijltje */}
-            <div className="mb-2">
-              <div className="flex items-center gap-1 py-1 px-1 mb-1">
-                <span className="text-blue-600 font-medium" style={{ fontSize: '0.95em' }}>Basislaag</span>
-              </div>
-              <div className="space-y-0">
-                <LayerItem name="Esri (licht)" type="base" displayName="Lichtgrijs (wereld)" />
-                <LayerItem name="OpenStreetMap" type="base" />
-                <LayerItem name="Luchtfoto" type="base" hasOverlay displayName="Luchtfoto (NL)" />
-                <LayerItem name="Satelliet (wereld)" type="base" hasOverlay />
-                <LayerItem name="TMK 1850" type="overlay" hasOverlay />
-                <LayerItem name="Bonnebladen 1900" type="overlay" hasOverlay />
-              </div>
-            </div>
-
-            {/* Thema's - vaste sectie, daaronder inklapbare groepen */}
-            <div className="mb-2">
-              <div className="flex items-center gap-1 py-1 px-1 mb-1 border-t border-gray-100 pt-2">
-                <span className="text-blue-600 font-medium" style={{ fontSize: '0.95em' }}>Thema's</span>
-              </div>
+  const themeTree = (
+    <>
               {/* Steentijd (Stone Age) */}
               {isThemeVisible('Steentijd & Prehistorie') && (
                 <LayerGroup title="Steentijd & Prehistorie" defaultExpanded={false} layerNames={['Hunebedden', 'Grafheuvels', 'Terpen', 'FAMKE Steentijd', 'FAMKE IJzertijd']}>
@@ -495,6 +432,94 @@ export function ThemesPanel() {
                 </LayerGroup>
               )}
 
+    </>
+  )
+
+  const catalog = buildCatalog(themeTree)
+  const activeEntries = catalog.filter(entry => entry.kind !== 'base' && visible[entry.name])
+  const searchTerm = normalize(query.trim())
+  const results = searchTerm.length >= 2
+    ? catalog.filter(entry => normalize(`${entry.label} ${entry.name} ${entry.path}`).includes(searchTerm))
+    : null
+
+  return (
+    <AppWindow
+      isOpen={themesPanelOpen}
+      title="Kaartlagen"
+      icon={<Layers size={18} />}
+      placement="right"
+      onClose={toggleThemesPanel}
+    >
+      <div className="p-2">
+            <div className="relative mb-2">
+              <Search size={15} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                enterKeyHint="search"
+                value={query}
+                onChange={event => setQuery(event.target.value)}
+                onClick={event => event.stopPropagation()}
+                placeholder="Zoek een laag"
+                aria-label="Zoek een laag"
+                className="w-full pl-8 pr-8 py-2 bg-gray-100 rounded-lg border-0 outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ fontSize: '1em' }}
+              />
+              {query && (
+                <button type="button" aria-label="Zoekterm wissen" onClick={(event) => { event.stopPropagation(); setQuery('') }}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 border-0 outline-none bg-transparent text-gray-400 hover:text-gray-600">
+                  <X size={15} />
+                </button>
+              )}
+            </div>
+
+            {results ? (
+              <div className="mb-2">
+                <SectionTitle>{results.length === 0 ? 'Geen lagen gevonden' : `${results.length} ${results.length === 1 ? 'laag' : 'lagen'} gevonden`}</SectionTitle>
+                {results.map(entry => <CatalogRow key={entry.key} entry={entry} />)}
+              </div>
+            ) : (
+              <>
+            {activeEntries.length > 0 && (
+              <div className="mb-2">
+                <button
+                  type="button"
+                  onClick={(event) => { event.stopPropagation(); setActiveOpen(open => !open) }}
+                  aria-expanded={activeOpen}
+                  className="w-full flex items-center gap-1 py-1 px-1 mb-1 border-0 outline-none bg-transparent text-left"
+                >
+                  <ChevronRight size={14} className={`text-blue-500 transition-transform ${activeOpen ? 'rotate-90' : ''}`} />
+                  <span className="text-blue-600 font-medium" style={{ fontSize: '0.95em' }}>Actief ({activeEntries.length})</span>
+                  {!activeOpen && (
+                    <span className="ml-1 min-w-0 flex-1 truncate text-gray-400" style={{ fontSize: '0.8em' }}>
+                      {activeEntries.map(entry => entry.label).join(', ')}
+                    </span>
+                  )}
+                </button>
+                {activeOpen && activeEntries.map(entry => <CatalogRow key={entry.key} entry={entry} />)}
+              </div>
+            )}
+
+            {/* Basiskaart: precies één keuze */}
+            <div className="mb-2">
+              <SectionTitle border={activeEntries.length > 0}>Basiskaart</SectionTitle>
+              <div role="radiogroup" aria-label="Basiskaart" className="space-y-0">
+                {BASE_ENTRIES.map(entry => (
+                  <LayerItem key={entry.name} name={entry.name} type="base" hasOverlay={entry.hasOverlay} displayName={entry.label} />
+                ))}
+              </div>
+              <h4 className="px-1 pt-2 pb-0.5 text-gray-500" style={{ fontSize: '0.8em' }}>Historische kaarten NL (over de basiskaart)</h4>
+              <div className="space-y-0">
+                {HISTORIC_OVERLAY_ENTRIES.map(entry => (
+                  <LayerItem key={entry.name} name={entry.name} type="overlay" hasOverlay />
+                ))}
+              </div>
+            </div>
+
+            {/* Thema's - inklapbare groepen */}
+            <div className="mb-2">
+              <SectionTitle border>Thema&apos;s</SectionTitle>
+              {themeTree}
+
               {/* Specials (3D) - externe 3D archeologische sites */}
               {isSpecialSectionVisible('Specials (3D)') && (
                 <div className="mb-2">
@@ -559,7 +584,133 @@ export function ThemesPanel() {
                 </div>
               )}
             </div>
+
+            {/* Inklappen verandert alleen de lijst, nooit de kaartzichtbaarheid. */}
+            <div className="mb-2 border-t border-gray-100 pt-2">
+              <SectionTitle>Eigen lagen &amp; imports</SectionTitle>
+              <UserLayerSection title="Eigen lagen" count={standalonePointLayers.length}>
+              <p className="px-1 text-[11px] mb-1" style={{ color: 'var(--detect-window-muted)' }}>Nieuwe lagen zijn privé. Delen stel je in via de laaginstellingen.</p>
+              {standalonePointLayers.map(layer => (
+                <PointLayerItem
+                  key={layer.id}
+                  layer={layer}
+                  onToggle={() => toggleVisibility(layer.id)}
+                  onDelete={() => removeLayer(layer.id)}
+                  onRename={(name) => updateLayer(layer.id, { name })}
+                  onChangeColor={(color) => updateLayer(layer.id, { color })}
+                />
+              ))}
+              </UserLayerSection>
+              <BuddyWriteStatus />
+              {buddyError && (
+                <div role="alert" className="rounded-lg bg-red-50 p-2 text-xs text-red-700">
+                  <p>{buddyError}</p>
+                  <button onClick={refreshBuddies} className="mt-1 underline">Opnieuw proberen</button>
+                </div>
+              )}
+              <UserLayerSection title="Imports" count={importedLayers.length}>
+              <p className="px-1 text-[11px] mb-1" style={{ color: 'var(--detect-window-muted)' }}>Geïmporteerde kaarten. Eigen lagen leg je hier overheen.</p>
+              {importedLayers.length === 0 && <p className="px-1 text-[11px]">Nog geen imports</p>}
+              {importedLayers.map(layer => (
+                <CustomLayerItem key={layer.id} layer={layer} compact />
+              ))}
+              </UserLayerSection>
+              <div className="grid grid-cols-2 gap-2 px-1 pt-2">
+                <button
+                  onClick={(event) => { event.stopPropagation(); openWindow('createLayer', 'layers') }}
+                  className="detect-window-primary-button flex items-center justify-center gap-1 px-2 py-2 text-xs"
+                >
+                  <Plus size={14} /> Nieuwe laag
+                </button>
+                <button
+                  onClick={(event) => { event.stopPropagation(); openWindow('importLayer', 'layers') }}
+                  className="detect-window-secondary-button flex items-center justify-center gap-1 px-2 py-2 text-xs"
+                >
+                  <Upload size={14} /> Importeren
+                </button>
+              </div>
+            </div>
+
+              </>
+            )}
       </div>
     </AppWindow>
+  )
+}
+
+interface CatalogEntry {
+  key: string
+  name: string
+  label: string
+  path: string
+  kind: 'base' | 'overlay' | 'france'
+  hasOverlay?: boolean
+}
+
+const BASE_ENTRIES = [
+  { name: 'Esri (licht)', label: 'Lichtgrijs (wereld)', hasOverlay: false },
+  { name: 'OpenStreetMap', label: 'OpenStreetMap', hasOverlay: false },
+  { name: 'Luchtfoto', label: 'Luchtfoto (NL)', hasOverlay: true },
+  { name: 'Satelliet (wereld)', label: 'Satelliet (wereld)', hasOverlay: true },
+]
+
+const HISTORIC_OVERLAY_ENTRIES = [
+  { name: 'TMK 1850' },
+  { name: 'Bonnebladen 1900' },
+]
+
+function normalize(value: string) {
+  return value.toLocaleLowerCase('nl').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+/** Leest alle lagen uit de themaboom, zodat zoeken en Actief altijd gelijk lopen met de boom. */
+function buildCatalog(themeTree: ReactNode): CatalogEntry[] {
+  const entries: CatalogEntry[] = [
+    ...BASE_ENTRIES.map(entry => ({ key: `base:${entry.name}`, name: entry.name, label: entry.label, path: 'Basiskaart', kind: 'base' as const, hasOverlay: entry.hasOverlay })),
+    { key: 'base:Hybride (wereld)', name: 'Hybride (wereld)', label: 'Hybride (wereld)', path: 'Basiskaart', kind: 'base' },
+    ...HISTORIC_OVERLAY_ENTRIES.map(entry => ({ key: `overlay:${entry.name}`, name: entry.name, label: entry.name, path: 'Historische kaarten NL', kind: 'overlay' as const, hasOverlay: true })),
+  ]
+  const walk = (node: ReactNode, path: string[]) => {
+    Children.forEach(node, child => {
+      if (!isValidElement(child)) return
+      const props = child.props as { children?: ReactNode, title?: string, name?: string, displayName?: string }
+      if (child.type === LayerItem && props.name) {
+        entries.push({ key: `overlay:${props.name}`, name: props.name, label: props.displayName || props.name, path: path.join(' › '), kind: 'overlay' })
+        return
+      }
+      if (child.type === LayerGroup && props.title) {
+        if (props.title === 'Frankrijk') {
+          FRANCE_RESEARCH_LAYER_DEFINITIONS.forEach(layer => entries.push({
+            key: `france:${layer.name}`, name: layer.name, label: layer.name,
+            path: [...path, 'Frankrijk', FRANCE_GROUP_TITLES[layer.group]].join(' › '), kind: 'france',
+          }))
+        }
+        walk(props.children, [...path, props.title])
+        return
+      }
+      if (props.children) walk(props.children, path)
+    })
+  }
+  walk(themeTree, [])
+  const seen = new Set<string>()
+  return entries.filter(entry => !seen.has(entry.key) && seen.add(entry.key))
+}
+
+function CatalogRow({ entry }: { entry: CatalogEntry }) {
+  if (entry.kind === 'france') {
+    const layer = FRANCE_RESEARCH_LAYER_DEFINITIONS.find(definition => definition.name === entry.name)
+    return layer ? <FranceResearchRow layer={layer} note={entry.path} /> : null
+  }
+  if (entry.name === 'Hybride (wereld)') {
+    return <LayerItem name="Satelliet (wereld)" type="base" hasOverlay note="Basiskaart · met Hybride als variant" />
+  }
+  return <LayerItem name={entry.name} type={entry.kind === 'base' ? 'base' : 'overlay'} hasOverlay={entry.hasOverlay} displayName={entry.label} note={entry.path} />
+}
+
+function SectionTitle({ children, border = false }: { children: ReactNode, border?: boolean }) {
+  return (
+    <div className={`flex items-center gap-1 py-1 px-1 mb-1 ${border ? 'border-t border-gray-100 pt-2' : ''}`}>
+      <span className="text-blue-600 font-medium" style={{ fontSize: '0.95em' }}>{children}</span>
+    </div>
   )
 }

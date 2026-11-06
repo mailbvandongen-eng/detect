@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Bookmark, Trash2, Map, List, Pencil } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { RotateCcw, Compass, TreePalm, Layers, ChevronUp, Mountain, Waves, Search, Target, Grid3X3, Save, Plus, RotateCw, Check, LucideIcon, Bookmark, Trash2, Map, List, Pencil, MoreHorizontal } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useLayerStore, useGPSStore, useUIStore, usePresetStore, useSettingsStore, useMapStore } from '../../store'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
-import { captureCurrentPresetSnapshot, type Preset } from '../../store/presetStore'
+import { applyPresetSnapshot, captureCurrentPresetSnapshot, type Preset } from '../../store/presetStore'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { useCustomLayerStore } from '../../store/customLayerStore'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
@@ -79,6 +79,10 @@ export function PresetButtons() {
   const [newPresetName, setNewPresetName] = useState('')
   const [rememberMapView, setRememberMapView] = useState(false)
 
+  const [actionsId, setActionsId] = useState<string | null>(null)
+  const [undoSnapshot, setUndoSnapshot] = useState<Preset | null>(null)
+  const undoTimer = useRef<number | null>(null)
+  useEffect(() => () => { if (undoTimer.current) window.clearTimeout(undoTimer.current) }, [])
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editRememberView, setEditRememberView] = useState(false)
@@ -92,10 +96,26 @@ export function PresetButtons() {
       ? existing?.mapView || { center: toLonLat(center!) as [number, number], zoom: zoom! }
       : null })
     setEditingId(null)
+    setActionsId(null)
   }
 
   const resetAll = () => {
     closeAllPanels()
+
+    // Bewaar de huidige kaart, zodat de reset een paar seconden terug te draaien is.
+    const view = map?.getView()
+    const center = view?.getCenter()
+    const zoom = view?.getZoom()
+    setUndoSnapshot({
+      id: 'undo-reset',
+      name: 'Kaart voor reset',
+      icon: 'Layers',
+      isBuiltIn: false,
+      ...captureCurrentPresetSnapshot(),
+      mapView: center && typeof zoom === 'number' ? { center: toLonLat(center) as [number, number], zoom } : null,
+    })
+    if (undoTimer.current) window.clearTimeout(undoTimer.current)
+    undoTimer.current = window.setTimeout(() => setUndoSnapshot(null), 8000)
 
     // Alles behalve de bekende basislagen is een overlay. Hierdoor hoeft deze
     // knop niet meer handmatig bijgewerkt te worden wanneer er lagen bijkomen.
@@ -124,6 +144,13 @@ export function PresetButtons() {
     }
 
     console.log('🔄 Reset: lichtgrijs, alle lagen uit, GPS uit, zoom naar Nederland')
+  }
+
+  const undoReset = () => {
+    if (!undoSnapshot) return
+    applyPresetSnapshot(undoSnapshot)
+    setUndoSnapshot(null)
+    if (undoTimer.current) window.clearTimeout(undoTimer.current)
   }
 
   const handleApplyPreset = (id: string) => {
@@ -211,6 +238,19 @@ export function PresetButtons() {
         )}
       </motion.button>
 
+      {undoSnapshot && (
+        <div
+          role="status"
+          className="fixed left-1/2 -translate-x-1/2 z-[1200] flex items-center gap-3 pl-4 pr-1 py-1 rounded-xl bg-gray-800/90 text-white shadow-lg backdrop-blur-sm"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)', fontSize: '0.9em' }}
+        >
+          <span className="whitespace-nowrap">Kaart gereset</span>
+          <button type="button" onClick={undoReset} className="min-h-[40px] px-3 rounded-lg border-0 outline-none bg-transparent text-blue-300 font-medium hover:bg-white/10 whitespace-nowrap">
+            Ongedaan maken
+          </button>
+        </div>
+      )}
+
       <AppWindow
         isOpen={presetsPanelOpen}
         title="Presets"
@@ -297,14 +337,18 @@ export function PresetButtons() {
                 <IconComponent size={15} className={`${iconColor} flex-shrink-0`} />
                 <span className="text-gray-700 truncate flex-1">{preset.name}</span>
               </button>
-              <button type="button" className="detect-window-icon-button shrink-0" style={{minWidth:44,minHeight:44}} title="Huidige lagen opslaan naar deze preset" aria-label={`Lagen opslaan in ${preset.name}`} onClick={event => handleSaveToPreset(event,preset.id,preset.name)}>{isSaved ? <Check size={18} className="text-green-500"/> : <Save size={18}/>}</button>
-              <button type="button" className="detect-window-icon-button shrink-0" style={{minWidth:44,minHeight:44}} aria-label={`Preset ${preset.name} bewerken`} title="Preset bewerken" onClick={() => {setEditingId(preset.id);setEditName(preset.name);setEditRememberView(!!preset.mapView)}}><Pencil size={18}/></button>
-              <button type="button" className="detect-window-icon-button shrink-0" style={{minWidth:44,minHeight:44}} aria-label={`Lijst van ${preset.name}`} title={`Lijst van ${preset.name}`} onClick={() => useUIStore.getState().openPlaceList(`preset:${preset.id}`)}><List size={18}/></button>
+              {isSaved && <Check size={18} className="text-green-500 shrink-0" aria-label="Opgeslagen" />}
+              <button type="button" className="detect-window-icon-button shrink-0" style={{minWidth:44,minHeight:44}} aria-expanded={actionsId === preset.id} aria-label={`Meer voor ${preset.name}`} title="Opslaan, bewerken of lijst" onClick={() => { setActionsId(actionsId === preset.id ? null : preset.id); setEditingId(null) }}><MoreHorizontal size={18}/></button>
               </div>
+              {actionsId === preset.id && editingId !== preset.id && <div className="grid grid-cols-3 gap-1 px-1 pb-1">
+                <button type="button" className="detect-window-secondary-button flex flex-col items-center gap-0.5 px-1 py-1.5" style={{fontSize:'0.78em'}} title="Huidige lagen opslaan naar deze preset" aria-label={`Lagen opslaan in ${preset.name}`} onClick={event => { handleSaveToPreset(event,preset.id,preset.name); setActionsId(null) }}><Save size={16}/>Huidige lagen opslaan</button>
+                <button type="button" className="detect-window-secondary-button flex flex-col items-center gap-0.5 px-1 py-1.5" style={{fontSize:'0.78em'}} aria-label={`Preset ${preset.name} bewerken`} title="Preset bewerken" onClick={() => {setEditingId(preset.id);setEditName(preset.name);setEditRememberView(!!preset.mapView)}}><Pencil size={16}/>Naam en locatie</button>
+                <button type="button" className="detect-window-secondary-button flex flex-col items-center gap-0.5 px-1 py-1.5" style={{fontSize:'0.78em'}} aria-label={`Lijst van ${preset.name}`} title={`Lijst van ${preset.name}`} onClick={() => useUIStore.getState().openPlaceList(`preset:${preset.id}`)}><List size={16}/>Lijst</button>
+              </div>}
               {editingId === preset.id && <form className="p-2 space-y-2" onSubmit={event => {event.preventDefault();saveEdit()}}>
                 <label className="block text-sm">Naam preset<input aria-label="Naam preset" className="block w-full border rounded-lg p-2" value={editName} onChange={event => setEditName(event.target.value)} required/></label>
                 <label className="flex items-center gap-2 min-h-[44px] text-sm"><input type="checkbox" checked={editRememberView} onChange={event => setEditRememberView(event.target.checked)}/>Locatie & zoom onthouden</label>
-                <div className="flex gap-2"><button type="submit" className="detect-window-primary-button" disabled={!editName.trim()}>Opslaan</button><button type="button" className="detect-window-secondary-button" onClick={() => setEditingId(null)}>Annuleren</button>{!preset.isBuiltIn && <button type="button" className="detect-window-icon-button" style={{minWidth:44,minHeight:44}} title="Preset verwijderen" aria-label={`Preset ${preset.name} verwijderen`} onClick={event => handleDeletePreset(event,preset)}><Trash2 size={18}/></button>}</div>
+                <div className="flex gap-2"><button type="submit" className="detect-window-primary-button" disabled={!editName.trim()}>Opslaan</button><button type="button" className="detect-window-secondary-button" onClick={() => { setEditingId(null); setActionsId(null) }}>Annuleren</button>{!preset.isBuiltIn && <button type="button" className="detect-window-icon-button" style={{minWidth:44,minHeight:44}} title="Preset verwijderen" aria-label={`Preset ${preset.name} verwijderen`} onClick={event => handleDeletePreset(event,preset)}><Trash2 size={18}/></button>}</div>
               </form>}
               </div>
             )

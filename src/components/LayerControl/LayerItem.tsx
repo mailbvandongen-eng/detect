@@ -8,6 +8,8 @@ interface Props {
   type: 'overlay' | 'base'
   hasOverlay?: boolean
   displayName?: string
+  /** Kleine extra regel, bijvoorbeeld de groep in zoekresultaten. */
+  note?: string
 }
 
 const BASE_LAYER_NAMES = [
@@ -20,7 +22,7 @@ const BASE_LAYER_NAMES = [
 
 const AUTO_REFERENCE_BASE_LAYERS = ['Luchtfoto', 'Satelliet (wereld)', 'Hybride (wereld)']
 
-export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
+export function LayerItem({ name, type, hasOverlay, displayName, note }: Props) {
   const [showGeologyLegend, setShowGeologyLegend] = useState(false)
   const isFrenchGeology = name === 'Bodem/geologie 1:50.000 FR' || name === 'Geologie + reliëf FR'
   const brgmLegendUrl = 'https://mapsref.brgm.fr/wxs/referentiel/geologie?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&LAYER=GEOL50_HARM&FORMAT=image/png'
@@ -71,6 +73,8 @@ export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
         <button
           onClick={handleChange}
           disabled={isLoading}
+          role={type === 'base' ? 'radio' : 'checkbox'}
+          aria-checked={isChecked}
           className={`flex-1 flex items-center justify-between py-1 pl-3 pr-2 border-0 outline-none transition-colors text-left ${
             isLoading
                 ? 'opacity-70 cursor-wait bg-transparent'
@@ -80,24 +84,31 @@ export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
           }`}
           style={{ fontSize: 'inherit' }}
         >
-          <span className={`flex items-center gap-1 ${hasError ? 'text-red-500' : 'text-gray-600'}`}>
-            {displayName || name}
-            {hasError && <AlertCircle size={12} className="text-red-500" />}
+          <span className={hasError ? 'text-red-500' : 'text-gray-600'}>
+            <span className="flex items-center gap-1">
+              {displayName || name}
+              {hasError && <AlertCircle size={12} className="text-red-500" />}
+            </span>
+            {note && <small className="block text-gray-400">{note}</small>}
           </span>
-          <div
-            className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-100 flex-shrink-0"
-            style={{
-              backgroundColor: isLoading ? '#93c5fd' : isChecked ? '#3b82f6' : 'white',
-              border: isLoading ? '2px solid #93c5fd' : isChecked ? '2px solid #3b82f6' : '2px solid #60a5fa',
-              color: 'white'
-            }}
-          >
-            {isLoading ? (
-              <Loader2 size={10} strokeWidth={3} className="animate-spin" />
-            ) : isChecked ? (
-              <Check size={12} strokeWidth={3} />
-            ) : null}
-          </div>
+          {type === 'base' ? (
+            <RadioMark checked={isChecked} loading={isLoading} />
+          ) : (
+            <div
+              className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-100 flex-shrink-0"
+              style={{
+                backgroundColor: isLoading ? '#93c5fd' : isChecked ? '#3b82f6' : 'white',
+                border: isLoading ? '2px solid #93c5fd' : isChecked ? '2px solid #3b82f6' : '2px solid #60a5fa',
+                color: 'white'
+              }}
+            >
+              {isLoading ? (
+                <Loader2 size={10} strokeWidth={3} className="animate-spin" />
+              ) : isChecked ? (
+                <Check size={12} strokeWidth={3} />
+              ) : null}
+            </div>
+          )}
         </button>
 
         {showManualLabels && isChecked && (
@@ -138,6 +149,8 @@ export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
       {showHybridCompanion && (
         <button
           onClick={handleHybridChange}
+          role="radio"
+          aria-checked={Boolean(hybridVisible)}
           className={`w-full flex items-center justify-between py-1 pl-3 pr-2 border-0 outline-none transition-colors text-left ${
             hybridVisible ? 'bg-blue-50 hover:bg-blue-100' : 'bg-transparent hover:bg-blue-50'
           }`}
@@ -145,18 +158,22 @@ export function LayerItem({ name, type, hasOverlay, displayName }: Props) {
           title="Satelliet met dynamische straat-, water-, plaats- en gebiedsnamen"
         >
           <span className="flex items-center gap-1 text-gray-600">Hybride (wereld)</span>
-          <div
-            className="w-4 h-4 rounded-sm flex items-center justify-center transition-all duration-100 flex-shrink-0"
-            style={{
-              backgroundColor: hybridVisible ? '#3b82f6' : 'white',
-              border: hybridVisible ? '2px solid #3b82f6' : '2px solid #60a5fa',
-              color: 'white'
-            }}
-          >
-            {hybridVisible && <Check size={12} strokeWidth={3} />}
-          </div>
+          <RadioMark checked={Boolean(hybridVisible)} />
         </button>
       )}
     </div>
+  )
+}
+
+/** Rond keuzerondje: van de basiskaarten staat er altijd precies één aan. */
+function RadioMark({ checked, loading = false }: { checked: boolean, loading?: boolean }) {
+  return (
+    <span
+      role="presentation"
+      className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 bg-white"
+      style={{ border: `2px solid ${checked || loading ? '#3b82f6' : '#60a5fa'}` }}
+    >
+      {loading ? <Loader2 size={10} strokeWidth={3} className="animate-spin text-blue-500" /> : checked && <span className="w-2 h-2 rounded-full bg-blue-500" />}
+    </span>
   )
 }

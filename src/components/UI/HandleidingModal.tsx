@@ -1,6 +1,6 @@
 import {
-  Search, MapPin, Compass, SlidersHorizontal, Filter, Menu, RotateCcw,
-  Cloud, Ruler, Pencil, Printer, Plus, Navigation, Map,
+  Search, MapPin, Compass, SlidersHorizontal, Filter, Menu, RotateCcw, History,
+  Cloud, Ruler, Pencil, Printer, Navigation, Map,
   ChevronRight, Settings, Route, Star, Eye
 } from 'lucide-react'
 import { AppWindow } from './AppWindow'
@@ -40,7 +40,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 {/* Schermindeling */}
                 <Section title="Schermindeling" icon={<Map size={16} />}>
                   <p className="text-xs text-gray-600 mb-3">
-                    De knoppen zijn verdeeld over het scherm voor optimaal gebruik:
+                    Elke knop heeft een vaste plek. Staat een knop uit of is hij niet nodig, dan schuiven de andere knoppen netjes door. Zoomen gaat met twee vingers of dubbeltikken.
                   </p>
 
                   <div className="space-y-3">
@@ -53,26 +53,26 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
 
                     <LocationGroup title="Rechtsboven" items={[
                       { icon: <Search size={14} />, name: "Zoeken", desc: "Zoek adressen en plaatsen in heel Europa" },
-                      { icon: <Menu size={14} />, name: "Menu", desc: "Instellingen en opties" },
-                      { icon: <Compass size={14} />, name: "Kompas", desc: "Verschijnt bij gedraaide kaart" },
+                      { icon: <Menu size={14} />, name: "Menu", desc: "Account, lijsten, handleiding en instellingen" },
                       { icon: <Map size={14} />, name: "Kaartlagen", desc: "Lagen aan/uit zetten" },
+                      { icon: <Compass size={14} />, name: "Kompas", desc: "Verschijnt onder Kaartlagen bij een gedraaide kaart" },
                     ]} />
 
                     <LocationGroup title="Rechtsonder" items={[
-                      { icon: <Navigation size={14} />, name: "GPS", desc: "Je locatie volgen" },
-                      { icon: <Plus size={14} />, name: "Zoom", desc: "In- en uitzoomen" },
-                      { icon: <SlidersHorizontal size={14} />, name: "Transparantie", desc: "Dekking van actieve lagen aanpassen" },
+                      { icon: <Navigation size={14} />, name: "GPS", desc: "Je locatie volgen (in de hoek)" },
+                      { icon: <SlidersHorizontal size={14} />, name: "Transparantie", desc: "Boven GPS, zodra een laag aan staat" },
+                      { icon: <History size={14} />, name: "Jaarkeuze", desc: "Bij luchtfoto's met meerdere jaren" },
                     ]} />
 
                     <LocationGroup title="Linksonder" items={[
-                      { icon: <RotateCcw size={14} />, name: "Reset", desc: "Kaart en lagen terugzetten" },
+                      { icon: <RotateCcw size={14} />, name: "Reset", desc: "Kaart en lagen terugzetten; daarna even Ongedaan maken" },
                       { icon: <Star size={14} />, name: "Presets", desc: "Snel een lagencombinatie kiezen" },
                       { icon: <Filter size={14} />, name: "Monumentfilter", desc: "AMK-monumenten op periode filteren" },
                     ]} />
 
-                    <LocationGroup title="Optioneel onderaan" items={[
-                      { icon: <MapPin size={14} />, name: "Vondst knop", desc: "Verschijnt wanneer ingeschakeld in Menu" },
-                      { icon: <Route size={14} />, name: "Route knop", desc: "GPS-route opnemen en beheren" },
+                    <LocationGroup title="Optioneel onderaan, naast GPS" items={[
+                      { icon: <MapPin size={14} />, name: "Vondst toevoegen", desc: "Aan te zetten in Menu → Knoppen op de kaart" },
+                      { icon: <Route size={14} />, name: "Route opnemen", desc: "GPS-route opnemen en beheren" },
                     ]} />
                   </div>
                 </Section>
@@ -80,7 +80,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 {/* Hamburger Menu */}
                 <Section title="Menu opties" icon={<Menu size={16} />}>
                   <p className="text-xs text-gray-600 mb-3">
-                    Het hamburger menu (rechtsboven) bevat belangrijke functies:
+                    Het menu (rechtsboven) is ingedeeld in Account, Openen en Knoppen op de kaart. Een blauw stipje op de menuknop betekent dat er nieuwe wijzigingen zijn.
                   </p>
 
                   <div className="bg-gray-50 rounded-xl p-3 space-y-2">
@@ -99,12 +99,10 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                       In het menu kun je knoppen tonen of verbergen om je scherm overzichtelijk te houden:
                     </p>
                     <ul className="text-xs text-blue-700 space-y-1 ml-4 list-disc">
-                      <li><strong>Vondst knop</strong> - Knop voor vondsten vastleggen</li>
-                      <li><strong>Route knop</strong> - Knop voor routes opnemen en beheren</li>
-                      <li><strong>Weerwidget</strong> - Actueel weer linksboven</li>
-                      <li><strong>Kaartlagen</strong> - Eigen lagen afzonderlijk tonen of verbergen</li>
-                      <li><strong>Meten, Tekenen en Exporteren</strong> - Gereedschappen linksboven</li>
-                      <li><strong>Tekstgrootte</strong> - Schuifregelaars in panelen tonen</li>
+                      <li><strong>Meten, Tekenen en Exporteren</strong> - Gereedschappen links</li>
+                      <li><strong>Route opnemen en Vondst toevoegen</strong> - Knoppen onderaan naast GPS</li>
+                      <li><strong>Weer</strong> - Actueel weer linksboven</li>
+                      <li><strong>Tekstgrootte-schuifje</strong> - Schuifregelaar in de kop van vensters</li>
                     </ul>
                   </div>
                 </Section>
@@ -148,7 +146,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 {/* Kaartlagen */}
                 <Section title="Kaartlagen (100+)">
                   <p className="text-xs text-gray-600 mb-2">
-                    Open Kaartlagen rechtsboven en kies een basiskaart, thema of land. Lagen worden pas geladen wanneer je ze inschakelt.
+                    Open Kaartlagen rechtsboven. Bovenaan zoek je een laag op naam en zie je onder Actief wat er aan staat. Daaronder kies je één basiskaart, dan de thema's en helemaal onderaan je eigen lagen en imports. Het blauwe tellertje bij een groep zet met één tik alle lagen van die groep uit. Lagen worden pas geladen wanneer je ze inschakelt.
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     <LayerCategory name="Archeologie" items={["AMK per periode", "IKAW", "Onderzoeken", "Kansenkaart"]} />
@@ -228,14 +226,14 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     <li><strong>Terrein Analyse</strong> - IKAW, bodem, geomorfologie en AHN</li>
                   </ul>
                   <p className="text-xs text-gray-500 mt-2 italic">
-                    Gebruik het opslaan-icoon naast een preset om de huidige lagen erin vast te leggen. Open Presets om een preset toe te voegen. Met het potlood kun je de naam en ‘Locatie & zoom onthouden’ aanpassen of een eigen preset verwijderen. Standaardpresets herstellen bewaart je eigen presets.
+                    Tik op de naam om een preset te kiezen. Via ⋯ naast een preset leg je de huidige lagen erin vast, pas je de naam en ‘Locatie & zoom onthouden’ aan, verwijder je een eigen preset of open je de lijst. Standaardpresets herstellen bewaart je eigen presets.
                   </p>
                 </Section>
 
                 {/* Mijn Lagen */}
                 <Section title="Mijn Lagen" icon={<MapPin size={16} />}>
                   <p className="text-xs text-gray-600 mb-2">
-                    Zelfgemaakte en geïmporteerde lagen staan samen onder Kaartlagen → Mijn lagen.
+                    Zelfgemaakte en geïmporteerde lagen staan onderaan Kaartlagen bij Eigen lagen &amp; imports.
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
                     <li>Iedere laag heeft een eigen aan/uitknop.</li>
@@ -258,8 +256,8 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     Registreer je vondsten met locatie en details:
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
-                    <li><strong>Vondstknop:</strong> zet Menu → Vondst knop aan en gebruik de oranje knop onderaan</li>
-                    <li><strong>Long-press:</strong> Houd vinger op kaart → "Vondst registreren"</li>
+                    <li><strong>Long-press:</strong> Houd vinger op kaart → toevoegen → kies laag</li>
+                    <li><strong>Vondstknop:</strong> optioneel via Menu → Knoppen op de kaart → Vondst toevoegen</li>
                     <li><strong>Velden:</strong> Type, materiaal, periode, diepte, conditie, gewicht</li>
                     <li><strong>Export:</strong> Excel, CSV, GeoJSON, GPX, KML</li>
                   </ul>
@@ -271,7 +269,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                 {/* Routes */}
                 <Section title="Routes Opnemen" icon={<Route size={16} />}>
                   <p className="text-xs text-gray-600 mb-2">
-                    Zet Menu → Route knop aan om een GPS-route op te nemen.
+                    Zet Menu → Knoppen op de kaart → Route opnemen aan om een GPS-route op te nemen.
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
                     <li>Tik op de groene routeknop om te starten; tik opnieuw om te pauzeren of hervatten.</li>

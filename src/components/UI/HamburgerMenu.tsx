@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { X, Info, Settings, LogOut, User, MapPin, Route, Type, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw, History, List } from 'lucide-react'
+import type { CSSProperties, ReactNode } from 'react'
+import { X, Info, Settings, LogOut, User, MapPin, Route, Type, Cloud, Landmark, Ruler, Pencil, Printer, RefreshCw, History, List, Menu } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../../store/authStore'
 import { useUIStore } from '../../store/uiStore'
@@ -150,13 +151,13 @@ export function HamburgerMenu() {
         onClick={() => toggleWindow('menu')}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        title="Instellingen en beheer"
-        aria-label="Instellingen en beheer"
+        title="Menu"
+        aria-label="Menu"
       >
         {isOpen ? (
           <X size={22} className="text-white" />
         ) : (
-          <Settings size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
+          <Menu size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
         )}
         {hasUnseenChanges && !isOpen && (
           <span aria-hidden="true" className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-white" />
@@ -178,19 +179,17 @@ export function HamburgerMenu() {
               <Settings size={18} className="text-gray-500" />
               <span>Instellingen</span>
             </button>
-            <button type="button" onClick={handleChangeLogClick} className="w-full text-center text-blue-600 underline" style={{ fontSize: '0.78em' }} title="Bekijk wijzigingen">
-              Detect v{version} · Wijzigingen
-            </button>
+            <p className="text-center text-gray-400" style={{ fontSize: '0.75em' }}>Detect v{version}</p>
           </div>
         )}
       >
-              {/* Google Login / Profile Section - NO border when logged out */}
+              <MenuSection title="Account" first>
               {loading ? (
                 <div className="px-3 py-4 flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
                 </div>
               ) : user ? (
-                <div className="px-3 py-3 border-b border-gray-100">
+                <div className="px-3 py-2">
                   <div className="flex items-center gap-3">
                     {user.photoURL ? (
                       <img
@@ -286,8 +285,9 @@ export function HamburgerMenu() {
                 </button>
               )}
 
-              {/* Menu Items */}
-              <div className="py-1">
+              </MenuSection>
+
+              <MenuSection title="Openen">
                 <button onClick={() => useUIStore.getState().openPlaceList(useUIStore.getState().placeListScope)} className="w-full px-3 py-2.5 text-left flex items-center gap-3 border-0 outline-none bg-transparent text-gray-700 hover:bg-blue-50" style={menuItemStyle}>
                   <List size={18} className="text-blue-500" /><span>Lijstweergave</span>
                 </button>
@@ -323,152 +323,58 @@ export function HamburgerMenu() {
                   <Landmark size={18} className="text-purple-500" />
                   <span>Zoek in monumenten</span>
                 </button>
-              </div>
+              </MenuSection>
 
-              {/* Toggle Options */}
-              <div className="py-1 border-t border-gray-100">
-                {/* Vondst knop toggle */}
-                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
-                  <div className="flex items-center gap-3">
-                    <MapPin size={18} className="text-orange-500" />
-                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Vondst knop</span>
-                  </div>
-                  <button
-                    onClick={() => setShowVondstButton(!showVondstButton)}
-                    className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
-                      showVondstButton ? 'bg-gradient-to-r from-orange-500 to-orange-600' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
-                        showVondstButton ? 'left-[22px]' : 'left-0.5'
-                      }`}
-                    />
-                  </button>
-                </div>
+              <MenuSection title="Knoppen op de kaart">
+                <ToggleRow icon={<Ruler size={18} className="text-blue-500" />} label="Meten" checked={showMeasureTool} onChange={setShowMeasureTool} style={toggleRowStyle} />
+                <ToggleRow icon={<Pencil size={18} className="text-orange-500" />} label="Tekenen" checked={showDrawTool} onChange={setShowDrawTool} style={toggleRowStyle} />
+                <ToggleRow icon={<Printer size={18} className="text-indigo-500" />} label="Exporteren" checked={showPrintTool} onChange={setShowPrintTool} style={toggleRowStyle} />
+                <ToggleRow icon={<Route size={18} className="text-green-500" />} label="Route opnemen" checked={showRouteRecordButton} onChange={setShowRouteRecordButton} style={toggleRowStyle} />
+                <ToggleRow icon={<MapPin size={18} className="text-orange-500" />} label="Vondst toevoegen" checked={showVondstButton} onChange={setShowVondstButton} style={toggleRowStyle} />
+                <ToggleRow icon={<Cloud size={18} className="text-cyan-500" />} label="Weer" checked={showWeatherButton} onChange={setShowWeatherButton} style={toggleRowStyle} />
+              </MenuSection>
 
-                {/* Route knop toggle */}
-                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
-                  <div className="flex items-center gap-3">
-                    <Route size={18} className="text-green-500" />
-                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Route knop</span>
-                  </div>
-                  <button
-                    onClick={() => setShowRouteRecordButton(!showRouteRecordButton)}
-                    className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
-                      showRouteRecordButton ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
-                        showRouteRecordButton ? 'left-[22px]' : 'left-0.5'
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {/* Weerwidget toggle */}
-                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
-                  <div className="flex items-center gap-3">
-                    <Cloud size={18} className="text-cyan-500" />
-                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Weerwidget</span>
-                  </div>
-                  <button
-                    onClick={() => setShowWeatherButton(!showWeatherButton)}
-                    className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
-                      showWeatherButton ? 'bg-gradient-to-r from-cyan-500 to-cyan-600' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
-                        showWeatherButton ? 'left-[22px]' : 'left-0.5'
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {/* Meetgereedschap toggle */}
-                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
-                  <div className="flex items-center gap-3">
-                    <Ruler size={18} className="text-blue-500" />
-                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Meten</span>
-                  </div>
-                  <button
-                    onClick={() => setShowMeasureTool(!showMeasureTool)}
-                    className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
-                      showMeasureTool ? 'bg-gradient-to-r from-blue-500 to-blue-600' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
-                        showMeasureTool ? 'left-[22px]' : 'left-0.5'
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {/* Tekengereedschap toggle */}
-                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
-                  <div className="flex items-center gap-3">
-                    <Pencil size={18} className="text-orange-500" />
-                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Tekenen</span>
-                  </div>
-                  <button
-                    onClick={() => setShowDrawTool(!showDrawTool)}
-                    className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
-                      showDrawTool ? 'bg-gradient-to-r from-orange-500 to-orange-600' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
-                        showDrawTool ? 'left-[22px]' : 'left-0.5'
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {/* Exporteren toggle */}
-                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
-                  <div className="flex items-center gap-3">
-                    <Printer size={18} className="text-indigo-500" />
-                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Exporteren</span>
-                  </div>
-                  <button
-                    onClick={() => setShowPrintTool(!showPrintTool)}
-                    className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
-                      showPrintTool ? 'bg-gradient-to-r from-indigo-500 to-indigo-600' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
-                        showPrintTool ? 'left-[22px]' : 'left-0.5'
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {/* Tekstgrootte schuifjes toggle */}
-                <div className="px-3 py-2 flex items-center justify-between" style={toggleRowStyle}>
-                  <div className="flex items-center gap-3">
-                    <Type size={18} className="text-purple-500" />
-                    <span className="text-gray-700" style={{ fontSize: '0.9em' }}>Tekstgrootte</span>
-                  </div>
-                  <button
-                    onClick={() => setShowFontSliders(!showFontSliders)}
-                    className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${
-                      showFontSliders ? 'bg-gradient-to-r from-purple-500 to-purple-600' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
-                        showFontSliders ? 'left-[22px]' : 'left-0.5'
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
+              <MenuSection title="Vensters">
+                <ToggleRow icon={<Type size={18} className="text-purple-500" />} label="Tekstgrootte-schuifje" checked={showFontSliders} onChange={setShowFontSliders} style={toggleRowStyle} />
+              </MenuSection>
       </AppWindow>
 
     </>
+  )
+}
+
+function MenuSection({ title, first = false, children }: { title: string, first?: boolean, children: ReactNode }) {
+  return (
+    <section className={first ? 'pb-1' : 'py-1 border-t border-gray-100'}>
+      <h3 className="px-3 pt-2 pb-1 font-semibold uppercase tracking-wide text-gray-400" style={{ fontSize: '0.68em' }}>{title}</h3>
+      {children}
+    </section>
+  )
+}
+
+function ToggleRow({ icon, label, checked, onChange, style }: {
+  icon: ReactNode
+  label: string
+  checked: boolean
+  onChange: (value: boolean) => void
+  style: CSSProperties
+}) {
+  return (
+    <div className="px-3 py-2 flex items-center justify-between" style={style}>
+      <div className="flex items-center gap-3">
+        {icon}
+        <span className="text-gray-700" style={{ fontSize: '0.9em' }}>{label}</span>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        onClick={() => onChange(!checked)}
+        className={`w-10 h-5 rounded-full transition-all border-0 outline-none relative ${checked ? 'bg-[var(--detect-accent,#3b82f6)]' : 'bg-gray-300'}`}
+      >
+        <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${checked ? 'left-[22px]' : 'left-0.5'}`} />
+      </button>
+    </div>
   )
 }
