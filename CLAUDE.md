@@ -8,6 +8,7 @@
 ## VASTE PRODUCTKOERS
 - Geen commercieel product, abonnementen, premiumlagen of betaalmuren.
 - Alle aanwezige lagen en functies zijn direct beschikbaar.
+- **Doel: datagedreven zoeken.** Welke data nodig is, bepaalt wat je zoekt en waar. Presets zijn zoekstrategieën met een leidende laag bovenop (zie `ROADMAP.md`, sectie Doel).
 - Focus: metaaldetectie, steentijd, archeologie, geomorfologie, bodemgebruik, hoogte en LiDAR.
 - Werk uitsluitend aan deze repository; andere detectorprojecten horen niet bij Detect.
 - Laat goed werkende bestaande functies ongemoeid.

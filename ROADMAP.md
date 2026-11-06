@@ -1,8 +1,24 @@
 # Ontwikkelrichting Detect
 
+## Doel: datagedreven zoeken
+
+Detect is er om **datagedreven te zoeken**. Welke data je nodig hebt, wordt bepaald door **wat** je zoekt en **waar**. Een laag hoort in Detect als hij helpt een vindplaats te voorspellen; een preset is een combinatie van lagen die samen een patroon zichtbaar maken.
+
+Voorbeeld, Maas en Waal (preset Detectie):
+- **Geomorfologie is de leidende laag**: rivierduinen, stroomruggen en stroomrugglooiingen en de stroomrichting tonen waar mensen woonden; komgebieden tonen waar je níet wilt zijn.
+- Daarbij **AMK-monumenten**, de **hoogtekaart** (Hillshade Kleur, LiDAR) en **Romeinse wegen**.
+- Samen ontstaan patronen: een beekje, een helling op het zuiden, op een rivierduin, tussen de monumenten → stop de auto.
+- Daarna: eigenaar zoeken, toestemming vragen, zoeken op het perceel bij de hoogste plek, en tijdens het lopen letten op indicatoren zoals scherven. Zo worden nieuwe nederzettingen ontdekt.
+- Navigatie naar de plek is onderdeel van die werkwijze.
+
+Gevolgen voor ontwikkeling:
+- Presets zijn zoekstrategieën per doel en landschap, niet losse lagencollecties. De leidende laag ligt bovenop (zie `src/config/layerOrder.ts`) en staat bovenaan in de transparantieregelaar.
+- Elke nieuwe laag of functie wordt getoetst aan: helpt dit een vindplaats te voorspellen, de eigenaar te vinden, of er te komen?
+- Snelheid en leesbaarheid in het veld gaan boven volledigheid: liever vijf lagen die samen een patroon tonen dan achttien op 10%.
+
 ## Uitgangspunt
 
-Detect is uitsluitend Bobs persoonlijke onderzoeksapp. Geen verkoop, abonnementen, premiumlagen of publieke productambitie. De app ondersteunt metaaldetectie, steentijdonderzoek, archeologie, geomorfologie, bodem en bodemgebruik, hoogtekaarten, LiDAR en historische landschapsanalyse.
+Detect is uitsluitend Bobs persoonlijke onderzoeksapp. Geen verkoop, abonnementen, premiumlagen of publieke productambitie. De app ondersteunt datagedreven zoeken (zie hierboven) voor metaaldetectie, steentijdonderzoek, archeologie, geomorfologie, bodem en bodemgebruik, hoogtekaarten, LiDAR en historische landschapsanalyse.
 
 Vaste projectregel: eerst bron en endpoint controleren, alleen lagen toevoegen die werkelijk onderzoekswaarde hebben, popups toevoegen waar gegevens beschikbaar zijn, daarna broncommit → productiebuild → gegenereerde docs-commit → GitHub Pages → eindcontrole. Geen laag toevoegen alleen omdat hij op papier interessant klinkt.
 
