@@ -164,7 +164,8 @@ export function createFranceLidarTerrainLayerOL() {
 }
 
 export function createFranceGeology50LayerOL() {
-  return geologyLayer('Bodem/geologie 1:50.000 FR', 'SCAN_D_GEOL50', 0.68, 22)
+  // Geharmoniseerde kaart: kleuren komen overeen met de legenda in de popup.
+  return geologyLayer('Bodem/geologie 1:50.000 FR', 'SCAN_H_GEOL50', 0.68, 22)
 }
 
 export function createFranceGeologyReliefLayerOL() {

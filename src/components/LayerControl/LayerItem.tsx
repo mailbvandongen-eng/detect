@@ -25,7 +25,6 @@ const AUTO_REFERENCE_BASE_LAYERS = ['Luchtfoto', 'Satelliet (wereld)', 'Hybride 
 export function LayerItem({ name, type, hasOverlay, displayName, note }: Props) {
   const [showGeologyLegend, setShowGeologyLegend] = useState(false)
   const isFrenchGeology = name === 'Bodem/geologie 1:50.000 FR' || name === 'Geologie + reliëf FR'
-  const brgmLegendUrl = 'https://mapsref.brgm.fr/wxs/referentiel/geologie?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&LAYER=GEOL50_HARM&FORMAT=image/png'
   const visible = useLayerStore(state => state.visible[name])
   const labelsVisible = useLayerStore(state => state.visible['Labels Overlay'])
   const hybridVisible = useLayerStore(state => state.visible['Hybride (wereld)'])
@@ -133,9 +132,7 @@ export function LayerItem({ name, type, hasOverlay, displayName, note }: Props) 
           </button>
           {showGeologyLegend && (
             <div className="rounded-lg border border-gray-200 bg-white p-2 text-xs text-gray-700 space-y-2">
-              <p>BRGM geologische kaart 1:50.000. De kleuren en lettercodes beschrijven geologische eenheden; hun exacte betekenis verschilt per kaartblad.</p>
-              <img src={brgmLegendUrl} alt="Legenda van BRGM geharmoniseerde geologische kaart"
-                className="w-full h-auto max-h-72 object-contain object-left" loading="lazy" />
+              <p>BRGM geharmoniseerde geologische kaart 1:50.000. Tik rond Thédirac op de kaart: de popup toont de eenheid met kleur, omschrijving en de legenda van het gebied.</p>
               <a href="https://infoterre.brgm.fr/" target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-blue-700 underline">
                 Complete kaartbladlegenda in InfoTerre <ExternalLink size={12} />

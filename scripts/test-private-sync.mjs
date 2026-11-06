@@ -209,6 +209,16 @@ assert.deepEqual([...newDetectie.layers].sort(),['AHN4 Hillshade Kleur','AHN4 Mu
 assert.deepEqual(newDetectie.mapView,oldDetectie.mapView,'Onthouden kaartbeeld blijft');
 const ownDetectie=presetsModule.normalizePresetCollection([{...newDetectie,layers:[...newDetectie.layers,'Bodemkaart']}]).find(p=>p.id==='detectie-uitgebreid');
 assert.equal(ownDetectie.layers.includes('Bodemkaart'),true,'Na de vernieuwing blijft eigen opslag in Detectie bewaard');
+const mergedPresets=presetsModule.normalizePresetCollection([{id:'veld-hoogtekaart',name:'Hoogtekaart',icon:'Mountain',layers:['AHN4 Hoogtekaart Kleur'],isBuiltIn:true},{id:'veld-lidar',name:'LiDAR',icon:'Grid',layers:['AHN4 Multi-Hillshade NL'],isBuiltIn:true}]);
+assert.equal(mergedPresets.some(p=>p.id==='veld-hoogtekaart'||p.id==='veld-lidar'),false,'Oude losse Hoogtekaart- en LiDAR-presets verdwijnen');
+const hoogte=mergedPresets.find(p=>p.id==='veld-hoogte-lidar');
+assert.deepEqual([...hoogte.layers].sort(),['AHN4 Hoogtekaart Kleur','AHN4 Multi-Hillshade NL','AMK Monumenten','Romeinse wegen (regio)']);
+assert.equal(hoogte.baseLayer,'Esri (licht)');
+const geoOld=presetsModule.normalizePresetCollection([{id:'veld-geomorfologie',name:'Geomorfologie',icon:'Layers',layers:['Geomorfologie'],layerStates:{'AMK Monumenten':{visible:false,opacity:.3}},isBuiltIn:true}]).find(p=>p.id==='veld-geomorfologie');
+assert.ok(geoOld.layers.includes('AMK Monumenten')&&geoOld.layers.includes('Romeinse wegen (regio)'),'Monumenten en Romeinse wegen altijd in NL-presets');
+assert.equal(geoOld.layerStates['AMK Monumenten'].visible,true);assert.equal(geoOld.layerStates['AMK Monumenten'].opacity,.3,'Eigen transparantie blijft');
+const fr=mergedPresets.find(p=>p.id==='frankrijk-historie');
+for(const name of ['Bodem/geologie 1:50.000 FR','Luchtfoto · 1950–1965','IGN-kaart · 1950','État-major · 1820–1866','Carte de Cassini · 18e eeuw'])assert.ok(fr.layers.includes(name),`Frankrijk historie bevat ${name}`);
 const legacy=presetsModule.normalizePresetCollection([{...savedVacation,layers:['Sites ClassÃ©s Occitanie'],layerStates:{'Sites ClassÃ©s Occitanie':{visible:false,opacity:.2},'Sites Classés Occitanie':{visible:true,opacity:.35}}}]).find(p=>p.id===savedVacation.id);
 assert.deepEqual(legacy.layers,['Sites Classés Occitanie']);assert.deepEqual(legacy.layerStates['Sites Classés Occitanie'],{visible:true,opacity:.35});
 pass('Saved built-in presets retain all choices through normalization; current layer names override old aliases');

@@ -12,11 +12,12 @@ interface ChangeLogModalProps {
 const currentRelease = {
   version,
   date: '7 november 2026',
-  title: 'Vaste laagvolgorde en nieuwe Detectie',
+  title: 'Hoogte & LiDAR, Frankrijk historie en geologie met legenda',
   changes: [
-    'Lagen liggen altijd in dezelfde volgorde op de kaart, hoe je ze ook aanzet: punten en lijnen bovenop, dan kadaster, geomorfologie, bodem, Hillshade Kleur, LiDAR, hoogtekaart en historische kaarten.',
-    'De transparantieregelaar toont de lagen in precies die volgorde, de bovenste laag bovenaan.',
-    'Detectie is teruggebracht tot de basis: luchtfoto, AMK, Romeinse wegen, geomorfologie boven Hillshade Kleur, en LiDAR. UIKAV, parken, speeltuinen en strandjes zijn eruit. Je opgeslagen Detectie wordt eenmalig vervangen; een onthouden kaartbeeld blijft.'
+    'Hoogtekaart en LiDAR zijn samengevoegd tot de preset Hoogte & LiDAR op de lichte kaart. Beide lagen zijn apart regelbaar.',
+    'AMK-monumenten en Romeinse wegen staan in alle Nederlandse presets altijd aan.',
+    'Nieuwe preset Frankrijk historie: luchtfoto 1950–1965, IGN-kaart 1950, État-major, Carte de Cassini en het Napoleontisch kadaster, met de BRGM-bodemkaart erover.',
+    'De Franse bodemkaart toont nu de geharmoniseerde BRGM-kaart. Een tik rond Thédirac geeft de geologische eenheid met kleur, omschrijving en de legenda van het hele gebied. Dat werkte eerder niet, omdat de BRGM-dienst geen eenheid teruggeeft.'
   ]
 }
 

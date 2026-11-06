@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { accountStorage } from '../utils/accountStorage'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
+import { NAPOLEON_LOT_LAYER } from '../data/lotCadastreArchives'
 import {
   FRANCE_HISTORICAL_MAP_NAMES,
   FRANCE_RESEARCH_DEFAULT_STATES,
@@ -73,26 +74,18 @@ const BUILT_IN_PRESETS: Preset[] = [
     isBuiltIn: true
   },
   {
-    id: 'veld-hoogtekaart',
-    name: 'Hoogtekaart',
+    id: 'veld-hoogte-lidar',
+    name: 'Hoogte & LiDAR',
     icon: 'Mountain',
-    layers: ['AHN4 Hoogtekaart Kleur', 'AMK Monumenten'],
+    // Actuele hoogtekaart en LiDAR samen, elk apart regelbaar in de
+    // transparantieregelaar. LiDAR ligt boven de hoogtekaart (layerOrder).
+    layers: ['AHN4 Hoogtekaart Kleur', 'AHN4 Multi-Hillshade NL', 'AMK Monumenten', 'Romeinse wegen (regio)'],
     baseLayer: 'Esri (licht)',
     layerOpacities: {
-      'AHN4 Hoogtekaart Kleur': 1,
-      'AMK Monumenten': 0.60
-    },
-    isBuiltIn: true
-  },
-  {
-    id: 'veld-lidar',
-    name: 'LiDAR',
-    icon: 'Grid',
-    layers: ['AHN4 Multi-Hillshade NL', 'AMK Monumenten'],
-    baseLayer: 'Esri (licht)',
-    layerOpacities: {
-      'AHN4 Multi-Hillshade NL': 1,
-      'AMK Monumenten': 0.60
+      'AHN4 Hoogtekaart Kleur': 0.8,
+      'AHN4 Multi-Hillshade NL': 0.5,
+      'AMK Monumenten': 0.60,
+      'Romeinse wegen (regio)': 1
     },
     isBuiltIn: true
   },
@@ -100,11 +93,12 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'veld-geomorfologie',
     name: 'Geomorfologie',
     icon: 'Layers',
-    layers: ['Geomorfologie', 'AMK Monumenten'],
+    layers: ['Geomorfologie', 'AMK Monumenten', 'Romeinse wegen (regio)'],
     baseLayer: 'Esri (licht)',
     layerOpacities: {
       'Geomorfologie': 1,
-      'AMK Monumenten': 0.60
+      'AMK Monumenten': 0.60,
+      'Romeinse wegen (regio)': 1
     },
     isBuiltIn: true
   },
@@ -112,11 +106,12 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'veld-tmk-1850',
     name: '1850',
     icon: 'Map',
-    layers: ['TMK 1850', 'AMK Monumenten'],
+    layers: ['TMK 1850', 'AMK Monumenten', 'Romeinse wegen (regio)'],
     baseLayer: 'Luchtfoto',
     layerOpacities: {
       'TMK 1850': 0.8,
-      'AMK Monumenten': 0.60
+      'AMK Monumenten': 0.60,
+      'Romeinse wegen (regio)': 1
     },
     isBuiltIn: true
   },
@@ -124,11 +119,41 @@ const BUILT_IN_PRESETS: Preset[] = [
     id: 'veld-bonnebladen-1900',
     name: '1900',
     icon: 'Map',
-    layers: ['Bonnebladen 1900', 'AMK Monumenten'],
+    layers: ['Bonnebladen 1900', 'AMK Monumenten', 'Romeinse wegen (regio)'],
     baseLayer: 'Luchtfoto',
     layerOpacities: {
       'Bonnebladen 1900': 0.8,
-      'AMK Monumenten': 0.60
+      'AMK Monumenten': 0.60,
+      'Romeinse wegen (regio)': 1
+    },
+    isBuiltIn: true
+  },
+  {
+    id: 'frankrijk-historie',
+    name: 'Frankrijk historie',
+    icon: 'Map',
+    // Alle werkende historische kaarten gestapeld (luchtfoto 1950–1965 boven,
+    // Cassini onder) met de BRGM-bodemkaart erover; regel per laag de dekking.
+    layers: [
+      'Bodem/geologie 1:50.000 FR',
+      'Luchtfoto · 1950–1965',
+      'IGN-kaart · 1950',
+      'État-major · 1820–1866',
+      'Carte de Cassini · 18e eeuw',
+      NAPOLEON_LOT_LAYER
+    ],
+    baseLayer: 'Hybride (wereld)',
+    mapView: {
+      center: THEDIRAC_CENTER,
+      zoom: 12
+    },
+    layerOpacities: {
+      'Bodem/geologie 1:50.000 FR': 0.35,
+      'Luchtfoto · 1950–1965': 0.7,
+      'IGN-kaart · 1950': 0.7,
+      'État-major · 1820–1866': 0.7,
+      'Carte de Cassini · 18e eeuw': 0.8,
+      [NAPOLEON_LOT_LAYER]: 1
     },
     isBuiltIn: true
   },
@@ -152,7 +177,11 @@ const BUILT_IN_PRESETS: Preset[] = [
   }
 ]
 
+const ALWAYS_VISIBLE_PRESET_IDS = new Set(['detectie-uitgebreid', 'veld-hoogte-lidar', 'veld-geomorfologie', 'veld-tmk-1850', 'veld-bonnebladen-1900'])
+
 const LEGACY_STANDARD_PRESET_IDS = new Set([
+  'veld-hoogtekaart',
+  'veld-lidar',
   'detectie',
   'detectie-basis',
   'terreinanalyse',
@@ -304,6 +333,17 @@ function normalizePreset(preset: Preset): Preset {
         visible: selectedHistorical ? name === selectedHistorical : Boolean(existingStates[name]?.visible),
         opacity: existingStates[name]?.opacity ?? fallbackOpacity
       }
+    }
+  }
+
+  // Monumenten en Romeinse wegen zijn in alle Nederlandse standaardpresets
+  // altijd zichtbaar, ook in een eerder opgeslagen versie.
+  if (ALWAYS_VISIBLE_PRESET_IDS.has(preset.id)) {
+    for (const [name, fallbackOpacity] of [['AMK Monumenten', 0.6], ['Romeinse wegen (regio)', 1]] as const) {
+      if (!configuredLayers.includes(name)) configuredLayers.push(name)
+      const opacity = layerStates?.[name]?.opacity ?? layerOpacities?.[name] ?? fallbackOpacity
+      if (layerStates) layerStates = { ...layerStates, [name]: { visible: true, opacity } }
+      if (layerOpacities) layerOpacities[name] = opacity
     }
   }
 

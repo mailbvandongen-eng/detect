@@ -5,6 +5,7 @@ import proj4 from 'proj4'
 import { describeOcsArtificialisation, describeOcsCoverage, describeOcsUsage, formatOcsArea } from '../../../utils/ocsGe'
 import { formatAncientForestPopup } from '../../../utils/ancientForestPopup'
 import type OlMap from 'ol/Map'
+import { findThediracGeologyUnit, formatThediracGeologyPopup } from '../../../utils/thediracGeology'
 import { fetchWithTimeout, KADASTRALE_GEMEENTEN, IKAW_VALUES, getSoilExplanation } from './popupHelpers'
 
 // Query WMS layers for feature info - returns array of all results
@@ -1556,56 +1557,15 @@ export async function queryWMSLayers(map: OlMap, coordinate: number[], viewResol
     // Scanned 1:50,000 geology is not queryable: request formation attributes from
     // the BRGM harmonised vector service (same map coordinate).
     if (title === 'Bodem/geologie 1:50.000 FR' || title === 'Geologie + reliëf FR') {
+      // De BRGM-diensten geven geen eenheid terug bij een tik; zoek de eenheid
+      // op in de lokale BD Charm-50-uitsnede van het onderzoeksgebied.
       const [lon, lat] = toLonLat(coordinate)
       const informationLink = `https://infoterre.brgm.fr/viewer/MainTileForward.do?lon=${lon}&lat=${lat}`
-      const escapeGeology = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-      }[char] || char))
-      const serviceUrl = 'https://mapsref.brgm.fr/wxs/referentiel/geologie'
-      const legendUrl = `${serviceUrl}?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetLegendGraphic&LAYER=GEOL50_HARM&FORMAT=image/png`
-      const legend = `<details open class="mt-2"><summary class="cursor-pointer text-blue-700 underline text-sm">Legenda geologische kaart (BRGM)</summary><img src="${legendUrl}" alt="BRGM legenda 1:50.000" class="mt-2 max-w-full h-auto"/><div class="text-sm text-gray-600 mt-2">Ontbreekt de legenda-afbeelding? Open de complete kaartbladlegenda via InfoTerre hieronder.</div></details>`
-      const link = `<div class="mt-2"><a href="${informationLink}" target="_blank" rel="noopener noreferrer" class="text-blue-700 text-sm underline">Open actuele kaart en kaartbladlegenda in BRGM InfoTerre</a></div>`
-      let found = false
-      // The BRGM harmonised service is WMS 1.1.1. The two endpoints are
-      // genuine BRGM access paths, not an HTML scrape or invented geology.
-      for (const endpoint of [serviceUrl, 'https://geoservices.brgm.fr/geologie']) {
-        if (found) break
-        try {
-          const vectorSource = new TileWMS({
-            url: endpoint,
-            params: { LAYERS: 'GEOL50_HARM', VERSION: '1.1.1', TILED: false },
-            crossOrigin: 'anonymous',
-          })
-          const vectorUrl = vectorSource.getFeatureInfoUrl(coordinate, viewResolution, 'EPSG:3857', {
-            INFO_FORMAT: 'application/json',
-            FEATURE_COUNT: 5,
-            VERSION: '1.1.1',
-          })
-          if (!vectorUrl) continue
-          const response = await fetch(vectorUrl, { signal: AbortSignal.timeout(8000) })
-          if (!response.ok) continue
-          const payload = await response.json()
-          const properties = payload?.features?.[0]?.properties
-          if (!properties || typeof properties !== 'object') continue
-          const entries = Object.entries(properties).filter(([key, value]) =>
-            value !== null && value !== undefined && value !== '' &&
-            !/^(geom|geometry|shape|bbox|fid|id)$/i.test(key) &&
-            typeof value !== 'object'
-          )
-          if (!entries.length) continue
-          let html = '<strong class="text-amber-800">Geologische eenheid · BRGM 1:50.000</strong>'
-          for (const [key, value] of entries.slice(0, 18)) {
-            html += `<br/><span class="text-sm text-gray-700"><strong>${escapeGeology(key)}:</strong> ${escapeGeology(value)}</span>`
-          }
-          html += '<div class="mt-2 text-xs text-gray-500">BRGM geharmoniseerde geologie; de gesteente-eenheid bewijst geen aanwezigheid van silex.</div>'
-          results.push(html + legend + link)
-          found = true
-        } catch (error) {
-          console.warn('BRGM vector geology query failed:', endpoint, error)
-        }
-      }
-      if (!found) {
-        results.push(`<strong>Geologische kaart · BRGM 1:50.000</strong><div class="text-sm text-gray-700 mt-1">De kaart is zichtbaar, maar de BRGM-attributendienst geeft momenteel geen leesbare gesteente-eenheid terug. Gebruik de legenda en de volledige live kaart hieronder.</div>${legend}${link}`)
+      const found = await findThediracGeologyUnit(lon, lat)
+      if (found) {
+        results.push(formatThediracGeologyPopup(found.unit, found.legend, informationLink))
+      } else {
+        results.push(`<strong>Geologische kaart · BRGM 1:50.000</strong><div class="text-sm text-gray-700 mt-1">De eenheid met legenda is beschikbaar in het onderzoeksgebied rond Thédirac. Buiten dat gebied vind je de toelichting in BRGM InfoTerre.</div><div class="mt-2"><a href="${informationLink}" target="_blank" rel="noopener noreferrer" class="text-blue-700 text-sm underline">Open kaart en kaartbladtoelichting in BRGM InfoTerre</a></div>`)
       }
       continue
     }
