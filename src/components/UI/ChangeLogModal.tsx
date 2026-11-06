@@ -12,12 +12,9 @@ interface ChangeLogModalProps {
 const currentRelease = {
   version,
   date: '6 november 2026',
-  title: 'Monumenten zoeken vanuit de zoekbalk',
+  title: 'Hillshade Kleur zonder blokken',
   changes: [
-    'In de zoekbalk zit nu een monumentknop: je zoekterm gaat direct mee naar Zoek in monumenten. Vind je geen adres, dan staat de link er ook. Het menu-item is daarom vervallen.',
-    'De knoppen voor transparantie en jaarkeuze hebben dezelfde vorm als de andere kaartknoppen.',
-    'Nieuwe kaartlagen starten automatisch uit en doen direct mee met reset, zoeken en Actief. Zes lagen die daar nog ontbraken doen nu ook mee.',
-    'Achter de schermen is de kaartinformatie opgesplitst in kleinere onderdelen; er verandert niets aan wat je ziet.'
+    'AHN4 Hillshade Kleur bouwt niet meer op in blokken met verschillende kleuren. De kleuren lopen nu over het hele kaartbeeld door, met dezelfde schaduwwerking.'
   ]
 }
 

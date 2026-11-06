@@ -34,17 +34,20 @@ export function createAHN4ColorElevationLayerOL() {
 // Bron: Esri Nederland Hoogteviewer (apps.arcgisonline.nl/hoogteviewer)
 // Geeft 3D-effect door hillshade over de kleurlaag te leggen met multiply blend
 export function createAHN4ShadedReliefLayerOL() {
-  // Onderlaag: Kleur gebaseerd op hoogte
-  const colorLayer = new TileLayer({
+  // Onderlaag: Kleur gebaseerd op hoogte. Eén export-image voor het hele
+  // kaartbeeld: de dynamische kleurschaal rekt anders per tegel afzonderlijk
+  // uit, waardoor zichtbare blokken ontstaan (zelfde oplossing als Hoogtekaart Kleur).
+  const colorLayer = new ImageLayer({
     properties: { title: 'Color Base' },
     opacity: 1.0,
-    source: new TileArcGISRest({
+    source: new ImageArcGISRest({
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({
           rasterFunction: 'AHN - Color Ramp D'
         })
       },
+      ratio: 1.25,
       crossOrigin: 'anonymous',
       attributions: '© Esri Nederland, AHN4 50cm'
     })
