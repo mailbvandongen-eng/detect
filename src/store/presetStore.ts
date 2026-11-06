@@ -144,6 +144,34 @@ const BUILT_IN_PRESETS: Preset[] = [
       [NAPOLEON_LOT_LAYER]: 1
     },
     isBuiltIn: true
+  },
+  {
+    id: 'vakantie-onderzoek-fr',
+    name: 'Vakantie-onderzoek FR',
+    icon: 'Search',
+    // Sjabloon om een bestemming in Frankrijk voor te bereiden: alleen lagen
+    // die in heel Frankrijk werken. Ga naar de plek en sla via
+    // Preset toevoegen een eigen kopie op met "Locatie & zoom onthouden".
+    layers: [
+      'Bodem/geologie 1:50.000 FR',
+      'LiDAR HD terrein FR',
+      'Waterlopen BD TOPAGE 2026',
+      'Oude bossen · Forêts anciennes',
+      'Hist. Gebouwen FR',
+      'INRAP Sites FR',
+      'Romeinse wegen (Wereld)'
+    ],
+    baseLayer: 'Hybride (wereld)',
+    layerOpacities: {
+      'Bodem/geologie 1:50.000 FR': 0.35,
+      'LiDAR HD terrein FR': 0.5,
+      'Waterlopen BD TOPAGE 2026': 0.9,
+      'Oude bossen · Forêts anciennes': 0.35,
+      'Hist. Gebouwen FR': 1,
+      'INRAP Sites FR': 1,
+      'Romeinse wegen (Wereld)': 1
+    },
+    isBuiltIn: true
   }
 ]
 

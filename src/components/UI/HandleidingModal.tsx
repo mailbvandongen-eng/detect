@@ -222,6 +222,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     <li><strong>Geomorfologie</strong> - Geomorfologische kaart en AMK</li>
                     <li><strong>1850 / 1900</strong> - TMK of Bonnebladen over de luchtfoto, met AMK</li>
                     <li><strong>Frankrijk historie</strong> - Luchtfoto 1950–1965, IGN 1950, État-major, Cassini en Napoleon-kadaster met de BRGM-bodemkaart; tik voor eenheid en legenda</li>
+                    <li><strong>Vakantie-onderzoek FR</strong> - Sjabloon voor een nieuwe bestemming: geologie met legenda, LiDAR HD, waterlopen, oude bossen, monuments historiques, INRAP-sites en Romeinse wegen. Kies de preset, zoek de plek op en sla via Preset toevoegen een eigen kopie op met ‘Locatie &amp; zoom onthouden’.</li>
                     <li>In alle Nederlandse presets staan AMK-monumenten en Romeinse wegen altijd aan.</li>
                   </ul>
                   <p className="text-xs text-gray-500 mt-2 italic">

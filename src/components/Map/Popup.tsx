@@ -539,6 +539,8 @@ export function Popup() {
 
         // Skip geometry property
         const { geometry, ...dataProps } = properties
+        // Achtergrondvlakken (zoals lokale geologie) krijgen hun info via de kaartdiensten.
+        if (dataProps.popupIgnore) continue
 
         // Check if this is a vondst marker
         if (dataProps.vondst) {

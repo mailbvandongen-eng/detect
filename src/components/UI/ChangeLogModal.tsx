@@ -12,10 +12,11 @@ interface ChangeLogModalProps {
 const currentRelease = {
   version,
   date: '7 november 2026',
-  title: 'Thédirac-preset verwijderd',
+  title: 'Dordogne voorbereid: geologie met legenda en Vakantie-onderzoek FR',
   changes: [
-    'De preset Thédirac 2026 is verwijderd; de vakantie is voorbij. Alle Franse onderzoekslagen blijven beschikbaar in Kaartlagen → Frankrijk.',
-    'Frankrijk historie springt niet meer naar Thédirac, maar blijft op de plek waar je kijkt.'
+    'Geologie met eenheid en legenda per tik werkt nu in de hele Dordogne, de Lot en de Lot-et-Garonne. BRGM heeft voor de Dordogne en de Lot-et-Garonne geen geharmoniseerde kaart; Detect tekent daar de officiële BRGM-vlakken zelf (vanaf ingezoomd niveau).',
+    'Nieuwe laag Geologie kaartbladen FR (origineel) voor de rest van Frankrijk; de kleuren verschillen daar per kaartblad.',
+    'Nieuwe sjabloon-preset Vakantie-onderzoek FR: geologie, LiDAR HD, waterlopen, oude bossen, monuments historiques, INRAP-sites en Romeinse wegen. Ga naar je bestemming en sla via Preset toevoegen een eigen kopie op met Locatie & zoom onthouden.'
   ]
 }
 

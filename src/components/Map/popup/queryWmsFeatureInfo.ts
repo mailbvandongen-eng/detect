@@ -5,11 +5,29 @@ import proj4 from 'proj4'
 import { describeOcsArtificialisation, describeOcsCoverage, describeOcsUsage, formatOcsArea } from '../../../utils/ocsGe'
 import { formatAncientForestPopup } from '../../../utils/ancientForestPopup'
 import type OlMap from 'ol/Map'
-import { findThediracGeologyUnit, formatThediracGeologyPopup } from '../../../utils/thediracGeology'
+import { findGeologyUnit, formatGeologyPopup } from '../../../utils/franceGeology'
 import { fetchWithTimeout, KADASTRALE_GEMEENTEN, IKAW_VALUES, getSoilExplanation } from './popupHelpers'
 
 // Query WMS layers for feature info - returns array of all results
+const GEOLOGY_TITLES = new Set(['Bodem/geologie 1:50.000 FR', 'Geologie + reliëf FR', 'Geologie kaartbladen FR (origineel)'])
+
+/** Geologische eenheid met legenda uit de lokale BD Charm-50-data. */
+async function queryGeology(map: OlMap, coordinate: number[]): Promise<string[]> {
+  const visible = map.getLayers().getArray().some(layer => GEOLOGY_TITLES.has(layer.get('title')) && layer.getVisible())
+  if (!visible) return []
+  const [lon, lat] = toLonLat(coordinate)
+  const informationLink = `https://infoterre.brgm.fr/viewer/MainTileForward.do?lon=${lon}&lat=${lat}`
+  const found = await findGeologyUnit(lon, lat).catch(() => null)
+  if (found) return [formatGeologyPopup(found.unit, found.legend, found.dept, informationLink)]
+  return [`<strong>Geologische kaart · BRGM 1:50.000</strong><div class="text-sm text-gray-700 mt-1">Eenheid en legenda zijn beschikbaar in de departementen met lokale BRGM-data (o.a. Dordogne, Lot en Lot-et-Garonne). Hier vind je de toelichting in BRGM InfoTerre.</div><div class="mt-2"><a href="${informationLink}" target="_blank" rel="noopener noreferrer" class="text-blue-700 text-sm underline">Open kaart en kaartbladtoelichting in BRGM InfoTerre</a></div>`]
+}
+
 export async function queryWMSLayers(map: OlMap, coordinate: number[], viewResolution: number): Promise<string[]> {
+  const [geology, wms] = await Promise.all([queryGeology(map, coordinate), queryWmsServices(map, coordinate, viewResolution)])
+  return [...geology, ...wms]
+}
+
+async function queryWmsServices(map: OlMap, coordinate: number[], viewResolution: number): Promise<string[]> {
   // Een trage of onbereikbare kaartdienst mag niet alle popups blokkeren.
   const fetch = (input: RequestInfo | URL, init?: RequestInit) => fetchWithTimeout(input, init)
 
@@ -1556,19 +1574,8 @@ export async function queryWMSLayers(map: OlMap, coordinate: number[], viewResol
 
     // Scanned 1:50,000 geology is not queryable: request formation attributes from
     // the BRGM harmonised vector service (same map coordinate).
-    if (title === 'Bodem/geologie 1:50.000 FR' || title === 'Geologie + reliëf FR') {
-      // De BRGM-diensten geven geen eenheid terug bij een tik; zoek de eenheid
-      // op in de lokale BD Charm-50-uitsnede van het onderzoeksgebied.
-      const [lon, lat] = toLonLat(coordinate)
-      const informationLink = `https://infoterre.brgm.fr/viewer/MainTileForward.do?lon=${lon}&lat=${lat}`
-      const found = await findThediracGeologyUnit(lon, lat)
-      if (found) {
-        results.push(formatThediracGeologyPopup(found.unit, found.legend, informationLink))
-      } else {
-        results.push(`<strong>Geologische kaart · BRGM 1:50.000</strong><div class="text-sm text-gray-700 mt-1">De eenheid met legenda is beschikbaar in het onderzoeksgebied rond Thédirac. Buiten dat gebied vind je de toelichting in BRGM InfoTerre.</div><div class="mt-2"><a href="${informationLink}" target="_blank" rel="noopener noreferrer" class="text-blue-700 text-sm underline">Open kaart en kaartbladtoelichting in BRGM InfoTerre</a></div>`)
-      }
-      continue
-    }
+    // Geologie wordt hierboven één keer per tik afgehandeld.
+    if (GEOLOGY_TITLES.has(title)) continue
 
     const url = source.getFeatureInfoUrl(
       coordinate,

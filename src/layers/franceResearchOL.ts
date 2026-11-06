@@ -10,7 +10,10 @@ import TileWMS from 'ol/source/TileWMS'
 import VectorSource from 'ol/source/Vector'
 import XYZ from 'ol/source/XYZ'
 import GeoJSON from 'ol/format/GeoJSON'
-import { fromLonLat } from 'ol/proj'
+import { fromLonLat, transformExtent } from 'ol/proj'
+import Polygon from 'ol/geom/Polygon'
+import { bbox as bboxStrategy } from 'ol/loadingstrategy'
+import { DEPARTMENTS_WITHOUT_HARMONISED_SCAN, loadGeologyCell, loadGeologyIndex, loadGeologyLegend } from '../utils/franceGeology'
 import { Fill, Stroke, Style } from 'ol/style'
 import {
   THEDIRAC_RESEARCH_LAYER_NAME,
@@ -163,9 +166,82 @@ export function createFranceLidarTerrainLayerOL() {
   })
 }
 
+// Lokale BD Charm-50-vlakken voor departementen zonder geharmoniseerde
+// BRGM-kaart. Pas vanaf zoom 11 (een paar vakken van 0,25° tegelijk).
+function createLocalGeologyLayer() {
+  const loadedCells = new Set<string>()
+  const source = new VectorSource({
+    strategy: bboxStrategy,
+    loader: (extent, _resolution, projection, success, failure) => {
+      void (async () => {
+        try {
+          const index = await loadGeologyIndex()
+          if (!index) return success?.([])
+          const [minLon, minLat, maxLon, maxLat] = transformExtent(extent, projection, 'EPSG:4326')
+          const features: Feature[] = []
+          for (const department of index.departments) {
+            if (!DEPARTMENTS_WITHOUT_HARMONISED_SCAN.has(department.dept)) continue
+            const [dx0, dy0, dx1, dy1] = department.bbox
+            if (maxLon < dx0 || minLon > dx1 || maxLat < dy0 || minLat > dy1) continue
+            const legend = await loadGeologyLegend(department.dept)
+            const colors = new Map(legend.map(unit => [unit.code, unit.color]))
+            for (let cx = Math.floor(minLon / index.cell); cx <= Math.floor(maxLon / index.cell); cx++) {
+              for (let cy = Math.floor(minLat / index.cell); cy <= Math.floor(maxLat / index.cell); cy++) {
+                const key = `${cx}_${cy}`
+                const id = `${department.dept}/${key}`
+                if (loadedCells.has(id) || !department.cells.includes(key)) continue
+                loadedCells.add(id)
+                for (const polygon of await loadGeologyCell(department.dept, key, index.scale)) {
+                  const feature = new Feature(new Polygon(polygon.rings.map(ring => ring.map(point => fromLonLat(point)))))
+                  feature.setProperties({ popupIgnore: true, geologyColor: colors.get(polygon.code) || '#cccccc' })
+                  features.push(feature)
+                }
+              }
+            }
+          }
+          source.addFeatures(features)
+          success?.(features)
+        } catch (error) {
+          console.warn('Lokale geologie kon niet worden geladen', error)
+          failure?.()
+        }
+      })()
+    }
+  })
+  const styles = new Map<string, Style>()
+  return new VectorLayer({
+    properties: { title: 'Geologie lokaal (BD Charm-50)' },
+    minZoom: 11,
+    source,
+    style: feature => {
+      const color = String(feature.get('geologyColor'))
+      let style = styles.get(color)
+      if (!style) {
+        style = new Style({ fill: new Fill({ color }), stroke: new Stroke({ color: 'rgba(80,80,80,0.35)', width: 0.5 }) })
+        styles.set(color, style)
+      }
+      return style
+    }
+  })
+}
+
 export function createFranceGeology50LayerOL() {
   // Geharmoniseerde kaart: kleuren komen overeen met de legenda in de popup.
-  return geologyLayer('Bodem/geologie 1:50.000 FR', 'SCAN_H_GEOL50', 0.68, 22)
+  // Waar BRGM die kaart niet heeft (o.a. Dordogne), tekent Detect de vlakken zelf.
+  const scan = geologyLayer('Bodem/geologie 1:50.000 FR · BRGM', 'SCAN_H_GEOL50', 1, 0)
+  scan.setVisible(true)
+  return new LayerGroup({
+    properties: { title: 'Bodem/geologie 1:50.000 FR', type: 'overlay' },
+    visible: false,
+    opacity: 0.68,
+    zIndex: 22,
+    layers: [scan, createLocalGeologyLayer()]
+  })
+}
+
+export function createFranceGeologySheetsLayerOL() {
+  // Originele kaartbladen: heel Frankrijk, maar kleuren verschillen per blad.
+  return geologyLayer('Geologie kaartbladen FR (origineel)', 'SCAN_D_GEOL50', 0.6, 22)
 }
 
 export function createFranceGeologyReliefLayerOL() {
@@ -350,6 +426,7 @@ export const FRANCE_RESEARCH_FACTORIES: Record<string, () => any> = {
   'LiDAR HD terrein FR': createFranceLidarTerrainLayerOL,
   'Bodem/geologie 1:50.000 FR': createFranceGeology50LayerOL,
   'Geologie + reliëf FR': createFranceGeologyReliefLayerOL,
+  'Geologie kaartbladen FR (origineel)': createFranceGeologySheetsLayerOL,
   'BRGM boringen · BSS': createFranceBssLayerOL,
   'BRGM IDPR · infiltratie/afstroming': createFranceIdprLayerOL,
   'BRGM cavités · ondergrondse holtes': createFranceCavitiesLayerOL,

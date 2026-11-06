@@ -35,6 +35,7 @@ export const FRANCE_RESEARCH_LAYER_DEFINITIONS: FranceResearchLayerDefinition[] 
   { name: 'OCS GE landbedekking 2021-2023', group: 'water', opacity: 0.24, zIndex: 21, defaultVisible: true },
   { name: 'Bodem/geologie 1:50.000 FR', group: 'geology', opacity: 0.28, zIndex: 22, defaultVisible: true },
   { name: 'Geologie + reliëf FR', group: 'geology', opacity: 0.66, zIndex: 23, defaultVisible: false },
+  { name: 'Geologie kaartbladen FR (origineel)', group: 'geology', opacity: 0.6, zIndex: 22, defaultVisible: false },
   { name: 'BRGM boringen · BSS', group: 'geology', opacity: 1, zIndex: 24, defaultVisible: false },
   { name: 'BRGM IDPR · infiltratie/afstroming', group: 'geology', opacity: 0.55, zIndex: 25, defaultVisible: false },
   { name: 'BRGM cavités · ondergrondse holtes', group: 'geology', opacity: 1, zIndex: 26, defaultVisible: false },
