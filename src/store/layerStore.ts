@@ -8,6 +8,7 @@ import { THEDIRAC_CONTEXT_LAYER_NAME } from '../data/thediracLandscapeContext'
 import { THEDIRAC_SIGHTS_LAYER_NAME } from '../data/thediracSights'
 import { useMapStore } from './mapStore'
 import { FRANCE_RESEARCH_LAYER_DEFINITIONS } from '../config/franceResearchLayers'
+import { getStackZIndex } from '../config/layerOrder'
 
 export type LoadingState = 'idle' | 'loading' | 'loaded' | 'error'
 
@@ -169,6 +170,8 @@ export const useLayerStore = create<LayerState>()(
     },
 
     registerLayer: (name: string, layer: Layer) => {
+      const stackZ = getStackZIndex(name)
+      if (stackZ !== undefined) layer.setZIndex(stackZ)
       set(state => {
         state.layers[name] = layer
         state.loadingState[name] = 'loaded'
@@ -224,6 +227,8 @@ export const useLayerStore = create<LayerState>()(
           olLayer.setOpacity(currentState.opacity[name])
         }
 
+        const stackZ = getStackZIndex(name)
+        if (stackZ !== undefined) olLayer.setZIndex(stackZ)
         mapState.map.addLayer(olLayer)
 
         set(current => {

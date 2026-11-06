@@ -34,6 +34,7 @@ export interface Preset {
   } | null
   historicalMapsAdded?: boolean
   cassiniAdded?: boolean
+  detectieRevision?: number
   isBuiltIn: boolean
 }
 
@@ -43,51 +44,31 @@ const NEW_HISTORICAL_LAYERS = ['Luchtfoto · 1950–1965', 'IGN-kaart · 1950', 
 const THEDIRAC_ARCHAEOLOGY_LAYER = THEDIRAC_RESEARCH_LAYER_NAME
 const CASSINI_LAYER = 'Carte de Cassini · 18e eeuw'
 
+/** Verhoog om de ingebouwde Detectie-preset eenmalig opnieuw uit te rollen. */
+const DETECTIE_REVISION = 2
+
 const BUILT_IN_PRESETS: Preset[] = [
   {
     id: 'detectie-uitgebreid',
     name: 'Detectie',
     icon: 'Compass',
+    detectieRevision: DETECTIE_REVISION,
+    // Volgorde op de kaart volgt LAYER_STACK_ORDER: geomorfologie boven
+    // Hillshade Kleur, daaronder LiDAR; AMK en Romeinse wegen liggen bovenop.
     layers: [
-      'AHN4 Hoogtekaart Kleur',
-      'Geomorfologie',
       'AMK Monumenten',
-      'Gewaspercelen',
-      'Kadastrale Grenzen',
-      'AHN4 Multi-Hillshade NL',
       'Romeinse wegen (regio)',
-      'Essen',
-      'Bodemkaart',
-      'IKAW',
-      'UIKAV Punten',
-      'UIKAV Vlakken',
-      'UIKAV Buffer',
-      'UIKAV Expert',
-      'UIKAV Indeling',
-      'Parken',
-      'Speeltuinen',
-      'Strandjes'
+      'Geomorfologie',
+      'AHN4 Hillshade Kleur',
+      'AHN4 Multi-Hillshade NL'
     ],
     baseLayer: 'Luchtfoto',
     layerOpacities: {
-      'AHN4 Hoogtekaart Kleur': 0.20,
-      'Geomorfologie': 0.80,
       'AMK Monumenten': 0.60,
-      'Gewaspercelen': 0.10,
-      'Kadastrale Grenzen': 0.50,
-      'AHN4 Multi-Hillshade NL': 0.20,
       'Romeinse wegen (regio)': 1,
-      'Essen': 0.10,
-      'Bodemkaart': 0.10,
-      'IKAW': 0.10,
-      'UIKAV Punten': 0.10,
-      'UIKAV Vlakken': 0.10,
-      'UIKAV Buffer': 0.10,
-      'UIKAV Expert': 0.10,
-      'UIKAV Indeling': 0.10,
-      'Parken': 0.10,
-      'Speeltuinen': 0.10,
-      'Strandjes': 0.10
+      'Geomorfologie': 0.60,
+      'AHN4 Hillshade Kleur': 0.60,
+      'AHN4 Multi-Hillshade NL': 0.20
     },
     isBuiltIn: true
   },
@@ -262,6 +243,12 @@ function normalizeLayerOpacities(opacities: Record<string, number> | undefined):
 
 function normalizePreset(preset: Preset): Preset {
   const builtInPreset = BUILT_IN_PRESET_MAP.get(preset.id)
+
+  // Nieuwe basis voor Detectie (nov 2026): de opgeslagen versie wordt eenmalig
+  // vervangen; een eventueel onthouden kaartbeeld blijft behouden.
+  if (builtInPreset && preset.id === 'detectie-uitgebreid' && (preset.detectieRevision ?? 0) < DETECTIE_REVISION) {
+    preset = { ...builtInPreset, mapView: preset.mapView ?? builtInPreset.mapView }
+  }
 
   if (!builtInPreset) {
     return {

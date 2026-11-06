@@ -87,4 +87,19 @@ for (const name of [...Object.keys(layerRegistry), ...FRANCE_RESEARCH_LAYER_DEFI
 }
 assert.equal(defaults['Esri (licht)'], true)
 assert.equal(Object.keys(defaults).some(name => name.includes('Ã')), false, 'Geen kapotte laagnamen')
+
+const { getStackZIndex } = loadModule('src/config/layerOrder.ts')
+for (const name of ['Geomorfologie', 'AHN4 Hillshade Kleur', 'AHN4 Multi-Hillshade NL', 'AHN4 Hoogtekaart Kleur']) {
+  assert.ok(layerRegistry[name], `${name} bestaat in het register`)
+}
+assert.ok(getStackZIndex('Geomorfologie') > getStackZIndex('AHN4 Hillshade Kleur'), 'Geomorfologie ligt boven Hillshade Kleur')
+assert.ok(getStackZIndex('AHN4 Hillshade Kleur') > getStackZIndex('AHN4 Multi-Hillshade NL'))
+assert.ok(getStackZIndex('Geomorfologie') < 10, 'Vlakken blijven onder AMK (z 10)')
+assert.ok(getStackZIndex('TMK 1850') > 0, 'Historische kaart blijft boven de basiskaart')
+const ordered = getActiveOpacityLayers(
+  { 'AHN4 Hillshade Kleur': true, 'Geomorfologie': true, 'AHN4 Multi-Hillshade NL': true, 'AMK Monumenten': true },
+  { 'AHN4 Hillshade Kleur': 0.6, 'Geomorfologie': 0.6, 'AHN4 Multi-Hillshade NL': 0.3 },
+  { 'AMK Monumenten': { getOpacity: () => 0.6, getZIndex: () => 10 } },
+).map(layer => layer.name)
+assert.deepEqual(ordered, ['AMK Monumenten', 'Geomorfologie', 'AHN4 Hillshade Kleur', 'AHN4 Multi-Hillshade NL'], 'Regelaar volgt de kaartvolgorde, bovenste eerst')
 console.log('Kaartbediening: complete lagenlijst, import-ID’s, nul-opacity, één-venster-regel en knoppenschema zonder gaten goed.')

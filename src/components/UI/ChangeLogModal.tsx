@@ -11,10 +11,12 @@ interface ChangeLogModalProps {
 
 const currentRelease = {
   version,
-  date: '6 november 2026',
-  title: 'Hillshade Kleur zonder blokken',
+  date: '7 november 2026',
+  title: 'Vaste laagvolgorde en nieuwe Detectie',
   changes: [
-    'AHN4 Hillshade Kleur bouwt niet meer op in blokken met verschillende kleuren. De kleuren lopen nu over het hele kaartbeeld door, met dezelfde schaduwwerking.'
+    'Lagen liggen altijd in dezelfde volgorde op de kaart, hoe je ze ook aanzet: punten en lijnen bovenop, dan kadaster, geomorfologie, bodem, Hillshade Kleur, LiDAR, hoogtekaart en historische kaarten.',
+    'De transparantieregelaar toont de lagen in precies die volgorde, de bovenste laag bovenaan.',
+    'Detectie is teruggebracht tot de basis: luchtfoto, AMK, Romeinse wegen, geomorfologie boven Hillshade Kleur, en LiDAR. UIKAV, parken, speeltuinen en strandjes zijn eruit. Je opgeslagen Detectie wordt eenmalig vervangen; een onthouden kaartbeeld blijft.'
   ]
 }
 

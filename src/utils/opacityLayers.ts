@@ -1,5 +1,6 @@
 // Imagery, internal labels and personal/user layers are not analysis overlays.
 import { FRANCE_RESEARCH_LAYER_ORDER } from '../config/franceResearchLayers'
+import { getStackZIndex } from '../config/layerOrder'
 
 const NON_OPACITY_LAYERS = new Set([
   'Esri (licht)', 'OpenStreetMap', 'Luchtfoto', 'Satelliet (wereld)',
@@ -18,7 +19,7 @@ interface OpacityLayer {
 export function getActiveOpacityLayers(
   visible: Record<string, boolean>,
   opacity: Record<string, number>,
-  registered: Record<string, { getOpacity: () => number }>,
+  registered: Record<string, { getOpacity: () => number, getZIndex?: () => number | undefined }>,
   imports: { id: string; name: string; visible: boolean; opacity: number }[] = [],
 ): OpacityLayer[] {
   const standard = Object.keys(visible)
@@ -31,16 +32,17 @@ export function getActiveOpacityLayers(
       kind: 'standard' as const,
       opacity: opacity[name] ?? registered[name].getOpacity(),
     }))
+  // Zelfde volgorde als op de kaart: de bovenste laag staat bovenaan.
   const canonicalOrder = new Map(FRANCE_RESEARCH_LAYER_ORDER.map((name, index) => [name, index]))
+  const zOf = (name: string) => getStackZIndex(name) ?? registered[name]?.getZIndex?.() ?? 0
   const orderedStandard = standard
-    .map((item, index) => ({ item, index }))
+    .map((item, index) => ({ item, index, z: zOf(item.name) }))
     .sort((a, b) => {
+      if (a.z !== b.z) return b.z - a.z
       const ai = canonicalOrder.get(a.item.name)
       const bi = canonicalOrder.get(b.item.name)
-      if (ai === undefined && bi === undefined) return a.index - b.index
-      if (ai === undefined) return 1
-      if (bi === undefined) return -1
-      return ai - bi
+      if (ai !== undefined && bi !== undefined) return ai - bi
+      return a.index - b.index
     })
     .map(({ item }) => item)
   return [...orderedStandard, ...imports.filter(layer => layer.visible).map(layer => ({

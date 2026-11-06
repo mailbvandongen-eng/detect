@@ -217,12 +217,12 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     Presets zijn vooraf ingestelde combinaties van kaartlagen. Ideaal om snel te wisselen tussen:
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
-                    <li><strong>Detectie</strong> - AMK, percelen, geomorfologie, hoogte en kadaster</li>
-                    <li><strong>Steentijd</strong> - Hunebedden, grafheuvels, terpen, FAMKE/AMK en hillshade</li>
-                    <li><strong>Romeins - Mid vroeg</strong> - Romeinse wegen en forten, AMK en percelen</li>
-                    <li><strong>Mid laat - Nieuwe tijd</strong> - Kastelen, essen, monumenten en oude kernen</li>
-                    <li><strong>WOII & Militair</strong> - Bunkers, slagvelden, vliegvelden, linies en inundaties</li>
-                    <li><strong>Terrein Analyse</strong> - IKAW, bodem, geomorfologie en AHN</li>
+                    <li><strong>Detectie</strong> - Luchtfoto met AMK, Romeinse wegen, geomorfologie bovenop Hillshade Kleur, en LiDAR</li>
+                    <li><strong>Hoogtekaart</strong> - AHN4 Hoogtekaart Kleur en AMK</li>
+                    <li><strong>LiDAR</strong> - Multi-Hillshade en AMK</li>
+                    <li><strong>Geomorfologie</strong> - Geomorfologische kaart en AMK</li>
+                    <li><strong>1850 / 1900</strong> - TMK of Bonnebladen over de luchtfoto, met AMK</li>
+                    <li><strong>Thédirac 2026</strong> - Frankrijk-onderzoeksset rond Thédirac</li>
                   </ul>
                   <p className="text-xs text-gray-500 mt-2 italic">
                     Tik op de naam om een preset te kiezen. Via ⋯ naast een preset leg je de huidige lagen erin vast, pas je de naam en ‘Locatie & zoom onthouden’ aan, verwijder je een eigen preset of open je de lijst. Standaardpresets herstellen bewaart je eigen presets.

@@ -203,6 +203,12 @@ const savedVacation = {...presetsModule.usePresetStore.getState().presets.find(p
 const normalizedVacation=presetsModule.normalizePresetCollection([savedVacation]).find(p=>p.id===savedVacation.id);
 assert.deepEqual(normalizedVacation,savedVacation);
 assert.deepEqual(presetsModule.normalizePresetCollection([normalizedVacation]).find(p=>p.id===savedVacation.id),savedVacation);
+const oldDetectie={id:'detectie-uitgebreid',name:'Detectie',icon:'Compass',layers:['UIKAV Punten','Parken','AMK Monumenten'],baseLayer:'Luchtfoto',isBuiltIn:true,mapView:{center:[5,52],zoom:12}};
+const newDetectie=presetsModule.normalizePresetCollection([oldDetectie]).find(p=>p.id==='detectie-uitgebreid');
+assert.deepEqual([...newDetectie.layers].sort(),['AHN4 Hillshade Kleur','AHN4 Multi-Hillshade NL','AMK Monumenten','Geomorfologie','Romeinse wegen (regio)'],'Oude Detectie wordt eenmalig de nieuwe basis');
+assert.deepEqual(newDetectie.mapView,oldDetectie.mapView,'Onthouden kaartbeeld blijft');
+const ownDetectie=presetsModule.normalizePresetCollection([{...newDetectie,layers:[...newDetectie.layers,'Bodemkaart']}]).find(p=>p.id==='detectie-uitgebreid');
+assert.equal(ownDetectie.layers.includes('Bodemkaart'),true,'Na de vernieuwing blijft eigen opslag in Detectie bewaard');
 const legacy=presetsModule.normalizePresetCollection([{...savedVacation,layers:['Sites ClassÃ©s Occitanie'],layerStates:{'Sites ClassÃ©s Occitanie':{visible:false,opacity:.2},'Sites Classés Occitanie':{visible:true,opacity:.35}}}]).find(p=>p.id===savedVacation.id);
 assert.deepEqual(legacy.layers,['Sites Classés Occitanie']);assert.deepEqual(legacy.layerStates['Sites Classés Occitanie'],{visible:true,opacity:.35});
 pass('Saved built-in presets retain all choices through normalization; current layer names override old aliases');
