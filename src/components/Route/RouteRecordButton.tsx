@@ -5,10 +5,10 @@ import { useSettingsStore } from '../../store/settingsStore'
 import { useUIStore } from '../../store/uiStore'
 import { useRouteRecordingStore, exportRouteAsGPX } from '../../store/routeRecordingStore'
 import type { RecordingState } from '../../store/routeRecordingStore'
+import { useControlSlot } from '../../hooks/useControlSlot'
 
 export function RouteRecordButton() {
   const showRouteRecordButton = useSettingsStore(state => state.showRouteRecordButton)
-  const showVondstButton = useSettingsStore(state => state.showVondstButton)
   const toggleRouteDashboard = useUIStore(state => state.toggleRouteDashboard)
   const {
     state: recordingState,
@@ -155,14 +155,12 @@ export function RouteRecordButton() {
     }
   }, [recordingState, addPoint, autoPauseEnabled, autoPauseSeconds, pauseRecording])
 
+  const showExtraButton = recordingState === 'recording' || recordingState === 'paused' || savedRoutes.length > 0
+  const mainSlot = useControlSlot('route', showRouteRecordButton)
+  const extraSlot = useControlSlot('routeExtra', showRouteRecordButton && showExtraButton)
+
   // Don't render if disabled in settings
   if (!showRouteRecordButton) return null
-
-  // Dynamic positioning based on whether Vondst button is visible
-  // GPS button is at right-[104px], VondstButton at right-[152px]
-  // Each button is 44px + 4px gap = 48px
-  const mainButtonRight = showVondstButton ? 'right-[200px]' : 'right-[152px]'
-  const secondaryButtonRight = showVondstButton ? 'right-[248px]' : 'right-[200px]'
 
   const handleStartRecording = () => {
     startRecording()
@@ -250,9 +248,10 @@ export function RouteRecordButton() {
 
   return (
     <>
-      {/* Main button - positioned dynamically based on vondst button visibility */}
+      {/* Main button - plek volgens knoppenschema */}
       <motion.button
-        className={`fixed bottom-2 ${mainButtonRight} z-[1000] w-11 h-11 ${getButtonColor(recordingState)} text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none backdrop-blur-sm`}
+        style={mainSlot}
+        className={`fixed z-[1000] w-11 h-11 ${getButtonColor(recordingState)} text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none backdrop-blur-sm`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={handleMainButtonClick}
@@ -273,7 +272,8 @@ export function RouteRecordButton() {
       <AnimatePresence>
         {recordingState === 'idle' && savedRoutes.length > 0 && (
           <motion.button
-            className={`fixed bottom-2 ${secondaryButtonRight} z-[1000] w-11 h-11 bg-green-400 hover:bg-green-500 text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none`}
+            style={extraSlot}
+            className={`fixed z-[1000] w-11 h-11 bg-green-400 hover:bg-green-500 text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none`}
             initial={{ opacity: 0, scale: 0.8, x: 20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.8, x: 20 }}
@@ -295,7 +295,8 @@ export function RouteRecordButton() {
       <AnimatePresence>
         {(recordingState === 'recording' || recordingState === 'paused') && (
           <motion.button
-            className={`fixed bottom-2 ${secondaryButtonRight} z-[1000] w-11 h-11 bg-gray-700 hover:bg-gray-800 text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none`}
+            style={extraSlot}
+            className={`fixed z-[1000] w-11 h-11 bg-gray-700 hover:bg-gray-800 text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none`}
             initial={{ opacity: 0, scale: 0.8, x: 20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.8, x: 20 }}

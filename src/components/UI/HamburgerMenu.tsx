@@ -7,6 +7,8 @@ import { useSettingsStore } from '../../store/settingsStore'
 import { useCloudSync } from '../../hooks/useCloudSync'
 import { version } from '../../../package.json'
 import { AppWindow } from './AppWindow'
+import { useControlSlot } from '../../hooks/useControlSlot'
+import { useUnseenChangeLog } from '../../hooks/useStartupWindows'
 
 // Google logo SVG component
 function GoogleLogo({ size = 18 }: { size?: number }) {
@@ -67,7 +69,8 @@ export function HamburgerMenu() {
   const setShowPrintTool = useSettingsStore(state => state.setShowPrintTool)
 
   // Safe top position for mobile browsers (accounts for notch/status bar)
-  const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
+  const slotStyle = useControlSlot('menu')
+  const hasUnseenChanges = useUnseenChangeLog()
 
   const closeMenu = closeWindow
 
@@ -138,12 +141,12 @@ export function HamburgerMenu() {
     <>
       {/* Settings menu button - preserve active colors */}
       <motion.button
-        className={`fixed right-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
+        className={`fixed z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
           isOpen
             ? 'bg-blue-500 hover:bg-blue-600'
             : 'bg-white/90 hover:bg-white'
         }`}
-        style={safeTopStyle}
+        style={slotStyle}
         onClick={() => toggleWindow('menu')}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -154,6 +157,9 @@ export function HamburgerMenu() {
           <X size={22} className="text-white" />
         ) : (
           <Settings size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
+        )}
+        {hasUnseenChanges && !isOpen && (
+          <span aria-hidden="true" className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-white" />
         )}
       </motion.button>
 
@@ -304,6 +310,9 @@ export function HamburgerMenu() {
                 >
                   <History size={18} className="text-blue-500" />
                   <span>Wijzigingen</span>
+                  {hasUnseenChanges && (
+                    <span className="ml-auto px-1.5 py-0.5 rounded-full bg-blue-500 text-white" style={{ fontSize: '0.7em' }}>Nieuw</span>
+                  )}
                 </button>
 
                 <button

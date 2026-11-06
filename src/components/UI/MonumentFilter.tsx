@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { useMonumentFilterStore } from '../../store/monumentFilterStore'
 import { useLayerStore, useUIStore } from '../../store'
 import { AppWindow } from './AppWindow'
+import { useControlSlot } from '../../hooks/useControlSlot'
 
 const AMK_LAYERS = [
   'AMK Monumenten',
@@ -45,13 +46,16 @@ export function MonumentFilter() {
     clearFilter()
   }
 
+  const slotStyle = useControlSlot('monumentFilter', isAMKVisible)
+
   if (!isAMKVisible) return null
 
   return (
     <div>
       <motion.button
         onClick={toggleMonumentFilter}
-        className={`fixed bottom-[116px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
+        style={slotStyle}
+        className={`fixed z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
           isActive
             ? 'bg-purple-500 text-white'
             : 'bg-white/80 hover:bg-white/90 text-purple-600'

@@ -126,6 +126,25 @@ style={{ fontSize: '1em' }}
 | 1 | `src/store/layerStore.ts` | `visible` | Nieuwe laag met `false` |
 | 2 | `src/components/UI/PresetButtons.tsx` | `ALL_OVERLAYS` | Laagnaam als string |
 
+## KNOPPENSCHEMA - ELKE KAARTKNOP KRIJGT ZIJN PLEK UIT HET SCHEMA
+
+Geen vaste `top-[..]`, `bottom-[..]`, `left-[..]` of `right-[..]` op kaartknoppen.
+Alle plekken staan in `src/config/controlLayout.ts`:
+
+| Dok | Richting | Knoppen |
+|-----|----------|---------|
+| `topRight` | rechts, van boven naar beneden | menu, lagen, kompas |
+| `topRow` | boven, van rechts naar links naast menu | zoeken |
+| `left` | links onder het weerblok, naar beneden | meten, tekenen, exporteren |
+| `bottomLeft` | linksonder, naar boven | reset, presets, monumentfilter |
+| `bottomRight` | rechtsonder, naar boven (GPS in de hoek) | gps, transparantie, jaarkeuze |
+| `bottomRow` | onder, van rechts naar links naast GPS | vondst, route, route-extra |
+
+Nieuwe knop: voeg de id op de juiste plek in het schema toe en gebruik in het component
+`const slotStyle = useControlSlot('<id>', zichtbaar)` als `style` (altijd aanroepen, vóór een
+eventuele `return null`). Verborgen knoppen laten zo nooit een gat; volgende knoppen schuiven door.
+`scripts/test-map-controls.mjs` controleert het schema.
+
 ## CLICK EVENTS IN PANELS - ALTIJD STOPPROPAGATION!
 
 **KRITIEK:** Bij ELKE klikbare item (link, button) in een panel dat sluit bij "click outside":

@@ -13,6 +13,7 @@ import { toLonLat } from 'ol/proj'
 import type { FeatureLike } from 'ol/Feature'
 import type { FeatureGeometry, GeometryType } from '../../store/customPointLayerStore'
 import { AppWindow } from './AppWindow'
+import { useControlSlot } from '../../hooks/useControlSlot'
 
 type DrawMode = 'select' | 'point' | 'line' | 'polygon'
 
@@ -26,7 +27,6 @@ export function DrawTool() {
   const openWindow = useUIStore(state => state.openWindow)
   const closeWindow = useUIStore(state => state.closeWindow)
   const showDrawTool = useSettingsStore(state => state.showDrawTool)
-  const showMeasureTool = useSettingsStore(state => state.showMeasureTool)
   const [drawMode, setDrawMode] = useState<DrawMode>('select')
   const [featureCount, setFeatureCount] = useState(0)
   const [currentMeasurement, setCurrentMeasurement] = useState<string | null>(null)
@@ -286,22 +286,20 @@ export function DrawTool() {
     closeWindow()
   }
 
+  const slotStyle = useControlSlot('draw', showDrawTool)
+
   // Don't render if hidden
   if (!showDrawTool) return null
 
-  // Calculate position dynamically based on which tools above are visible
-  // Base position is 90px (under weather widget), each tool adds 48px (44px button + 4px gap)
-  const topPosition = 90 + (showMeasureTool ? 48 : 0)
-
   return (
     <>
-      {/* Draw button - left side, dynamic position */}
+      {/* Draw button - plek volgens knoppenschema */}
       <motion.button
         onClick={toggleDraw}
-        className={`fixed left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
+        className={`fixed z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
           isActive ? 'bg-orange-500' : 'bg-white/80 hover:bg-white/90'
         }`}
-        style={{ top: `${topPosition}px` }}
+        style={slotStyle}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Tekenen op de kaart"

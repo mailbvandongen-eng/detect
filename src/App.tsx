@@ -11,7 +11,6 @@ import { PresetButtons } from './components/UI/PresetButtons'
 import { CompassButton } from './components/UI/CompassButton'
 import { OpacitySliders } from './components/UI/OpacitySliders'
 import { SearchBox } from './components/UI/SearchBox'
-import { ZoomButtons } from './components/UI/ZoomButtons'
 import { SettingsPanel } from './components/UI/SettingsPanel'
 import { HamburgerMenu } from './components/UI/HamburgerMenu'
 import { InfoButton } from './components/UI/InfoButton'
@@ -146,7 +145,6 @@ function App() {
       <GpsButton />
       <AddVondstButton />
       <RouteRecordButton />
-      <ZoomButtons />
       <LayerControlButton />
       <ThemesPanel />
       <OpacitySliders />

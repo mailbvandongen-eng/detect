@@ -13,6 +13,7 @@ import type Feature from 'ol/Feature'
 import type { FeatureLike } from 'ol/Feature'
 import type { EventsKey } from 'ol/events'
 import { AppWindow } from './AppWindow'
+import { useControlSlot } from '../../hooks/useControlSlot'
 
 export function MeasureTool() {
   const map = useMapStore(state => state.map)
@@ -145,6 +146,7 @@ export function MeasureTool() {
   }
 
   // Don't render if hidden
+  const slotStyle = useControlSlot('measure', showMeasureTool)
   if (!showMeasureTool) return null
 
   return (
@@ -152,9 +154,10 @@ export function MeasureTool() {
       {/* Measure button - left side, under weather widget */}
       <motion.button
         onClick={toggleMeasure}
-        className={`fixed top-[90px] left-2 z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
+        className={`fixed z-[800] w-11 h-11 flex items-center justify-center rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm ${
           isActive ? 'bg-blue-500' : 'bg-white/80 hover:bg-white/90'
         }`}
+        style={slotStyle}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Afstanden meten"

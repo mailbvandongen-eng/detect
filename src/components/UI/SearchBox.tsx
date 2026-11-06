@@ -3,6 +3,7 @@ import { Search, X, ExternalLink } from 'lucide-react'
 import { useMapStore, useSettingsStore, useUIStore } from '../../store'
 import { fromLonLat } from 'ol/proj'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useControlSlot } from '../../hooks/useControlSlot'
 
 interface SearchResult {
   text: string
@@ -213,13 +214,14 @@ export function SearchBox() {
 
   // Safe top position for mobile browsers (accounts for notch/status bar)
   const safeTopStyle = { top: 'max(0.5rem, env(safe-area-inset-top, 0.5rem))' }
+  const slotStyle = useControlSlot('search')
 
   // Collapsed state: just a search icon button
   if (!isExpanded) {
     return (
       <motion.button
-        className="fixed right-14 z-[800] w-11 h-11 flex items-center justify-center bg-white/90 hover:bg-white rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
-        style={safeTopStyle}
+        className="fixed z-[800] w-11 h-11 flex items-center justify-center bg-white/90 hover:bg-white rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        style={slotStyle}
         onClick={() => { useUIStore.getState().closeAllPanels(); setIsExpanded(true) }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}

@@ -4,14 +4,13 @@ import { Printer, Download, FileImage, Loader2 } from 'lucide-react'
 import { useMapStore, useSettingsStore, useUIStore } from '../../store'
 import { composeMapCanvas } from '../../utils/mapExport'
 import { AppWindow } from './AppWindow'
+import { useControlSlot } from '../../hooks/useControlSlot'
 
 type PrintFormat = 'png' | 'jpeg' | 'pdf'
 
 export function PrintTool() {
   const map = useMapStore(state => state.map)
   const showPrintTool = useSettingsStore(state => state.showPrintTool)
-  const showMeasureTool = useSettingsStore(state => state.showMeasureTool)
-  const showDrawTool = useSettingsStore(state => state.showDrawTool)
   const isOpen = useUIStore(state => state.activeWindow === 'print')
   const toggleWindow = useUIStore(state => state.toggleWindow)
   const closeWindow = useUIStore(state => state.closeWindow)
@@ -102,22 +101,18 @@ export function PrintTool() {
     }
   }
 
+  const slotStyle = useControlSlot('print', showPrintTool)
+
   // Don't render if hidden
   if (!showPrintTool) return null
 
-  // Calculate position dynamically based on which tools above are visible
-  // Base position is 90px (under weather widget), each tool adds 48px (44px button + 4px gap)
-  let topPosition = 90
-  if (showMeasureTool) topPosition += 48
-  if (showDrawTool) topPosition += 48
-
   return (
     <>
-      {/* Print button - left side, dynamic position */}
+      {/* Print button - plek volgens knoppenschema */}
       <motion.button
         onClick={() => toggleWindow('print')}
-        className="fixed left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
-        style={{ top: `${topPosition}px` }}
+        className="fixed z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        style={slotStyle}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Kaart printen/exporteren"

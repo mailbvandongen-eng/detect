@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { LocateFixed, Navigation } from 'lucide-react'
 import { useGPS } from '../../hooks/useGPS'
 import { useGPSStore } from '../../store/gpsStore'
+import { useControlSlot } from '../../hooks/useControlSlot'
 
 /**
  * Request iOS DeviceOrientation permission.
@@ -32,6 +33,7 @@ export function GpsButton() {
   const setNavigationMode = useGPSStore(state => state.setNavigationMode)
 
   const isHeadingUp = tracking && navigationMode === 'headingUp'
+  const slotStyle = useControlSlot('gps')
 
   const handleClick = async () => {
     if (!tracking) {
@@ -57,7 +59,7 @@ export function GpsButton() {
   return (
     <motion.button
       className={`
-        fixed bottom-2 right-[104px] z-[1000]
+        fixed z-[1000]
         w-11 h-11 cursor-pointer border-0 outline-none
         flex items-center justify-center
         rounded-xl backdrop-blur-sm
@@ -69,6 +71,7 @@ export function GpsButton() {
             : 'bg-white/80 text-gray-500 hover:bg-white/90 shadow-sm'
         }
       `}
+      style={slotStyle}
       onClick={handleClick}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}

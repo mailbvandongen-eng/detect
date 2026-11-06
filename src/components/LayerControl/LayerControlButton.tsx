@@ -1,44 +1,17 @@
 import { motion } from 'framer-motion'
 import { Layers } from 'lucide-react'
-import { useUIStore, useMapStore } from '../../store'
-import { useEffect, useState } from 'react'
+import { useUIStore } from '../../store'
+import { useControlSlot } from '../../hooks/useControlSlot'
 
 export function KaartlagenButton() {
   const themesPanelOpen = useUIStore(state => state.activeWindow === 'layers')
   const toggleThemesPanel = useUIStore(state => state.toggleThemesPanel)
-  const map = useMapStore(state => state.map)
-  const [compassVisible, setCompassVisible] = useState(false)
-
-  // Listen to map rotation to know when compass is visible
-  useEffect(() => {
-    if (!map) return
-
-    const view = map.getView()
-
-    const updateCompassVisibility = () => {
-      const rot = view.getRotation()
-      // Compass shows when rotated more than ~5 degrees
-      setCompassVisible(Math.abs(rot) > 0.087)
-    }
-
-    updateCompassVisibility()
-    view.on('change:rotation', updateCompassVisibility)
-
-    return () => {
-      view.un('change:rotation', updateCompassVisibility)
-    }
-  }, [map])
-
-  // Position below hamburger menu, or below compass if visible
-  // Hamburger is at safe-area-inset-top, compass is at top-[60px] and is 44px tall
-  const topPosition = compassVisible
-    ? 'calc(max(0.5rem, env(safe-area-inset-top, 0.5rem)) + 112px)'
-    : 'calc(max(0.5rem, env(safe-area-inset-top, 0.5rem)) + 52px)'
+  const slotStyle = useControlSlot('layers')
 
   return (
     <motion.button
       className={`
-        fixed right-2 z-[800]
+        fixed z-[800]
         w-11 h-11 cursor-pointer border-0 outline-none
         flex items-center justify-center
         rounded-xl backdrop-blur-sm
@@ -48,9 +21,7 @@ export function KaartlagenButton() {
           : 'bg-white/80 text-gray-500 hover:bg-white/90 shadow-sm'
         }
       `}
-      style={{ top: topPosition }}
-      animate={{ top: topPosition }}
-      transition={{ duration: 0.2 }}
+      style={slotStyle}
       onClick={toggleThemesPanel}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}

@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMapStore } from '../../store/mapStore'
 import { useEffect, useState } from 'react'
+import { useControlSlot } from '../../hooks/useControlSlot'
 
 export function CompassButton() {
   const map = useMapStore(state => state.map)
@@ -33,6 +34,8 @@ export function CompassButton() {
     }
   }, [map])
 
+  const slotStyle = useControlSlot('compass', isVisible)
+
   // Reset rotation to north
   const resetToNorth = () => {
     if (!map) return
@@ -51,7 +54,8 @@ export function CompassButton() {
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ duration: 0.2 }}
           onClick={resetToNorth}
-          className="fixed top-[60px] right-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+          style={slotStyle}
+          className="fixed z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
           title="Klik om noorden te herstellen"
         >
           {/* Google Maps style compass needle */}

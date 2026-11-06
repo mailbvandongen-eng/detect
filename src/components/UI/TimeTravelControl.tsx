@@ -3,6 +3,8 @@ import { History, X } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useUIStore } from '../../store/uiStore'
 import { MapControlButton } from './MapControlButton'
+import { getControlPosition } from '../../config/controlLayout'
+import { useControlSlotStore } from '../../hooks/useControlSlot'
 
 interface TimeTravelControlProps {
   visible: boolean
@@ -19,6 +21,7 @@ export function TimeTravelControl({ visible, name, years, selectedIndex, year, s
   const toggleWindow = useUIStore(state => state.toggleWindow)
   const closeWindow = useUIStore(state => state.closeWindow)
   const fontScale = useSettingsStore(state => state.fontScale)
+  const visibleControls = useControlSlotStore(state => state.visible)
 
   useEffect(() => {
     // A background change parks the control; selecting imagery never opens it.
@@ -39,6 +42,7 @@ export function TimeTravelControl({ visible, name, years, selectedIndex, year, s
   return (
     <div className="detect-time-travel-control">
       <MapControlButton
+        slot="timeTravel"
         label={`${name}: jaar kiezen`}
         controls="time-travel-panel"
         isOpen={isOpen}
@@ -57,7 +61,7 @@ export function TimeTravelControl({ visible, name, years, selectedIndex, year, s
           <section
             id="time-travel-panel"
             className="detect-time-travel-panel"
-            style={{ '--detect-ui-scale': fontScale / 100 } as CSSProperties}
+            style={{ '--detect-ui-scale': fontScale / 100, bottom: getControlPosition('timeTravel', visibleControls).bottom } as CSSProperties}
             role="dialog"
             aria-label={`${name}: jaarkeuze`}
           >

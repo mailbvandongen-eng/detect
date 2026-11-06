@@ -1,4 +1,4 @@
-import { Layers, Search, MapPin, Compass, SlidersHorizontal, Filter, Menu, RotateCcw, BookOpen } from 'lucide-react'
+import { Layers, Search, LocateFixed, Bookmark, SlidersHorizontal, Filter, Settings, RotateCcw, BookOpen, Ruler, Pencil, Printer, History, Hand } from 'lucide-react'
 import { useSettingsStore } from '../../store/settingsStore'
 import { AppWindow } from './AppWindow'
 
@@ -49,29 +49,35 @@ export function WelcomeModal({ isOpen, onClose, onOpenManual }: WelcomeModalProp
       }
     >
               <div className="p-4 space-y-4">
-                {/* Tools section */}
-                <section>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Knoppen op de kaart</h3>
-                  <p className="text-xs text-gray-500 mb-3">Aan de linker- en rechterkant vind je tools:</p>
+                <ToolGroup title="Rechtsboven">
+                  <ToolItem icon={<Search size={16} />} title="Zoeken" description="adres of plaatsnaam in heel Europa" />
+                  <ToolItem icon={<Settings size={16} />} title="Menu" description="account, lijsten, handleiding en instellingen" />
+                  <ToolItem icon={<Layers size={16} />} title="Kaartlagen" description="basiskaart en thema's kiezen" />
+                </ToolGroup>
 
-                  <div className="space-y-2">
-                    <ToolItem icon={<Layers size={16} />} title="Kaartlagen" description="Selecteer welke lagen je wilt zien" />
-                    <ToolItem icon={<Search size={16} />} title="Zoeken" description="Zoek naar een adres of plaatsnaam in heel Europa" />
-                    <ToolItem icon={<MapPin size={16} />} title="GPS Locatie" description="Volg je positie op de kaart" />
-                    <ToolItem icon={<Compass size={16} />} title="Presets" description="Snel wisselen tussen kaartlagen" />
-                    <ToolItem icon={<Filter size={16} />} title="Monument Filter" description="Filter monumenten op periode" />
-                    <ToolItem icon={<SlidersHorizontal size={16} />} title="Transparantie" description="Pas doorzichtigheid aan" />
-                    <ToolItem icon={<Menu size={16} />} title="Menu" description="Instellingen en meer" />
-                    <ToolItem icon={<RotateCcw size={16} />} title="Reset" description="Kaart naar beginstand" />
-                  </div>
-                </section>
+                <ToolGroup title="Links">
+                  <ToolItem icon={<Ruler size={16} />} title="Meten" description="afstanden op de kaart" />
+                  <ToolItem icon={<Pencil size={16} />} title="Tekenen" description="punten, lijnen en vlakken" />
+                  <ToolItem icon={<Printer size={16} />} title="Exporteren" description="kaart printen of opslaan" />
+                </ToolGroup>
 
-                {/* Kaartlagen info */}
-                <section className="bg-blue-50 rounded-xl p-3">
-                  <h3 className="text-sm font-semibold text-blue-800 mb-1">Kaartlagen gebruiken</h3>
-                  <p className="text-xs text-blue-700">
-                    Klik op een locatie om informatie te zien over monumenten en archeologische gegevens.
-                  </p>
+                <ToolGroup title="Onderaan">
+                  <ToolItem icon={<Bookmark size={16} />} title="Presets" description="vaste laagcombinaties in één tik" />
+                  <ToolItem icon={<RotateCcw size={16} />} title="Reset" description="alle lagen uit, lichtgrijze kaart" />
+                  <ToolItem icon={<LocateFixed size={16} />} title="GPS" description="tik nogmaals: kaart draait mee" />
+                </ToolGroup>
+
+                <ToolGroup title="Verschijnen alleen als ze nodig zijn">
+                  <ToolItem icon={<SlidersHorizontal size={16} />} title="Transparantie" description="zodra er een laag aan staat" />
+                  <ToolItem icon={<History size={16} />} title="Jaarkeuze" description="bij luchtfoto's met meerdere jaren" />
+                  <ToolItem icon={<Filter size={16} />} title="Monumentfilter" description="bij AMK-lagen" />
+                </ToolGroup>
+
+                <section className="bg-blue-50 rounded-xl p-3 space-y-1">
+                  <h3 className="text-sm font-semibold text-blue-800 flex items-center gap-1.5"><Hand size={15} /> Op de kaart</h3>
+                  <p className="text-xs text-blue-700">Tik op de kaart voor informatie over monumenten, bodem en archeologie.</p>
+                  <p className="text-xs text-blue-700">Houd lang ingedrukt om een punt of vondst toe te voegen aan een laag.</p>
+                  <p className="text-xs text-blue-700">Zoom met twee vingers of dubbeltik.</p>
                 </section>
 
                 {/* Handleiding link */}
@@ -92,6 +98,15 @@ export function WelcomeModal({ isOpen, onClose, onOpenManual }: WelcomeModalProp
   )
 }
 
+function ToolGroup({ title, children }: { title: string, children: React.ReactNode }) {
+  return (
+    <section>
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1.5">{title}</h3>
+      <div className="space-y-1.5">{children}</div>
+    </section>
+  )
+}
+
 function ToolItem({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
     <div className="flex items-center gap-2">
@@ -100,7 +115,7 @@ function ToolItem({ icon, title, description }: { icon: React.ReactNode, title: 
       </div>
       <div className="flex-1 min-w-0">
         <span className="text-xs font-medium text-gray-700">{title}</span>
-        <span className="text-xs text-gray-400 ml-1">- {description}</span>
+        <span className="text-xs text-gray-400 ml-1">– {description}</span>
       </div>
     </div>
   )

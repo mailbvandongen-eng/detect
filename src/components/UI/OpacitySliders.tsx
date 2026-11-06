@@ -37,6 +37,7 @@ export function OpacitySliders() {
   return (
     <div className="detect-opacity-control">
       <MapControlButton
+        slot="opacity"
         label="Transparantie"
         controls="opacity-slider-list"
         isOpen={isOpen}

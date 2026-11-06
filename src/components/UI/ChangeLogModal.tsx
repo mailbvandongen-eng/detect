@@ -11,12 +11,14 @@ interface ChangeLogModalProps {
 
 const currentRelease = {
   version,
-  date: '13 oktober 2026',
-  title: 'Geologie Frankrijk en versie direct zichtbaar',
+  date: '6 november 2026',
+  title: 'Vaste plek voor elke knop',
   changes: [
-    'Het actuele versienummer staat direct naast de menuknop en opent met één tik het wijzigingsoverzicht.',
-    'BRGM-geologie vraagt nu de geologische eenheid op via twee toegangspunten en biedt de legenda direct in de kaartpopup.',
-    'Bij een tijdelijke storing wordt de kaartlaag niet uitgezet; bij een nieuwe klik wordt de informatie opnieuw opgehaald.'
+    'Alle kaartknoppen volgen één vast schema. Staat een knop uit of is hij niet nodig, dan schuiven de andere knoppen netjes door; er blijven geen gaten meer over.',
+    'De knoppen voor in- en uitzoomen zijn verwijderd. Zoomen gaat met twee vingers of dubbeltikken. GPS staat nu rechtsonder in de hoek.',
+    'Kaartbronnen zit niet meer over de uitzoomknop heen, maar staat als klein i-knopje naast de resetknop.',
+    'Bij het opstarten opent hoogstens één venster. Nieuwe wijzigingen zie je aan een blauw stipje op de menuknop en het label Nieuw bij Wijzigingen.',
+    'De uitleg Hoe werkt Detect? toont weer precies de knoppen die op het scherm staan, per schermhoek.'
   ]
 }
 
@@ -202,7 +204,7 @@ export function ChangeLogModal({ isOpen, onClose }: ChangeLogModalProps) {
             setHidden(event.target.checked)
             setSaveError(!setAutomaticChangesHidden(event.target.checked))
           }} />
-          Wijzigingen niet meer tonen
+          Geen melding bij nieuwe versies
         </label>
         {saveError && <p role="alert" className="text-sm">De keuze geldt nu, maar kon niet op dit apparaat worden opgeslagen.</p>}
         <button onClick={handleClose} className="detect-window-primary-button w-full">Gezien</button>

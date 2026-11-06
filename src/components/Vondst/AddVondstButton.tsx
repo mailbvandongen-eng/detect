@@ -4,6 +4,7 @@ import { AddVondstForm } from './AddVondstForm'
 import { useAuth } from '../../hooks/useAuth'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useUIStore } from '../../store/uiStore'
+import { useControlSlot } from '../../hooks/useControlSlot'
 
 export function AddVondstButton() {
   const { isAuthenticated, loginAnonymous } = useAuth()
@@ -13,6 +14,8 @@ export function AddVondstButton() {
   const vondstFormLocation = useUIStore(state => state.vondstFormLocation)
   const openVondstForm = useUIStore(state => state.openVondstForm)
   const closeVondstForm = useUIStore(state => state.closeVondstForm)
+
+  const slotStyle = useControlSlot('vondst', showVondstButton)
 
   // Don't render if disabled in settings
   if (!showVondstButton) return null
@@ -38,7 +41,8 @@ export function AddVondstButton() {
     <>
       {/* Square button, same size as GPS button, positioned to its left */}
       <motion.button
-        className="fixed bottom-2 right-[152px] z-[1000] w-11 h-11 bg-orange-500 hover:bg-orange-600 text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none backdrop-blur-sm"
+        style={slotStyle}
+        className="fixed z-[1000] w-11 h-11 bg-orange-500 hover:bg-orange-600 text-white rounded-xl shadow-sm flex items-center justify-center cursor-pointer border-0 outline-none backdrop-blur-sm"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={handleClick}

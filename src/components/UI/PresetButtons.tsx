@@ -7,6 +7,7 @@ import { captureCurrentPresetSnapshot, type Preset } from '../../store/presetSto
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { useCustomLayerStore } from '../../store/customLayerStore'
 import { useCustomPointLayerStore } from '../../store/customPointLayerStore'
+import { useControlSlot } from '../../hooks/useControlSlot'
 import { AppWindow } from './AppWindow'
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -179,11 +180,15 @@ export function PresetButtons() {
     if (confirm('Standaardpresets herstellen? Hun opgeslagen laagkeuzes en kaartpositie worden teruggezet. Je eigen presets blijven behouden.')) resetToDefaults()
   }
 
+  const resetSlot = useControlSlot('reset')
+  const presetsSlot = useControlSlot('presets')
+
   return (
     <>
       <motion.button
         onClick={resetAll}
-        className="fixed bottom-2 left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        style={resetSlot}
+        className="fixed z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Reset - lichtgrijze kaart, alle lagen uit, GPS uit"
@@ -193,7 +198,8 @@ export function PresetButtons() {
 
       <motion.button
         onClick={togglePresetsPanel}
-        className="fixed bottom-[60px] left-2 z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
+        style={presetsSlot}
+        className="fixed z-[800] w-11 h-11 flex items-center justify-center bg-white/80 hover:bg-white/90 rounded-xl shadow-sm border-0 outline-none transition-colors backdrop-blur-sm"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="Presets"

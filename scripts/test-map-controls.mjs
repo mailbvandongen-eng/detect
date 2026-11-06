@@ -60,4 +60,21 @@ assert.equal(useUIStore.getState().activeWindow, 'layers', 'Andere panelen sluit
 ui.toggleWindow('timeTravel')
 ui.toggleWindow('timeTravel')
 assert.equal(useUIStore.getState().activeWindow, null)
-console.log('Kaartbediening: complete lagenlijst, import-ID’s, nul-opacity en één-venster-regel goed.')
+
+const layout = loadModule('src/config/controlLayout.ts')
+const seen = new Set()
+for (const ids of Object.values(layout.CONTROL_LAYOUT)) for (const id of ids) {
+  assert.equal(seen.has(id), false, `Knop ${id} staat maar op één plek in het schema`)
+  seen.add(id)
+}
+const shown = new Set(['menu', 'layers', 'measure', 'print', 'reset', 'presets', 'gps', 'timeTravel', 'route'])
+assert.equal(layout.getControlPosition('print', shown).top, layout.getControlPosition('draw', new Set(['measure'])).top, 'Verborgen tekenknop laat geen gat: export schuift op')
+assert.equal(layout.getControlPosition('timeTravel', shown).bottom, '56px', 'Jaarkeuze sluit direct aan op GPS als transparantie ontbreekt')
+assert.equal(layout.getControlPosition('route', shown).right, '56px', 'Route schuift naar de vrije plek naast GPS')
+shown.add('vondst')
+assert.equal(layout.getControlPosition('route', shown).right, '104px', 'Een extra knop schuift de rest door')
+assert.equal(layout.getControlPosition('gps', shown).right, '8px')
+assert.equal(layout.getControlPosition('gps', shown).bottom, '8px', 'GPS staat in de hoek nu de zoomknoppen weg zijn')
+const compassShown = new Set(['menu', 'layers', 'compass'])
+assert.equal(layout.getControlPosition('layers', compassShown).top, layout.getControlPosition('layers', new Set(['menu'])).top, 'Kompas verschuift de lagenknop niet')
+console.log('Kaartbediening: complete lagenlijst, import-ID’s, nul-opacity, één-venster-regel en knoppenschema zonder gaten goed.')
