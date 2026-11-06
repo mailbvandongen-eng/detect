@@ -1,6 +1,6 @@
 # Detect - Sessienotities
 
-## Huidige versie: 2.33.107
+## Huidige versie: 2.33.111
 
 ---
 
@@ -29,7 +29,8 @@
 - Monumenten zoeken via knop in de zoekbalk. Laagbeginstand uit register (`buildDefaultVisibility`).
 - `Popup.tsx` deels opgesplitst naar `src/components/Map/popup/`; `handleClick` is nog groot.
 - Open: Bob overweegt de Vondst-knop helemaal te verwijderen (long-press → toevoegen → laag werkt prima).
-- Bekende testfouten die al vóór deze ronde bestonden: `test-cassini-browser` (Cassini niet zichtbaar na migratie) en `test-france-history-browser` (Historical layer migration mismatch Luchtfoto 1950–1965).
+- Preset Thédirac 2026 verwijderd (v2.33.111; vakantie voorbij). Franse lagen blijven. Presets voor een volgende vakantie: per bestemming een eigen onderzoekspreset maken. De tests `test-cassini-browser` en `test-france-history-browser` testten alleen die preset en zijn vervallen.
+- Presets nu: Detectie, Hoogte & LiDAR, Geomorfologie, 1850, 1900, Frankrijk historie. AMK + Romeinse wegen altijd aan in NL-presets. Geologie-legenda FR via lokale BD Charm-50 (alleen gebied Thédirac).
 
 ### Venstersysteem (v2.33.1)
 - `src/store/uiStore.ts` beheert één actief hoofdvenster; een tweede venster vervangt altijd het eerste.

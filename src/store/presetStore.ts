@@ -4,12 +4,7 @@ import { accountStorage } from '../utils/accountStorage'
 import { fromLonLat, toLonLat } from 'ol/proj'
 import { THEDIRAC_RESEARCH_LAYER_NAME } from '../data/thediracResearchSites'
 import { NAPOLEON_LOT_LAYER } from '../data/lotCadastreArchives'
-import {
-  FRANCE_HISTORICAL_MAP_NAMES,
-  FRANCE_RESEARCH_DEFAULT_STATES,
-  FRANCE_RESEARCH_LAYER_DEFINITIONS,
-  FRANCE_RESEARCH_LAYER_ORDER
-} from '../config/franceResearchLayers'
+import { FRANCE_RESEARCH_LAYER_ORDER } from '../config/franceResearchLayers'
 import { useLayerStore } from './layerStore'
 import { useMapStore } from './mapStore'
 import { useCustomLayerStore } from './customLayerStore'
@@ -39,11 +34,8 @@ export interface Preset {
   isBuiltIn: boolean
 }
 
-const THEDIRAC_CENTER: [number, number] = [1.34, 44.625]
 const FRANCE_RESEARCH_LAYER_NAMES = new Set(FRANCE_RESEARCH_LAYER_ORDER)
-const NEW_HISTORICAL_LAYERS = ['Luchtfoto · 1950–1965', 'IGN-kaart · 1950', 'État-major · 1820–1866', 'Napoleontisch kadaster · Lot (archief)'] as const
 const THEDIRAC_ARCHAEOLOGY_LAYER = THEDIRAC_RESEARCH_LAYER_NAME
-const CASSINI_LAYER = 'Carte de Cassini · 18e eeuw'
 
 /** Verhoog om de ingebouwde Detectie-preset eenmalig opnieuw uit te rollen. */
 const DETECTIE_REVISION = 2
@@ -143,10 +135,6 @@ const BUILT_IN_PRESETS: Preset[] = [
       NAPOLEON_LOT_LAYER
     ],
     baseLayer: 'Hybride (wereld)',
-    mapView: {
-      center: THEDIRAC_CENTER,
-      zoom: 12
-    },
     layerOpacities: {
       'Bodem/geologie 1:50.000 FR': 0.35,
       'Luchtfoto · 1950–1965': 0.7,
@@ -156,30 +144,13 @@ const BUILT_IN_PRESETS: Preset[] = [
       [NAPOLEON_LOT_LAYER]: 1
     },
     isBuiltIn: true
-  },
-  {
-    id: 'thedirac-2026',
-    cassiniAdded: true,
-    historicalMapsAdded: true,
-    name: 'Thédirac 2026',
-    icon: 'Compass',
-    layers: FRANCE_RESEARCH_LAYER_DEFINITIONS.filter(layer => layer.defaultVisible).map(layer => layer.name),
-    layerStates: FRANCE_RESEARCH_DEFAULT_STATES,
-    baseLayer: 'Hybride (wereld)',
-    mapView: {
-      center: THEDIRAC_CENTER,
-      zoom: 10.7
-    },
-    layerOpacities: Object.fromEntries(
-      Object.entries(FRANCE_RESEARCH_DEFAULT_STATES).map(([name, state]) => [name, state.opacity])
-    ),
-    isBuiltIn: true
   }
 ]
 
 const ALWAYS_VISIBLE_PRESET_IDS = new Set(['detectie-uitgebreid', 'veld-hoogte-lidar', 'veld-geomorfologie', 'veld-tmk-1850', 'veld-bonnebladen-1900'])
 
 const LEGACY_STANDARD_PRESET_IDS = new Set([
+  'thedirac-2026',
   'veld-hoogtekaart',
   'veld-lidar',
   'detectie',
@@ -296,45 +267,8 @@ function normalizePreset(preset: Preset): Preset {
   // niet stilletjes uit de ingebouwde definitie worden teruggezet.
   const configuredLayers = (preset.layers ?? builtInPreset.layers).map(migrateFranceLayerName)
 
-  const addCassini = preset.id === 'thedirac-2026' && !preset.cassiniAdded
   let layerStates = normalizeLayerStates(preset.layerStates)
   const layerOpacities = normalizeLayerOpacities(preset.layerOpacities ?? builtInPreset.layerOpacities)
-  if (addCassini && !configuredLayers.includes(CASSINI_LAYER)) {
-    configuredLayers.push(CASSINI_LAYER)
-    if (layerStates) layerStates[CASSINI_LAYER] = { visible: true, opacity: 0.8 }
-    if (layerOpacities) layerOpacities[CASSINI_LAYER] = 0.8
-  }
-
-  if (preset.id === 'thedirac-2026' && !preset.historicalMapsAdded) {
-    for (const name of NEW_HISTORICAL_LAYERS) {
-      if (configuredLayers.includes(name)) continue
-      configuredLayers.push(name)
-      if (layerStates) layerStates[name] = { visible: true, opacity: 1 }
-      if (layerOpacities) layerOpacities[name] = 1
-    }
-  }
-
-  if (preset.id === 'thedirac-2026') {
-    const existingStates = layerStates ?? {}
-    const hasHistoricalState = FRANCE_HISTORICAL_MAP_NAMES.some(name => Object.prototype.hasOwnProperty.call(existingStates, name))
-    const visibleHistorical = FRANCE_HISTORICAL_MAP_NAMES.filter(name =>
-      existingStates[name]?.visible ?? configuredLayers.includes(name)
-    )
-    // Historical rasters are mutually exclusive. If an older saved preset had
-    // several enabled, preserve the aerial map when present, otherwise keep
-    // the first canonical choice instead of stacking opaque maps.
-    const selectedHistorical = visibleHistorical.includes('Luchtfoto · 1950–1965')
-      ? 'Luchtfoto · 1950–1965'
-      : visibleHistorical[0] ?? (hasHistoricalState ? null : 'Luchtfoto · 1950–1965')
-    layerStates = { ...existingStates }
-    for (const name of FRANCE_HISTORICAL_MAP_NAMES) {
-      const fallbackOpacity = FRANCE_RESEARCH_DEFAULT_STATES[name]?.opacity ?? 1
-      layerStates[name] = {
-        visible: selectedHistorical ? name === selectedHistorical : Boolean(existingStates[name]?.visible),
-        opacity: existingStates[name]?.opacity ?? fallbackOpacity
-      }
-    }
-  }
 
   // Monumenten en Romeinse wegen zijn in alle Nederlandse standaardpresets
   // altijd zichtbaar, ook in een eerder opgeslagen versie.
@@ -363,7 +297,6 @@ function normalizePreset(preset: Preset): Preset {
   return {
     ...builtInPreset,
     ...preset,
-    ...(preset.id === 'thedirac-2026' ? { cassiniAdded: true, historicalMapsAdded: true } : {}),
     layers: configuredLayers.filter((layer) => !REMOVED_LAYERS.has(layer)),
     baseLayer: migrateLegacyBaseLayer(preset.baseLayer ?? builtInPreset.baseLayer),
     layerStates,

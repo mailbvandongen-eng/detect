@@ -196,7 +196,7 @@ mocks['../store/routeRecordingStore'] = { useRouteRecordingStore: asHook(routes)
 const settingsModule = load('src/store/settingsStore.ts'), presetsModule = load('src/store/presetStore.ts')
 mocks['../store/settingsStore'] = { ...settingsModule, useSettingsStore: asHook(settings) }
 mocks['../store/presetStore'] = { ...presetsModule, usePresetStore: asHook(presetsModule.usePresetStore) }
-const savedVacation = {...presetsModule.usePresetStore.getState().presets.find(p=>p.id==='thedirac-2026'),
+const savedVacation = {id:'mijn-vakantie',icon:'Compass',isBuiltIn:false,layerOpacities:{},
   name:'Mijn Thédirac', baseLayer:'OpenStreetMap', layers:['Mineralen (12)','Fossielen (28)','Spectaculaire wandelroutes (15)','Sites Classés Occitanie'],
   layerStates:{'Mineralen (12)':{visible:true,opacity:.41},'Fossielen (28)':{visible:true,opacity:.62},'Spectaculaire wandelroutes (15)':{visible:true,opacity:.8},'Sites Classés Occitanie':{visible:true,opacity:.35},'LiDAR HD terrein FR':{visible:false,opacity:.2},'Carte de Cassini · 18e eeuw':{visible:false,opacity:.8},'Luchtfoto · 1950–1965':{visible:true,opacity:1},'IGN-kaart · 1950':{visible:false,opacity:1},'État-major · 1820–1866':{visible:false,opacity:1}},
   customLayerStates:{'point:kept':{visible:true,opacity:1}},mapView:{center:[1.34,44.62],zoom:13}};
@@ -217,6 +217,7 @@ assert.equal(hoogte.baseLayer,'Esri (licht)');
 const geoOld=presetsModule.normalizePresetCollection([{id:'veld-geomorfologie',name:'Geomorfologie',icon:'Layers',layers:['Geomorfologie'],layerStates:{'AMK Monumenten':{visible:false,opacity:.3}},isBuiltIn:true}]).find(p=>p.id==='veld-geomorfologie');
 assert.ok(geoOld.layers.includes('AMK Monumenten')&&geoOld.layers.includes('Romeinse wegen (regio)'),'Monumenten en Romeinse wegen altijd in NL-presets');
 assert.equal(geoOld.layerStates['AMK Monumenten'].visible,true);assert.equal(geoOld.layerStates['AMK Monumenten'].opacity,.3,'Eigen transparantie blijft');
+assert.equal(presetsModule.normalizePresetCollection([{id:'thedirac-2026',name:'Thédirac 2026',icon:'Compass',layers:[],isBuiltIn:true}]).some(p=>p.id==='thedirac-2026'),false,'Thédirac-preset is vervallen');
 const fr=mergedPresets.find(p=>p.id==='frankrijk-historie');
 for(const name of ['Bodem/geologie 1:50.000 FR','Luchtfoto · 1950–1965','IGN-kaart · 1950','État-major · 1820–1866','Carte de Cassini · 18e eeuw'])assert.ok(fr.layers.includes(name),`Frankrijk historie bevat ${name}`);
 const legacy=presetsModule.normalizePresetCollection([{...savedVacation,layers:['Sites ClassÃ©s Occitanie'],layerStates:{'Sites ClassÃ©s Occitanie':{visible:false,opacity:.2},'Sites Classés Occitanie':{visible:true,opacity:.35}}}]).find(p=>p.id===savedVacation.id);
@@ -297,7 +298,7 @@ presetStore.getState().resetToDefaults()
 assert.deepEqual(presetStore.getState().presets.find(p => p.id === 'added-after-defaults'), {...ownPreset,id:'added-after-defaults'})
 presetStore.getState().resetToBuiltIn()
 assert.deepEqual(presetStore.getState().presets.find(p => p.id === ownPreset.id), ownPreset)
-const disabledView = {...presetStore.getState().presets.find(p => p.id === 'thedirac-2026'),mapView:null}
+const disabledView = {...presetStore.getState().presets.find(p => p.id === 'veld-geomorfologie'),mapView:null}
 assert.equal(load('src/store/presetStore.ts').normalizePresetCollection([disabledView]).find(p => p.id === disabledView.id).mapView,null)
 pass('Both restore paths preserve current own presets and disabled built-in map view survives normalization')
 console.log(`${count} private sync and account isolation checks passed`)

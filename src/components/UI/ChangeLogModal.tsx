@@ -12,12 +12,10 @@ interface ChangeLogModalProps {
 const currentRelease = {
   version,
   date: '7 november 2026',
-  title: 'Hoogte & LiDAR, Frankrijk historie en geologie met legenda',
+  title: 'Thédirac-preset verwijderd',
   changes: [
-    'Hoogtekaart en LiDAR zijn samengevoegd tot de preset Hoogte & LiDAR op de lichte kaart. Beide lagen zijn apart regelbaar.',
-    'AMK-monumenten en Romeinse wegen staan in alle Nederlandse presets altijd aan.',
-    'Nieuwe preset Frankrijk historie: luchtfoto 1950–1965, IGN-kaart 1950, État-major, Carte de Cassini en het Napoleontisch kadaster, met de BRGM-bodemkaart erover.',
-    'De Franse bodemkaart toont nu de geharmoniseerde BRGM-kaart. Een tik rond Thédirac geeft de geologische eenheid met kleur, omschrijving en de legenda van het hele gebied. Dat werkte eerder niet, omdat de BRGM-dienst geen eenheid teruggeeft.'
+    'De preset Thédirac 2026 is verwijderd; de vakantie is voorbij. Alle Franse onderzoekslagen blijven beschikbaar in Kaartlagen → Frankrijk.',
+    'Frankrijk historie springt niet meer naar Thédirac, maar blijft op de plek waar je kijkt.'
   ]
 }
 
