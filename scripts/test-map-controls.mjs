@@ -114,4 +114,6 @@ assert.equal(getActiveOpacityLayers({ 'Luchtfoto': true }, { 'Luchtfoto': 1 }, {
 
 const loading = getActiveOpacityLayers({ 'Geomorfologie': true, 'Fossielen Frankrijk': true }, { 'Geomorfologie': 0.6 }, {})
 assert.ok(loading.some(layer => layer.name === 'Fossielen Frankrijk' && layer.opacity === 1), 'Een laag die nog laadt staat direct in de regelaar')
+
+assert.equal(getActiveOpacityLayers({ 'Romeinse wegen (regio)': true, 'Geomorfologie': true }, { 'Romeinse wegen (regio)': 1, 'Geomorfologie': 0.6 }, {}).some(layer => layer.name.startsWith('Romeinse wegen')), false, 'Romeinse wegen staan aan of uit, niet in de regelaar')
 console.log('Kaartbediening: complete lagenlijst, import-ID’s, nul-opacity, één-venster-regel en knoppenschema zonder gaten goed.')

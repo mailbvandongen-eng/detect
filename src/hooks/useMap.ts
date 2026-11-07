@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import Map from 'ol/Map'
 import View from 'ol/View'
 import { fromLonLat } from 'ol/proj'
-import { Attribution, ScaleLine } from 'ol/control'
+import { ScaleLine } from 'ol/control'
 import { useMapStore, useSettingsStore } from '../store'
 import type { MapViewOptions } from '../types/map'
 import { MAP_CLICK_MOVE_TOLERANCE_PX } from '../utils/fieldReliability'
@@ -23,7 +23,8 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
       const defaultView: MapViewOptions = { center: [5.1214, 52.0907], zoom: 8, rotation: 0, minZoom: 3, maxZoom: 19, ...viewOptions }
       const map = new Map({
         target,
-        controls: [new Attribution({ collapsible: true, collapsed: true, tipLabel: 'Kaartbronnen' })],
+        // Bronvermelding staat in Info & handleiding (Databronnen & Licenties).
+        controls: [],
         moveTolerance: MAP_CLICK_MOVE_TOLERANCE_PX,
         view: new View({ center: fromLonLat(defaultView.center), zoom: defaultView.zoom, rotation: defaultView.rotation, minZoom: defaultView.minZoom, maxZoom: defaultView.maxZoom })
       })
@@ -69,7 +70,7 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
     if (!map) return
     if (showScaleBar) {
       if (!scaleLineRef.current) {
-        const scale = new ScaleLine({ units: 'metric', bar: false, text: true, minWidth: 72 })
+        const scale = new ScaleLine({ units: 'metric', bar: false, text: true, minWidth: 56, maxWidth: 110 })
         scaleLineRef.current = scale
         map.addControl(scale)
       }

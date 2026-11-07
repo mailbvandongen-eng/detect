@@ -2,8 +2,10 @@
 import { FRANCE_RESEARCH_LAYER_ORDER } from '../config/franceResearchLayers'
 import { getStackZIndex } from '../config/layerOrder'
 
+// Romeinse wegen staan gewoon aan of uit; transparantie voegt daar niets toe.
 const NON_OPACITY_LAYERS = new Set([
   'Labels Overlay', 'Hybrid Reference Overlay', 'Mijn Vondsten',
+  'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)',
 ])
 
 /** Basiskaarten staan onderaan de regelaar, met een herkenbare naam. */

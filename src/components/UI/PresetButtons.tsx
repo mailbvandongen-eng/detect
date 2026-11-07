@@ -245,10 +245,10 @@ export function PresetButtons() {
         <div
           role="status"
           className="fixed left-1/2 -translate-x-1/2 z-[1200] flex items-center gap-3 pl-4 pr-1 py-1 rounded-xl bg-gray-800/90 text-white shadow-lg backdrop-blur-sm"
-          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)', fontSize: '0.9em' }}
+          style={{ bottom: '56px', height: '44px', fontSize: '0.9em' }}
         >
           <span className="whitespace-nowrap">Kaart gereset</span>
-          <button type="button" onClick={undoReset} className="min-h-[40px] px-3 rounded-lg border-0 outline-none bg-transparent text-blue-300 font-medium hover:bg-white/10 whitespace-nowrap">
+          <button type="button" onClick={undoReset} className="min-h-[36px] px-3 rounded-lg border-0 outline-none bg-transparent text-blue-300 font-medium hover:bg-white/10 whitespace-nowrap">
             Ongedaan maken
           </button>
         </div>

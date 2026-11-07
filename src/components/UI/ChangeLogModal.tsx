@@ -12,11 +12,11 @@ interface ChangeLogModalProps {
 const currentRelease = {
   version,
   date: '7 november 2026',
-  title: 'Basiskaart in de transparantieregelaar',
+  title: 'Onderkant netjes uitgelijnd',
   changes: [
-    'De basiskaart staat onderaan de transparantieregelaar zodra er een laag overheen ligt. Zo maak je bijvoorbeeld de luchtfoto lichter, zodat de lagen erboven beter leesbaar zijn.',
-    'Presets onthouden de transparantie van de basiskaart. Reset zet de basiskaart weer op 100%.',
-    'Een laag die je aanzet staat direct in de regelaar, ook als hij nog laadt (zoals de fossielenlagen, die hun gegevens live ophalen).'
+    'Het i-knopje voor kaartbronnen is weg. De bronvermelding staat in Info & handleiding onder Databronnen & Licenties.',
+    'De schaalbalk staat linksonder naast de resetknop, op één lijn met de onderste knoppen. De melding Kaart gereset staat op de hoogte van de presetknop.',
+    'Romeinse wegen staan niet meer in de transparantieregelaar; die zet je gewoon aan of uit.'
   ]
 }
 

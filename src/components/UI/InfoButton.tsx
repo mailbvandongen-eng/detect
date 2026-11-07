@@ -86,6 +86,31 @@ function InfoTab() {
         <h3 className="font-semibold text-gray-800 mb-2">Databronnen & Licenties</h3>
         <ul className="space-y-2 text-gray-600">
           <li>
+            <strong>Basiskaarten</strong>
+            <br />
+            <span className="text-xs">© Esri, HERE, Garmin, Maxar en de GIS-community (lichtgrijs, satelliet, hybride); © OpenStreetMap-bijdragers; Luchtfoto NL © PDOK / Beeldmateriaal Nederland</span>
+          </li>
+          <li>
+            <strong>Esri Nederland / AHN</strong>
+            <br />
+            <span className="text-xs">AHN4 Hoogtekaart Kleur, Hillshade Kleur en Multi-Hillshade (50 cm)</span>
+          </li>
+          <li>
+            <strong>IGN / Géoplateforme</strong> (Licence Ouverte)
+            <br />
+            <span className="text-xs">LiDAR HD, OCS GE, Forêts anciennes, luchtfoto 1950–1965, IGN-kaart 1950, État-major; Carte de Cassini © BnF / IGN; BD TOPAGE © IGN / OFB / Sandre</span>
+          </li>
+          <li>
+            <strong>BRGM</strong> (Licence Ouverte Etalab)
+            <br />
+            <span className="text-xs">Geologische kaarten 1:50.000, BD Charm-50 (geologie met legenda), boringen BSS, IDPR, cavités (Géorisques)</span>
+          </li>
+          <li>
+            <strong>Paleobiology Database</strong> (CC BY 4.0)
+            <br />
+            <span className="text-xs">Fossielen Nederland, België, Duitsland en Frankrijk</span>
+          </li>
+          <li>
             <strong>RCE / Cultureelerfgoed.nl</strong> (CC0/CC-BY)
             <br />
             <span className="text-xs">AMK Monumenten, Rijksmonumenten, Werelderfgoed, Paleokaarten, Religieus Erfgoed, Essen, Archeo Onderzoeken</span>
