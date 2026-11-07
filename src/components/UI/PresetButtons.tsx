@@ -126,6 +126,9 @@ export function PresetButtons() {
     BASE_LAYERS.forEach(layerName => {
       setLayerVisibility(layerName, layerName === 'Esri (licht)')
     })
+    for (const layerName of ['Esri (licht)', 'OpenStreetMap', 'Luchtfoto', 'Satelliet (wereld)', 'Hybride (wereld)']) {
+      useLayerStore.getState().setLayerOpacity(layerName, 1)
+    }
     setLayerVisibility('Labels Overlay', true)
 
     for (const store of [useCustomLayerStore, useCustomPointLayerStore]) {

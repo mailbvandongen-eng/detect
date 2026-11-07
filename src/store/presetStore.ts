@@ -21,6 +21,8 @@ export interface Preset {
   icon: string
   layers: string[]
   baseLayer?: string
+  /** Transparantie van de basiskaart (1 = volledig zichtbaar). */
+  baseOpacity?: number
   layerOpacities?: Record<string, number>
   layerStates?: Record<string, PresetLayerState>
   customLayerStates?: Record<string, PresetLayerState>
@@ -209,7 +211,7 @@ interface PresetState {
   updatedAt: number
   applyPreset: (id: string) => void
   createPreset: (name: string, icon: string, rememberMapView?: boolean) => void
-  updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'layerOpacities' | 'layerStates' | 'customLayerStates' | 'mapView'>>) => void
+  updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'baseOpacity' | 'layerOpacities' | 'layerStates' | 'customLayerStates' | 'mapView'>>) => void
   deletePreset: (id: string) => void
   saveAsDefaults: () => void
   resetToDefaults: () => void
@@ -391,6 +393,7 @@ export function applyPresetSnapshot(rawPreset: Preset) {
   BASE_LAYER_NAMES.forEach((layerName) => {
     layerStore.setLayerVisibility(layerName, layerName === nextBaseLayer)
   })
+  layerStore.setLayerOpacity(nextBaseLayer, preset.baseOpacity ?? 1)
   layerStore.setLayerVisibility(
     'Labels Overlay',
     nextBaseLayer === 'Esri (licht)' || preset.layers.includes('Labels Overlay')
@@ -449,6 +452,7 @@ export function captureCurrentPresetSnapshot() {
       .filter(([, state]) => state.visible)
       .map(([layerName]) => layerName),
     baseLayer: activeBaseLayer || 'Esri (licht)',
+    baseOpacity: layerStore.opacity[activeBaseLayer || 'Esri (licht)'] ?? 1,
     layerOpacities: Object.fromEntries(
       Object.entries(layerStates).map(([layerName, state]) => [layerName, state.opacity])
     ),
