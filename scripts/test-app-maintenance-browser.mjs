@@ -8,7 +8,7 @@ const {webkit,devices}=require('playwright')
 const fixture=`
 import React from 'react';import {createRoot} from 'react-dom/client';
 import {useStartupWindows} from '/src/hooks/useStartupWindows';
-import {WelcomeModal} from '/src/components/UI/WelcomeModal';
+import {WelcomeModal} from '/src/components/UI/WelcomeModal';import {HamburgerMenu} from '/src/components/UI/HamburgerMenu';
 import {ChangeLogModal} from '/src/components/UI/ChangeLogModal';
 import {SettingsPanel} from '/src/components/UI/SettingsPanel';
 import {initializeAppUpdates} from '/src/services/appMaintenance';
@@ -27,7 +27,7 @@ ui.subscribe((next,old)=>{if(next.activeWindow==='changeLog'&&old.activeWindow!=
  sessionStorage.setItem('change-count',String(Number(sessionStorage.getItem('change-count')||0)+1));
  if(!auth.getState().ready)sessionStorage.setItem('early-window','yes');
 }});
-function Startup(){const startup=useStartupWindows();return <><WelcomeModal isOpen={startup.welcomeModalOpen} onClose={startup.handleWelcomeClose} onOpenManual={startup.handleOpenManual}/><ChangeLogModal isOpen={startup.changeLogOpen} onClose={startup.closeChangeLog}/><SettingsPanel/></>}
+function Startup(){const startup=useStartupWindows();return <><HamburgerMenu/><WelcomeModal isOpen={startup.welcomeModalOpen} onClose={startup.handleWelcomeClose} onOpenManual={startup.handleOpenManual}/><ChangeLogModal isOpen={startup.changeLogOpen} onClose={startup.closeChangeLog}/><SettingsPanel/></>}
 createRoot(document.getElementById('root')).render(<Startup/>);
 initializeAppUpdates();
 setTimeout(async()=>{
@@ -92,6 +92,10 @@ try{
  swVersion=2
  await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();await r.update()})
  await page.waitForFunction(()=>window.test.update.getState().updateAvailable)
+ await page.evaluate(()=>window.test.ui.getState().openWindow('menu'))
+ await page.getByRole('button',{name:/Nieuwe versie klaar/}).waitFor()
+ await page.evaluate(()=>window.test.ui.getState().closeWindow())
+ console.log('PASS WebKit: waiting update is announced in the menu')
  const changedCount=await page.evaluate(()=>sessionStorage.getItem('change-count'))
  let navigations=0;page.on('framenavigated',frame=>{if(frame===page.mainFrame())navigations++})
  await page.waitForTimeout(700)

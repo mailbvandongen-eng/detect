@@ -32,9 +32,13 @@ export function initializeAppUpdates() {
     observeRegistration(next)
     void next.update().catch(() => {})
   }).catch(() => { registrationPromise = undefined })
-  document.addEventListener('visibilitychange', () => {
+  const checkForUpdate = () => {
     if (document.visibilityState === 'visible' && navigator.onLine) void registration?.update().catch(() => {})
-  })
+  }
+  document.addEventListener('visibilitychange', checkForUpdate)
+  // Ook als de app lang open blijft: elk halfuur kijken of er een nieuwe versie is.
+  // Er wordt nooit vanzelf herladen; de melding staat in het menu.
+  window.setInterval(checkForUpdate, 30 * 60 * 1000)
 }
 
 function assertIdle() {

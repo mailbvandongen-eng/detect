@@ -11,12 +11,12 @@ interface ChangeLogModalProps {
 
 const currentRelease = {
   version,
-  date: '7 november 2026',
-  title: 'Onderkant netjes uitgelijnd',
+  date: '9 november 2026',
+  title: 'Nieuwe versie zichtbaar in het menu',
   changes: [
-    'Het i-knopje voor kaartbronnen is weg. De bronvermelding staat in Info & handleiding onder Databronnen & Licenties.',
-    'De schaalbalk staat linksonder naast de resetknop, op één lijn met de onderste knoppen. De melding Kaart gereset staat op de hoogte van de presetknop.',
-    'Romeinse wegen staan niet meer in de transparantieregelaar; die zet je gewoon aan of uit.'
+    'Staat er een nieuwe versie klaar, dan krijgt de menuknop een oranje stipje en staat bovenaan het menu Nieuwe versie klaar. Eén tik vernieuwt Detect.',
+    'Detect herlaadt nooit vanzelf; tijdens een route-opname of invoer wordt vernieuwen tegengehouden met een melding.',
+    'Detect controleert ook elk halfuur op een nieuwe versie zolang de app open is.'
   ]
 }
 

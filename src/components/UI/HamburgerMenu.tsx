@@ -10,6 +10,8 @@ import { version } from '../../../package.json'
 import { AppWindow } from './AppWindow'
 import { useControlSlot } from '../../hooks/useControlSlot'
 import { useUnseenChangeLog } from '../../hooks/useStartupWindows'
+import { useAppUpdateStore } from '../../store/appUpdateStore'
+import { renewApp } from '../../services/appMaintenance'
 
 // Google logo SVG component
 function GoogleLogo({ size = 18 }: { size?: number }) {
@@ -72,6 +74,7 @@ export function HamburgerMenu() {
   // Safe top position for mobile browsers (accounts for notch/status bar)
   const slotStyle = useControlSlot('menu')
   const hasUnseenChanges = useUnseenChangeLog()
+  const update = useAppUpdateStore()
 
   const closeMenu = closeWindow
 
@@ -155,8 +158,8 @@ export function HamburgerMenu() {
         ) : (
           <Menu size={22} className="text-gray-600 drop-shadow-[1px_1px_1px_rgba(0,0,0,0.15)]" />
         )}
-        {hasUnseenChanges && !isOpen && (
-          <span aria-hidden="true" className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-white" />
+        {(hasUnseenChanges || update.updateAvailable) && !isOpen && (
+          <span aria-hidden="true" className={`absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full ring-2 ring-white ${update.updateAvailable ? 'bg-orange-500' : 'bg-blue-500'}`} />
         )}
       </motion.button>
 
@@ -179,6 +182,25 @@ export function HamburgerMenu() {
           </div>
         )}
       >
+              {update.updateAvailable && (
+                <div className="mx-2 mt-2 mb-1 rounded-lg bg-orange-50 p-2">
+                  <button
+                    type="button"
+                    onClick={() => void renewApp()}
+                    disabled={update.busy}
+                    className="w-full flex items-center gap-3 border-0 outline-none bg-transparent text-left text-orange-800 disabled:opacity-60"
+                    style={menuItemStyle}
+                  >
+                    <RefreshCw size={18} className={`text-orange-600 ${update.busy ? 'animate-spin' : ''}`} />
+                    <span className="flex-1">
+                      <span className="block font-medium">{update.busy ? 'Bezig met vernieuwen…' : 'Nieuwe versie klaar'}</span>
+                      <span className="block text-orange-700" style={{ fontSize: '0.8em' }}>Tik om Detect te vernieuwen</span>
+                    </span>
+                  </button>
+                  {update.error && <p role="alert" className="px-1 pt-1 text-red-700" style={{ fontSize: '0.8em' }}>{update.error}</p>}
+                </div>
+              )}
+
               <MenuSection title="Account" first>
               {loading ? (
                 <div className="px-3 py-4 flex items-center justify-center">
