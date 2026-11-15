@@ -48,6 +48,7 @@ export function GpsMarker() {
   const accuracyRef = useRef<Feature<Point> | null>(null)
   const layerRef = useRef<VectorLayer<VectorSource> | null>(null)
   const previousPositionRef = useRef(position)
+  const lastRotationRef = useRef(0)
 
   const isHeadingUp = tracking && navigationMode === 'headingUp'
 
@@ -197,7 +198,11 @@ export function GpsMarker() {
     while (diff > Math.PI) diff -= 2 * Math.PI
     while (diff < -Math.PI) diff += 2 * Math.PI
 
-    if (Math.abs(diff) > 0.01) {
+    // Alleen meedraaien bij minstens 2 graden en hooguit 4x per seconde: elke
+    // draai tekent alle lagen opnieuw en dat maakte de telefoon in de auto warm.
+    const now = performance.now()
+    if (Math.abs(diff) > 0.035 && now - lastRotationRef.current >= 250) {
+      lastRotationRef.current = now
       view.animate({
         rotation: currentRotation + diff,
         duration: 200

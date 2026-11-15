@@ -11,13 +11,11 @@ interface ChangeLogModalProps {
 
 const currentRelease = {
   version,
-  date: '15 november 2026',
-  title: 'Nieuwe indeling presets',
+  date: '16 november 2026',
+  title: 'Zuiniger op de iPhone',
   changes: [
-    'Detectie is nu licht: lichte kaart met geomorfologie, monumenten en Romeinse wegen. Geschikt voor onderweg.',
-    'Nieuwe presets LiDAR (AHN4 Multi-Hillshade 50 cm) en Hoogtekaart (AHN4 Hoogtekaart Kleur), elk op de lichte kaart met monumenten en Romeinse wegen.',
-    'Nieuwe preset Thuisonderzoek: luchtfoto met hoogtekaart en LiDAR, monumenten en Romeinse wegen.',
-    'De preset Hoogte & LiDAR is vervangen door deze presets. Je opgeslagen Detectie wordt eenmalig vervangen door de nieuwe versie.'
+    'Hoogtekaart, Hillshade Kleur en LiDAR worden op schermresolutie opgehaald in plaats van 3x. Op een iPhone was elk beeld ruim 10 miljoen pixels; nu ongeveer 1 miljoen. Dat moet voorkomen dat Safari Detect in de auto afsluit en de telefoon warm wordt.',
+    'De kaart tekent op hooguit 2x scherpte en draait in rijmodus alleen mee bij een richtingsverandering van minstens 2 graden, hooguit 4 keer per seconde.'
   ]
 }
 

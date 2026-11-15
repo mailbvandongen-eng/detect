@@ -17,6 +17,9 @@ export function createAHN4ColorElevationLayerOL() {
     visible: false,
     opacity: 1.0,
     source: new ImageArcGISRest({
+      // Geen 2x/3x-afbeelding: op een iPhone werd elk beeld >10 Mpx en klapte
+      // Safari eruit. De 50 cm-data is op schermresolutie al volledig zichtbaar.
+      hidpi: false,
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({
@@ -41,6 +44,9 @@ export function createAHN4ShadedReliefLayerOL() {
     properties: { title: 'Color Base' },
     opacity: 1.0,
     source: new ImageArcGISRest({
+      // Geen 2x/3x-afbeelding: op een iPhone werd elk beeld >10 Mpx en klapte
+      // Safari eruit. De 50 cm-data is op schermresolutie al volledig zichtbaar.
+      hidpi: false,
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({
@@ -121,6 +127,9 @@ export function createAHN4MultiHillshadeLayerOL() {
     visible: false,
     opacity: 0.7,
     source: new ImageArcGISRest({
+      // Geen 2x/3x-afbeelding: op een iPhone werd elk beeld >10 Mpx en klapte
+      // Safari eruit. De 50 cm-data is op schermresolutie al volledig zichtbaar.
+      hidpi: false,
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({

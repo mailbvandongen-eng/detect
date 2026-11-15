@@ -302,6 +302,9 @@ export async function showParcelHeightMap(
     // Create colored elevation layer with polygon clipping
     // Using AHN4 DTM 50cm from Esri Nederland ImageServer with DYNAMIC color ramp
     const imageSource = new ImageArcGISRest({
+      // Geen 2x/3x-afbeelding: op een iPhone werd elk beeld >10 Mpx en klapte
+      // Safari eruit. De 50 cm-data is op schermresolutie al volledig zichtbaar.
+      hidpi: false,
       url: 'https://ahn.arcgisonline.nl/arcgis/rest/services/Hoogtebestand/AHN4_DTM_50cm/ImageServer',
       params: {
         renderingRule: JSON.stringify({

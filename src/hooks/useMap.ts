@@ -23,6 +23,9 @@ export function useMap({ target, viewOptions }: UseMapOptions) {
       const defaultView: MapViewOptions = { center: [5.1214, 52.0907], zoom: 8, rotation: 0, minZoom: 3, maxZoom: 19, ...viewOptions }
       const map = new Map({
         target,
+        // Telefoons met 3x-schermen tekenen anders 9x zoveel pixels per laag;
+        // 2x is scherp genoeg en houdt geheugen en warmte binnen de perken.
+        pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
         // Bronvermelding staat in Info & handleiding (Databronnen & Licenties).
         controls: [],
         moveTolerance: MAP_CLICK_MOVE_TOLERANCE_PX,
