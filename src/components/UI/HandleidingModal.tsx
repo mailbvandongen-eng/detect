@@ -217,8 +217,10 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     Presets zijn vooraf ingestelde combinaties van kaartlagen. Ideaal om snel te wisselen tussen:
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
-                    <li><strong>Detectie</strong> - Luchtfoto met AMK, Romeinse wegen, geomorfologie bovenop Hillshade Kleur, en LiDAR</li>
-                    <li><strong>Hoogte &amp; LiDAR</strong> - Lichte kaart met actuele hoogtekaart en LiDAR, elk apart regelbaar</li>
+                    <li><strong>Detectie</strong> - Lichte kaart met geomorfologie, monumenten en Romeinse wegen; licht genoeg voor onderweg</li>
+                    <li><strong>LiDAR</strong> - Lichte kaart met AHN4 Multi-Hillshade (50 cm), monumenten en Romeinse wegen</li>
+                    <li><strong>Hoogtekaart</strong> - Lichte kaart met AHN4 Hoogtekaart Kleur, monumenten en Romeinse wegen</li>
+                    <li><strong>Thuisonderzoek</strong> - Luchtfoto met hoogtekaart en LiDAR, monumenten en Romeinse wegen</li>
                     <li><strong>Geomorfologie</strong> - Geomorfologische kaart en AMK</li>
                     <li><strong>1850 / 1900</strong> - TMK of Bonnebladen over de luchtfoto, met AMK</li>
                     <li><strong>Frankrijk historie</strong> - Luchtfoto 1950–1965, IGN 1950, État-major, Cassini en Napoleon-kadaster met de BRGM-bodemkaart; tik voor eenheid en legenda</li>

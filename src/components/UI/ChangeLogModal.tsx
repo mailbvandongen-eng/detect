@@ -11,12 +11,13 @@ interface ChangeLogModalProps {
 
 const currentRelease = {
   version,
-  date: '9 november 2026',
-  title: 'Nieuwe versie zichtbaar in het menu',
+  date: '15 november 2026',
+  title: 'Nieuwe indeling presets',
   changes: [
-    'Staat er een nieuwe versie klaar, dan krijgt de menuknop een oranje stipje en staat bovenaan het menu Nieuwe versie klaar. Eén tik vernieuwt Detect.',
-    'Detect herlaadt nooit vanzelf; tijdens een route-opname of invoer wordt vernieuwen tegengehouden met een melding.',
-    'Detect controleert ook elk halfuur op een nieuwe versie zolang de app open is.'
+    'Detectie is nu licht: lichte kaart met geomorfologie, monumenten en Romeinse wegen. Geschikt voor onderweg.',
+    'Nieuwe presets LiDAR (AHN4 Multi-Hillshade 50 cm) en Hoogtekaart (AHN4 Hoogtekaart Kleur), elk op de lichte kaart met monumenten en Romeinse wegen.',
+    'Nieuwe preset Thuisonderzoek: luchtfoto met hoogtekaart en LiDAR, monumenten en Romeinse wegen.',
+    'De preset Hoogte & LiDAR is vervangen door deze presets. Je opgeslagen Detectie wordt eenmalig vervangen door de nieuwe versie.'
   ]
 }
 

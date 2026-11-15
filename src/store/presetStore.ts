@@ -40,7 +40,7 @@ const FRANCE_RESEARCH_LAYER_NAMES = new Set(FRANCE_RESEARCH_LAYER_ORDER)
 const THEDIRAC_ARCHAEOLOGY_LAYER = THEDIRAC_RESEARCH_LAYER_NAME
 
 /** Verhoog om de ingebouwde Detectie-preset eenmalig opnieuw uit te rollen. */
-const DETECTIE_REVISION = 2
+const DETECTIE_REVISION = 3
 
 const BUILT_IN_PRESETS: Preset[] = [
   {
@@ -48,35 +48,54 @@ const BUILT_IN_PRESETS: Preset[] = [
     name: 'Detectie',
     icon: 'Compass',
     detectieRevision: DETECTIE_REVISION,
-    // Volgorde op de kaart volgt LAYER_STACK_ORDER: geomorfologie boven
-    // Hillshade Kleur, daaronder LiDAR; AMK en Romeinse wegen liggen bovenop.
-    layers: [
-      'AMK Monumenten',
-      'Romeinse wegen (regio)',
-      'Geomorfologie',
-      'AHN4 Hillshade Kleur',
-      'AHN4 Multi-Hillshade NL'
-    ],
-    baseLayer: 'Luchtfoto',
+    // Meest gebruikte combinatie: geomorfologie als leidende laag met de
+    // monumenten erboven, op de lichte kaart. Licht genoeg voor onderweg.
+    layers: ['Geomorfologie', 'AMK Monumenten', 'Romeinse wegen (regio)'],
+    baseLayer: 'Esri (licht)',
     layerOpacities: {
+      'Geomorfologie': 0.70,
       'AMK Monumenten': 0.60,
-      'Romeinse wegen (regio)': 1,
-      'Geomorfologie': 0.60,
-      'AHN4 Hillshade Kleur': 0.60,
-      'AHN4 Multi-Hillshade NL': 0.20
+      'Romeinse wegen (regio)': 1
     },
     isBuiltIn: true
   },
   {
-    id: 'veld-hoogte-lidar',
-    name: 'Hoogte & LiDAR',
-    icon: 'Mountain',
-    // Actuele hoogtekaart en LiDAR samen, elk apart regelbaar in de
-    // transparantieregelaar. LiDAR ligt boven de hoogtekaart (layerOrder).
-    layers: ['AHN4 Hoogtekaart Kleur', 'AHN4 Multi-Hillshade NL', 'AMK Monumenten', 'Romeinse wegen (regio)'],
+    id: 'lidar-50cm',
+    name: 'LiDAR',
+    icon: 'Grid',
+    // Scherpste LiDAR-weergave: AHN4 multidirectionele hillshade, 50 cm.
+    layers: ['AHN4 Multi-Hillshade NL', 'AMK Monumenten', 'Romeinse wegen (regio)'],
     baseLayer: 'Esri (licht)',
     layerOpacities: {
-      'AHN4 Hoogtekaart Kleur': 0.8,
+      'AHN4 Multi-Hillshade NL': 1,
+      'AMK Monumenten': 0.60,
+      'Romeinse wegen (regio)': 1
+    },
+    isBuiltIn: true
+  },
+  {
+    id: 'hoogtekaart-kleur',
+    name: 'Hoogtekaart',
+    icon: 'Mountain',
+    layers: ['AHN4 Hoogtekaart Kleur', 'AMK Monumenten', 'Romeinse wegen (regio)'],
+    baseLayer: 'Esri (licht)',
+    layerOpacities: {
+      'AHN4 Hoogtekaart Kleur': 1,
+      'AMK Monumenten': 0.60,
+      'Romeinse wegen (regio)': 1
+    },
+    isBuiltIn: true
+  },
+  {
+    id: 'thuis-onderzoek',
+    name: 'Thuisonderzoek',
+    icon: 'Search',
+    // Uitgebreide combinatie voor thuis: luchtfoto met hoogtekaart en LiDAR
+    // (LiDAR ligt boven de hoogtekaart, zie layerOrder), elk apart regelbaar.
+    layers: ['AHN4 Hoogtekaart Kleur', 'AHN4 Multi-Hillshade NL', 'AMK Monumenten', 'Romeinse wegen (regio)'],
+    baseLayer: 'Luchtfoto',
+    layerOpacities: {
+      'AHN4 Hoogtekaart Kleur': 0.6,
       'AHN4 Multi-Hillshade NL': 0.5,
       'AMK Monumenten': 0.60,
       'Romeinse wegen (regio)': 1
@@ -177,9 +196,10 @@ const BUILT_IN_PRESETS: Preset[] = [
   }
 ]
 
-const ALWAYS_VISIBLE_PRESET_IDS = new Set(['detectie-uitgebreid', 'veld-hoogte-lidar', 'veld-geomorfologie', 'veld-tmk-1850', 'veld-bonnebladen-1900'])
+const ALWAYS_VISIBLE_PRESET_IDS = new Set(['detectie-uitgebreid', 'lidar-50cm', 'hoogtekaart-kleur', 'thuis-onderzoek', 'veld-geomorfologie', 'veld-tmk-1850', 'veld-bonnebladen-1900'])
 
 const LEGACY_STANDARD_PRESET_IDS = new Set([
+  'veld-hoogte-lidar',
   'thedirac-2026',
   'veld-hoogtekaart',
   'veld-lidar',
@@ -309,19 +329,6 @@ function normalizePreset(preset: Preset): Preset {
       if (layerStates) layerStates = { ...layerStates, [name]: { visible: true, opacity } }
       if (layerOpacities) layerOpacities[name] = opacity
     }
-  }
-
-  // Houd de LiDAR-laag vast in Detectie, ook als een oudere opgeslagen preset
-  // deze expliciet had uitgezet. De bestaande transparantie blijft behouden.
-  if (preset.id === 'detectie-uitgebreid') {
-    const lidarLayer = 'AHN4 Multi-Hillshade NL'
-    if (!configuredLayers.includes(lidarLayer)) configuredLayers.push(lidarLayer)
-    const lidarOpacity = layerStates?.[lidarLayer]?.opacity ?? layerOpacities?.[lidarLayer] ?? 0.2
-    layerStates = {
-      ...layerStates,
-      [lidarLayer]: { visible: true, opacity: lidarOpacity }
-    }
-    if (layerOpacities) layerOpacities[lidarLayer] = lidarOpacity
   }
 
   return {
