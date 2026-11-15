@@ -205,7 +205,7 @@ assert.deepEqual(normalizedVacation,savedVacation);
 assert.deepEqual(presetsModule.normalizePresetCollection([normalizedVacation]).find(p=>p.id===savedVacation.id),savedVacation);
 const oldDetectie={id:'detectie-uitgebreid',name:'Detectie',icon:'Compass',layers:['UIKAV Punten','Parken','AMK Monumenten'],baseLayer:'Luchtfoto',isBuiltIn:true,mapView:{center:[5,52],zoom:12}};
 const newDetectie=presetsModule.normalizePresetCollection([oldDetectie]).find(p=>p.id==='detectie-uitgebreid');
-assert.deepEqual([...newDetectie.layers].sort(),['AMK Monumenten','Geomorfologie','Romeinse wegen (regio)'],'Oude Detectie wordt eenmalig de nieuwe basis');assert.equal(newDetectie.baseLayer,'Esri (licht)');
+assert.deepEqual([...newDetectie.layers].sort(),['AMK Monumenten','Geomorfologie','Romeinse wegen (regio)'],'Oude Detectie wordt eenmalig de nieuwe basis');assert.equal(newDetectie.baseLayer,'Luchtfoto');
 assert.deepEqual(newDetectie.mapView,oldDetectie.mapView,'Onthouden kaartbeeld blijft');
 const ownDetectie=presetsModule.normalizePresetCollection([{...newDetectie,layers:[...newDetectie.layers,'Bodemkaart']}]).find(p=>p.id==='detectie-uitgebreid');
 assert.equal(ownDetectie.layers.includes('Bodemkaart'),true,'Na de vernieuwing blijft eigen opslag in Detectie bewaard');

@@ -217,7 +217,7 @@ export function HandleidingModal({ isOpen, onClose }: HandleidingModalProps) {
                     Presets zijn vooraf ingestelde combinaties van kaartlagen. Ideaal om snel te wisselen tussen:
                   </p>
                   <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
-                    <li><strong>Detectie</strong> - Lichte kaart met geomorfologie, monumenten en Romeinse wegen; licht genoeg voor onderweg</li>
+                    <li><strong>Detectie</strong> - Luchtfoto NL met geomorfologie, monumenten en Romeinse wegen</li>
                     <li><strong>LiDAR</strong> - Lichte kaart met AHN4 Multi-Hillshade (50 cm), monumenten en Romeinse wegen</li>
                     <li><strong>Hoogtekaart</strong> - Lichte kaart met AHN4 Hoogtekaart Kleur, monumenten en Romeinse wegen</li>
                     <li><strong>Thuisonderzoek</strong> - Luchtfoto met hoogtekaart en LiDAR, monumenten en Romeinse wegen</li>

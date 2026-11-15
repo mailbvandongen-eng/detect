@@ -108,9 +108,7 @@ const withBase = getActiveOpacityLayers(
   { 'Geomorfologie': 0.6, 'Luchtfoto': 0.7 },
   {},
 )
-assert.equal(withBase.at(-1).layerKey, 'Luchtfoto', 'Basiskaart staat onderaan de regelaar')
-assert.equal(withBase.at(-1).name, 'Basiskaart · Luchtfoto NL')
-assert.equal(getActiveOpacityLayers({ 'Luchtfoto': true }, { 'Luchtfoto': 1 }, {}).length, 0, 'Zonder lagen erboven geen regelaar voor alleen de basiskaart')
+assert.deepEqual(withBase.map(layer => layer.layerKey), ['Geomorfologie'], 'Basiskaarten staan niet in de regelaar')
 
 const loading = getActiveOpacityLayers({ 'Geomorfologie': true, 'Fossielen Frankrijk': true }, { 'Geomorfologie': 0.6 }, {})
 assert.ok(loading.some(layer => layer.name === 'Fossielen Frankrijk' && layer.opacity === 1), 'Een laag die nog laadt staat direct in de regelaar')

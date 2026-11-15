@@ -3,19 +3,12 @@ import { FRANCE_RESEARCH_LAYER_ORDER } from '../config/franceResearchLayers'
 import { getStackZIndex } from '../config/layerOrder'
 
 // Romeinse wegen staan gewoon aan of uit; transparantie voegt daar niets toe.
+// Basiskaarten staan bewust niet in de regelaar.
 const NON_OPACITY_LAYERS = new Set([
+  'Esri (licht)', 'OpenStreetMap', 'Luchtfoto', 'Satelliet (wereld)', 'Hybride (wereld)',
   'Labels Overlay', 'Hybrid Reference Overlay', 'Mijn Vondsten',
   'Romeinse wegen (regio)', 'Romeinse wegen (Wereld)',
 ])
-
-/** Basiskaarten staan onderaan de regelaar, met een herkenbare naam. */
-const BASE_LAYER_LABELS: Record<string, string> = {
-  'Esri (licht)': 'Basiskaart · Lichtgrijs',
-  'OpenStreetMap': 'Basiskaart · OpenStreetMap',
-  'Luchtfoto': 'Basiskaart · Luchtfoto NL',
-  'Satelliet (wereld)': 'Basiskaart · Satelliet',
-  'Hybride (wereld)': 'Basiskaart · Hybride',
-}
 
 interface OpacityLayer {
   id: string
@@ -32,7 +25,7 @@ export function getActiveOpacityLayers(
   imports: { id: string; name: string; visible: boolean; opacity: number }[] = [],
 ): OpacityLayer[] {
   const standard = Object.keys(visible)
-    .filter(name => visible[name] && !NON_OPACITY_LAYERS.has(name) && !BASE_LAYER_LABELS[name])
+    .filter(name => visible[name] && !NON_OPACITY_LAYERS.has(name))
     .map(name => ({
       id: `standard-${name}`,
       layerKey: name,
@@ -55,20 +48,8 @@ export function getActiveOpacityLayers(
       return a.index - b.index
     })
     .map(({ item }) => item)
-  const overlays = [...orderedStandard, ...imports.filter(layer => layer.visible).map(layer => ({
+  return [...orderedStandard, ...imports.filter(layer => layer.visible).map(layer => ({
     id: `imported-${layer.id}`, layerKey: layer.id, name: layer.name,
     kind: 'imported' as const, opacity: layer.opacity,
   }))]
-  // De basiskaart alleen tonen als er iets overheen ligt: dan helpt een
-  // lichtere basiskaart de lagen erboven leesbaar te maken.
-  if (!overlays.length) return overlays
-  const base = Object.keys(BASE_LAYER_LABELS).find(name => visible[name])
-  if (!base || (opacity[base] === undefined && !registered[base])) return overlays
-  return [...overlays, {
-    id: `standard-${base}`,
-    layerKey: base,
-    name: BASE_LAYER_LABELS[base],
-    kind: 'standard' as const,
-    opacity: opacity[base] ?? registered[base].getOpacity(),
-  }]
 }

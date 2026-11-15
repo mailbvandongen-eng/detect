@@ -12,10 +12,10 @@ interface ChangeLogModalProps {
 const currentRelease = {
   version,
   date: '16 november 2026',
-  title: 'Zuiniger op de iPhone',
+  title: 'Detectie op de luchtfoto, basiskaart uit de regelaar',
   changes: [
-    'Hoogtekaart, Hillshade Kleur en LiDAR worden op schermresolutie opgehaald in plaats van 3x. Op een iPhone was elk beeld ruim 10 miljoen pixels; nu ongeveer 1 miljoen. Dat moet voorkomen dat Safari Detect in de auto afsluit en de telefoon warm wordt.',
-    'De kaart tekent op hooguit 2x scherpte en draait in rijmodus alleen mee bij een richtingsverandering van minstens 2 graden, hooguit 4 keer per seconde.'
+    'Detectie gebruikt standaard de luchtfoto NL als basiskaart. Je opgeslagen Detectie wordt eenmalig bijgewerkt.',
+    'Basiskaarten staan niet meer in de transparantieregelaar; ze zijn altijd volledig zichtbaar.'
   ]
 }
 

@@ -21,8 +21,6 @@ export interface Preset {
   icon: string
   layers: string[]
   baseLayer?: string
-  /** Transparantie van de basiskaart (1 = volledig zichtbaar). */
-  baseOpacity?: number
   layerOpacities?: Record<string, number>
   layerStates?: Record<string, PresetLayerState>
   customLayerStates?: Record<string, PresetLayerState>
@@ -40,7 +38,7 @@ const FRANCE_RESEARCH_LAYER_NAMES = new Set(FRANCE_RESEARCH_LAYER_ORDER)
 const THEDIRAC_ARCHAEOLOGY_LAYER = THEDIRAC_RESEARCH_LAYER_NAME
 
 /** Verhoog om de ingebouwde Detectie-preset eenmalig opnieuw uit te rollen. */
-const DETECTIE_REVISION = 3
+const DETECTIE_REVISION = 4
 
 const BUILT_IN_PRESETS: Preset[] = [
   {
@@ -49,9 +47,9 @@ const BUILT_IN_PRESETS: Preset[] = [
     icon: 'Compass',
     detectieRevision: DETECTIE_REVISION,
     // Meest gebruikte combinatie: geomorfologie als leidende laag met de
-    // monumenten erboven, op de lichte kaart. Licht genoeg voor onderweg.
+    // monumenten erboven, op de luchtfoto NL.
     layers: ['Geomorfologie', 'AMK Monumenten', 'Romeinse wegen (regio)'],
-    baseLayer: 'Esri (licht)',
+    baseLayer: 'Luchtfoto',
     layerOpacities: {
       'Geomorfologie': 0.70,
       'AMK Monumenten': 0.60,
@@ -231,7 +229,7 @@ interface PresetState {
   updatedAt: number
   applyPreset: (id: string) => void
   createPreset: (name: string, icon: string, rememberMapView?: boolean) => void
-  updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'baseOpacity' | 'layerOpacities' | 'layerStates' | 'customLayerStates' | 'mapView'>>) => void
+  updatePreset: (id: string, changes: Partial<Pick<Preset, 'name' | 'icon' | 'layers' | 'baseLayer' | 'layerOpacities' | 'layerStates' | 'customLayerStates' | 'mapView'>>) => void
   deletePreset: (id: string) => void
   saveAsDefaults: () => void
   resetToDefaults: () => void
@@ -400,7 +398,8 @@ export function applyPresetSnapshot(rawPreset: Preset) {
   BASE_LAYER_NAMES.forEach((layerName) => {
     layerStore.setLayerVisibility(layerName, layerName === nextBaseLayer)
   })
-  layerStore.setLayerOpacity(nextBaseLayer, preset.baseOpacity ?? 1)
+  // Basiskaarten zijn altijd volledig zichtbaar (niet in de regelaar).
+  layerStore.setLayerOpacity(nextBaseLayer, 1)
   layerStore.setLayerVisibility(
     'Labels Overlay',
     nextBaseLayer === 'Esri (licht)' || preset.layers.includes('Labels Overlay')
@@ -459,7 +458,6 @@ export function captureCurrentPresetSnapshot() {
       .filter(([, state]) => state.visible)
       .map(([layerName]) => layerName),
     baseLayer: activeBaseLayer || 'Esri (licht)',
-    baseOpacity: layerStore.opacity[activeBaseLayer || 'Esri (licht)'] ?? 1,
     layerOpacities: Object.fromEntries(
       Object.entries(layerStates).map(([layerName, state]) => [layerName, state.opacity])
     ),
