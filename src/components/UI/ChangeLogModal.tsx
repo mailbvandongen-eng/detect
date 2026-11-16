@@ -12,10 +12,9 @@ interface ChangeLogModalProps {
 const currentRelease = {
   version,
   date: '16 november 2026',
-  title: 'Detectie op de luchtfoto, basiskaart uit de regelaar',
+  title: 'iPhone-aanpassing teruggedraaid',
   changes: [
-    'Detectie gebruikt standaard de luchtfoto NL als basiskaart. Je opgeslagen Detectie wordt eenmalig bijgewerkt.',
-    'Basiskaarten staan niet meer in de transparantieregelaar; ze zijn altijd volledig zichtbaar.'
+    'De aanpassing Zuiniger op de iPhone (2.33.117) is teruggedraaid: hoogtekaart, Hillshade Kleur en LiDAR zijn weer op volle schermscherpte en de kaart draait in rijmodus weer direct mee. Presets en andere wijzigingen blijven zoals ze waren.'
   ]
 }
 

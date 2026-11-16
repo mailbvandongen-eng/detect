@@ -1,6 +1,6 @@
 # Detect - Sessienotities
 
-## Huidige versie: 2.33.117
+## Huidige versie: 2.33.119
 
 ---
 
@@ -32,7 +32,7 @@
 - Preset Thédirac 2026 verwijderd (v2.33.111; vakantie voorbij). Franse lagen blijven. Presets voor een volgende vakantie: per bestemming een eigen onderzoekspreset maken. De tests `test-cassini-browser` en `test-france-history-browser` testten alleen die preset en zijn vervallen.
 - Presets nu: Detectie, Hoogte & LiDAR, Geomorfologie, 1850, 1900, Frankrijk historie. AMK + Romeinse wegen altijd aan in NL-presets. Geologie-legenda FR via lokale BD Charm-50 in public/data/geologie_fr (024, 046, 047); departement toevoegen: download GEO050K_HARM_<ddd>.zip van infoterre.brgm.fr/telechargements/BDCharm50/, uitpakken, `node scripts/build-france-geology.cjs <map>`; zonder SCAN_H_GEOL50 bij BRGM ook in DEPARTMENTS_WITHOUT_HARMONISED_SCAN (src/utils/franceGeology.ts) zetten.
 - `test-map-popup-browser` is wisselend (320px-kaartje buiten beeld) in de Chromium-shim, ook zonder wijzigingen; in WebKit/CI controleren.
-- v2.33.117 'Zuiniger op de iPhone' (hidpi:false AHN-images, map pixelRatio max 2, rotatie-throttle) is op proef: Bob kan vragen dit terug te draaien → `git revert` van die commit (zoek 'v2.33.117' in git log) + versie bump.
+- v2.33.117 'Zuiniger op de iPhone' (hidpi:false, pixelRatio max 2, rotatie-throttle) is in v2.33.119 teruggedraaid op verzoek van Bob: 'op het veld is dat een drama'. Niet opnieuw invoeren zonder overleg; iPhone-crash in de auto nog onopgelost.
 - Volgende vakantie: Bergerac / Dordogne; vaak Zuid-Frankrijk. Sjabloon-preset Vakantie-onderzoek FR.
 
 ### Venstersysteem (v2.33.1)
